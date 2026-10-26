@@ -110,8 +110,10 @@ Formato: qué elegí y por qué.
 - **Corregir tocando**: en modo matemáticas, un toque sin arrastrar sobre un símbolo reconocido abre las candidatas en
   vez de dibujar un punto. Escribir encima de un símbolo reconocido empieza como un toque: es el precio de no añadir
   otro botón.
-- **Flatpak:** no añadí el permiso `org.freedesktop.Flatpak` al manifiesto (permite salir de la caja de arena); queda
-  documentado como paso opcional que decides tú.
+- **Flatpak:** al principio no añadí el permiso `org.freedesktop.Flatpak` al manifiesto (permite salir de la caja de
+  arena). **Lo añadiste tú explícitamente** después ("añade el permiso org.freedesktop.Flatpak al manifiesto de
+  Flatpak"): está en `build-aux/com.github.flxzt.rnote.Devel.yaml`, rama `feat/flatpak-matematicas`, con un comentario
+  que explica el riesgo.
 - **Créditos de las fuentes Hershey** en `tools/onepepe-math/onepepe_math/glyphs.py`: A. V. Hershey (U.S. National
   Bureau of Standards) y James Hurt (formato de los datos); se usan a través del paquete `Hershey-Fonts` (MIT).
 

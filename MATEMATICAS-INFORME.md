@@ -102,7 +102,7 @@ falta para que sea útil es justo lo que depende de ti: tus 30 expresiones (para
 correcciones (el clasificador personal las aplica al momento). Por eso el modo matemáticas viene apagado y el umbral alto.
 
 **Pendiente que sí depende de ti:** medir con tus expresiones, ajustar umbrales y la estructura a tu letra "poco
-lineal", y, si usas Flatpak, el permiso para lanzar el programa auxiliar (ver `CAMBIOS-ONEPEPE.md`).
+lineal". (El permiso de Flatpak para lanzar el programa auxiliar ya está en el manifiesto, a petición tuya.)
 
 ## 1. Resumen (del primer entregable; el cambio de plan está en la sección 0)
 

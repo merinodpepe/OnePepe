@@ -241,14 +241,17 @@ cargo test -p rnote-compose
   echo '{"id":1,"cmd":"ping"}' | onepepe-math      # debe responder {"ok": true, ...}
   ```
   El modelo (~3 MB) y tus correcciones quedan en `~/.local/share/onepepe/`, nunca en el repositorio.
-- **Si usas Flatpak:** la app, dentro de su caja de arena, no ve el Python de tu sistema. La app intenta lanzar
-  `flatpak-spawn --host onepepe-math`, pero eso necesita un permiso que **no he añadido** porque permite a la app
-  ejecutar programas fuera de la caja de arena: decide tú. Si lo quieres, en tu equipo:
+- **Si usas Flatpak:** la app, dentro de su caja de arena, no ve el Python de tu sistema, así que lanza
+  `flatpak-spawn --host onepepe-math`. Para eso, **a petición tuya**, el manifiesto
+  (`build-aux/com.github.flxzt.rnote.Devel.yaml`) incluye el permiso `--talk-name=org.freedesktop.Flatpak`
+  (rama `feat/flatpak-matematicas`). **Ojo:** ese permiso permite a la app ejecutar cualquier programa de tu sistema
+  fuera de la caja de arena. Para quitarlo en tu equipo sin tocar el repositorio:
   ```bash
-  flatpak override --user --talk-name=org.freedesktop.Flatpak com.github.flxzt.rnote.Devel
+  flatpak override --user --no-talk-name=org.freedesktop.Flatpak com.github.flxzt.rnote.Devel
   ```
-  (se quita con `flatpak override --user --reset com.github.flxzt.rnote.Devel`). Alternativa sin ese permiso: compilar
-  OnePepe de forma nativa (sin Flatpak). También puedes indicar otra orden con la variable `ONEPEPE_MATH_CMD`.
+  Requisitos: `onepepe-math` debe estar en el PATH de tu sesión (`./instalar.sh` lo pone en `~/.local/bin`), y tus
+  cuadernos en una carpeta que la app pueda ver (Documentos, Imágenes o Escritorio, según el manifiesto). También
+  puedes indicar otra orden con la variable `ONEPEPE_MATH_CMD`. Sin Flatpak (compilación nativa) no hace falta nada.
 - **Ramas:** `feat/matematicas-limpias` (fusionada en `onepepe`).
 - **Estado:** compilado · tests ✔ (Rust: modo matemáticas con respuestas simuladas, deshacer, toque y corrección de grupo,
   dibujo del borde y del resultado; Python: 18 tests de protocolo, glifos, estructura, cálculo, unidades y aprendizaje
