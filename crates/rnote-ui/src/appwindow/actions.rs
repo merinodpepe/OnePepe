@@ -16,6 +16,7 @@ use rnote_engine::document::format::MeasureUnit;
 use rnote_engine::engine::StrokeContent;
 use rnote_engine::ext::GraphenePointExt;
 use rnote_engine::pens::PenStyle;
+use rnote_engine::store::ZOrderChange;
 use rnote_engine::strokes::resize::{ImageSizeOption, Resize};
 use rnote_engine::strokes::textstroke::TextAttribute;
 use rnote_engine::{Camera, Engine};
@@ -91,6 +92,11 @@ impl RnAppWindow {
         self.add_action(&action_selection_duplicate);
         let action_selection_invert_color = gio::SimpleAction::new("selection-invert-color", None);
         self.add_action(&action_selection_invert_color);
+        let action_selection_z_order = gio::SimpleAction::new(
+            "selection-z-order",
+            Some(&String::static_variant_type()),
+        );
+        self.add_action(&action_selection_z_order);
         let action_selection_select_all = gio::SimpleAction::new("selection-select-all", None);
         self.add_action(&action_selection_select_all);
         let action_selection_deselect_all = gio::SimpleAction::new("selection-deselect-all", None);
@@ -519,6 +525,29 @@ impl RnAppWindow {
                     return;
                 };
                 let widget_flags = canvas.engine_mut().invert_selection_colors();
+                appwindow.handle_widget_flags(widget_flags, &canvas);
+            }
+        ));
+
+        // OnePepe: change the stacking order of the selection
+        action_selection_z_order.connect_activate(clone!(
+            #[weak(rename_to=appwindow)]
+            self,
+            move |_, target| {
+                let Some(canvas) = appwindow.active_tab_canvas() else {
+                    return;
+                };
+                let change = match target.and_then(|t| t.get::<String>()).as_deref() {
+                    Some("front") => ZOrderChange::BringToFront,
+                    Some("back") => ZOrderChange::SendToBack,
+                    Some("raise") => ZOrderChange::RaiseOne,
+                    Some("lower") => ZOrderChange::LowerOne,
+                    other => {
+                        tracing::error!("invalid target for action `selection-z-order`: {other:?}");
+                        return;
+                    }
+                };
+                let widget_flags = canvas.engine_mut().change_selection_z_order(change);
                 appwindow.handle_widget_flags(widget_flags, &canvas);
             }
         ));

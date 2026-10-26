@@ -22,7 +22,7 @@ use crate::Image;
 use crate::document::Layout;
 use crate::pens::PenMode;
 use crate::pens::{Pen, PenStyle};
-use crate::store::StrokeKey;
+use crate::store::{StrokeKey, ZOrderChange};
 use crate::store::render_comp::{self, RenderCompState};
 use crate::strokes::content::GeneratedContentImages;
 use crate::strokes::textstroke::{TextAttribute, TextStyle};
@@ -815,6 +815,17 @@ impl Engine {
             .change_fill_colors(&self.store.selection_keys_as_rendered(), fill_color)
             | self.record(Instant::now())
             | self.update_content_rendering_current_viewport()
+    }
+
+    /// OnePepe: change the stacking order of the selected strokes.
+    pub fn change_selection_z_order(&mut self, change: ZOrderChange) -> WidgetFlags {
+        let keys = self.store.selection_keys_as_rendered();
+        if !self.store.change_z_order(&keys, change) {
+            return WidgetFlags::default();
+        }
+        self.current_pen_update_state()
+            | self.record(Instant::now())
+            | self.update_rendering_current_viewport()
     }
 
     pub fn invert_selection_colors(&mut self) -> WidgetFlags {

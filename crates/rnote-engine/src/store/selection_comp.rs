@@ -51,9 +51,9 @@ impl StrokeStore {
             .get_mut(key)
             .map(Arc::make_mut)
         {
+            // OnePepe: selecting no longer moves the stroke to the front, so the stacking order chosen by the user is
+            // kept.
             selection_comp.selected = selected;
-
-            self.update_chrono_to_last(key);
         }
     }
 

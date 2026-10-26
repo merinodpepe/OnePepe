@@ -8,6 +8,7 @@ pub mod trash_comp;
 
 // Re-exports
 pub use chrono_comp::ChronoComponent;
+pub use chrono_comp::ZOrderChange;
 use keytree::KeyTree;
 pub use render_comp::RenderComponent;
 pub use selection_comp::SelectionComponent;
