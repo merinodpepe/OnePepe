@@ -3,8 +3,8 @@ pub mod animation;
 pub mod config;
 pub mod export;
 pub mod import;
-pub mod rendering;
 pub mod math;
+pub mod rendering;
 pub mod ruler;
 pub mod snapshot;
 pub mod strokecontent;
@@ -24,8 +24,8 @@ use crate::Image;
 use crate::document::Layout;
 use crate::pens::PenMode;
 use crate::pens::{Pen, PenStyle};
-use crate::store::{StrokeKey, ZOrderChange};
 use crate::store::render_comp::{self, RenderCompState};
+use crate::store::{StrokeKey, ZOrderChange};
 use crate::strokes::content::GeneratedContentImages;
 use crate::strokes::textstroke::{TextAttribute, TextStyle};
 use crate::{Camera, Document, PenHolder, StrokeStore};
@@ -884,6 +884,18 @@ impl Engine {
             widget_flags |= self.change_pen_style(PenStyle::Typewriter);
         }
         widget_flags | self.insert_text(text, None)
+    }
+
+    /// OnePepe: bullet, numbered or checkbox list style for the paragraph of the text cursor.
+    pub fn text_paragraph_list(
+        &mut self,
+        kind: crate::pens::typewriter::scripts::ListKind,
+    ) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        if let Pen::Typewriter(typewriter) = self.penholder.current_pen_mut() {
+            widget_flags |= typewriter.paragraph_list(kind, &mut engine_view_mut!(self));
+        }
+        widget_flags
     }
 
     /// OnePepe: turns the selected text into superscript (`sup`) or subscript, or back.

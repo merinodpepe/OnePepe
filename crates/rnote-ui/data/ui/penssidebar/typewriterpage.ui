@@ -140,6 +140,33 @@
           </object>
         </child>
         <child>
+          <object class="GtkButton" id="text_list_bullet_button">
+            <property name="icon-name">view-list-bullet-symbolic</property>
+            <property name="tooltip_text" translatable="yes">Bulleted List</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="text_list_numbered_button">
+            <property name="icon-name">view-list-ordered-symbolic</property>
+            <property name="tooltip_text" translatable="yes">Numbered List</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="text_list_checkbox_button">
+            <property name="label">☑</property>
+            <property name="tooltip_text" translatable="yes">Checkbox (Click Again to Check or Uncheck)</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
           <object class="GtkButton" id="text_subscript_button">
             <property name="label">x₂</property>
             <property name="tooltip_text" translatable="yes">Subscript (Selected Text)</property>
