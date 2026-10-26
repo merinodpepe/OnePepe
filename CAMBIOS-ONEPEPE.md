@@ -92,3 +92,25 @@ cargo test -p rnote-compose
 - **Rama:** `feat/regla` (fusionada en `onepepe`).
 - **Estado:** compilado · tests ✔ (`cargo test -p rnote-compose ruler` y `cargo test -p rnote-engine engine::ruler`; incluyen trazos sintéticos temblorosos en 5 ángulos que quedan rectos) · dibujo de la regla comprobado renderizándolo a imagen · **no ejecutado en la app** · lápiz: pendiente.
 - **Cómo lo pruebo yo:** compila `onepepe`. Elige el pincel y pulsa el botón de la regla. Comprueba: (1) que puedes moverla arrastrando por el centro y girarla con el círculo azul, y que el ángulo mostrado cambia; (2) que al dibujar a lo largo del borde, empezando muy cerca, sale una línea recta, a 0°, 45° y a un ángulo cualquiera; (3) que si empiezas lejos de la regla el trazo es normal; (4) que deshacer (Ctrl+Z) quita la línea; (5) que al desactivar el botón desaparece. **Dime si la zona de enganche (16 px) te parece grande o pequeña**, y si el ancho de la regla te va bien.
+
+## Tinta a formas
+
+- **Qué hace:** al terminar un trazo con el **pincel**, si se parece claramente a una **línea, círculo, elipse, triángulo o rectángulo** (también girados), se sustituye por la forma limpia, con el mismo color y grosor. Si no encaja con claridad, el trazo se queda como está.
+  - **Activar/desactivar:** botón nuevo en la barra lateral del pincel (icono con un garabato, un círculo y un triángulo). Viene **desactivado**.
+  - **Sensibilidad:** en el menú de configuración del pincel (rueda dentada) → "Ink to Shape" → "Sensitivity", de 0 (estricto: convierte menos) a 100 (permisivo: convierte más). Por defecto 50.
+  - **Deshacer:** Ctrl+Z justo después devuelve tu trazo original; Ctrl+Shift+Z vuelve a poner la forma.
+  - Los trazos pequeños en pantalla (diagonal de menos de 50 píxeles al zoom actual) nunca se convierten, para no tocar la escritura.
+- **Resultados con trazos sintéticos** (`cargo test -p rnote-compose shaperecognition -- --nocapture`), sensibilidad 50:
+
+  | Forma | ruido bajo | ruido moderado |
+  |---|---|---|
+  | línea | 100/100 | 100/100 |
+  | círculo | 100/100 | 100/100 |
+  | elipse | 100/100 | 94/100 |
+  | triángulo | 98/100 | 95/100 |
+  | rectángulo | 100/100 | 100/100 |
+
+  Ninguna forma se confundió con otra. **Falsos positivos: 0 de 500** trazos que no son formas (bucles cursivos tipo "eeee", "w/m", "s", "8", espirales, "2", "3", "a" con rabito, "D", garabatos). Con sensibilidad 0 se reconocen 148/200 con ruido moderado; con 100, 199/200, en ambos casos sin falsos positivos. **Ojo:** son trazos generados por mí; tu letra real puede comportarse distinto.
+- **Rama:** `feat/formas` (fusionada en `onepepe`).
+- **Estado:** compilado · tests ✔ (reconocedor + prueba de extremo a extremo en el motor: dibujar círculo → forma → deshacer → trazo original → rehacer) · **no ejecutado en la app** · lápiz: pendiente.
+- **Cómo lo pruebo yo:** compila `onepepe`. Con el pincel, activa el botón de tinta a formas y dibuja: una línea, un círculo, una elipse alargada, un triángulo, un rectángulo y un rectángulo girado; luego escribe unas palabras normales, una "O" grande y una "a" grande. Mira qué se convierte. Prueba Ctrl+Z tras una conversión. Cambia la sensibilidad a 20 y a 80 y repite. **Anota cuántas formas acierta y cuántas letras convierte por error**, y dímelo para ajustar los umbrales.

@@ -5,6 +5,7 @@ use super::pensconfig::brushconfig::BrushStyle;
 use crate::engine::{EngineView, EngineViewMut};
 use crate::store::StrokeKey;
 use crate::strokes::BrushStroke;
+use crate::strokes::ShapeStroke;
 use crate::strokes::Stroke;
 use crate::{DrawableOnDoc, WidgetFlags};
 use p2d::bounding_volume::{Aabb, BoundingVolume};
@@ -18,6 +19,8 @@ use rnote_compose::builders::{
 use rnote_compose::eventresult::{EventPropagation, EventResult};
 use rnote_compose::penevent::{PenEvent, PenProgress};
 use rnote_compose::penpath::{Element, Segment};
+use rnote_compose::shaperecognition::{self, RecognitionParams};
+use rnote_compose::style::smooth::SmoothOptions;
 use std::time::Instant;
 
 #[derive(Debug)]
@@ -239,6 +242,7 @@ impl PenBehaviour for Brush {
                         PenProgress::InProgress
                     }
                     BuilderProgress::Finished(segments) => {
+                        let finished_key = *current_stroke_key;
                         let n_segments = segments.len();
 
                         if n_segments != 0 {
@@ -286,6 +290,9 @@ impl PenBehaviour for Brush {
 
                         widget_flags |= engine_view.store.record(Instant::now());
                         widget_flags.store_modified = true;
+
+                        // OnePepe: ink to shape. The original stroke was recorded above, so undo brings it back.
+                        widget_flags |= Self::convert_to_shape(finished_key, engine_view);
 
                         PenProgress::Finished
                     }
@@ -354,6 +361,62 @@ impl DrawableOnDoc for Brush {
 }
 
 impl Brush {
+    /// OnePepe: minimum size of a stroke to be converted to a shape, in surface pixels.
+    const SHAPE_RECOGNITION_MIN_SIZE: f64 = 50.0;
+
+    /// OnePepe: replaces the finished stroke with a geometric shape when the shape recognition is enabled
+    /// and the stroke fits one clearly.
+    fn convert_to_shape(key: StrokeKey, engine_view: &mut EngineViewMut) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        let brush_config = &engine_view.config.pens_config.brush_config;
+        if !brush_config.shape_recognition {
+            return widget_flags;
+        }
+        let Some(Stroke::BrushStroke(brushstroke)) = engine_view.store.get_stroke_ref(key) else {
+            return widget_flags;
+        };
+        let points = brushstroke
+            .path
+            .clone()
+            .into_elements()
+            .into_iter()
+            .map(|e| e.pos)
+            .collect::<Vec<_>>();
+        let params = RecognitionParams {
+            sensitivity: brush_config.shape_recognition_sensitivity,
+            min_size: Self::SHAPE_RECOGNITION_MIN_SIZE / engine_view.camera.total_zoom(),
+        };
+        let Some(recognized) = shaperecognition::recognize(&points, params) else {
+            return widget_flags;
+        };
+        let mut options = SmoothOptions {
+            stroke_width: brushstroke.style.stroke_width(),
+            stroke_color: brushstroke.style.stroke_color(),
+            fill_color: None,
+            ..Default::default()
+        };
+        options.update_piet_stroke_style();
+        let layer = brush_config.layer_for_current_options();
+
+        engine_view.store.remove_stroke(key);
+        let new_key = engine_view.store.insert_stroke(
+            Stroke::ShapeStroke(ShapeStroke::new(
+                recognized.to_shape(),
+                Style::Smooth(options),
+            )),
+            Some(layer),
+        );
+        engine_view.store.regenerate_rendering_for_stroke(
+            new_key,
+            engine_view.camera.viewport(),
+            engine_view.camera.image_scale(),
+        );
+        widget_flags |= engine_view.store.record(Instant::now());
+        widget_flags.store_modified = true;
+        widget_flags.redraw = true;
+        widget_flags
+    }
+
     const INPUT_OVERSHOOT: f64 = 30.0;
 
     fn get_preview_style(engine_view: &EngineView) -> Style {
@@ -395,5 +458,102 @@ fn new_builder(
         PenPathBuilderType::Simple => Box::new(PenPathSimpleBuilder::start(element, now)),
         PenPathBuilderType::Curved => Box::new(PenPathCurvedBuilder::start(element, now)),
         PenPathBuilderType::Modeled => Box::new(PenPathModeledBuilder::start(element, now)),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Engine;
+    use crate::strokes::Stroke;
+    use p2d::math::Vector2;
+    use rnote_compose::penevent::PenEvent;
+    use rnote_compose::penpath::Element;
+    use std::collections::HashSet;
+    use std::time::{Duration, Instant};
+
+    /// Draws a stroke through the engine like the pen would, returns the kinds of the strokes in the store.
+    fn draw(engine: &mut Engine, points: &[Vector2]) -> Vec<&'static str> {
+        let t0 = Instant::now();
+        for (i, p) in points.iter().enumerate() {
+            let element = Element::new(*p, 0.5);
+            let event = if i == points.len() - 1 {
+                PenEvent::Up {
+                    element,
+                    modifier_keys: HashSet::new(),
+                }
+            } else {
+                PenEvent::Down {
+                    element,
+                    modifier_keys: HashSet::new(),
+                }
+            };
+            let _ = engine.handle_pen_event(event, None, t0 + Duration::from_millis(8 * i as u64));
+        }
+        kinds(engine)
+    }
+
+    fn kinds(engine: &Engine) -> Vec<&'static str> {
+        engine
+            .store
+            .stroke_keys_as_rendered()
+            .into_iter()
+            .filter_map(|k| engine.store.get_stroke_ref(k))
+            .map(|s| match s {
+                Stroke::BrushStroke(_) => "brush",
+                Stroke::ShapeStroke(_) => "shape",
+                _ => "other",
+            })
+            .collect()
+    }
+
+    fn wobbly_circle() -> Vec<Vector2> {
+        (0..=130)
+            .map(|i| {
+                let t = i as f64 / 120.0 * 2.0 * std::f64::consts::PI;
+                let r = 150.0 + 3.0 * (5.0 * t).sin();
+                Vector2::new(400.0 + r * t.cos(), 300.0 + r * t.sin())
+            })
+            .collect()
+    }
+
+    #[test]
+    fn ink_to_shape_disabled_by_default() {
+        let mut engine = Engine::default();
+        assert_eq!(draw(&mut engine, &wobbly_circle()), vec!["brush"]);
+    }
+
+    #[test]
+    fn ink_to_shape_converts_and_undo_restores_the_original() {
+        let mut engine = Engine::default();
+        engine
+            .config
+            .write()
+            .pens_config
+            .brush_config
+            .shape_recognition = true;
+        assert_eq!(draw(&mut engine, &wobbly_circle()), vec!["shape"]);
+        let _ = engine.undo(Instant::now());
+        assert_eq!(kinds(&engine), vec!["brush"]);
+        let _ = engine.redo(Instant::now());
+        assert_eq!(kinds(&engine), vec!["shape"]);
+    }
+
+    #[test]
+    fn ink_to_shape_keeps_handwriting() {
+        let mut engine = Engine::default();
+        engine
+            .config
+            .write()
+            .pens_config
+            .brush_config
+            .shape_recognition = true;
+        // a big cursive "e" loop chain
+        let pts = (0..300)
+            .map(|i| {
+                let t = i as f64 / 300.0 * 6.0 * std::f64::consts::PI;
+                Vector2::new(t * 20.0 - 40.0 * t.sin(), -40.0 * t.cos())
+            })
+            .collect::<Vec<Vector2>>();
+        assert_eq!(draw(&mut engine, &pts), vec!["brush"]);
     }
 }
