@@ -160,6 +160,10 @@
       <menu id="workspace_dir_actions_menu_model">
         <section>
           <item>
+            <attribute name="label" translatable="yes">Create new Page</attribute>
+            <attribute name="action">workspacebrowser.create-page</attribute>
+          </item>
+          <item>
             <attribute name="label" translatable="yes">Create new Folder</attribute>
             <attribute name="action">workspacebrowser.create-folder</attribute>
           </item>
