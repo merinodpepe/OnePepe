@@ -271,3 +271,13 @@ cargo test -p rnote-compose
 - **Rama:** `feat/subindices` · **Estado:** compilado · tests ✔ (`cargo test -p rnote-engine scripts`) · no ejecutado · lápiz: pendiente.
 - **Cómo lo pruebo yo:** herramienta de texto, escribe `H2O x2 10-3`, selecciona el `2` de H2O → "x₂"; selecciona el
   `2` de x2 → "x²"; selecciona `-3` → "x²"; vuelve a pulsar para deshacer la conversión; Ctrl+Z también funciona.
+
+## Catálogo de símbolos (Fase 1c)
+
+- **Qué hace:** en la barra de la herramienta de texto, junto al botón de emojis, hay un botón **"Ω"**. Abre una
+  cuadrícula con griego (minúsculas y mayúsculas), operadores (± × ÷ · ≈ ≠ ≤ ≥ ≡ ∝ → ⇒…), análisis (∂ ∇ ∫ ∮ ∑ ∏ √ ∞ °…),
+  conjuntos y lógica (∈ ⊂ ∪ ∩ ∅ ∀ ∃ ℝ…) y física (ℏ Å µ Ω ⊥…). Un clic inserta el símbolo en el texto (o crea un cuadro
+  de texto nuevo si no estabas escribiendo).
+- **Rama:** `feat/catalogo-simbolos` · **Estado:** compilado · no ejecutado · lápiz: pendiente (no tiene tests: es solo interfaz).
+- **Cómo lo pruebo yo:** herramienta de texto, haz clic en el lienzo, pulsa "Ω" y elige ∂, luego α, luego ≈. Comprueba
+  que se insertan donde está el cursor.

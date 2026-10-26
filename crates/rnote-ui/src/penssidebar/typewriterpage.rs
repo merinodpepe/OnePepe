@@ -31,6 +31,8 @@ mod imp {
         #[template_child]
         pub(crate) text_superscript_button: TemplateChild<Button>,
         #[template_child]
+        pub(crate) symbolcatalog_menubutton: TemplateChild<MenuButton>,
+        #[template_child]
         pub(crate) text_subscript_button: TemplateChild<Button>,
         #[template_child]
         pub(crate) text_align_start_togglebutton: TemplateChild<ToggleButton>,
@@ -214,6 +216,10 @@ impl RnTypewriterPage {
             }
         ));
 
+        // OnePepe: symbol catalog
+        imp.symbolcatalog_menubutton
+            .set_popover(Some(&symbol_catalog_popover(appwindow)));
+
         // OnePepe: superscript / subscript
         for (button, sup) in [
             (imp.text_superscript_button.get(), true),
@@ -349,4 +355,53 @@ impl RnTypewriterPage {
 
         self.set_alignment(typewriter_config.text_style.alignment);
     }
+}
+
+/// OnePepe: symbols that can be inserted with one click, by category.
+const SYMBOL_CATALOG: &[(&str, &str)] = &[
+    ("Greek", "αβγδεζηθικλμνξοπρστυφχψω"),
+    ("Greek (Capitals)", "ΓΔΘΛΞΠΣΦΨΩ"),
+    ("Operators", "±∓×÷·∘≈≠≡≤≥≪≫∝∼→←↔⇒⇔↑↓"),
+    ("Analysis", "∂∇∫∬∮∑∏√∛∞′″°"),
+    ("Sets and Logic", "∈∉⊂⊆∪∩∅∀∃¬∧∨ℕℤℚℝℂ"),
+    ("Physics", "ℏÅµΩ‰⊥∥∠△"),
+];
+
+/// OnePepe: the popover of the symbol catalog. A click inserts the symbol into the text.
+fn symbol_catalog_popover(appwindow: &RnAppWindow) -> gtk4::Popover {
+    let popover = gtk4::Popover::new();
+    let vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    for (title, symbols) in SYMBOL_CATALOG {
+        let label = gtk4::Label::new(Some(&gettextrs::gettext(*title)));
+        label.set_halign(gtk4::Align::Start);
+        label.add_css_class("caption-heading");
+        vbox.append(&label);
+        let flow = gtk4::FlowBox::builder()
+            .max_children_per_line(10)
+            .min_children_per_line(10)
+            .selection_mode(gtk4::SelectionMode::None)
+            .build();
+        for symbol in symbols.chars() {
+            let button = gtk4::Button::with_label(&symbol.to_string());
+            button.add_css_class("flat");
+            button.connect_clicked(clone!(
+                #[weak]
+                appwindow,
+                #[weak]
+                popover,
+                move |_| {
+                    let Some(canvas) = appwindow.active_tab_canvas() else {
+                        return;
+                    };
+                    let widget_flags = canvas.engine_mut().insert_text(symbol.to_string(), None);
+                    appwindow.handle_widget_flags(widget_flags, &canvas);
+                    popover.popdown();
+                }
+            ));
+            flow.append(&button);
+        }
+        vbox.append(&flow);
+    }
+    popover.set_child(Some(&vbox));
+    popover
 }
