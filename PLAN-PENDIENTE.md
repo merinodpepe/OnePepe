@@ -1,56 +1,72 @@
-# Plan pendiente (cambios de plan del usuario, 2026-10-26)
+# Plan de mejora de OnePepe (pendiente)
 
-PARTE A: CAMBIOS EN LA FASE 3 (matemáticas)
-1. Objetivo principal nuevo: reconocer mi letra y SUSTITUIRLA por trazos limpios y legibles, como la conversión de tinta a formas. Cada símbolo reconocido se redibuja limpio en la misma posición y tamaño que el mío, sin reordenar nada. Deben ser trazos normales de Rnote, seleccionables y borrables, sin cambiar el formato .rnote (si hace falta, avísame antes). Si un símbolo es dudoso, se deja mi trazo original. Debe poder deshacerse, activarse y desactivarse en ajustes, y tener un umbral de confianza configurable.
-2. Se mantiene lo ya diseñado: grupos por forma, contexto, glosario, comprobación dimensional y corrección por símbolo o por grupo. Tras una corrección, el símbolo limpio se actualiza.
-3. El resultado del "=" en gris pasa a ser una función aparte, activable y desactivable en ajustes. Define qué hará con ecuaciones a despejar (2x+1=7, x=), simplificar y derivar.
-4. Fuente de los símbolos limpios: trazos de una sola línea o contornos de una fuente libre de matemáticas. Elige una y apunta su licencia.
+Actualizado: 2026-10-26. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](ESTADO.md) y
+[`CAMBIOS-ONEPEPE.md`](CAMBIOS-ONEPEPE.md); el plan original completo queda en el historial de git de este archivo.
 
-PARTE B: FUNCIONES EXTRA DE ONENOTE (sustituye la regla "no añadir funciones que no estén en la lista")
-Compruébalas en el código y apúntalas en AUDITORIA.md como existe, parcial o no existe, con la ruta del archivo. Solo implementa lo que falte, una rama por función, con tests donde se pueda y documentada en CAMBIOS-ONEPEPE.md con cómo probarla yo con el lápiz.
+## 1. Pruebas en tu equipo (lo primero)
 
-FASE 1b: botones del lápiz Wacom (prioridad alta)
-- Botón 1: borrador de trazo entero mientras está pulsado; al soltar vuelve a la herramienta anterior.
-- Botón 2: selección con lazo mientras está pulsado.
-- Ambos reasignables desde ajustes a cualquier herramienta, en modo "mientras pulso" o "alterna al pulsar".
-- Si el lápiz tiene extremo borrador, debe funcionar. El README de Rnote (Pitfalls) dice que no maneja bien los eventos "Eraser Tool": resuélvelo o explica por qué no se puede y qué alternativa hay.
-- Borrador de trazo entero en la barra de herramientas, además del borrador por área en tamaños pequeño, mediano y grande.
-- Hecho cuando está configurable en ajustes y CAMBIOS-ONEPEPE.md explica cómo verificar con evtest qué evento envía cada botón.
+Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Seguir `CAMBIOS-ONEPEPE.md` y anotar qué falla:
 
-FASE 1c: texto, símbolos y utilidades (por orden de prioridad)
-1. Subíndice y superíndice en el texto escrito a teclado.
-2. Catálogo de símbolos para insertar con un clic: alfabeto griego, operadores, ±, ∂, ∇, ∫, ∑, √, ≈, ≠, ≤, ≥, →.
-3. Resaltador con paleta personalizable, semitransparente, que no tape la tinta.
-4. Ejes cartesianos 2D y 3D como forma predefinida.
-5. Botón para estampar fecha, hora o ambas.
-6. Negrita, cursiva, subrayado, tachado y color de fuente en el texto, si faltan.
-7. Casillas de verificación, viñetas y listas numeradas.
-Solo si sobra tiempo y crédito: estilos rápidos (Título 1, Título 2, cita, código) y recorte de pantalla.
+- Hojas infinitas con zoom y desplazamiento.
+- Tinta a formas: cuántas formas acierta y cuántas letras convierte por error (para ajustar la sensibilidad).
+- Matemáticas: modo matemáticas, sustitución, corrección por toque, resultado del "=", archivo oculto al reabrir.
+- Botones del lápiz y extremo borrador, con la salida de `evtest`.
+- Regla (tamaño de la zona de enganche y ancho), colores, capas, cuadernos y herramientas de texto.
 
-NO HACER: copiar formato, adjuntar archivos como icono, búsqueda de imágenes en línea, tinta con texturas, editor de ecuaciones nativo.
+## 2. Matemáticas con tu letra
 
-ORDEN SI HAY QUE RECORTAR POR CRÉDITO O TIEMPO (el crédito caduca el 5 de noviembre a las 8:59 CET):
-1) hojas infinitas comprobadas, 2) tinta a formas, 3) matemáticas, 4) botones del lápiz (1b), 5) resto de la Fase 1, 6) Fase 1c, 7) cuadernos y secciones.
+Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`):
 
----
+- Recibir `mis_expresiones_1.rnote` (las 30 expresiones de `tools/onepepe-math/expresiones.txt`) y `mis_simbolos.rnote`,
+  adjuntos en el chat o en tu Google Drive, nunca en el repositorio.
+- Respuestas cortas: signo de multiplicar, coma o punto decimal, unidades en el mismo renglón, asignaturas y símbolos
+  para el glosario.
+- Medir el reconocimiento con tu letra, ajustar umbrales, agrupación y estructura (potencias, subíndices, fracciones)
+  a tu escritura "poco lineal", y entrenar el clasificador personal con tus ejemplos.
+- Validar con tu letra, una por una, las etapas: aritmética y álgebra → unidades y constantes → ecuaciones, derivadas e
+  integrales → matrices, sumatorios y límites.
+- Preparar el glosario de cada asignatura (biofísica y las que me digas).
+- **Modo matemáticas solo mientras se mantiene pulsado un botón del lápiz** (estaba en el plan como "si es barato" y
+  no está hecho).
 
-## Estado del plan (actualizado 2026-10-26, añadido por Claude; el texto de arriba es el original sin cambios)
+## 3. Que la aplicación se llame OnePepe por dentro
 
-PARTE A (matemáticas):
-1. Sustituir la letra por trazos limpios: **hecho** (trazos de pincel normales, umbral configurable, deshacer, ajustes;
-   sin cambiar el formato). Pendiente de medir con tu letra. Corrección tras cerrar y reabrir la página: **hecha**
-   con el archivo oculto junto a cada página (`feat/matematicas-archivo-oculto`).
-2. Grupos por forma, contexto, glosario, comprobación dimensional, corrección por símbolo o grupo con actualización del
-   símbolo limpio: **hecho**.
-3. Resultado del "=" como función aparte con ajuste propio: **hecho** (valor, despejar, simplificar, derivar, integrar,
-   sumatorios, límites, unidades).
-4. Fuente: **Hershey** de trazo único (licencia anotada en `MATEMATICAS-INFORME.md`, 0.2).
+Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue mostrando "Rnote": título de la ventana,
+"Acerca de", icono, nombre en el menú de aplicaciones e identificador (`com.github.flxzt.rnote`). Cambiarlo implica:
 
-PARTE B:
-- Auditoría en `AUDITORIA.md` ("Parte B"): **hecha**.
-- Fase 1b (botones del lápiz): **hecha** (`feat/botones-lapiz`), salvo lo que no se puede arreglar desde la app con
-  botones que envían "Eraser Tool" (explicado en `CAMBIOS-ONEPEPE.md`).
-- Fase 1c: 1 subíndice/superíndice **hecho** (`feat/subindices`); 2 catálogo **hecho** (`feat/catalogo-simbolos`);
-  3 resaltador **ya existía**; 4 ejes 2D/3D **ya existían**; 5 fecha/hora **hecho** (`feat/fecha-hora`);
-  6 formato de texto **ya existía**; 7 casillas, viñetas y listas **hecho** (`feat/listas`).
-  Opcionales (estilos rápidos, recorte de pantalla): **no hechos**.
+- **Nombre visible, "Acerca de" e icono:** cambio sencillo (textos, logo de `misc/onepepe/logo.svg` como icono de la app,
+  autores y enlaces apuntando a tu repositorio, conservando el crédito a Rnote que exige la GPL).
+- **Identificador de la app** (p. ej. `io.github.merinodpepe.OnePepe`). Es lo delicado:
+  - **Ajustes guardados:** Rnote guarda los ajustes (colores favoritos, botones del lápiz, cuadernos de la barra
+    lateral, herramientas…) con su identificador. Con uno nuevo, OnePepe empezaría con los ajustes por defecto. Se
+    puede añadir una migración que copie los de Rnote la primera vez.
+  - **Instalación en paralelo:** con un identificador propio, OnePepe y Rnote se pueden instalar a la vez sin pisarse
+    (Flatpak, menú de aplicaciones, ajustes). Hay que renombrar el manifiesto de Flatpak, el archivo `.desktop`, el
+    esquema de ajustes, el icono y los metadatos.
+  - **Archivos `.rnote`:** no cambian; ambos programas los abren. Hay que decidir cuál los abre por defecto con doble clic.
+  - **Traducciones y textos:** los nombres "Rnote" en las cadenas de la interfaz pasarían a "OnePepe".
+- Antes de hacerlo: confirmar contigo el identificador y si quieres migrar los ajustes de Rnote.
+
+## 4. Mejoras opcionales (si sobra tiempo y crédito)
+
+- Listas que continúan solas al pulsar Intro (ahora hay que pulsar el botón en cada párrafo).
+- Estilos rápidos de texto: Título 1, Título 2, cita, código.
+- Recorte de pantalla.
+- Árbol desplegable de tres niveles (cuaderno → sección → página) en la barra lateral, en lugar de entrar en carpetas.
+- Capturas de pantalla de OnePepe para el README (cuando funcione en tu equipo).
+- Tinta a texto (Fase 5; poco prioritaria).
+
+## 5. Cosas que haces tú en GitHub
+
+- Para que la portada del repositorio muestre el README de OnePepe sin tocar `main`: **Settings → General → Default
+  branch** → `onepepe`.
+
+## No hacer
+
+Copiar formato, adjuntar archivos como icono, búsqueda de imágenes en línea, tinta con texturas, editor de ecuaciones
+nativo, enlaces entre páginas y notas, grabación de audio. No cambiar el formato `.rnote` sin avisar, no tocar `main`
+ni otros repositorios ni la licencia, no subir modelos, datasets ni datos personales.
+
+## Orden de prioridad
+
+1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales.

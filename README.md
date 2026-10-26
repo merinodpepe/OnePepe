@@ -102,7 +102,7 @@ Todo se guarda en `~/.local/share/onepepe/`; tus correcciones nunca salen de tu 
 | [MATEMATICAS-INFORME.md](./MATEMATICAS-INFORME.md) | Cómo funciona el reconocimiento de matemáticas y sus resultados |
 | [DECISIONES.md](./DECISIONES.md) | Por qué se hizo cada cosa así |
 | [AUDITORIA.md](./AUDITORIA.md) | Qué traía ya la base y qué se añadió |
-| [PLAN-PENDIENTE.md](./PLAN-PENDIENTE.md) | El plan de trabajo |
+| [PLAN-PENDIENTE.md](./PLAN-PENDIENTE.md) | El plan de mejora: lo que falta por hacer |
 
 ## Problemas conocidos
 

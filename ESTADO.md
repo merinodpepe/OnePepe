@@ -1,7 +1,7 @@
 # Estado del proyecto OnePepe
 
 Actualizado: 2026-10-26 (segunda tanda). Rama de integración: `onepepe` (creada desde `main`, que no se ha tocado).
-Plan original y estado de cada punto: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md).
+Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
 - **compilado**: el motor compila de verdad; la interfaz GTK solo con `cargo check` (comprobación de tipos, sin
@@ -24,6 +24,7 @@ Leyenda de cómo se probó cada cosa:
 | 3 | Modo matemáticas: reconocedor, símbolos limpios, correcciones, glosario, resultado del "=" | `feat/matematicas-limpias` | sí | sí (Rust 6 + Python 15) y prueba de punta a punta del programa auxiliar con el modelo | pendiente |
 | 3 | Archivo oculto junto a cada página para corregir símbolos tras reabrir | `feat/matematicas-archivo-oculto` | sí | sí (4) | pendiente |
 | — | Permiso de Flatpak para lanzar el programa de matemáticas (`--talk-name=org.freedesktop.Flatpak`) | `feat/flatpak-matematicas` | — | — | pendiente |
+| — | README propio de OnePepe con logo | `feat/readme` | — | — | no aplica |
 | 1c | Subíndice / superíndice del texto | `feat/subindices` | sí | sí (2) | pendiente |
 | 1c | Catálogo de símbolos | `feat/catalogo-simbolos` | sí | — (solo interfaz) | pendiente |
 | 1c | Fecha y hora | `feat/fecha-hora` | sí | sí (2) | pendiente |
@@ -40,14 +41,20 @@ detalle (diseño y medidas): [`MATEMATICAS-INFORME.md`](MATEMATICAS-INFORME.md).
 
 ## Pendiente
 
+Resumen (detalle en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md)):
+
 1. **Tus pruebas con lápiz real** de todo lo anterior (primero: hojas infinitas, tinta a formas, matemáticas, botones).
 2. **Matemáticas con tu letra:** medir y ajustar con tus 30 expresiones; ahora mismo, con el modelo genérico, la
    sustitución acierta ~84 % de lo que sustituye y una fórmula entera sale perfecta solo ~10 % de las veces (medido con
-   letra de otras personas). Tus correcciones mejoran el resultado al momento.
-3. Permiso de Flatpak para el programa de matemáticas: **añadido al manifiesto** a petición tuya
-   (`feat/flatpak-matematicas`; ver `CAMBIOS-ONEPEPE.md` para el riesgo y cómo quitarlo).
-4. Opcionales no hechos: estilos rápidos (Título 1/2, cita, código), recorte de pantalla, continuar listas al pulsar
-   Intro, árbol desplegable de tres niveles para los cuadernos, tinta a texto (Fase 5).
+   letra de otras personas). Tus correcciones mejoran el resultado al momento. Falta también el modo matemáticas
+   "solo mientras mantengo pulsado un botón del lápiz".
+3. **Que la aplicación se llame OnePepe por dentro** (título, "Acerca de", icono e identificador), con migración de
+   ajustes y posibilidad de instalarla junto a Rnote.
+4. Opcionales: estilos rápidos (Título 1/2, cita, código), recorte de pantalla, continuar listas al pulsar Intro, árbol
+   desplegable de tres niveles para los cuadernos, capturas para el README, tinta a texto (Fase 5).
+
+Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas está **en el manifiesto** a petición tuya
+(`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
 
 ## Qué necesito de ti
 

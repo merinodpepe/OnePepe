@@ -2,9 +2,10 @@
 
 Fecha: 2026-10-26 (actualizado el mismo día con el cambio de plan). Estado: **investigación y prototipo de datos**.
 Nada de esto está aún en la app. Herramientas y lista de expresiones: [`tools/onepepe-math/`](tools/onepepe-math/README.md).
-El cambio de plan completo está en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (parte A).
+El cambio de plan (parte A) estaba en `PLAN-PENDIENTE.md`; ya está hecho y ese archivo ahora solo recoge lo pendiente
+(la versión original está en su historial de git).
 
-## 0. Cambio de plan (parte A de `PLAN-PENDIENTE.md`)
+## 0. Cambio de plan (parte A)
 
 El objetivo principal ya no es calcular, sino **pasar tu letra a trazos limpios**. El cálculo del "=" queda como
 función aparte. El reconocimiento (secciones 2.2 y siguientes) no cambia: es la base de las dos funciones.
