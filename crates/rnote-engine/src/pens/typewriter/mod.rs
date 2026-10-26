@@ -628,6 +628,54 @@ impl Typewriter {
         self.insert_text(converted, None, engine_view)
     }
 
+    /// OnePepe: applies a list style (bullet, number, checkbox) to the paragraph of the text cursor.
+    pub(crate) fn paragraph_list(
+        &mut self,
+        kind: scripts::ListKind,
+        engine_view: &mut EngineViewMut,
+    ) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        let TypewriterState::Modifying {
+            stroke_key, cursor, ..
+        } = &mut self.state
+        else {
+            return widget_flags;
+        };
+        let stroke_key = *stroke_key;
+        let Some(Stroke::TextStroke(textstroke)) = engine_view.store.get_stroke_mut(stroke_key)
+        else {
+            return widget_flags;
+        };
+        let old = cursor.cur_cursor();
+        let (start, remove, insert) = scripts::list_edit(&textstroke.text, old, kind);
+        let removed_text = textstroke.text[start..start + remove].to_string();
+        let mut edit_cursor = GraphemeCursor::new(start, textstroke.text.len(), true);
+        for _ in removed_text.chars() {
+            textstroke.remove_grapheme_after_cursor(&mut edit_cursor);
+        }
+        textstroke.insert_text_after_cursor(&insert, &mut edit_cursor);
+        let new = if old >= start + remove {
+            old - remove + insert.len()
+        } else {
+            start + insert.len()
+        };
+        *cursor = GraphemeCursor::new(new, textstroke.text.len(), true);
+        // a selection would point to old positions: back to a plain cursor
+        if let TypewriterState::Modifying { modify_state, .. } = &mut self.state {
+            *modify_state = ModifyState::Idle;
+        }
+        engine_view.store.update_geometry_for_stroke(stroke_key);
+        engine_view.store.regenerate_rendering_for_stroke(
+            stroke_key,
+            engine_view.camera.viewport(),
+            engine_view.camera.image_scale(),
+        );
+        widget_flags |= engine_view.store.record(Instant::now());
+        widget_flags.store_modified = true;
+        widget_flags.redraw = true;
+        widget_flags
+    }
+
     /// The range of the current selection, if available.
     pub(crate) fn selection_range(&self) -> Option<(Range<usize>, StrokeKey)> {
         if let TypewriterState::Modifying {

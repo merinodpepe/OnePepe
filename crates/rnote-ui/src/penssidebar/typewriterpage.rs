@@ -37,6 +37,12 @@ mod imp {
         #[template_child]
         pub(crate) text_subscript_button: TemplateChild<Button>,
         #[template_child]
+        pub(crate) text_list_bullet_button: TemplateChild<Button>,
+        #[template_child]
+        pub(crate) text_list_numbered_button: TemplateChild<Button>,
+        #[template_child]
+        pub(crate) text_list_checkbox_button: TemplateChild<Button>,
+        #[template_child]
         pub(crate) text_align_start_togglebutton: TemplateChild<ToggleButton>,
         #[template_child]
         pub(crate) text_align_center_togglebutton: TemplateChild<ToggleButton>,
@@ -225,6 +231,28 @@ impl RnTypewriterPage {
         // OnePepe: date / time stamp
         imp.datetime_menubutton
             .set_popover(Some(&date_time_popover(appwindow)));
+
+        // OnePepe: lists and checkboxes
+        {
+            use rnote_engine::pens::typewriter::scripts::ListKind;
+            for (button, kind) in [
+                (imp.text_list_bullet_button.get(), ListKind::Bullet),
+                (imp.text_list_numbered_button.get(), ListKind::Numbered),
+                (imp.text_list_checkbox_button.get(), ListKind::Checkbox),
+            ] {
+                button.connect_clicked(clone!(
+                    #[weak]
+                    appwindow,
+                    move |_| {
+                        let Some(canvas) = appwindow.active_tab_canvas() else {
+                            return;
+                        };
+                        let widget_flags = canvas.engine_mut().text_paragraph_list(kind);
+                        appwindow.handle_widget_flags(widget_flags, &canvas);
+                    }
+                ));
+            }
+        }
 
         // OnePepe: superscript / subscript
         for (button, sup) in [

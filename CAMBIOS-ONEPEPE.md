@@ -290,3 +290,16 @@ cargo test -p rnote-compose
 - **Rama:** `feat/fecha-hora` · **Estado:** compilado · tests ✔ (formato: `cargo test -p rnote-engine date_tests`) ·
   no ejecutado · lápiz: pendiente.
 - **Cómo lo pruebo yo:** herramienta de texto → botón del calendario → "Date and Time". Comprueba la hora de tu equipo.
+
+## Viñetas, listas numeradas y casillas (Fase 1c)
+
+- **Qué hace:** en la barra de la herramienta de texto, tres botones nuevos actúan sobre el **párrafo donde está el
+  cursor**: **viñeta** ("• "), **lista numerada** ("1. ", y si el párrafo de arriba es "3. …", pone "4. ") y
+  **casilla** ("☐ "; al volver a pulsar, se marca "☑ " y se desmarca "☐ "). Pulsar otra vez viñeta o numerada la quita;
+  cambiar de un estilo a otro lo sustituye.
+- **Limitación:** al pulsar Intro no se continúa la lista sola (hay que pulsar el botón en cada párrafo). Son caracteres
+  normales del texto: no cambia el formato `.rnote`.
+- **Rama:** `feat/listas` · **Estado:** compilado · tests ✔ (`cargo test -p rnote-engine list_tests engine_tests`) ·
+  no ejecutado · lápiz: pendiente.
+- **Cómo lo pruebo yo:** herramienta de texto: escribe tres líneas (Intro entre ellas). Pon el cursor en la primera →
+  numerada; en la segunda → numerada (debe salir "2."). En la tercera → casilla, y pulsa casilla otra vez para marcarla.

@@ -204,3 +204,171 @@ mod date_tests {
         );
     }
 }
+
+/// OnePepe: list styles of a paragraph.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ListKind {
+    /// "• "
+    Bullet,
+    /// "1. ", "2. "...
+    Numbered,
+    /// "☐ " / "☑ "
+    Checkbox,
+}
+
+/// The length in bytes of the list prefix at the start of a paragraph, if any.
+fn list_prefix_len(paragraph: &str) -> Option<usize> {
+    for p in ["• ", "☐ ", "☑ "] {
+        if paragraph.starts_with(p) {
+            return Some(p.len());
+        }
+    }
+    let digits = paragraph.chars().take_while(|c| c.is_ascii_digit()).count();
+    if digits > 0 && paragraph[digits..].starts_with(". ") {
+        return Some(digits + 2);
+    }
+    None
+}
+
+fn number_of(paragraph: &str) -> Option<u32> {
+    let digits = paragraph
+        .chars()
+        .take_while(|c| c.is_ascii_digit())
+        .collect::<String>();
+    if !digits.is_empty() && paragraph[digits.len()..].starts_with(". ") {
+        digits.parse().ok()
+    } else {
+        None
+    }
+}
+
+/// The edit that applies a list style to the paragraph containing the byte index `cursor`:
+/// (start of the paragraph, bytes to remove there, text to insert there).
+///
+/// Applying the same style again removes it, except for checkboxes, which toggle between ☐ and ☑.
+pub fn list_edit(text: &str, cursor: usize, kind: ListKind) -> (usize, usize, String) {
+    let cursor = cursor.min(text.len());
+    let start = text[..cursor].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    let end = text[start..]
+        .find('\n')
+        .map(|i| start + i)
+        .unwrap_or(text.len());
+    let paragraph = &text[start..end];
+    let existing = list_prefix_len(paragraph).unwrap_or(0);
+    let insert = match kind {
+        ListKind::Bullet => {
+            if paragraph.starts_with("• ") {
+                String::new()
+            } else {
+                "• ".to_string()
+            }
+        }
+        ListKind::Numbered => {
+            if number_of(paragraph).is_some() {
+                String::new()
+            } else {
+                // continue the numbering of the paragraph above
+                let previous = if start > 0 {
+                    let prev_end = start - 1;
+                    let prev_start = text[..prev_end].rfind('\n').map(|i| i + 1).unwrap_or(0);
+                    number_of(&text[prev_start..prev_end])
+                } else {
+                    None
+                };
+                format!("{}. ", previous.map(|n| n + 1).unwrap_or(1))
+            }
+        }
+        ListKind::Checkbox => {
+            if paragraph.starts_with("☐ ") {
+                "☑ ".to_string()
+            } else {
+                "☐ ".to_string()
+            }
+        }
+    };
+    (start, existing, insert)
+}
+
+#[cfg(test)]
+mod list_tests {
+    use super::*;
+
+    fn apply(text: &str, cursor: usize, kind: ListKind) -> String {
+        let (start, remove, insert) = list_edit(text, cursor, kind);
+        format!("{}{}{}", &text[..start], insert, &text[start + remove..])
+    }
+
+    #[test]
+    fn bullets_toggle() {
+        assert_eq!(apply("comprar pan", 3, ListKind::Bullet), "• comprar pan");
+        assert_eq!(apply("• comprar pan", 5, ListKind::Bullet), "comprar pan");
+    }
+
+    #[test]
+    fn numbering_continues() {
+        let text = "1. uno\ndos";
+        assert_eq!(
+            apply(text, text.len(), ListKind::Numbered),
+            "1. uno\n2. dos"
+        );
+        assert_eq!(apply("a\nb", 0, ListKind::Numbered), "1. a\nb");
+        // again: removed
+        assert_eq!(apply("1. uno", 4, ListKind::Numbered), "uno");
+    }
+
+    #[test]
+    fn checkbox_toggles_and_replaces_other_styles() {
+        assert_eq!(apply("tarea", 0, ListKind::Checkbox), "☐ tarea");
+        assert_eq!(apply("☐ tarea", 5, ListKind::Checkbox), "☑ tarea");
+        assert_eq!(apply("☑ tarea", 5, ListKind::Checkbox), "☐ tarea");
+        assert_eq!(apply("• tarea", 5, ListKind::Checkbox), "☐ tarea");
+        // only the paragraph of the cursor changes
+        assert_eq!(
+            apply("uno\ndos\ntres", 5, ListKind::Checkbox),
+            "uno\n☐ dos\ntres"
+        );
+    }
+}
+
+#[cfg(test)]
+mod engine_tests {
+    use super::*;
+    use crate::Engine;
+    use crate::pens::PenStyle;
+    use crate::strokes::Stroke;
+
+    fn text_of(engine: &Engine) -> String {
+        engine
+            .store
+            .stroke_keys_as_rendered()
+            .into_iter()
+            .find_map(|k| match engine.store.get_stroke_ref(k) {
+                Some(Stroke::TextStroke(t)) => Some(t.text.clone()),
+                _ => None,
+            })
+            .unwrap()
+    }
+
+    #[test]
+    fn list_on_the_paragraph_of_the_cursor() {
+        let mut engine = Engine::default();
+        let _ = engine.change_pen_style(PenStyle::Typewriter);
+        let _ = engine.insert_text("1. uno\ndos".to_string(), None);
+        let _ = engine.text_paragraph_list(ListKind::Numbered);
+        assert_eq!(text_of(&engine), "1. uno\n2. dos");
+        // the cursor stays at the end: typing continues the paragraph
+        let _ = engine.insert_text(" y tres".to_string(), None);
+        assert_eq!(text_of(&engine), "1. uno\n2. dos y tres");
+        let _ = engine.text_paragraph_list(ListKind::Checkbox);
+        assert_eq!(text_of(&engine), "1. uno\n☐ dos y tres");
+        let _ = engine.text_paragraph_list(ListKind::Checkbox);
+        assert_eq!(text_of(&engine), "1. uno\n☑ dos y tres");
+    }
+
+    #[test]
+    fn date_stamp_creates_text() {
+        let mut engine = Engine::default();
+        let _ = engine.insert_date_time(DateTimeStamp::Date);
+        assert_eq!(text_of(&engine).len(), "26/10/2026".len());
+    }
+}
