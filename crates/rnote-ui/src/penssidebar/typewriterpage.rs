@@ -29,6 +29,10 @@ mod imp {
         #[template_child]
         pub(crate) text_strikethrough_button: TemplateChild<Button>,
         #[template_child]
+        pub(crate) text_superscript_button: TemplateChild<Button>,
+        #[template_child]
+        pub(crate) text_subscript_button: TemplateChild<Button>,
+        #[template_child]
         pub(crate) text_align_start_togglebutton: TemplateChild<ToggleButton>,
         #[template_child]
         pub(crate) text_align_center_togglebutton: TemplateChild<ToggleButton>,
@@ -209,6 +213,24 @@ impl RnTypewriterPage {
                 appwindow.handle_widget_flags(widget_flags, &canvas);
             }
         ));
+
+        // OnePepe: superscript / subscript
+        for (button, sup) in [
+            (imp.text_superscript_button.get(), true),
+            (imp.text_subscript_button.get(), false),
+        ] {
+            button.connect_clicked(clone!(
+                #[weak]
+                appwindow,
+                move |_| {
+                    let Some(canvas) = appwindow.active_tab_canvas() else {
+                        return;
+                    };
+                    let widget_flags = canvas.engine_mut().text_selection_toggle_script(sup);
+                    appwindow.handle_widget_flags(widget_flags, &canvas);
+                }
+            ));
+        }
 
         // Alignment
         imp.text_align_start_togglebutton

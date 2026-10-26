@@ -750,7 +750,7 @@ mod tests {
     #[test]
     fn tap_on_symbol_and_group_correction() {
         let mut engine = Engine::default();
-        write_one_equals(&mut engine);
+        let _ = write_one_equals(&mut engine);
         let before = n_strokes(&engine);
         // a tap on the "1" does not draw, it asks for the candidates
         let flags = draw(&mut engine, &[(101.0, 120.0), (101.5, 120.5)]);
@@ -780,7 +780,7 @@ mod tests {
     #[test]
     fn writing_elsewhere_still_draws_in_math_mode() {
         let mut engine = Engine::default();
-        write_one_equals(&mut engine);
+        let _ = write_one_equals(&mut engine);
         let before = n_strokes(&engine);
         let _ = draw(&mut engine, &line(300.0, 100.0, 330.0, 140.0));
         assert_eq!(n_strokes(&engine), before + 1);

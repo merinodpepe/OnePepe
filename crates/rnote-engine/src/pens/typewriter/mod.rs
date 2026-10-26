@@ -1,5 +1,6 @@
 // Modules
 mod penevents;
+pub mod scripts;
 
 // Imports
 use super::PenBehaviour;
@@ -608,6 +609,23 @@ impl Typewriter {
     /// Whether the typewriter handles text input.
     pub fn is_handling_text_input(&self) -> bool {
         !matches!(self.state, TypewriterState::Idle)
+    }
+
+    /// OnePepe: converts the selected text to superscript or subscript (or back).
+    pub(crate) fn selection_toggle_script(
+        &mut self,
+        sup: bool,
+        engine_view: &mut EngineViewMut,
+    ) -> WidgetFlags {
+        let Some((range, key)) = self.selection_range() else {
+            return WidgetFlags::default();
+        };
+        let Some(Stroke::TextStroke(textstroke)) = engine_view.store.get_stroke_ref(key) else {
+            return WidgetFlags::default();
+        };
+        let converted = scripts::toggle_script(textstroke.get_text_slice_for_range(range), sup);
+        // replaces the selection
+        self.insert_text(converted, None, engine_view)
     }
 
     /// The range of the current selection, if available.

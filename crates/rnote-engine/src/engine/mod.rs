@@ -870,6 +870,15 @@ impl Engine {
             | self.update_content_rendering_current_viewport()
     }
 
+    /// OnePepe: turns the selected text into superscript (`sup`) or subscript, or back.
+    pub fn text_selection_toggle_script(&mut self, sup: bool) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        if let Pen::Typewriter(typewriter) = self.penholder.current_pen_mut() {
+            widget_flags |= typewriter.selection_toggle_script(sup, &mut engine_view_mut!(self));
+        }
+        widget_flags
+    }
+
     pub fn text_selection_change_style<F>(&mut self, modify_func: F) -> WidgetFlags
     where
         F: FnOnce(&mut TextStyle),
