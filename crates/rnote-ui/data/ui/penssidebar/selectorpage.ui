@@ -96,6 +96,50 @@
           </object>
         </child>
         <child>
+          <object class="GtkButton" id="selection_bring_to_front_button">
+            <property name="tooltip_text" translatable="yes">Bring Selection to Front</property>
+            <property name="action-name">win.selection-z-order</property>
+            <property name="action-target">'front'</property>
+            <property name="icon-name">go-top-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_raise_button">
+            <property name="tooltip_text" translatable="yes">Raise Selection One Level</property>
+            <property name="action-name">win.selection-z-order</property>
+            <property name="action-target">'raise'</property>
+            <property name="icon-name">go-up-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_lower_button">
+            <property name="tooltip_text" translatable="yes">Lower Selection One Level</property>
+            <property name="action-name">win.selection-z-order</property>
+            <property name="action-target">'lower'</property>
+            <property name="icon-name">go-down-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_send_to_back_button">
+            <property name="tooltip_text" translatable="yes">Send Selection to Back</property>
+            <property name="action-name">win.selection-z-order</property>
+            <property name="action-target">'back'</property>
+            <property name="icon-name">go-bottom-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
           <object class="GtkButton" id="selection_duplicate_button">
             <property name="tooltip_text" translatable="yes">Duplicate Selection</property>
             <property name="action-name">win.selection-duplicate</property>

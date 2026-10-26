@@ -69,3 +69,14 @@ cargo test -p rnote-compose
 - **Rama:** `feat/colores` (fusionada en `onepepe`).
 - **Estado:** compilado (comprobación de tipos de la UI) · tests de la paleta ✔ · **no ejecutado** (no hay pantalla en la nube) · lápiz: pendiente.
 - **Cómo lo pruebo yo:** compila la rama `onepepe` (ver arriba) y además `cargo test -p rnote-compose palette`. En la app: elige el lápiz, pulsa la flecha ▾ al lado de los colores, elige un color oscuro y uno claro y escribe con cada uno. Comprueba que la paleta se cierra al elegir, que el color de los trazos es el elegido y, si tenías una casilla favorita seleccionada, que ha cambiado a ese color y se mantiene al cerrar y abrir la app.
+
+## Reordenar capas (y PDFs/imágenes por encima de la tinta)
+
+- **Qué hace:** con la herramienta de selección, en la barra lateral de la selección hay 4 botones nuevos: **traer al frente** (flecha a tope arriba), **subir un nivel** (flecha arriba), **bajar un nivel** (flecha abajo) y **enviar al fondo** (flecha a tope abajo). "Subir/bajar un nivel" salta por encima/debajo del siguiente objeto que **se solapa** con la selección (los que están lejos no cuentan, porque moverse respecto a ellos no se vería).
+- **Cambio de comportamiento:** antes, en Rnote, al seleccionar o deseleccionar algo se subía al frente. Ahora seleccionar no cambia el orden; si no, "enviar al fondo" se desharía al deseleccionar.
+- **PDFs e imágenes:** ya se podían mover, girar y redimensionar con la selección (eso no lo he tocado). Lo nuevo: antes siempre quedaban debajo de la tinta; ahora, al usar cualquiera de los 4 botones con una imagen o página PDF seleccionada, pasa a la capa de la tinta y puedes ponerla encima o entre trazos. Las imágenes que no toques siguen como antes.
+- **Deshacer:** cada cambio de orden se puede deshacer (Ctrl+Z).
+- **Formato `.rnote`:** sin cambios (se usan valores de capa y orden que el formato ya tenía).
+- **Rama:** `feat/capas` (fusionada en `onepepe`).
+- **Estado:** compilado · tests del motor ✔ (`cargo test -p rnote-engine chrono_comp`) · **no ejecutado** · lápiz: pendiente.
+- **Cómo lo pruebo yo:** compila `onepepe`. Dibuja tres rectángulos rellenos de colores distintos que se solapen (herramienta de formas, color de relleno). Selecciona el de abajo y pulsa "traer al frente"; luego "enviar al fondo"; luego "subir un nivel" dos veces. Deselecciona y comprueba que el orden se mantiene. Importa una imagen o un PDF, ponlo encima de lo escrito con "traer al frente", deshaz con Ctrl+Z, guarda, cierra y vuelve a abrir el archivo para ver que el orden se conserva.
