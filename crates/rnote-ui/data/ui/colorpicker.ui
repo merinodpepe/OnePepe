@@ -83,6 +83,29 @@
           </object>
         </child>
         <child>
+          <object class="GtkMenuButton" id="palette_button">
+            <property name="icon-name">pan-down-symbolic</property>
+            <property name="tooltip-text" translatable="yes">Color Palette</property>
+            <style>
+              <class name="flat" />
+            </style>
+            <property name="popover">
+              <object class="GtkPopover" id="palette_popover">
+                <child>
+                  <object class="GtkGrid" id="palette_grid">
+                    <property name="row-spacing">3</property>
+                    <property name="column-spacing">3</property>
+                    <property name="margin-start">3</property>
+                    <property name="margin-end">3</property>
+                    <property name="margin-top">3</property>
+                    <property name="margin-bottom">3</property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
           <object class="GtkButton" id="colordialog_button">
             <property name="icon-name">preferences-color-symbolic</property>
             <style>

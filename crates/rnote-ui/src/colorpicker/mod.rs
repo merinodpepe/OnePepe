@@ -9,8 +9,8 @@ pub(crate) use colorsetter::RnColorSetter;
 // Imports
 use crate::RnAppWindow;
 use gtk4::{
-    Button, ColorDialog, CompositeTemplate, Label, Widget, gdk, glib, glib::clone, prelude::*,
-    subclass::prelude::*,
+    Button, ColorDialog, CompositeTemplate, Grid, Label, MenuButton, Popover, Widget, gdk, glib,
+    glib::clone, prelude::*, subclass::prelude::*,
 };
 use once_cell::sync::Lazy;
 use rnote_compose::{Color, color};
@@ -55,6 +55,12 @@ mod imp {
         #[template_child]
         pub(crate) setter_9: TemplateChild<RnColorSetter>,
         #[template_child]
+        pub(crate) palette_button: TemplateChild<MenuButton>,
+        #[template_child]
+        pub(crate) palette_popover: TemplateChild<Popover>,
+        #[template_child]
+        pub(crate) palette_grid: TemplateChild<Grid>,
+        #[template_child]
         pub(crate) colordialog_button: TemplateChild<Button>,
         #[template_child]
         pub(crate) active_color_label: TemplateChild<Label>,
@@ -82,6 +88,9 @@ mod imp {
                 setter_7: TemplateChild::default(),
                 setter_8: TemplateChild::default(),
                 setter_9: TemplateChild::default(),
+                palette_button: TemplateChild::default(),
+                palette_popover: TemplateChild::default(),
+                palette_grid: TemplateChild::default(),
                 colordialog_button: TemplateChild::default(),
                 active_color_label: TemplateChild::default(),
             }
@@ -109,6 +118,7 @@ mod imp {
             let obj = self.obj();
 
             self.setup_setters();
+            self.setup_palette();
 
             self.stroke_color_pad
                 .bind_property("color", &*obj, "stroke-color")
@@ -385,6 +395,35 @@ mod imp {
                         .update_color_label_string(colorpicker.fill_color().into_compose_color());
                 }
             });
+        }
+
+        /// OnePepe: fills the palette popover with the predefined colors.
+        fn setup_palette(&self) {
+            let obj = self.obj();
+
+            for (i, color) in rnote_compose::palette::palette_colors()
+                .into_iter()
+                .enumerate()
+            {
+                let swatch = RnColorSetter::new();
+                swatch.set_color(gdk::RGBA::from_compose_color(color));
+                swatch.set_tooltip_text(Some(&crate::utils::color_to_hsv_label_string(color)));
+                swatch.connect_active_notify(clone!(
+                    #[weak(rename_to=colorpicker)]
+                    obj,
+                    move |swatch| {
+                        if swatch.is_active() {
+                            swatch.set_active(false);
+                            colorpicker.set_color_active_pad(swatch.color());
+                            colorpicker.set_color_active_setter(swatch.color());
+                            colorpicker.imp().palette_popover.popdown();
+                        }
+                    }
+                ));
+                let columns = rnote_compose::palette::PALETTE_COLUMNS;
+                self.palette_grid
+                    .attach(&swatch, (i % columns) as i32, (i / columns) as i32, 1, 1);
+            }
         }
 
         fn default_color(i: usize) -> gdk::RGBA {

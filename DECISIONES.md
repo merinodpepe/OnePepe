@@ -9,3 +9,9 @@ Formato: qué elegí y por qué.
 - **`config.rs` local.** Para el `cargo check` de la UI generé `crates/rnote-ui/src/config.rs` a mano (meson lo genera normalmente). No se sube al repositorio (lo puse en `.git/info/exclude`).
 - **Test de hojas infinitas como test de integración** (`crates/rnote-engine/tests/infinite_layout.rs`) en la rama `feat/hojas-infinitas`, para no tocar código existente.
 - **`setup-deps.sh` también comprueba `libinput` y `libwacom`** aunque `BUILDING.md` no los pide, porque los pediste tú y GTK los usa con la tableta. Si las versiones de glib/GTK/libadwaita son demasiado viejas, el script no intenta instalar nada raro y recomienda Flatpak.
+
+## Fase 1 — Colores
+
+- **Paleta propia de 48 colores** en `crates/rnote-compose/src/palette.rs` (sin GTK, con tests) en lugar de modificar las constantes `GNOME_*` de Rnote, que tienen tonos muy parecidos en claridad y no traen oscuros ni rosas.
+- **Desplegable en vez de más casillas fijas:** 48 casillas no caben en la barra; un botón ▾ con una cuadrícula ocupa poco y reutiliza el widget `RnColorSetter` existente.
+- **Elegir de la paleta sustituye la casilla favorita seleccionada**, igual que hace ya el selector personalizado de Rnote. Así los favoritos se guardan sin código nuevo (Rnote ya los guarda en sus ajustes).
