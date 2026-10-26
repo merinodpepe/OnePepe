@@ -227,6 +227,7 @@ impl Engine {
         */
         self.penholder
             .draw_on_doc_to_gtk_snapshot(snapshot, &engine_view!(self))?;
+        self.draw_ruler_to_gtk_snapshot(snapshot)?;
 
         if self.config.read().visual_debug {
             snapshot.save();

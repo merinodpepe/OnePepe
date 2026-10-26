@@ -4,6 +4,7 @@ pub mod config;
 pub mod export;
 pub mod import;
 pub mod rendering;
+pub mod ruler;
 pub mod snapshot;
 pub mod strokecontent;
 pub mod visual_debug;
@@ -214,6 +215,11 @@ pub struct Engine {
     #[cfg(feature = "ui")]
     #[serde(skip)]
     origin_indicator_rendernode: Option<gtk4::gsk::RenderNode>,
+    // OnePepe: the virtual ruler. Not saved in the document.
+    #[serde(skip)]
+    pub ruler: Option<rnote_compose::ruler::Ruler>,
+    #[serde(skip)]
+    ruler_interaction: rnote_compose::ruler::RulerInteraction,
 }
 
 impl Default for Engine {
@@ -238,6 +244,8 @@ impl Default for Engine {
             origin_indicator_image: None,
             #[cfg(feature = "ui")]
             origin_indicator_rendernode: None,
+            ruler: None,
+            ruler_interaction: rnote_compose::ruler::RulerInteraction::default(),
         }
     }
 }
@@ -485,8 +493,21 @@ impl Engine {
         pen_mode: Option<PenMode>,
         now: Instant,
     ) -> (EventPropagation, WidgetFlags) {
-        self.penholder
-            .handle_pen_event(event, pen_mode, now, &mut engine_view_mut!(self))
+        let mut widget_flags = WidgetFlags::default();
+        if let Some(pen_mode) = pen_mode {
+            widget_flags |= self
+                .penholder
+                .change_pen_mode(pen_mode, &mut engine_view_mut!(self));
+        }
+        // OnePepe: the ruler can snap the event to its edge or use it to move itself.
+        let Some(event) = self.apply_ruler_to_pen_event(event) else {
+            widget_flags.redraw = true;
+            return (EventPropagation::Stop, widget_flags);
+        };
+        let (propagation, wf) =
+            self.penholder
+                .handle_pen_event(event, None, now, &mut engine_view_mut!(self));
+        (propagation, widget_flags | wf)
     }
 
     /// Handle a pressed shortcut key.

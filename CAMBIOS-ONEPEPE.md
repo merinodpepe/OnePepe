@@ -80,3 +80,15 @@ cargo test -p rnote-compose
 - **Rama:** `feat/capas` (fusionada en `onepepe`).
 - **Estado:** compilado · tests del motor ✔ (`cargo test -p rnote-engine chrono_comp`) · **no ejecutado** · lápiz: pendiente.
 - **Cómo lo pruebo yo:** compila `onepepe`. Dibuja tres rectángulos rellenos de colores distintos que se solapen (herramienta de formas, color de relleno). Selecciona el de abajo y pulsa "traer al frente"; luego "enviar al fondo"; luego "subir un nivel" dos veces. Deselecciona y comprueba que el orden se mantiene. Importa una imagen o un PDF, ponlo encima de lo escrito con "traer al frente", deshaz con Ctrl+Z, guarda, cierra y vuelve a abrir el archivo para ver que el orden se conserva.
+
+## Regla
+
+- **Qué hace:** en la barra lateral del **pincel** hay un botón nuevo con un icono de regla (también **Ctrl+Alt+R**). Al activarlo aparece una regla gris semitransparente en el centro de la vista, con marcas y el **ángulo** escrito en el centro.
+  - **Mover:** apoya el lápiz en el centro de la regla y arrastra.
+  - **Girar:** arrastra el círculo azul de un extremo. El ángulo se "engancha" a múltiplos de 15° (0°, 15°, 30°, 45°, 90°…) cuando estás a menos de 1,5°.
+  - **Dibujar recto:** empieza el trazo cerca de uno de los bordes largos (a menos de unos 16 píxeles de pantalla, por fuera o por dentro). Todo el trazo queda pegado a la línea del borde, aunque te separes después. Si empiezas lejos, el trazo es libre aunque cruce la regla.
+  - Solo afecta al **pincel**; con el borrador, la selección, etc., la regla no hace nada.
+  - Cada pestaña tiene su propia regla. No se guarda en el archivo (formato `.rnote` sin cambios).
+- **Rama:** `feat/regla` (fusionada en `onepepe`).
+- **Estado:** compilado · tests ✔ (`cargo test -p rnote-compose ruler` y `cargo test -p rnote-engine engine::ruler`; incluyen trazos sintéticos temblorosos en 5 ángulos que quedan rectos) · dibujo de la regla comprobado renderizándolo a imagen · **no ejecutado en la app** · lápiz: pendiente.
+- **Cómo lo pruebo yo:** compila `onepepe`. Elige el pincel y pulsa el botón de la regla. Comprueba: (1) que puedes moverla arrastrando por el centro y girarla con el círculo azul, y que el ángulo mostrado cambia; (2) que al dibujar a lo largo del borde, empezando muy cerca, sale una línea recta, a 0°, 45° y a un ángulo cualquiera; (3) que si empiezas lejos de la regla el trazo es normal; (4) que deshacer (Ctrl+Z) quita la línea; (5) que al desactivar el botón desaparece. **Dime si la zona de enganche (16 px) te parece grande o pequeña**, y si el ancho de la regla te va bien.

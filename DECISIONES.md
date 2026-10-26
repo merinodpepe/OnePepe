@@ -21,3 +21,10 @@ Formato: qué elegí y por qué.
 - **Subir/bajar un nivel respecto a objetos que se solapan** (como Inkscape), porque cambiar el orden respecto a un trazo lejano no tiene efecto visible y parecería que el botón no hace nada.
 - **Seleccionar ya no sube al frente** (`store/selection_comp.rs`): era incompatible con "enviar al fondo".
 - **Imágenes y PDF pasan a la capa de tinta (`UserLayer(0)`) solo al reordenarlos**, empezando desde el fondo de esa capa. Es un valor que el formato `.rnote` ya admite, así que no hay cambio de formato. Los botones se pusieron en la barra lateral de la selección, junto a "duplicar" y "borrar", con iconos estándar `go-top/up/down/bottom` (no he podido verlos en pantalla).
+
+## Fase 1 — Regla
+
+- **El trazo se pega al borde solo si empieza cerca de él** y entonces se queda pegado hasta levantar el lápiz. Si cada punto decidiera por separado, un trazo que roza el borde quedaría a trozos recto y a trozos libre.
+- **Mover/girar con el propio lápiz** (centro = mover, círculo = girar), porque con el pincel seleccionado en Rnote el dedo suele servir para desplazar el lienzo. Giro con enganche a múltiplos de 15°.
+- **La regla vive en el motor, por pestaña, sin guardarse** en el `.rnote` (campo con `#[serde(skip)]`), para no cambiar el formato. La geometría está en `crates/rnote-compose/src/ruler.rs` (sin GTK, con tests); la integración en `crates/rnote-engine/src/engine/ruler.rs`, interceptando los eventos del lápiz en `Engine::handle_pen_event` antes de pasarlos al pincel.
+- **Atajo Ctrl+Alt+R**, porque Ctrl+R y Ctrl+Shift+R ya están ocupados en Rnote. Icono propio sencillo (`onepepe-ruler-symbolic.svg`).
