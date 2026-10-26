@@ -787,6 +787,13 @@ impl RnAppWindow {
             let can_undo = canvas.engine_ref().can_undo();
             let can_redo = canvas.engine_ref().can_redo();
             let visual_debug = self.engine_config().read().visual_debug;
+            let ruler_enabled = canvas.engine_ref().ruler_enabled();
+            if let Some(action_ruler) = self
+                .lookup_action("ruler")
+                .and_then(|a| a.downcast::<gio::SimpleAction>().ok())
+            {
+                action_ruler.set_state(&ruler_enabled.to_variant());
+            }
 
             self.overlays()
                 .penpicker()

@@ -21,6 +21,8 @@ pub mod palette;
 pub mod penevent;
 /// module for pen paths
 pub mod penpath;
+/// OnePepe: virtual ruler
+pub mod ruler;
 /// utilities for serializing / deserializing
 pub mod serialize;
 /// module for shapes
