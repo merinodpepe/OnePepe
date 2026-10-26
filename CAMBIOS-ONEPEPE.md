@@ -260,3 +260,14 @@ cargo test -p rnote-compose
   whole group" escribiendo varias veces la misma letra. Activa "Show Result After =" y escribe `2x+1=7, x=`. Crea un
   `.onepepe-glosario.txt` con `T = 310 K` y `k_B = 1.380649e-23 J/K` en la carpeta del documento y escribe `k_B T =`.
   Si no pasa nada, mira si salió el aviso "Could not start the math helper".
+
+## Subíndice y superíndice en el texto (Fase 1c)
+
+- **Qué hace:** en la barra de la herramienta de texto hay dos botones nuevos, **"x²"** y **"x₂"**. Selecciona texto
+  escrito a teclado y pulsa uno: se convierte a superíndice o subíndice; pulsarlo otra vez lo devuelve a normal.
+- **Cómo:** con los caracteres Unicode de superíndice/subíndice (⁰¹²³…, ₀₁₂…, ⁺⁻⁼⁽⁾, muchas letras y algunas griegas),
+  porque el texto de Rnote no tiene un atributo de "elevar". **Limitación:** algunos caracteres no tienen versión
+  (p. ej. no hay "q" en superíndice ni casi mayúsculas en subíndice): esos se quedan igual. No cambia el formato `.rnote`.
+- **Rama:** `feat/subindices` · **Estado:** compilado · tests ✔ (`cargo test -p rnote-engine scripts`) · no ejecutado · lápiz: pendiente.
+- **Cómo lo pruebo yo:** herramienta de texto, escribe `H2O x2 10-3`, selecciona el `2` de H2O → "x₂"; selecciona el
+  `2` de x2 → "x²"; selecciona `-3` → "x²"; vuelve a pulsar para deshacer la conversión; Ctrl+Z también funciona.
