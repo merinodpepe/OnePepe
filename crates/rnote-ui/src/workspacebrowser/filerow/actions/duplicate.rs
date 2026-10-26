@@ -75,7 +75,8 @@ pub(crate) fn duplicate(filerow: &RnFileRow, appwindow: &RnAppWindow) -> gio::Si
 
 async fn duplicate_file(source: impl AsRef<Path>) -> anyhow::Result<()> {
     let destination = generate_destination_path(&source)?;
-    async_fs::copy(source, destination).await?;
+    async_fs::copy(&source, &destination).await?;
+    crate::mathhelper::sidecar_follow_copy(source.as_ref(), &destination).await;
     Ok(())
 }
 

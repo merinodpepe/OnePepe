@@ -621,6 +621,9 @@ pub(crate) async fn dialog_trash_file(appwindow: &RnAppWindow, current_file: &gi
                                     );
                                     return;
                                 }
+                                if let Some(path) = current_file.path() {
+                                    crate::mathhelper::sidecar_follow_trash(&path);
+                                }
                             }
                         ),
                     );

@@ -355,6 +355,8 @@ impl Engine {
 
     /// Imports an engine snapshot. A save file should always be loaded with this method.
     pub fn load_snapshot(&mut self, snapshot: EngineSnapshot) -> WidgetFlags {
+        // OnePepe: the recognized math symbols belong to the previous document
+        self.math_reset_document();
         self.document = snapshot.document.extract_snapshot_data();
         self.camera = snapshot.camera.extract_snapshot_data();
         let mut widget_flags = self.store.import_from_snapshot(&snapshot)

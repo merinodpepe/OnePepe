@@ -329,3 +329,66 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     });
     popover.popup();
 }
+
+// ---------- OnePepe: hidden file next to the page with the recognized math symbols ----------
+
+/// Writes (or removes, when there is nothing to remember) the hidden math file of a page that was just saved.
+pub(crate) async fn save_sidecar(canvas: &RnCanvas, page: &std::path::Path) {
+    let path = rnote_engine::engine::math::math_sidecar_path(page);
+    let json = canvas.engine_ref().math_sidecar_json();
+    let res = match json {
+        Some(json) => async_fs::write(&path, json).await,
+        None if path.exists() => async_fs::remove_file(&path).await,
+        None => Ok(()),
+    };
+    if let Err(e) = res {
+        tracing::warn!(
+            "Writing the hidden math file `{}` failed, Err: {e:?}",
+            path.display()
+        );
+    }
+}
+
+/// Restores the recognized math symbols of a page that was just opened.
+pub(crate) async fn load_sidecar(canvas: &RnCanvas, page: &std::path::Path) {
+    let path = rnote_engine::engine::math::math_sidecar_path(page);
+    if let Ok(json) = async_fs::read_to_string(&path).await {
+        let n = canvas.engine_mut().math_load_sidecar(&json);
+        tracing::debug!(
+            "Restored {n} recognized math symbols from `{}`",
+            path.display()
+        );
+    }
+}
+
+/// The hidden math file follows its page when the page is renamed or moved.
+pub(crate) async fn sidecar_follow_move(from: &std::path::Path, to: &std::path::Path) {
+    let source = rnote_engine::engine::math::math_sidecar_path(from);
+    if source.exists()
+        && let Err(e) =
+            async_fs::rename(&source, rnote_engine::engine::math::math_sidecar_path(to)).await
+    {
+        tracing::warn!("Moving the hidden math file failed, Err: {e:?}");
+    }
+}
+
+/// The hidden math file is copied when the page is duplicated.
+pub(crate) async fn sidecar_follow_copy(from: &std::path::Path, to: &std::path::Path) {
+    let source = rnote_engine::engine::math::math_sidecar_path(from);
+    if source.exists()
+        && let Err(e) =
+            async_fs::copy(&source, rnote_engine::engine::math::math_sidecar_path(to)).await
+    {
+        tracing::warn!("Copying the hidden math file failed, Err: {e:?}");
+    }
+}
+
+/// The hidden math file goes to the trash with its page.
+pub(crate) fn sidecar_follow_trash(page: &std::path::Path) {
+    let path = rnote_engine::engine::math::math_sidecar_path(page);
+    if path.exists()
+        && let Err(e) = gio::File::for_path(&path).trash(None::<&gio::Cancellable>)
+    {
+        tracing::warn!("Trashing the hidden math file failed, Err: {e:?}");
+    }
+}

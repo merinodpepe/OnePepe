@@ -35,6 +35,10 @@ impl RnCanvas {
             .engine_mut()
             .set_scale_factor(self.scale_factor() as f64);
 
+        // OnePepe: recognized math symbols of the page
+        if let Some(path) = file_path.as_ref() {
+            crate::mathhelper::load_sidecar(self, path.as_ref()).await;
+        }
         self.set_output_file(file_path.map(gio::File::for_path));
         self.dismiss_output_file_modified_toast();
         self.set_unsaved_changes(false);
@@ -261,6 +265,8 @@ impl RnCanvas {
         }
 
         debug!("Saving file has finished successfully");
+        // OnePepe: recognized math symbols of the page
+        crate::mathhelper::save_sidecar(self, &filepath).await;
 
         if !skip_set_output_file {
             // We only create/replace the file watcher once we are sure the file was successfully saved.

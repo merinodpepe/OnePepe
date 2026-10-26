@@ -30,11 +30,9 @@ función aparte. El reconocimiento (secciones 2.2 y siguientes) no cambia: es la
 - **Correcciones:** al tocar un símbolo limpio aparece la lista de candidatas. Al elegir otra, el símbolo limpio se
   redibuja con la nueva; con "todo el grupo", se redibujan todos los del grupo. Cada corrección se guarda como ejemplo de
   tu letra (con tus trazos originales) en `~/.local/share/onepepe/math/correcciones.jsonl`.
-- **Punto a confirmar contigo (formato):** para poder corregir un símbolo **después de cerrar y volver a abrir** la
-  página, hay que recordar qué trazos limpios forman cada símbolo, sus candidatas y tus trazos originales. Eso no cabe
-  en el `.rnote` sin cambiar el formato. Propuesta: guardarlo en un archivo oculto al lado de la página
-  (`.Pagina 1.rnote.onepepe.json`), sin tocar el `.rnote`. Alternativa: que las correcciones solo se puedan hacer
-  durante la sesión en que se convirtió. **No lo implementaré sin tu respuesta.**
+- **Corregir después de cerrar y volver a abrir:** confirmado por ti e **implementado**: un archivo oculto al lado de
+  la página (`.Página 1.rnote.onepepe.json`) recuerda qué trazos forman cada símbolo, sus candidatas, el grupo y tus
+  trazos originales, sin tocar el `.rnote`.
 
 ### 0.2 Fuente de los símbolos limpios
 
@@ -83,9 +81,8 @@ Hecho y fusionado en `onepepe` (rama `feat/matematicas-limpias`); detalle y prue
 - **Fuente:** Hershey vía el paquete `Hershey-Fonts` de PyPI (envoltorio con licencia MIT; los datos de Hershey se
   usan con los créditos exigidos, ver 0.2). Comprobada visualmente la tabla de símbolos; θ sale con la forma ϑ (diseño
   de Hershey); ≈ y ∼ están dibujados a mano porque no están en la fuente.
-- **Formato `.rnote`:** sin cambios. La relación símbolo ↔ trazos solo se recuerda **durante la sesión**: no he creado
-  el archivo oculto propuesto en 0.1 porque requiere tu confirmación. Consecuencia: tras cerrar y abrir la página, los
-  símbolos limpios ya no se pueden corregir tocándolos (se borran y se reescriben).
+- **Formato `.rnote`:** sin cambios. La relación símbolo ↔ trazos se guarda en el archivo oculto de 0.1
+  (rama `feat/matematicas-archivo-oculto`), así que se puede corregir tras reabrir la página.
 
 **Medidas** (fórmulas sintéticas de MathWriting con símbolos de escritores que el clasificador no vio; vocabulario
 básico; **no es tu letra**):
@@ -105,8 +102,7 @@ falta para que sea útil es justo lo que depende de ti: tus 30 expresiones (para
 correcciones (el clasificador personal las aplica al momento). Por eso el modo matemáticas viene apagado y el umbral alto.
 
 **Pendiente que sí depende de ti:** medir con tus expresiones, ajustar umbrales y la estructura a tu letra "poco
-lineal", decidir el archivo oculto para corregir tras reabrir, y, si usas Flatpak, decidir el permiso para lanzar el
-programa auxiliar (ver `CAMBIOS-ONEPEPE.md`).
+lineal", y, si usas Flatpak, el permiso para lanzar el programa auxiliar (ver `CAMBIOS-ONEPEPE.md`).
 
 ## 1. Resumen (del primer entregable; el cambio de plan está en la sección 0)
 
