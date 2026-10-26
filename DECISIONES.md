@@ -38,3 +38,19 @@ Formato: qué elegí y por qué.
 - **Deshacer:** el trazo original se guarda en el historial antes de sustituirlo, así que un Ctrl+Z lo recupera. No hace falta cambiar el formato: la forma se guarda como `ShapeStroke`, que ya existe en `.rnote`.
 - **Los ajustes (activado, sensibilidad) van en la configuración del pincel**, que Rnote guarda en los ajustes de la app, no en los documentos. Viene desactivado por defecto.
 - **La forma usa estilo liso** con el color y grosor del pincel (también con el rotulador, conservando su transparencia).
+
+## Fase 3 — Matemáticas (primer entregable)
+
+- **Reconocimiento por símbolos y no por imagen completa**, para poder dar candidatas por símbolo, corregir por grupos y
+  aprender de tu letra. Los modelos "imagen → LaTeX" quedan como posible hipótesis extra más adelante.
+- **Programa auxiliar persistente** (se lanza una vez y habla por JSON línea a línea) en vez de uno por petición, para
+  no cargar el modelo en cada "=".
+- **La expresión de SymPy se construye desde el árbol de símbolos**, no desde el LaTeX, porque `parse_latex` solo
+  entendió 19 de las 30 expresiones de prueba.
+- **MathWriting como dataset base** porque es el único grande con trazos (no imágenes) que se puede descargar desde
+  aquí; su licencia (CC BY-NC-SA) permite uso personal. Se descarga fuera del repositorio con un script.
+- **Tus datos no van al repositorio:** `.gitignore` en `tools/onepepe-math/` y envío por chat o Google Drive.
+- **El extractor solo usa la biblioteca estándar de Python**, para que lo puedas ejecutar sin instalar nada. Separa
+  renglones por posición vertical; el `.rnote` no guarda tiempos por punto, solo el orden de los trazos.
+- **Fixture sintético** (`tests/fixtures/dos_mas_tres.rnote`, 1,7 KB) generado por el motor con
+  `crates/rnote-engine/tests/rnote_fixture.rs`, para que el test use un archivo con el formato real.
