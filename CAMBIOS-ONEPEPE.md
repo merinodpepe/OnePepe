@@ -130,3 +130,26 @@ cargo test -p rnote-compose
   python3 rnote_extract.py ~/ruta/mis_expresiones_1.rnote -o expresiones_1.json --svg svg_1 --labels expresiones.txt
   ```
   y abre los `svg_1/renglon_XX.svg` para ver que cada uno contiene una expresión completa.
+
+## Cuadernos, secciones y páginas
+
+- **Cómo se organiza** (con el explorador de archivos de trabajo que ya tenía Rnote, en la barra lateral):
+  - **Cuaderno = espacio de trabajo** (una carpeta). Se añaden en la barra vertical de espacios de trabajo, con su
+    nombre, color e icono (esto ya existía).
+  - **Sección = subcarpeta.** Menú del explorador (botón de los tres puntos arriba) → "Create new Folder" (ya existía).
+    Doble clic en la carpeta para entrar; flecha "arriba" para volver.
+  - **Página = archivo `.rnote`.** Doble clic para abrirla en una pestaña (ya existía).
+- **Lo nuevo:**
+  - **"Create new Page"** en el menú del explorador: crea una página vacía en la carpeta actual con el nombre
+    "Page 1", "Page 2"… (puedes cambiarlo) usando tu formato de documento por defecto, y la abre en una pestaña nueva.
+  - **"Move to…"** en el menú de cada página o sección (botón ⋮ de la fila): elige la carpeta de destino (empieza en el
+    cuaderno) y la mueve allí. No sobrescribe nada: si ya existe algo con ese nombre, avisa y no hace nada.
+- **Ya existía y lo he comprobado en el código:** renombrar, duplicar y **borrar con confirmación** (se manda a la
+  papelera del sistema, no se borra para siempre: `crates/rnote-ui/src/dialogs/mod.rs:592`).
+- **Rama:** `feat/cuadernos` (fusionada en `onepepe`).
+- **Estado:** compilado · test ✔ (una página vacía guardada así se vuelve a abrir) · **no ejecutado en la app** · lápiz: no aplica.
+- **Cómo lo pruebo yo:** compila `onepepe`. Crea una carpeta `~/Apuntes/Biofisica` y añádela como espacio de trabajo
+  (botón "+" de la barra de espacios). Crea dos secciones ("Tema 1", "Tema 2"). Entra en "Tema 1", crea una página
+  nueva, escribe algo, guarda (Ctrl+S). Muévela a "Tema 2" con "Move to…", comprueba que la pestaña abierta sigue
+  funcionando y guardando, renómbrala y bórrala (debe pedir confirmación). **Pruébalo con una carpeta de prueba, no con
+  tus apuntes reales**, hasta que confirmes que funciona.

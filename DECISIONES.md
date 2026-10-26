@@ -54,3 +54,15 @@ Formato: qué elegí y por qué.
   renglones por posición vertical; el `.rnote` no guarda tiempos por punto, solo el orden de los trazos.
 - **Fixture sintético** (`tests/fixtures/dos_mas_tres.rnote`, 1,7 KB) generado por el motor con
   `crates/rnote-engine/tests/rnote_fixture.rs`, para que el test use un archivo con el formato real.
+
+## Fase 4 — Cuadernos
+
+- **No reescribí el explorador como un árbol de tres niveles.** El explorador de Rnote ya navega carpetas (entrar con
+  doble clic, salir con la flecha), así que cuaderno → sección → página funciona sin cambiar su estructura. Si
+  prefieres ver el árbol desplegable completo, es un cambio mayor (sustituir la lista por un `TreeListModel`): dímelo.
+- **"Nueva página" escribe un `.rnote` vacío** con el formato de documento por defecto de tus ajustes y lo abre. El
+  nombre propuesto es el primer "Page N" libre (en inglés porque la app no está traducida al español para textos nuevos).
+- **"Mover a…" usa el selector de carpetas del sistema** que empieza en el cuaderno, en lugar de arrastrar y soltar:
+  es más simple y más difícil de usar por error. Usa un simple renombrado de ruta (igual que "renombrar" de Rnote), así
+  que no copia ni borra nada; si el destino ya existe, no hace nada.
+- **Borrar ya pedía confirmación** y manda a la papelera; no lo he tocado.

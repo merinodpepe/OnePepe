@@ -77,6 +77,10 @@
             <attribute name="label" translatable="yes">Duplicate</attribute>
             <attribute name="action">filerow.duplicate</attribute>
           </item>
+          <item>
+            <attribute name="label" translatable="yes">Move to…</attribute>
+            <attribute name="action">filerow.move-to</attribute>
+          </item>
         </section>
       </menu>
     </object>
