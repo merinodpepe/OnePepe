@@ -1,6 +1,8 @@
 // Imports
 use super::penmode::PenModeState;
-use super::shortcuts::ShortcutMode;
+use super::pensconfig::eraserconfig::EraserStyle;
+use super::pensconfig::selectorconfig::SelectorStyle;
+use super::shortcuts::{ShortcutMode, ShortcutPenVariant};
 use super::{
     Brush, Eraser, Pen, PenBehaviour, PenMode, PenStyle, Selector, Shaper, Tools, Typewriter,
 };
@@ -46,6 +48,16 @@ pub struct PenHolder {
     toggle_pen_style: Option<PenStyle>,
     #[serde(skip)]
     prev_shortcut_key: Option<ShortcutKey>,
+    /// OnePepe: the toolbar style that a shortcut pen variant replaced, restored when the shortcut ends.
+    #[serde(skip)]
+    variant_restore: Option<VariantRestore>,
+}
+
+/// OnePepe: the toolbar style to restore after a shortcut pen variant.
+#[derive(Debug, Clone, Copy)]
+enum VariantRestore {
+    Eraser(EraserStyle),
+    Selector(SelectorStyle),
 }
 
 impl Default for PenHolder {
@@ -58,6 +70,7 @@ impl Default for PenHolder {
             progress: PenProgress::Idle,
             toggle_pen_style: None,
             prev_shortcut_key: None,
+            variant_restore: None,
         }
     }
 }
@@ -110,12 +123,65 @@ impl PenHolder {
     }
 
     /// Change the pen style.
+    /// OnePepe: applies a shortcut pen variant to the pens config. When `remember` is set, the replaced toolbar style
+    /// is restored by [`Self::restore_variant`].
+    fn apply_variant(
+        &mut self,
+        variant: ShortcutPenVariant,
+        engine_view: &mut EngineViewMut,
+        remember: bool,
+    ) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        let pens_config = &mut engine_view.config.pens_config;
+        let previous = match variant {
+            ShortcutPenVariant::Current => return widget_flags,
+            ShortcutPenVariant::EraserWholeStrokes | ShortcutPenVariant::EraserArea => {
+                let previous = VariantRestore::Eraser(pens_config.eraser_config.style);
+                pens_config.eraser_config.style = if variant == ShortcutPenVariant::EraserArea {
+                    EraserStyle::SplitCollidingStrokes
+                } else {
+                    EraserStyle::TrashCollidingStrokes
+                };
+                previous
+            }
+            ShortcutPenVariant::SelectorLasso => {
+                let previous = VariantRestore::Selector(pens_config.selector_config.style);
+                pens_config.selector_config.style = SelectorStyle::Polygon;
+                previous
+            }
+        };
+        // keep the first replaced style when shortcuts are pressed repeatedly
+        if remember && self.variant_restore.is_none() {
+            self.variant_restore = Some(previous);
+        }
+        widget_flags.refresh_ui = true;
+        widget_flags
+    }
+
+    /// OnePepe: restores the toolbar style that was replaced by a shortcut pen variant.
+    fn restore_variant(&mut self, engine_view: &mut EngineViewMut) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        match self.variant_restore.take() {
+            Some(VariantRestore::Eraser(style)) => {
+                engine_view.config.pens_config.eraser_config.style = style;
+            }
+            Some(VariantRestore::Selector(style)) => {
+                engine_view.config.pens_config.selector_config.style = style;
+            }
+            None => return widget_flags,
+        }
+        widget_flags |= self.reinstall_pen_current_style(engine_view);
+        widget_flags.refresh_ui = true;
+        widget_flags
+    }
+
     pub fn change_style(
         &mut self,
         new_style: PenStyle,
         engine_view: &mut EngineViewMut,
     ) -> WidgetFlags {
-        let widget_flags = self.change_style_int(new_style, engine_view);
+        let widget_flags =
+            self.restore_variant(engine_view) | self.change_style_int(new_style, engine_view);
         // When the style is changed externally, the toggle mode / internal states are reset
         self.toggle_pen_style = None;
         self.prev_shortcut_key = None;
@@ -131,6 +197,9 @@ impl PenHolder {
     ) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
 
+        if new_style_override.is_none() {
+            widget_flags |= self.restore_variant(engine_view);
+        }
         if self.pen_mode_state.style_override() != new_style_override {
             // Deselecting when changing the style override
             let all_strokes = engine_view.store.selection_keys_as_rendered();
@@ -270,12 +339,19 @@ impl PenHolder {
             .get_shortcut_action(shortcut_key)
         {
             match action {
-                ShortcutAction::ChangePenStyle { style, mode } => match mode {
+                ShortcutAction::ChangePenStyle {
+                    style,
+                    mode,
+                    variant,
+                } => match mode {
                     ShortcutMode::Temporary => {
+                        widget_flags |= self.apply_variant(variant, engine_view, true);
                         widget_flags |= self.change_style_override(Some(style), engine_view);
                     }
                     ShortcutMode::Permanent => {
                         self.toggle_pen_style = None;
+                        widget_flags |= self.restore_variant(engine_view);
+                        widget_flags |= self.apply_variant(variant, engine_view, false);
                         widget_flags |= self.change_style_int(style, engine_view);
                     }
                     ShortcutMode::Toggle => {
@@ -287,15 +363,19 @@ impl PenHolder {
                                 .map(|k| k != shortcut_key)
                                 .unwrap_or(true)
                             {
+                                widget_flags |= self.restore_variant(engine_view);
+                                widget_flags |= self.apply_variant(variant, engine_view, true);
                                 widget_flags |= self.change_style_int(style, engine_view);
                             } else {
                                 self.toggle_pen_style = None;
+                                widget_flags |= self.restore_variant(engine_view);
                                 widget_flags |=
                                     self.change_style_int(toggle_pen_style, engine_view);
                             }
                         } else {
                             self.toggle_pen_style =
                                 Some(self.current_pen_style(&engine_view.as_im()));
+                            widget_flags |= self.apply_variant(variant, engine_view, true);
                             widget_flags |= self.change_style_int(style, engine_view);
                         }
                     }
@@ -535,5 +615,102 @@ fn new_pen(pen_style: PenStyle) -> Pen {
         PenStyle::Eraser => Pen::Eraser(Eraser::default()),
         PenStyle::Selector => Pen::Selector(Selector::default()),
         PenStyle::Tools => Pen::Tools(Tools::default()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Engine;
+    use crate::pens::PenStyle;
+    use crate::pens::pensconfig::eraserconfig::EraserStyle;
+    use crate::pens::pensconfig::selectorconfig::SelectorStyle;
+    use crate::pens::shortcuts::{ShortcutAction, ShortcutMode, ShortcutPenVariant};
+    use rnote_compose::penevent::ShortcutKey;
+    use std::time::Instant;
+
+    fn style(engine: &Engine) -> PenStyle {
+        engine.current_pen_style_w_override()
+    }
+
+    #[test]
+    fn stylus_button_1_erases_whole_strokes_while_pressed() {
+        let mut engine = Engine::default();
+        engine.config.write().pens_config.eraser_config.style = EraserStyle::SplitCollidingStrokes;
+        let _ =
+            engine.handle_pressed_shortcut_key(ShortcutKey::StylusPrimaryButton, Instant::now());
+        assert_eq!(style(&engine), PenStyle::Eraser);
+        assert!(matches!(
+            engine.config.read().pens_config.eraser_config.style,
+            EraserStyle::TrashCollidingStrokes
+        ));
+        // released
+        let _ = engine.change_pen_style_override(None);
+        assert_eq!(style(&engine), PenStyle::Brush);
+        assert!(matches!(
+            engine.config.read().pens_config.eraser_config.style,
+            EraserStyle::SplitCollidingStrokes
+        ));
+    }
+
+    #[test]
+    fn stylus_button_2_selects_with_lasso_while_pressed() {
+        let mut engine = Engine::default();
+        assert_eq!(
+            engine.config.read().pens_config.selector_config.style,
+            SelectorStyle::Rectangle
+        );
+        let _ =
+            engine.handle_pressed_shortcut_key(ShortcutKey::StylusSecondaryButton, Instant::now());
+        assert_eq!(style(&engine), PenStyle::Selector);
+        assert_eq!(
+            engine.config.read().pens_config.selector_config.style,
+            SelectorStyle::Polygon
+        );
+        let _ = engine.change_pen_style_override(None);
+        assert_eq!(
+            engine.config.read().pens_config.selector_config.style,
+            SelectorStyle::Rectangle
+        );
+    }
+
+    #[test]
+    fn toggle_mode_switches_and_restores() {
+        let mut engine = Engine::default();
+        engine.config.write().pens_config.shortcuts.insert(
+            ShortcutKey::StylusPrimaryButton,
+            ShortcutAction::ChangePenStyle {
+                style: PenStyle::Eraser,
+                mode: ShortcutMode::Toggle,
+                variant: ShortcutPenVariant::EraserArea,
+            },
+        );
+        let _ =
+            engine.handle_pressed_shortcut_key(ShortcutKey::StylusPrimaryButton, Instant::now());
+        assert_eq!(style(&engine), PenStyle::Eraser);
+        assert!(matches!(
+            engine.config.read().pens_config.eraser_config.style,
+            EraserStyle::SplitCollidingStrokes
+        ));
+        let _ =
+            engine.handle_pressed_shortcut_key(ShortcutKey::StylusPrimaryButton, Instant::now());
+        assert_eq!(style(&engine), PenStyle::Brush);
+        assert!(matches!(
+            engine.config.read().pens_config.eraser_config.style,
+            EraserStyle::TrashCollidingStrokes
+        ));
+    }
+
+    #[test]
+    fn old_settings_without_variant_still_load() {
+        let json = r#"{"change_pen_style":{"style":"eraser","mode":"temporary"}}"#;
+        let action: ShortcutAction = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            action,
+            ShortcutAction::ChangePenStyle {
+                style: PenStyle::Eraser,
+                mode: ShortcutMode::Temporary,
+                variant: ShortcutPenVariant::Current,
+            }
+        );
     }
 }

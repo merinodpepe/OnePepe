@@ -39,6 +39,25 @@ impl TryFrom<u32> for ShortcutMode {
     }
 }
 
+/// OnePepe: a variant of the pen style that a shortcut switches to, regardless of what is set in the toolbar.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Serialize, Deserialize)]
+#[serde(rename = "shortcut_pen_variant")]
+pub enum ShortcutPenVariant {
+    /// Use the style as it is configured in the toolbar.
+    #[default]
+    #[serde(rename = "current")]
+    Current,
+    /// Eraser that removes whole strokes.
+    #[serde(rename = "eraser_whole_strokes")]
+    EraserWholeStrokes,
+    /// Eraser that only removes the touched area of strokes.
+    #[serde(rename = "eraser_area")]
+    EraserArea,
+    /// Lasso selection.
+    #[serde(rename = "selector_lasso")]
+    SelectorLasso,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 #[serde(rename = "shortcut_action")]
 pub enum ShortcutAction {
@@ -48,6 +67,9 @@ pub enum ShortcutAction {
         style: PenStyle,
         #[serde(rename = "mode")]
         mode: ShortcutMode,
+        /// OnePepe
+        #[serde(rename = "variant", default)]
+        variant: ShortcutPenVariant,
     },
 }
 
@@ -64,6 +86,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Eraser,
                 mode: ShortcutMode::Temporary,
+                variant: ShortcutPenVariant::EraserWholeStrokes,
             },
         );
         map.insert(
@@ -71,6 +94,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Selector,
                 mode: ShortcutMode::Temporary,
+                variant: ShortcutPenVariant::SelectorLasso,
             },
         );
         map.insert(
@@ -78,6 +102,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Shaper,
                 mode: ShortcutMode::Temporary,
+                variant: ShortcutPenVariant::Current,
             },
         );
         map.insert(
@@ -85,6 +110,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Eraser,
                 mode: ShortcutMode::Toggle,
+                variant: ShortcutPenVariant::Current,
             },
         );
         map.insert(
@@ -92,6 +118,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Tools,
                 mode: ShortcutMode::Toggle,
+                variant: ShortcutPenVariant::Current,
             },
         );
         map.insert(
@@ -99,6 +126,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Brush,
                 mode: ShortcutMode::Permanent,
+                variant: ShortcutPenVariant::Current,
             },
         );
         map.insert(
@@ -106,6 +134,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Shaper,
                 mode: ShortcutMode::Permanent,
+                variant: ShortcutPenVariant::Current,
             },
         );
         map.insert(
@@ -113,6 +142,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Typewriter,
                 mode: ShortcutMode::Permanent,
+                variant: ShortcutPenVariant::Current,
             },
         );
         map.insert(
@@ -120,6 +150,7 @@ impl Default for Shortcuts {
             ShortcutAction::ChangePenStyle {
                 style: PenStyle::Eraser,
                 mode: ShortcutMode::Permanent,
+                variant: ShortcutPenVariant::Current,
             },
         );
 

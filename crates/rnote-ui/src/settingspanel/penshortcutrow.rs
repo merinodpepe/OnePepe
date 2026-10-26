@@ -1,6 +1,7 @@
 // Imports
 use super::penshortcutmodels::{
     ChangePenStyleIconFactory, ChangePenStyleListFactory, ChangePenStyleListModel,
+    SHORTCUT_ENTRIES, shortcut_entry_index,
 };
 use adw::{prelude::*, subclass::prelude::*};
 use gtk4::{CompositeTemplate, DropDown, ListBoxRow, Widget, glib, glib::clone, glib::subclass::*};
@@ -8,7 +9,7 @@ use num_traits::ToPrimitive;
 use once_cell::sync::Lazy;
 use rnote_engine::pens::PenStyle;
 use rnote_engine::pens::shortcuts::ShortcutAction;
-use rnote_engine::pens::shortcuts::ShortcutMode;
+use rnote_engine::pens::shortcuts::{ShortcutMode, ShortcutPenVariant};
 use std::cell::RefCell;
 
 mod imp {
@@ -30,8 +31,9 @@ mod imp {
                 action: RefCell::new(ShortcutAction::ChangePenStyle {
                     style: PenStyle::Eraser,
                     mode: ShortcutMode::Temporary,
+                    variant: ShortcutPenVariant::Current,
                 }),
-                changepenstyle_model: ChangePenStyleListModel::default(),
+                changepenstyle_model: ChangePenStyleListModel::with_variants(),
 
                 mode_dropdown: TemplateChild::default(),
             }
@@ -67,11 +69,12 @@ mod imp {
             obj.set_factory(Some(&*icon_factory));
 
             obj.connect_selected_item_notify(move |row| {
-                let new_pen_style = row.pen_style();
+                let (new_pen_style, new_variant) = row.pen_style_variant();
 
                 match &mut *row.imp().action.borrow_mut() {
-                    ShortcutAction::ChangePenStyle { style, .. } => {
+                    ShortcutAction::ChangePenStyle { style, variant, .. } => {
                         *style = new_pen_style;
+                        *variant = new_variant;
                     }
                 }
                 row.emit_by_name::<()>("action-changed", &[]);
@@ -150,12 +153,17 @@ impl RnPenShortcutRow {
         self.emit_by_name::<()>("action-changed", &[]);
     }
 
-    pub(crate) fn pen_style(&self) -> PenStyle {
-        PenStyle::try_from(self.selected()).unwrap()
+    /// OnePepe: the selected pen style and its variant.
+    pub(crate) fn pen_style_variant(&self) -> (PenStyle, ShortcutPenVariant) {
+        let (_, style, variant) = SHORTCUT_ENTRIES
+            .get(self.selected() as usize)
+            .copied()
+            .unwrap_or(SHORTCUT_ENTRIES[0]);
+        (style, variant)
     }
 
-    pub(crate) fn set_pen_style(&self, style: PenStyle) {
-        self.set_selected(style.to_u32().unwrap())
+    pub(crate) fn set_pen_style_variant(&self, style: PenStyle, variant: ShortcutPenVariant) {
+        self.set_selected(shortcut_entry_index(style, variant))
     }
 
     pub(crate) fn shortcut_mode(&self) -> ShortcutMode {
@@ -170,8 +178,12 @@ impl RnPenShortcutRow {
 
     fn update_ui(&self) {
         match self.action() {
-            ShortcutAction::ChangePenStyle { style, mode } => {
-                self.set_pen_style(style);
+            ShortcutAction::ChangePenStyle {
+                style,
+                mode,
+                variant,
+            } => {
+                self.set_pen_style_variant(style, variant);
                 self.set_shortcut_mode(mode);
             }
         }

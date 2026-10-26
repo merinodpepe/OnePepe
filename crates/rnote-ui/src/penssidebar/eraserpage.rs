@@ -153,6 +153,10 @@ impl RnEraserPage {
         // set value after the range!
         imp.stroke_width_picker
             .set_stroke_width(EraserConfig::WIDTH_DEFAULT);
+        // OnePepe: small, medium and large area eraser presets
+        imp.stroke_width_picker.setter_1().set_stroke_width(8.0);
+        imp.stroke_width_picker.setter_2().set_stroke_width(24.0);
+        imp.stroke_width_picker.setter_3().set_stroke_width(64.0);
 
         imp.stroke_width_picker.connect_notify_local(
             Some("stroke-width"),

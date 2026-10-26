@@ -153,3 +153,42 @@ cargo test -p rnote-compose
   nueva, escribe algo, guarda (Ctrl+S). Muévela a "Tema 2" con "Move to…", comprueba que la pestaña abierta sigue
   funcionando y guardando, renómbrala y bórrala (debe pedir confirmación). **Pruébalo con una carpeta de prueba, no con
   tus apuntes reales**, hasta que confirmes que funciona.
+
+## Botones del lápiz Wacom (Fase 1b)
+
+- **Ya existía en Rnote** (comprobado en el código): reasignar los botones del lápiz en Ajustes → "Stylus Primary/Secondary
+  Button Action", con los modos **"Temporary"** (= mientras pulso), **"Toggle"** (= alterna al pulsar), "Permanent" y
+  "Disabled" (`crates/rnote-engine/src/pens/shortcuts.rs`); el **extremo borrador** de las Wacom (GTK lo marca como
+  herramienta "Eraser", `crates/rnote-ui/src/canvas/input.rs:480`) con su herramienta elegible en Ajustes →
+  "Tool for the eraser action"; y en la barra del borrador los dos estilos: **"Trash Strokes" (trazo entero)** y
+  **"Split Strokes" (por área)**.
+- **Lo nuevo:**
+  - En el desplegable de cada botón hay tres opciones más: **"Eraser (Whole Strokes)"**, **"Eraser (Area)"** y
+    **"Selector (Lasso)"**. Usan ese tipo de borrador/selección **aunque en la barra tengas otro**, y al soltar el botón (o
+    al volver a pulsarlo en modo "Toggle") se restaura lo que tenías.
+  - **Valores por defecto nuevos:** botón 1 → borrador de trazo entero mientras está pulsado; botón 2 → lazo mientras
+    está pulsado. **Ojo:** si ya usabas Rnote, tus ajustes guardados mandan; cámbialos en Ajustes con las opciones nuevas.
+  - En la barra del borrador, los tres tamaños rápidos son ahora **8, 24 y 64** (pequeño, mediano, grande) en vez de 2, 8 y 16.
+- **"Eraser Tool" (Pitfalls del README):** el problema que describe el README es de lápices cuyos **botones** envían el
+  evento de "goma" (HP MPP 2.0, Surface Pen), no de las Wacom, cuyos botones envían `BTN_STYLUS`/`BTN_STYLUS2` y cuyo
+  extremo borrador envía `BTN_TOOL_RUBBER`. Desde la aplicación no se puede distinguir un "botón que dice ser goma" de
+  una goma de verdad: GTK solo entrega "la herramienta es una goma". Alternativa: elegir en Ajustes → "Tool for the
+  eraser action" qué hace ese evento (p. ej. borrador o selección). Para remapear el botón a nivel de sistema existen
+  `xsetwacom` (solo X11) o, en Wayland, el panel de tableta de GNOME/KDE.
+- **Rama:** `feat/botones-lapiz`.
+- **Estado:** compilado · tests ✔ (`cargo test -p rnote-engine penholder`: botón 1, botón 2, modo alternar, y que los
+  ajustes antiguos sin la opción nueva siguen cargando) · **no ejecutado en la app** · lápiz: pendiente.
+- **Cómo verificar qué envía cada botón (`evtest`):**
+  ```bash
+  sudo apt install evtest     # Fedora: sudo dnf install evtest · Arch: sudo pacman -S evtest
+  sudo evtest                 # elige el dispositivo cuyo nombre acaba en "Pen" (o "Stylus")
+  ```
+  Acerca el lápiz a la tableta y pulsa cada botón. Lo esperado en una Wacom: botón inferior → `BTN_STYLUS`, superior →
+  `BTN_STYLUS2`, extremo borrador → `BTN_TOOL_RUBBER` (y la punta → `BTN_TOOL_PEN` + `BTN_TOUCH`). En Rnote,
+  `BTN_STYLUS` es "Primary Button" y `BTN_STYLUS2` "Secondary Button". Si un botón envía `BTN_TOOL_RUBBER`, se comporta
+  como el extremo borrador (ver el párrafo anterior).
+- **Cómo lo pruebo yo:** compila `onepepe`. En Ajustes, comprueba los dos botones (o ponlos en "Eraser (Whole Strokes)" y
+  "Selector (Lasso)", modo "Temporary"). Con el pincel: mantén el botón 1 y pasa por encima de un trazo (debe borrarse
+  entero); suelta y sigue escribiendo. Mantén el botón 2 y rodea varios trazos (lazo); suelta. Pon el borrador de la
+  barra en "Split Strokes" y repite con el botón 1: debe seguir borrando trazos enteros y, al soltar, la barra debe
+  volver a "Split Strokes". Prueba el modo "Toggle". Prueba el extremo borrador.
