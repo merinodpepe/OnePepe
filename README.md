@@ -1,214 +1,131 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/flxzt/rnote/main/crates/rnote-ui/data/icons/scalable/apps/rnote.svg" width="300"></img>
-</div><br><br><br>
+<img src="misc/onepepe/logo.svg" width="200" alt="Logo de OnePepe">
 
-<div align="center">
-    <a href="https://github.com/flxzt/rnote/actions/workflows/ci.yml">
-        <img alt="CI"src="https://github.com/flxzt/rnote/actions/workflows/ci.yml/badge.svg"></img>
-    </a>
-    <a href="https://liberapay.com/flxzt/donate">
-        <img alt="Donate using Liberapay" src="https://raw.githubusercontent.com/flxzt/rnote/main/misc/assets/liberapay-donate-button.svg" width="60" height="20">
-    </a>
+# OnePepe
+
+**Tus apuntes a mano, como en OneNote, pero en Linux.**
+
 </div>
 
+OnePepe es una aplicación de apuntes a mano para Linux pensada para tabletas gráficas (Wacom) y para estudiar
+asignaturas de ciencias: escribes con el lápiz en un lienzo infinito, ordenas tus apuntes en cuadernos, secciones y
+páginas, conviertes tus trazos en formas limpias y, en el modo matemáticas, OnePepe reconoce lo que escribes, lo pasa a
+limpio y te calcula el resultado del "=".
 
-# Rnote
+Está hecha en Rust con GTK4 y libadwaita, y funciona sobre Wayland.
 
-> Sketch and take handwritten notes.  
+## Qué puedes hacer con OnePepe
 
-Rnote is an open-source vector-based drawing app for sketching, handwritten notes and to annotate documents and pictures.
-It is targeted at students, teachers and those who own a drawing tablet and provides features like Pdf and picture import and export,
-an infinite canvas and an adaptive UI for big and small screens.
+**Escribir y dibujar**
 
-Written in Rust and GTK4.
+- Lápiz sensible a la presión, con estilos de trazo configurables y resaltador que no tapa lo escrito.
+- Lienzo infinito en todas las direcciones (o páginas fijas, si lo prefieres).
+- Paleta de 48 colores, de muy claros a muy oscuros, además de tus 9 colores favoritos y el selector personalizado.
+- **Tinta a formas:** dibuja una línea, un círculo, una elipse, un triángulo o un rectángulo a mano y se convierte en la
+  forma limpia. Con interruptor, control de sensibilidad y deshacer.
+- **Regla** que se mueve y se gira con el lápiz, muestra el ángulo y endereza los trazos que haces a lo largo de su borde.
+- Herramienta de formas, ejes cartesianos 2D y 3D, rejillas y flechas.
 
-**Features**
+**Matemáticas**
 
-- Adaptive UI focused on stylus input
-- Pressure-sensitive stylus input with different and configurable stroke styles
-- Create many different shapes with the shape tool
-- Move, rotate, resize and modify existing content with the selection tool
-- Different document expansion layouts ( fixed pages, continuous vertical, infinite in every direction, .. )
-- Customizable background colors, patterns, sizes
-- Customizable page format
-- (Optional) pen sounds
-- Reconfigurable stylus button shortcuts
-- An integrated workspace browser for quick access to related files
-- Drag & Drop, clipboard support
-- Pdf, Bitmap and Svg image import
-- Documents can be exported to Svg, Pdf and Xopp. Document pages and selections to Svg, Png and Jpeg.
-- Save and load the documents in the native `.rnote` file format
-- Tabs to work on multiple documents at the same time
-- Autosave, printing
-- CLI for automation
+- **Modo matemáticas** (Ctrl+Alt+M): OnePepe reconoce los símbolos que escribes y los redibuja limpios en el mismo
+  sitio, sin tocar los que no tiene claros. Ctrl+Z devuelve tu letra.
+- **Corrección con un toque:** toca un símbolo para elegir otra lectura, para ese símbolo o para todos los que se le
+  parecen. Cada corrección le enseña tu letra (y se queda en tu equipo).
+- **Resultado del "="** en gris junto a lo que escribes: calcula, despeja ecuaciones, simplifica, deriva, integra,
+  sumatorios y límites, con unidades y constantes físicas y comprobación de dimensiones.
+- **Glosario por cuaderno** con los símbolos y constantes de cada asignatura (k_B, N_A, ΔG…).
 
-**Disclaimer**
+**Organizar**
 
-The file format is still unstable. It might change and break compatibility between versions.
+- **Cuadernos, secciones y páginas** en la barra lateral: crea páginas nuevas, muévelas entre secciones, renómbralas,
+  duplícalas o bórralas (con confirmación).
+- Pestañas para tener varias páginas abiertas, autoguardado e impresión.
 
-## Website
+**Seleccionar y ordenar**
 
-Rnote has a project website: [rnote.flxzt.net](https://rnote.flxzt.net/)
+- Selección con lazo o rectángulo para mover, girar y redimensionar.
+- **Traer al frente, enviar al fondo, subir y bajar un nivel**, también con imágenes y páginas de PDF, que se pueden
+  poner por encima de la tinta.
+- Importa PDF, imágenes y SVG como objetos que puedes mover, girar y redimensionar.
+- Exporta a PDF, SVG, PNG, JPEG y Xopp.
 
-## Installation
+**Texto**
 
-### Linux
+- Negrita, cursiva, subrayado, tachado y color.
+- **Superíndices y subíndices** (x², H₂O), **catálogo de símbolos** (griego, operadores, ∂ ∇ ∫ ∑ √ ≈ ≠ ≤ ≥ →…),
+  **viñetas, listas numeradas y casillas** ☐ ☑, y **fecha y hora** con un clic.
 
-Download the official flatpak on Flathub [here](https://flathub.org/apps/details/com.github.flxzt.rnote).
+**El lápiz**
 
-<div align="start">
-<a href='https://flathub.org/apps/details/com.github.flxzt.rnote'><img width="250" alt='Download on Flathub' src='https://raw.githubusercontent.com/flxzt/rnote/main/misc/assets/flathub-badge.svg'/></a>
-</div><br>
+- Botones del lápiz configurables: por defecto, el botón 1 borra trazos enteros y el botón 2 selecciona con lazo
+  mientras los mantienes pulsados. Modos "mientras pulso" o "alterna al pulsar". Extremo borrador compatible.
+- Borrador de trazo entero o por área, en tamaño pequeño, mediano o grande.
 
-### MacOS
+## Instalación
 
-Thanks to [dehesselle](https://gitlab.com/dehesselle) the app is available on MacOS as an app bundle.  
-Check out the [repository](https://gitlab.com/dehesselle/rnote_macos), the latest release can be downloaded [here](https://gitlab.com/dehesselle/rnote_macos/-/releases/permalink/latest).
-
-<div align="start">
-<a href='https://gitlab.com/dehesselle/rnote_macos/-/releases/permalink/latest'><img width="150" alt='Download MacOS app bundle' src='https://raw.githubusercontent.com/flxzt/rnote/main/misc/assets/rnote-macos-app-bundle-badge.png'/></a>
-</div><br>
-
-### Windows
-
-Download the Windows installer from the latest release which can be found [here](https://github.com/flxzt/rnote/releases/latest).
-
-<div align="start">
-<a href='https://github.com/flxzt/rnote/releases/latest'><img width="250" alt='Download Windows installer' src='https://raw.githubusercontent.com/flxzt/rnote/main/misc/assets/windows-installer-badge.svg'/></a>
-</div><br>
-
-Install using [Winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/flxzt/rnote):
-
-```
-winget install flxzt.rnote
-```
-
-### Downgrading
-
-Because the file format still is unstable, downgrading to a specific version might be necessary.
-
-List all available past versions on flathub:
+OnePepe necesita GNOME 50 (GTK ≥ 4.22, libadwaita ≥ 1.9, glib ≥ 2.88). Lo más sencillo es compilarlo con **Flatpak**,
+que trae todo lo necesario:
 
 ```bash
-flatpak remote-info --log flathub com.github.flxzt.rnote
+git clone https://github.com/merinodpepe/OnePepe.git
+cd OnePepe
+git checkout onepepe
+git submodule update --init --recursive
+./setup-deps.sh --flatpak
+flatpak-builder --user --install --force-clean _flatpak_app build-aux/com.github.flxzt.rnote.Devel.yaml
+flatpak run com.github.flxzt.rnote.Devel
 ```
 
-Pick the commit from the desired version and downgrade with:
+Si tu distribución ya trae GNOME 50, puedes compilarlo de forma nativa: `./setup-deps.sh` te dice qué falta y te da
+los comandos. Más detalles en [BUILDING.md](./BUILDING.md).
+
+### Modo matemáticas
+
+El reconocimiento de matemáticas es un programa auxiliar en Python que se instala aparte, una sola vez:
 
 ```bash
-sudo flatpak update --commit=<commit-hash> com.github.flxzt.rnote 
+cd tools/onepepe-math
+./instalar.sh --entrenar
 ```
 
-After downgrading, the flatpak version can be pinned or unpinned with:
+Descarga el conjunto de datos público MathWriting y entrena el reconocedor de símbolos en tu equipo (unos minutos).
+Todo se guarda en `~/.local/share/onepepe/`; tus correcciones nunca salen de tu ordenador. Detalles en
+[tools/onepepe-math/README.md](./tools/onepepe-math/README.md).
 
-```
-$ flatpak mask com.github.flxzt.rnote
-$ flatpak mask --remove com.github.flxzt.rnote
-```
+## Documentación
 
-To update to the latest version again, unpin and run `flatpak update`.
+| Documento | Para qué |
+|---|---|
+| [ESTADO.md](./ESTADO.md) | Qué está hecho, cómo se ha probado y qué falta |
+| [CAMBIOS-ONEPEPE.md](./CAMBIOS-ONEPEPE.md) | Cada función de OnePepe y cómo probarla con el lápiz |
+| [MATEMATICAS-INFORME.md](./MATEMATICAS-INFORME.md) | Cómo funciona el reconocimiento de matemáticas y sus resultados |
+| [DECISIONES.md](./DECISIONES.md) | Por qué se hizo cada cosa así |
+| [AUDITORIA.md](./AUDITORIA.md) | Qué traía ya la base y qué se añadió |
+| [PLAN-PENDIENTE.md](./PLAN-PENDIENTE.md) | El plan de trabajo |
 
-## CLI
+## Problemas conocidos
 
-In addition to the UI, a CLI tool is available, providing basic handling of .rnote files for automation.
-It is included in the flatpak.
-To execute it, run:
+- **Usa Wayland.** En X11 la entrada del lápiz y de la pantalla táctil no es fiable.
+- **Si los botones del lápiz no responden**, comprueba que `libinput` y `libwacom` están instalados (`./setup-deps.sh --check`).
+  Para ver qué evento envía cada botón usa `evtest` (instrucciones en [CAMBIOS-ONEPEPE.md](./CAMBIOS-ONEPEPE.md)).
+- **Algunos lápices** (no las Wacom) tienen un botón que se presenta como "goma"; la aplicación no puede distinguirlo
+  del extremo borrador. Elige qué hace en Ajustes → "Tool for the eraser action".
+- **Con Flatpak**, guarda tus cuadernos en Documentos, Imágenes o Escritorio: son las carpetas que la aplicación puede ver.
+- **El reconocimiento de matemáticas aún está aprendiendo:** sin muestras de tu letra se equivoca a menudo; por eso
+  viene apagado y deja intactos los símbolos dudosos.
 
-```bash
-flatpak run --command=rnote-cli com.github.flxzt.rnote help
-```
+## Formato de archivo
 
-## Screenshots
+Las páginas se guardan como archivos `.rnote` (JSON comprimido con gzip), compatibles con Rnote 0.15. OnePepe no
+cambia el formato: lo que necesita recordar el modo matemáticas va en un archivo oculto junto a cada página
+(`.<página>.rnote.onepepe.json`).
 
-![overview](./crates/rnote-ui/data/screenshots/overview.png)  
-![selection](./crates/rnote-ui/data/screenshots/selection.png)  
-![typewriter](./crates/rnote-ui/data/screenshots/typewriter.png)  
-![focus-mode](./crates/rnote-ui/data/screenshots/focus-mode.png)  
-![workspaces](./crates/rnote-ui/data/screenshots/workspaces.png)  
-![document-settings](./crates/rnote-ui/data/screenshots/document-settings.png)  
-![action-shortcuts](./crates/rnote-ui/data/screenshots/action-shortcuts.png)  
+## Licencia
 
-## Pitfalls & Known Issues
+OnePepe es software libre bajo la licencia GPL-3.0-or-later. Consulta el archivo [LICENSE](./LICENSE).
 
-- **The app does not work properly on X11**\
-    X11 is unsupported. Stylus and touch input support is known to be unreliable, and upstream support of X11
-    (GTK4 UI toolkit and desktop environments) will decrease over time (from lower maintenance, deprecation to removal)
-    so successfully fixing X11-related issues for users isn't feasible anymore.
-
-- **Drag & Drop is not working**\
-    Ensure that Rnote has permission to access the locations from which you are dragging files.
-    These can be granted in Flatseal, a Flatpak permissions manager.
-
-- **Odd location for current file**\
-    If the directory displayed in the header title is similar to `/run/user/1000/../`, Rnote does not have permissions
-    to access the directory. Again, granting them in Flatseal fixes this issue.
-
-- **The stylus buttons or moving the canvas with a stylus do not work**\
-    Make sure that `libinput` and `libwacom` are installed and loaded.
-
-- **While hovering over the screen with the stylus, other input events are blocked in some regions of the screen**\
-    Some devices apply palm rejection, so your hand does not trigger any action on the screen while using a
-    stylus/drawing tablet. However, this might not be desirable. If your device has a left/right handed setting for
-    your stylus/drawing tablet, make sure it is set correctly. Rnote can't disable this unfortunately
-    (discussed in issue [#329](https://github.com/flxzt/rnote/issues/329)).
-
-- **Changing the stylus button action in the settings does not work**
-    Some stylus models have a button that sends out an "Eraser Tool" event instead of a "Primary button" or
-    "Secondary button" event. Examples for such buttons are the lower button of the HP MPP2.0 Tilt pen or when the
-    back of the Microsoft Surface Pen hovers over the screen. This could result in inconsistent button settings in the
-    shortcuts menu (e.g. the secondary/upper button is actually the primary/lower button, or vice versa).
-
-    Rnote doesn't natively support handling "Eraser Tool" events, nor enable remapping an erase button to a
-    Primary/Secondary button. However, a workaround can be used to permanently map a tool to an eraser button
-
-  1. Hover over the canvas, and press and hold the eraser button on the pen
-  1. Switch to the desired pen style while keeping the button pressed
-  1. When releasing the pressed button, it should switch back to the previous pen style
-  1. The pen style in the "Eraser" mode should now be remembered
-
-    To verify what event each pen button sends, you can use `evtest` on Linux.
-
-- **On Windows: the application window is surrounded by a black border instead of a shadow**:
-  This is due to a bug with the underlying UI toolkit GTK4.
-  Unfortunately for the time being this cannot be fixed easily and is a known issue.
-
-## Translations
-
-<a href="https://hosted.weblate.org/engage/rnote/">
-<img src="https://hosted.weblate.org/widgets/rnote/-/repo/multi-auto.svg" alt="Translation status" />
-</a><br><br>
-
-If you want to start contributing by translating, take a look into the [translations section](./CONTRIBUTING.md#Translations)
-of the CONTRIBUTING document.
-
-## Fonts
-
-The following fonts are bundled with the application:
-
-- [Grape Nuts](https://fonts.google.com/specimen/Grape+Nuts): Grape Nuts is a simple handwritten casual font.
-- [OpenDyslexic-Regular](https://github.com/antijingoist/opendyslexic): OpenDyslexic is a typeface designed against some
-    common symptoms of dyslexia.
-- [TT2020Base-Regular](https://github.com/ctrlcctrlv/TT2020): TT2020 is an advanced, open source, hyperrealistic,
-    multilingual typewriter font for a new decade.
-- [Virgil](https://virgil.excalidraw.com/): The font that powers Excalidraw.
-
-## File Format
-
-The `.rnote` file format is a gzipped json file.
-
-So far breaking changes in the format happened in versions:
-
-- `v0.2.0`
-- `v0.3.0`
-- `v0.4.0`
-- `v0.5.0`
-
-To be able to open and export older files that are incompatible with the newest version, look under **Installation** /**Downgrading** to install older versions of Rnote.
-
-## License
-
-Rnote is available under GPL-3.0-or-later. See the LICENSE file for more info.
-
+    Copyright (C) 2026  merinodpepe (OnePepe)
     Copyright (C) 2023  The Rnote Authors
 
     This program is free software: you can redistribute it and/or modify
@@ -224,34 +141,18 @@ Rnote is available under GPL-3.0-or-later. See the LICENSE file for more info.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-## Credits
+## Créditos
 
-- A huge thanks to the contributors, translators and to all that donated. You are the ones that help keep the project going!
-- [Freesound](https://freesound.org/) is the source for the pen sounds. The individual sounds are credited in `sounds/Licenses.md`
-- [Rough.js](https://roughjs.com/) provides the algorithms for implementation of Rnote's rough shapes.
-- [Pizarra](https://pizarra.categulario.xyz/en/) is an innovative drawing app with advanced shaping and featuring an infinite zoom. It is a great inspiration of the architecture of Rnote. Go check it out!
-
-## Community
-
-If you have any questions or want to start a general discussion, open a topic in the [Github Discussions](https://github.com/flxzt/rnote/discussions) section.
-
-There are also two Matrix chat rooms:
-
-- for users: [#rnote:matrix.org](https://matrix.to/#/#rnote:matrix.org)
-- for developers: [#rnote-dev:matrix.org](https://matrix.to/#/#rnote-dev:matrix.org)
-
-## Drawings Created With Rnote
-
-If you have drawn something cool in Rnote and want to share it, submit a PR to add it here. :)  
-
-<div align="center" spacing="20px">
-        <img alt="Pikachu" src="https://raw.githubusercontent.com/flxzt/rnote/main/misc/drawings/pikachu.png" height="400">
-        <img alt="Love" src="https://raw.githubusercontent.com/flxzt/rnote/main/misc/drawings/love.png" height="400">
-        <img alt="Suits" src="https://raw.githubusercontent.com/flxzt/rnote/main/misc/drawings/suits.png" height="400">
-        <img alt="Nature's cat" src="https://raw.githubusercontent.com/flxzt/rnote/main/misc/drawings/natureza_gato.png" height="400">
-        <img alt="Donald Duck" src="./misc/drawings/donald.png" height="400">
-</div><br>
-
-## Building
-
-Build instructions for Linux are documented in [BUILDING.md](./BUILDING.md) and for other platforms [here](./misc/building)
+- OnePepe está construido sobre [Rnote](https://github.com/flxzt/rnote), de The Rnote Authors (GPL-3.0-or-later).
+  Gracias a sus autores, colaboradores y traductores.
+- Sonidos del lápiz: [Freesound](https://freesound.org/) (créditos en `sounds/Licenses.md`).
+- Formas a mano alzada: algoritmos de [Rough.js](https://roughjs.com/).
+- Símbolos limpios del modo matemáticas: fuentes de trazo único de Dr. A. V. Hershey (U.S. National Bureau of
+  Standards), formato de datos de James Hurt (Cognition, Inc.), a través del paquete
+  [Hershey-Fonts](https://github.com/apshu/HersheyFonts) (MIT).
+- Datos para entrenar el reconocimiento de matemáticas: [MathWriting](https://github.com/google-research/google-research/tree/master/mathwriting)
+  de Google (CC BY-NC-SA 4.0), que se descarga en tu equipo y no se distribuye con OnePepe.
+- Cálculo: [SymPy](https://www.sympy.org/), [Pint](https://pint.readthedocs.io/) y [SciPy](https://scipy.org/).
+- Tipografías incluidas: [Grape Nuts](https://fonts.google.com/specimen/Grape+Nuts),
+  [OpenDyslexic](https://github.com/antijingoist/opendyslexic), [TT2020](https://github.com/ctrlcctrlv/TT2020) y
+  [Virgil](https://virgil.excalidraw.com/).
