@@ -15,6 +15,8 @@ pub mod constraints;
 pub mod eventresult;
 /// module for extension traits for foreign types
 pub mod ext;
+/// OnePepe: extended predefined color palette
+pub mod palette;
 /// module for pen events
 pub mod penevent;
 /// module for pen paths
