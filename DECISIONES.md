@@ -77,3 +77,31 @@ Formato: qué elegí y por qué.
 - **Extremo borrador / "Eraser Tool":** no se puede arreglar desde la app para lápices cuyos botones envían eventos de
   goma, porque GTK no distingue ese caso; lo documenté con la alternativa. Las Wacom no tienen ese problema.
 - **Tamaños del borrador por área 8/24/64**: los de Rnote (2/8/16) son los del pincel y se quedan cortos para borrar.
+
+## Fase 3 — Matemáticas sin datos del usuario
+
+- **Clasificador pequeño evaluado con numpy** (red de 2 capas, ~3 MB) en vez de PyTorch/ONNX: se entrena en un par de
+  minutos en CPU con scikit-learn y en tu equipo solo hace falta numpy. MathWriting solo trae 6 423 símbolos sueltos
+  etiquetados (~30 por clase), así que se entrena con deformaciones aleatorias.
+- **Clase "trozo"** (trazos sueltos de símbolos de varios trazos y parejas de símbolos juntadas) para que la agrupación
+  no parta el "=" ni junte símbolos vecinos: subió la agrupación del 81 % al 90 %.
+- **20 % de los símbolos reservado** (por identificador) que el clasificador nunca ve; las pruebas de fórmulas usan solo
+  esos, para no inflar los números.
+- **Vocabulario básico por defecto** (cifras, letras, griegas, operadores y símbolos de análisis); los ~100 símbolos
+  exóticos de MathWriting (ℕ, ⊨, ℘…) se ignoran.
+- **Contexto por bigramas + Viterbi** (pesos elegidos midiendo en fórmulas sintéticas) y **grupos por forma con
+  similitud ≥ 0,85** de la representación interna (medido: agrupa el 64 % de parejas del mismo símbolo de una misma
+  persona y ninguna de símbolos distintos en 400 pruebas).
+- **La sustitución usa la confianza tras el contexto** y un umbral alto (95 %) por defecto. El modo matemáticas viene
+  apagado, así que nada cambia hasta que lo activas.
+- **El motor de Rnote no sabe matemáticas**: guarda el estado (cola de trazos, símbolos reconocidos para corregir,
+  resultados) y aplica las respuestas; todo lo demás está en el programa auxiliar. La relación símbolo ↔ trazos se
+  recuerda solo durante la sesión (no hay archivo oculto junto a la página hasta que lo confirmes; ver
+  `MATEMATICAS-INFORME.md`, 0.1).
+- **Corregir tocando**: en modo matemáticas, un toque sin arrastrar sobre un símbolo reconocido abre las candidatas en
+  vez de dibujar un punto. Escribir encima de un símbolo reconocido empieza como un toque: es el precio de no añadir
+  otro botón.
+- **Flatpak:** no añadí el permiso `org.freedesktop.Flatpak` al manifiesto (permite salir de la caja de arena); queda
+  documentado como paso opcional que decides tú.
+- **Créditos de las fuentes Hershey** en `tools/onepepe-math/onepepe_math/glyphs.py`: A. V. Hershey (U.S. National
+  Bureau of Standards) y James Hurt (formato de los datos); se usan a través del paquete `Hershey-Fonts` (MIT).

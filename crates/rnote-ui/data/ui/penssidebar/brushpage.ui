@@ -63,6 +63,16 @@
           </object>
         </child>
         <child>
+          <object class="GtkToggleButton" id="math_mode_toggle">
+            <property name="action-name">win.math-mode</property>
+            <property name="tooltip_text" translatable="yes">Math Mode</property>
+            <property name="icon-name">onepepe-math-symbolic</property>
+            <style>
+              <class name="sidebar_action_button" />
+            </style>
+          </object>
+        </child>
+        <child>
           <object class="GtkToggleButton" id="shape_recognition_toggle">
             <property name="tooltip_text" translatable="yes">Ink to Shape</property>
             <property name="icon-name">onepepe-ink-to-shape-symbolic</property>
@@ -208,6 +218,34 @@ Results in the best looking handwriting.</property>
             </object>
           </child>
           <child>
+            <!-- OnePepe: math -->
+            <object class="AdwPreferencesGroup">
+              <property name="title" translatable="yes">Math Mode</property>
+              <property name="description" translatable="yes">Needs the helper program onepepe-math (tools/onepepe-math)</property>
+              <child>
+                <object class="AdwSwitchRow" id="math_replace_row">
+                  <property name="title" translatable="yes">Replace with Clean Symbols</property>
+                  <property name="subtitle" translatable="yes">Recognized symbols are redrawn cleanly in the same place</property>
+                </object>
+              </child>
+              <child>
+                <object class="AdwSpinRow" id="math_threshold_row">
+                  <property name="title" translatable="yes">Confidence Threshold</property>
+                  <property name="subtitle" translatable="yes">Doubtful symbols below this value (in %) keep your handwriting</property>
+                  <property name="adjustment">math_threshold_adj</property>
+                  <property name="numeric">true</property>
+                  <property name="digits">0</property>
+                </object>
+              </child>
+              <child>
+                <object class="AdwSwitchRow" id="math_equals_row">
+                  <property name="title" translatable="yes">Show Result After "="</property>
+                  <property name="subtitle" translatable="yes">In gray, next to the "=", without changing your ink</property>
+                </object>
+              </child>
+            </object>
+          </child>
+          <child>
             <!-- Textured options -->
             <object class="AdwPreferencesGroup">
               <property name="title" translatable="yes">Textured Style</property>
@@ -241,6 +279,13 @@ Results in the best looking handwriting.</property>
           </child>
         </object>
       </child>
+    </object>
+    <object class="GtkAdjustment" id="math_threshold_adj">
+      <property name="lower">50</property>
+      <property name="upper">99</property>
+      <property name="value">95</property>
+      <property name="step-increment">1</property>
+      <property name="page-increment">5</property>
     </object>
     <object class="GtkAdjustment" id="shape_recognition_sensitivity_adj">
       <property name="lower">0</property>

@@ -4,3 +4,5 @@ svg_*/
 mis_*.rnote
 datos-*/
 __pycache__/
+*.npz
+.venv/

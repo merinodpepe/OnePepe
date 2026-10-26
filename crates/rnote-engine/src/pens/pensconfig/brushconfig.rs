@@ -116,6 +116,9 @@ pub struct BrushConfig {
     /// OnePepe: how permissive the shape recognition is, from 0.0 (strict) to 1.0 (permissive).
     #[serde(rename = "shape_recognition_sensitivity")]
     pub shape_recognition_sensitivity: f64,
+    /// OnePepe: options of the math recognition.
+    #[serde(rename = "math")]
+    pub math: crate::engine::math::MathOptions,
 }
 
 impl Default for BrushConfig {
@@ -128,6 +131,7 @@ impl Default for BrushConfig {
             textured_options: TexturedOptions::default(),
             shape_recognition: false,
             shape_recognition_sensitivity: 0.5,
+            math: crate::engine::math::MathOptions::default(),
         }
     }
 }

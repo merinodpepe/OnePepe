@@ -207,6 +207,22 @@ impl RnAppWindow {
             &String::from("brush").to_variant(),
         );
         self.add_action(&action_pen_style);
+        // OnePepe: math mode of the active tab
+        let action_math_mode = gio::SimpleAction::new_stateful("math-mode", None, &false.to_variant());
+        self.add_action(&action_math_mode);
+        action_math_mode.connect_activate(clone!(
+            #[weak(rename_to=appwindow)]
+            self,
+            move |action, _| {
+                let Some(canvas) = appwindow.active_tab_canvas() else {
+                    return;
+                };
+                let enable = !canvas.engine_ref().math_mode();
+                let widget_flags = canvas.engine_mut().set_math_mode(enable);
+                action.set_state(&enable.to_variant());
+                appwindow.handle_widget_flags(widget_flags, &canvas);
+            }
+        ));
         // OnePepe: show or hide the ruler of the active tab
         let action_ruler = gio::SimpleAction::new_stateful("ruler", None, &false.to_variant());
         self.add_action(&action_ruler);
@@ -1228,6 +1244,7 @@ impl RnAppWindow {
         app.set_accels_for_action("win.active-tab-close", &["<Ctrl>w"]);
         app.set_accels_for_action("win.fullscreen", &["F11"]);
         app.set_accels_for_action("win.ruler", &["<Ctrl><Alt>r"]);
+        app.set_accels_for_action("win.math-mode", &["<Ctrl><Alt>m"]);
         app.set_accels_for_action("win.keyboard-shortcuts", &["<Ctrl>question"]);
         app.set_accels_for_action("win.toggle-overview", &["<Ctrl><Shift>o"]);
         app.set_accels_for_action("win.open-canvasmenu", &["F9"]);

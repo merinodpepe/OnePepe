@@ -1,0 +1,7 @@
+# Para ejecutar el reconocedor (programa auxiliar de OnePepe)
+numpy
+sympy>=1.13
+lark
+pint
+scipy
+Hershey-Fonts

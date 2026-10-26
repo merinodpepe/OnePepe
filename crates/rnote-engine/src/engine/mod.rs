@@ -4,6 +4,7 @@ pub mod config;
 pub mod export;
 pub mod import;
 pub mod rendering;
+pub mod math;
 pub mod ruler;
 pub mod snapshot;
 pub mod strokecontent;
@@ -220,6 +221,9 @@ pub struct Engine {
     pub ruler: Option<rnote_compose::ruler::Ruler>,
     #[serde(skip)]
     ruler_interaction: rnote_compose::ruler::RulerInteraction,
+    // OnePepe: math mode state. Not saved in the document.
+    #[serde(skip)]
+    pub(crate) math: math::MathState,
 }
 
 impl Default for Engine {
@@ -246,6 +250,7 @@ impl Default for Engine {
             origin_indicator_rendernode: None,
             ruler: None,
             ruler_interaction: rnote_compose::ruler::RulerInteraction::default(),
+            math: math::MathState::default(),
         }
     }
 }
@@ -504,9 +509,18 @@ impl Engine {
             widget_flags.redraw = true;
             return (EventPropagation::Stop, widget_flags);
         };
+        // OnePepe: math mode: taps on recognized symbols, and queueing of finished strokes
+        let Some(event) = self.math_filter_pen_event(event, &mut widget_flags) else {
+            widget_flags.redraw = true;
+            return (EventPropagation::Stop, widget_flags);
+        };
+        let is_up = matches!(event, PenEvent::Up { .. });
         let (propagation, wf) =
             self.penholder
-                .handle_pen_event(event, None, now, &mut engine_view_mut!(self));
+                .handle_pen_event(event.clone(), None, now, &mut engine_view_mut!(self));
+        if is_up {
+            widget_flags |= self.math_after_pen_event(&event);
+        }
         (propagation, widget_flags | wf)
     }
 
