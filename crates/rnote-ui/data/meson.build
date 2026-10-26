@@ -210,6 +210,7 @@ rnote_ui_gresources_icons_files = files(
     'icons/scalable/actions/pen-brush-style-marker-symbolic.svg',
     'icons/scalable/actions/pen-brush-style-solid-symbolic.svg',
     'icons/scalable/actions/onepepe-ruler-symbolic.svg',
+    'icons/scalable/actions/onepepe-ink-to-shape-symbolic.svg',
     'icons/scalable/actions/pen-brush-style-textured-symbolic.svg',
     'icons/scalable/actions/pen-brush-symbolic.svg',
     'icons/scalable/actions/pen-eraser-split-colliding-strokes-symbolic.svg',

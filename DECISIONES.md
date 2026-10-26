@@ -28,3 +28,13 @@ Formato: qué elegí y por qué.
 - **Mover/girar con el propio lápiz** (centro = mover, círculo = girar), porque con el pincel seleccionado en Rnote el dedo suele servir para desplazar el lienzo. Giro con enganche a múltiplos de 15°.
 - **La regla vive en el motor, por pestaña, sin guardarse** en el `.rnote` (campo con `#[serde(skip)]`), para no cambiar el formato. La geometría está en `crates/rnote-compose/src/ruler.rs` (sin GTK, con tests); la integración en `crates/rnote-engine/src/engine/ruler.rs`, interceptando los eventos del lápiz en `Engine::handle_pen_event` antes de pasarlos al pincel.
 - **Atajo Ctrl+Alt+R**, porque Ctrl+R y Ctrl+Shift+R ya están ocupados en Rnote. Icono propio sencillo (`onepepe-ruler-symbolic.svg`).
+
+## Fase 2 — Tinta a formas
+
+- **Algoritmo geométrico propio, sin modelos** (`crates/rnote-compose/src/shaperecognition.rs`): remuestreo y suavizado; si el trazo está abierto solo puede ser una línea (ajuste por mínimos cuadrados totales); si está cerrado, se compara un ajuste de elipse por ejes principales con un polígono obtenido por Douglas-Peucker cuyas esquinas se recalculan cruzando rectas ajustadas a cada lado. Gana el de menor error relativo a su tolerancia. Es rápido, predecible y fácil de ajustar.
+- **Rechazo de escritura:** (1) tamaño mínimo en pantalla de 50 px; (2) un trazo cerrado debe dar exactamente una vuelta (giro neto ≈ 360° y giro total acotado), lo que descarta "8", "e", espirales…; (3) si tras cerrar el trazo sigue y se aleja del contorno (el rabito de una "a"), no es una forma. Preferí perder alguna forma dudosa antes que convertir letras.
+- **Cuadriláteros:** solo se convierten si sus ángulos están cerca de 90° (rectángulo, también girado o en rombo-cuadrado). Un paralelogramo o trapecio se deja como está, porque no estaba en tu lista.
+- **El círculo/elipse se decide por la proporción de ejes** (> 0,82 → círculo).
+- **Deshacer:** el trazo original se guarda en el historial antes de sustituirlo, así que un Ctrl+Z lo recupera. No hace falta cambiar el formato: la forma se guarda como `ShapeStroke`, que ya existe en `.rnote`.
+- **Los ajustes (activado, sensibilidad) van en la configuración del pincel**, que Rnote guarda en los ajustes de la app, no en los documentos. Viene desactivado por defecto.
+- **La forma usa estilo liso** con el color y grosor del pincel (también con el rotulador, conservando su transparencia).

@@ -25,6 +25,8 @@ pub mod penpath;
 pub mod ruler;
 /// utilities for serializing / deserializing
 pub mod serialize;
+/// OnePepe: recognition of hand drawn shapes
+pub mod shaperecognition;
 /// module for shapes
 pub mod shapes;
 /// module for splitorder

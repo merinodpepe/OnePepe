@@ -97,7 +97,7 @@ impl std::ops::DerefMut for SolidOptions {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default, rename = "brush_config")]
 pub struct BrushConfig {
     #[serde(rename = "builder_type")]
@@ -110,6 +110,26 @@ pub struct BrushConfig {
     pub solid_options: SolidOptions,
     #[serde(rename = "textured_options")]
     pub textured_options: TexturedOptions,
+    /// OnePepe: convert finished strokes to geometric shapes when they fit.
+    #[serde(rename = "shape_recognition")]
+    pub shape_recognition: bool,
+    /// OnePepe: how permissive the shape recognition is, from 0.0 (strict) to 1.0 (permissive).
+    #[serde(rename = "shape_recognition_sensitivity")]
+    pub shape_recognition_sensitivity: f64,
+}
+
+impl Default for BrushConfig {
+    fn default() -> Self {
+        Self {
+            builder_type: PenPathBuilderType::default(),
+            style: BrushStyle::default(),
+            marker_options: MarkerOptions::default(),
+            solid_options: SolidOptions::default(),
+            textured_options: TexturedOptions::default(),
+            shape_recognition: false,
+            shape_recognition_sensitivity: 0.5,
+        }
+    }
 }
 
 impl BrushConfig {
