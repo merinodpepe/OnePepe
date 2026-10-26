@@ -127,3 +127,11 @@ Formato: qué elegí y por qué.
 - **Fecha y hora en formato español** (dd/mm/aaaa, HH:MM) con la hora local del equipo.
 - **Catálogo de símbolos** como un desplegable junto al de emojis, reutilizando la inserción de texto de Rnote.
 - **No hice** estilos rápidos ni recorte de pantalla (opcionales en el plan).
+
+## README de OnePepe
+
+- **README propio en español** con el nombre, el logo (`misc/onepepe/logo.svg`, dibujado para OnePepe) y las funciones
+  de OnePepe. Se conserva, en "Licencia" y "Créditos", el aviso de que se basa en Rnote y el copyright de sus autores:
+  la licencia GPL obliga a mantener esos avisos.
+- **Sin capturas de pantalla** por ahora: las de Rnote mostrarían otro programa y en la nube no puedo hacer capturas de
+  OnePepe. Se pueden añadir cuando lo ejecutes en tu equipo.
