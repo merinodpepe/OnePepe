@@ -81,6 +81,7 @@ pub(crate) fn move_to(filerow: &RnFileRow, appwindow: &RnAppWindow) -> gio::Simp
                             .dispatch_toast_error(&gettext("Moving failed"));
                         appwindow.overlays().progressbar_abort();
                     } else {
+                        crate::mathhelper::sidecar_follow_move(&current_path, &target).await;
                         appwindow.overlays().progressbar_finish();
                     }
                 }

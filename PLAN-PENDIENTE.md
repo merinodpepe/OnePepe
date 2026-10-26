@@ -38,8 +38,8 @@ ORDEN SI HAY QUE RECORTAR POR CRÉDITO O TIEMPO (el crédito caduca el 5 de novi
 
 PARTE A (matemáticas):
 1. Sustituir la letra por trazos limpios: **hecho** (trazos de pincel normales, umbral configurable, deshacer, ajustes;
-   sin cambiar el formato). Pendiente de medir con tu letra. La corrección tras cerrar y reabrir la página necesita tu
-   decisión sobre el archivo oculto (ver `MATEMATICAS-INFORME.md`, 0.1 y 0.4).
+   sin cambiar el formato). Pendiente de medir con tu letra. Corrección tras cerrar y reabrir la página: **hecha**
+   con el archivo oculto junto a cada página (`feat/matematicas-archivo-oculto`).
 2. Grupos por forma, contexto, glosario, comprobación dimensional, corrección por símbolo o grupo con actualización del
    símbolo limpio: **hecho**.
 3. Resultado del "=" como función aparte con ajuste propio: **hecho** (valor, despejar, simplificar, derivar, integrar,

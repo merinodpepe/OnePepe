@@ -88,6 +88,54 @@ pub struct MathState {
     corrections: Vec<(u64, Vec<u64>, String)>,
 }
 
+// ---------- hidden file next to the page ----------
+
+/// The hidden file next to a page that remembers its recognized symbols: `.<page file name>.onepepe.json`.
+pub fn math_sidecar_path(page: &std::path::Path) -> std::path::PathBuf {
+    let name = page
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_default();
+    page.with_file_name(format!(".{name}.onepepe.json"))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SidecarFile {
+    version: u32,
+    symbols: Vec<SidecarSymbol>,
+    #[serde(default)]
+    overlays: Vec<SidecarOverlay>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SidecarSymbol {
+    id: u64,
+    /// The strokes of the symbol in the page, and their bounds when saved, to check they did not change.
+    keys: Vec<StrokeKey>,
+    keys_bounds: [f64; 4],
+    latex: String,
+    bounds: [f64; 4],
+    candidates: Vec<(String, f64)>,
+    group: (u64, i64),
+    original: Vec<Vec<[f64; 2]>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SidecarOverlay {
+    anchor: [f64; 2],
+    height: f64,
+    text: String,
+    latex: String,
+}
+
+fn aabb_to_array(b: Aabb) -> [f64; 4] {
+    [b.mins.x, b.mins.y, b.maxs.x, b.maxs.y]
+}
+
+fn array_to_aabb(a: [f64; 4]) -> Aabb {
+    Aabb::new(Vector2::new(a[0], a[1]), Vector2::new(a[2], a[3]))
+}
+
 // ---------- protocol ----------
 
 #[derive(Debug, Serialize)]
@@ -568,6 +616,113 @@ impl Engine {
         widget_flags
     }
 
+    /// The content of the hidden file next to the page (recognized symbols and results), or None if there is nothing
+    /// to remember (then an existing hidden file should be removed).
+    pub fn math_sidecar_json(&self) -> Option<String> {
+        let symbols = self
+            .math
+            .symbols
+            .iter()
+            .filter_map(|s| {
+                let keys_bounds = self.store.bounds_for_strokes(&s.keys)?;
+                if s.keys
+                    .iter()
+                    .any(|k| self.store.get_stroke_ref(*k).is_none())
+                {
+                    return None;
+                }
+                Some(SidecarSymbol {
+                    id: s.id,
+                    keys: s.keys.clone(),
+                    keys_bounds: aabb_to_array(keys_bounds),
+                    latex: s.latex.clone(),
+                    bounds: aabb_to_array(s.bounds),
+                    candidates: s.candidates.clone(),
+                    group: s.group,
+                    original: s.original.clone(),
+                })
+            })
+            .collect::<Vec<_>>();
+        if symbols.is_empty() && self.math.overlays.is_empty() {
+            return None;
+        }
+        let overlays = self
+            .math
+            .overlays
+            .iter()
+            .map(|o| SidecarOverlay {
+                anchor: [o.anchor.x, o.anchor.y],
+                height: o.height,
+                text: o.text.clone(),
+                latex: o.latex.clone(),
+            })
+            .collect();
+        serde_json::to_string(&SidecarFile {
+            version: 1,
+            symbols,
+            overlays,
+        })
+        .ok()
+    }
+
+    /// Restores the recognized symbols from the hidden file next to the page. Symbols whose strokes were changed
+    /// or deleted outside of OnePepe are skipped. Returns how many symbols were restored.
+    pub fn math_load_sidecar(&mut self, json: &str) -> usize {
+        let Ok(file) = serde_json::from_str::<SidecarFile>(json) else {
+            tracing::warn!("Could not read the hidden math file of the page");
+            return 0;
+        };
+        let tolerance = 0.5;
+        let mut restored = 0;
+        for s in file.symbols {
+            let Some(current) = self.store.bounds_for_strokes(&s.keys) else {
+                continue;
+            };
+            let unchanged = s
+                .keys
+                .iter()
+                .all(|k| self.store.get_stroke_ref(*k).is_some())
+                && aabb_to_array(current)
+                    .iter()
+                    .zip(s.keys_bounds.iter())
+                    .all(|(a, b)| (a - b).abs() <= tolerance);
+            if !unchanged {
+                continue;
+            }
+            self.math.next_id = self.math.next_id.max(s.id).max(s.group.0);
+            self.math.symbols.push(MathSymbol {
+                id: s.id,
+                keys: s.keys,
+                latex: s.latex,
+                bounds: array_to_aabb(s.bounds),
+                candidates: s.candidates,
+                group: s.group,
+                original: s.original,
+            });
+            restored += 1;
+        }
+        self.math.overlays = file
+            .overlays
+            .into_iter()
+            .map(|o| MathOverlay {
+                anchor: Vector2::new(o.anchor[0], o.anchor[1]),
+                height: o.height,
+                text: o.text,
+                latex: o.latex,
+            })
+            .collect();
+        restored
+    }
+
+    /// Forgets all recognized symbols and results (e.g. when another document is loaded).
+    pub(crate) fn math_reset_document(&mut self) {
+        let mode = self.math.mode;
+        self.math = MathState {
+            mode,
+            ..MathState::default()
+        };
+    }
+
     /// Removes the result overlays (e.g. when the document changes a lot).
     pub fn math_clear_overlays(&mut self) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
@@ -828,5 +983,116 @@ mod render_tests {
         let data = surface.take_data().unwrap();
         let not_white = data.chunks(4).filter(|px| px[0] < 200).count();
         assert!(not_white > 1000);
+    }
+}
+
+#[cfg(test)]
+mod sidecar_tests {
+    use super::*;
+
+    #[test]
+    fn sidecar_path_is_hidden_next_to_the_page() {
+        assert_eq!(
+            math_sidecar_path(std::path::Path::new("/a/Tema 1/Página 1.rnote")),
+            std::path::PathBuf::from("/a/Tema 1/.Página 1.rnote.onepepe.json")
+        );
+    }
+
+    /// Engine with "1 =" recognized and the "1" replaced, as in the math mode tests.
+    fn engine_with_symbols() -> Engine {
+        let mut engine = Engine::default();
+        let _ = engine.set_math_mode(true);
+        engine.config.write().pens_config.brush_config.math.equals = true;
+        let lines = [
+            [(100.0, 100.0), (103.0, 140.0)],
+            [(120.0, 115.0), (140.0, 115.0)],
+            [(120.0, 125.0), (140.0, 125.0)],
+        ];
+        for l in lines {
+            let path = PenPath::try_from_elements((0..=10).map(|i| {
+                let t = i as f64 / 10.0;
+                Element::new(
+                    Vector2::new(
+                        l[0].0 + (l[1].0 - l[0].0) * t,
+                        l[0].1 + (l[1].1 - l[0].1) * t,
+                    ),
+                    0.5,
+                )
+            }))
+            .unwrap();
+            let key = engine.store.insert_stroke(
+                Stroke::BrushStroke(BrushStroke::from_penpath(
+                    path,
+                    rnote_compose::Style::default(),
+                )),
+                None,
+            );
+            engine.math.pending.push(key);
+        }
+        let req = engine.math_take_request(None).unwrap();
+        let id = serde_json::from_str::<serde_json::Value>(&req).unwrap()["id"]
+            .as_u64()
+            .unwrap();
+        let resp = format!(
+            r#"{{"id": {id}, "symbols": [
+                {{"strokes": [0], "candidates": [{{"latex": "1", "p": 0.99}}, {{"latex": "l", "p": 0.01}}], "group": 0,
+                  "clean": [[[101, 100], [101, 140]]]}},
+                {{"strokes": [1, 2], "candidates": [{{"latex": "=", "p": 0.6}}], "group": 1, "clean": null}}
+              ], "result": {{"text": "1", "latex": "1"}}}}"#
+        );
+        let _ = engine.math_apply_response(&resp);
+        engine
+    }
+
+    #[test]
+    fn symbols_survive_save_and_reopen() {
+        let engine = engine_with_symbols();
+        let sidecar = engine.math_sidecar_json().unwrap();
+        // save and reopen the page
+        let bytes = futures::executor::block_on(engine.save_as_rnote_bytes("p.rnote".into()))
+            .unwrap()
+            .unwrap();
+        let snapshot = futures::executor::block_on(
+            crate::engine::EngineSnapshot::load_from_rnote_bytes(bytes),
+        )
+        .unwrap();
+        let mut reopened = Engine::default();
+        let _ = reopened.load_snapshot(snapshot);
+        assert_eq!(reopened.math.symbols.len(), 0);
+        assert_eq!(reopened.math_load_sidecar(&sidecar), 2);
+        assert_eq!(reopened.math.overlays.len(), 1);
+        // the clean "1" can be corrected again
+        let (id, cands) = reopened.math_symbol_at(Vector2::new(101.0, 120.0)).unwrap();
+        assert_eq!(cands[0].0, "1");
+        let reqs = reopened.math_correction_requests(id, "l", false, None);
+        assert_eq!(reqs.len(), 1);
+        // new request ids don't collide with the restored ones
+        assert!(reopened.math.next_id >= id);
+    }
+
+    #[test]
+    fn changed_strokes_are_not_restored() {
+        let mut engine = engine_with_symbols();
+        let sidecar = engine.math_sidecar_json().unwrap();
+        // the "=" strokes are erased outside of the math mode
+        let eq = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "=")
+            .unwrap()
+            .keys
+            .clone();
+        for k in eq {
+            engine.store.remove_stroke(k);
+        }
+        engine.math_reset_document();
+        assert_eq!(engine.math_load_sidecar(&sidecar), 1);
+        assert_eq!(engine.math_load_sidecar("not json"), 0);
+    }
+
+    #[test]
+    fn nothing_to_remember() {
+        assert!(Engine::default().math_sidecar_json().is_none());
     }
 }

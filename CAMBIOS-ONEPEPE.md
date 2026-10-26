@@ -303,3 +303,21 @@ cargo test -p rnote-compose
   no ejecutado · lápiz: pendiente.
 - **Cómo lo pruebo yo:** herramienta de texto: escribe tres líneas (Intro entre ellas). Pon el cursor en la primera →
   numerada; en la segunda → numerada (debe salir "2."). En la tercera → casilla, y pulsa casilla otra vez para marcarla.
+
+## Matemáticas: archivo oculto junto a cada página
+
+- **Qué hace:** al guardar una página en la que el modo matemáticas reconoció símbolos, OnePepe escribe a su lado un
+  archivo oculto `.<nombre de la página>.rnote.onepepe.json` (p. ej. `.Página 1.rnote.onepepe.json`) con qué trazos
+  forman cada símbolo, sus candidatas, su grupo, tu letra original y los resultados del "=". Al abrir la página se lee,
+  así que **puedes seguir corrigiendo símbolos tocándolos después de cerrar y abrir**.
+- **Seguridad de tus datos:** el `.rnote` no cambia. Si un símbolo se modificó o borró fuera del modo matemáticas, se
+  ignora al abrir. Si ya no queda nada que recordar, el archivo oculto se borra. El explorador de archivos no lo
+  muestra (es oculto), y al **renombrar, mover, duplicar o mandar a la papelera** la página desde el explorador de
+  OnePepe, su archivo oculto la acompaña. Si mueves la página con otro programa, mueve también el archivo oculto (o
+  simplemente se pierde la posibilidad de corregir esos símbolos; la página queda intacta).
+- **Rama:** `feat/matematicas-archivo-oculto` · **Estado:** compilado · tests ✔ (`cargo test -p rnote-engine
+  sidecar_tests`: guardar el `.rnote` de verdad, reabrirlo, restaurar símbolos y corregir uno; trazos borrados se
+  ignoran) · no ejecutado · lápiz: pendiente.
+- **Cómo lo pruebo yo:** con el modo matemáticas, escribe algo que se sustituya, guarda (Ctrl+S), cierra la pestaña y
+  vuelve a abrir la página: toca un símbolo limpio y comprueba que salen sus candidatas. Con `ls -a` en la carpeta verás
+  el archivo `.…onepepe.json`. Renombra la página desde el explorador y comprueba que el archivo oculto cambia de nombre.

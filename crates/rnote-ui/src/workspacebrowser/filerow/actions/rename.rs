@@ -83,6 +83,11 @@ pub(crate) fn rename(filerow: &RnFileRow, appwindow: &RnAppWindow) -> gio::Simpl
                                         .dispatch_toast_error(&gettext("Renaming file failed"));
                                     appwindow.overlays().progressbar_abort();
                                 } else {
+                                    crate::mathhelper::sidecar_follow_move(
+                                        &current_file_path,
+                                        &new_file_path,
+                                    )
+                                    .await;
                                     appwindow.overlays().progressbar_finish();
                                 }
                             }

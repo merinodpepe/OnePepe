@@ -96,8 +96,17 @@ Formato: qué elegí y por qué.
   apagado, así que nada cambia hasta que lo activas.
 - **El motor de Rnote no sabe matemáticas**: guarda el estado (cola de trazos, símbolos reconocidos para corregir,
   resultados) y aplica las respuestas; todo lo demás está en el programa auxiliar. La relación símbolo ↔ trazos se
-  recuerda solo durante la sesión (no hay archivo oculto junto a la página hasta que lo confirmes; ver
-  `MATEMATICAS-INFORME.md`, 0.1).
+  guarda en un archivo oculto junto a la página (confirmado por ti; ver la sección siguiente).
+
+## Matemáticas — archivo oculto junto a la página
+
+- **Nombre `.<página>.rnote.onepepe.json`** en la misma carpeta: oculto (el explorador de Rnote no lo muestra) y fácil
+  de asociar a su página.
+- **Identificación de los trazos por su clave interna** (Rnote conserva las claves al guardar y abrir, comprobado con un
+  test) **más su caja**: si al abrir no coinciden, ese símbolo se ignora. Así un archivo oculto desfasado nunca cambia
+  la página, como mucho se pierde la corrección de esos símbolos.
+- **Se escribe al guardar** (también con el autoguardado) y **se lee al abrir**; acompaña a la página al renombrar,
+  mover, duplicar o borrar desde el explorador de OnePepe. Las carpetas enteras se mueven con todo su contenido.
 - **Corregir tocando**: en modo matemáticas, un toque sin arrastrar sobre un símbolo reconocido abre las candidatas en
   vez de dibujar un punto. Escribir encima de un símbolo reconocido empieza como un toque: es el precio de no añadir
   otro botón.

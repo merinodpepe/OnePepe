@@ -22,6 +22,7 @@ Leyenda de cómo se probó cada cosa:
 | 1b | Botones del lápiz: borrador de trazo entero y lazo mientras pulsas, reasignables; tamaños del borrador | `feat/botones-lapiz` | sí | sí (4) | pendiente |
 | 3 | Informe, extractor de `.rnote` y lista de 30 expresiones | `feat/matematicas-prototipo` | — | sí (3, Python) | no aplica |
 | 3 | Modo matemáticas: reconocedor, símbolos limpios, correcciones, glosario, resultado del "=" | `feat/matematicas-limpias` | sí | sí (Rust 6 + Python 15) y prueba de punta a punta del programa auxiliar con el modelo | pendiente |
+| 3 | Archivo oculto junto a cada página para corregir símbolos tras reabrir | `feat/matematicas-archivo-oculto` | sí | sí (4) | pendiente |
 | 1c | Subíndice / superíndice del texto | `feat/subindices` | sí | sí (2) | pendiente |
 | 1c | Catálogo de símbolos | `feat/catalogo-simbolos` | sí | — (solo interfaz) | pendiente |
 | 1c | Fecha y hora | `feat/fecha-hora` | sí | sí (2) | pendiente |
@@ -42,7 +43,7 @@ detalle (diseño y medidas): [`MATEMATICAS-INFORME.md`](MATEMATICAS-INFORME.md).
 2. **Matemáticas con tu letra:** medir y ajustar con tus 30 expresiones; ahora mismo, con el modelo genérico, la
    sustitución acierta ~84 % de lo que sustituye y una fórmula entera sale perfecta solo ~10 % de las veces (medido con
    letra de otras personas). Tus correcciones mejoran el resultado al momento.
-3. **Decisiones tuyas** (abajo): archivo oculto para corregir símbolos tras reabrir; permiso de Flatpak.
+3. **Decisión tuya** (abajo): permiso de Flatpak para el programa de matemáticas.
 4. Opcionales no hechos: estilos rápidos (Título 1/2, cita, código), recorte de pantalla, continuar listas al pulsar
    Intro, árbol desplegable de tres niveles para los cuadernos, tinta a texto (Fase 5).
 
@@ -57,12 +58,10 @@ detalle (diseño y medidas): [`MATEMATICAS-INFORME.md`](MATEMATICAS-INFORME.md).
    **no en el repositorio**.
 5. **Respuestas cortas** (`MATEMATICAS-INFORME.md`, sección 5): signo de multiplicar, coma o punto decimal, unidades en
    el mismo renglón, asignaturas y símbolos para el glosario.
-6. **Decisión de formato:** ¿guardo, en un archivo oculto junto a cada página, qué trazos forman cada símbolo
-   reconocido (para corregir después de reabrir)? Sin eso, solo se corrige durante la sesión.
-7. **Si usas Flatpak:** decidir si das a OnePepe permiso para lanzar el programa de matemáticas fuera de la caja de
+6. **Si usas Flatpak:** decidir si das a OnePepe permiso para lanzar el programa de matemáticas fuera de la caja de
    arena (`flatpak override --user --talk-name=org.freedesktop.Flatpak com.github.flxzt.rnote.Devel`). Yo no lo he
    añadido al manifiesto porque reduce el aislamiento. Alternativa: compilar sin Flatpak.
-8. **Botones del lápiz:** modelo de tu Wacom y qué muestra `evtest` al pulsar cada botón (ver `CAMBIOS-ONEPEPE.md`).
+7. **Botones del lápiz:** modelo de tu Wacom y qué muestra `evtest` al pulsar cada botón (ver `CAMBIOS-ONEPEPE.md`).
 
 ## Comandos para retomar el trabajo
 
