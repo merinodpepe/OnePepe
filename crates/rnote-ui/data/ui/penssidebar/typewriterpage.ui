@@ -52,6 +52,16 @@
       <property name="position">right</property>
     </object>
     <child>
+      <object class="GtkMenuButton" id="symbolcatalog_menubutton">
+        <property name="direction">left</property>
+        <property name="label">Ω</property>
+        <property name="tooltip_text" translatable="yes">Insert Math Symbol</property>
+        <style>
+          <class name="flat" />
+        </style>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparator">
         <property name="orientation">vertical</property>
       </object>
