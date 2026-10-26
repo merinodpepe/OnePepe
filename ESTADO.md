@@ -52,6 +52,13 @@ Resumen (detalle en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md)):
    ajustes y posibilidad de instalarla junto a Rnote.
 4. Opcionales: estilos rápidos (Título 1/2, cita, código), recorte de pantalla, continuar listas al pulsar Intro, árbol
    desplegable de tres niveles para los cuadernos, capturas para el README, tinta a texto (Fase 5).
+5. Ideas para más adelante (sección 6 de `PLAN-PENDIENTE.md`, sin implementar):
+   - Reentrenar el modelo en tu equipo cuando tú quieras, con tiempo estimado.
+   - Selector de tamaño de hoja y exportación encogida a una hoja.
+   - Etiquetas, búsqueda y plantillas.
+   - Bolígrafos favoritos.
+   - Modo repaso.
+   - Copias de seguridad, entre otras.
 
 Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas está **en el manifiesto** a petición tuya
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
