@@ -19,6 +19,9 @@ finish-args:
     - "--filesystem=xdg-pictures"
     - "--filesystem=xdg-desktop"
     - "--talk-name=org.gtk.vfs.*"
+    # OnePepe: lets the app start the math helper on the host (flatpak-spawn --host onepepe-math).
+    # Added at the user's explicit request. Note: this allows the app to run any program outside the sandbox.
+    - "--talk-name=org.freedesktop.Flatpak"
     - "--filesystem=xdg-run/gvfsd"
     - "--env=RUST_BACKTRACE=1"
     - "--env=RUST_LOG=rnote=debug,rnote-cli=debug,rnote-engine=debug,rnote-compose=debug"
