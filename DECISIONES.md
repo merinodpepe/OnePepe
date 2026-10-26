@@ -66,3 +66,14 @@ Formato: qué elegí y por qué.
   es más simple y más difícil de usar por error. Usa un simple renombrado de ruta (igual que "renombrar" de Rnote), así
   que no copia ni borra nada; si el destino ya existe, no hace nada.
 - **Borrar ya pedía confirmación** y manda a la papelera; no lo he tocado.
+
+## Fase 1b — Botones del lápiz
+
+- **Variantes en lugar de herramientas nuevas:** las opciones "Eraser (Whole Strokes)", "Eraser (Area)" y
+  "Selector (Lasso)" son un campo nuevo `variant` de la acción del atajo (en los ajustes de la app, no en los `.rnote`).
+  Al activarse cambian el estilo del borrador/selección y lo restauran al terminar. Los ajustes antiguos sin ese campo
+  cargan como antes (test).
+- **Los valores por defecto nuevos solo afectan a instalaciones nuevas**: no sobrescribo los ajustes guardados.
+- **Extremo borrador / "Eraser Tool":** no se puede arreglar desde la app para lápices cuyos botones envían eventos de
+  goma, porque GTK no distingue ese caso; lo documenté con la alternativa. Las Wacom no tienen ese problema.
+- **Tamaños del borrador por área 8/24/64**: los de Rnote (2/8/16) son los del pincel y se quedan cortos para borrar.
