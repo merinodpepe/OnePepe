@@ -50,6 +50,12 @@ mod imp {
         pub(crate) shape_recognition_toggle: TemplateChild<ToggleButton>,
         #[template_child]
         pub(crate) shape_recognition_sensitivity_row: TemplateChild<adw::SpinRow>,
+        #[template_child]
+        pub(crate) math_replace_row: TemplateChild<adw::SwitchRow>,
+        #[template_child]
+        pub(crate) math_threshold_row: TemplateChild<adw::SpinRow>,
+        #[template_child]
+        pub(crate) math_equals_row: TemplateChild<adw::SwitchRow>,
     }
 
     #[glib::object_subclass]
@@ -447,6 +453,47 @@ impl RnBrushPage {
                 }
             ));
 
+        // OnePepe: math options
+        imp.math_replace_row.connect_active_notify(clone!(
+            #[weak]
+            appwindow,
+            move |row| {
+                appwindow
+                    .engine_config()
+                    .write()
+                    .pens_config
+                    .brush_config
+                    .math
+                    .replace = row.is_active();
+            }
+        ));
+        imp.math_threshold_row.get().connect_changed(clone!(
+            #[weak]
+            appwindow,
+            move |row| {
+                appwindow
+                    .engine_config()
+                    .write()
+                    .pens_config
+                    .brush_config
+                    .math
+                    .threshold = row.value() / 100.0;
+            }
+        ));
+        imp.math_equals_row.connect_active_notify(clone!(
+            #[weak]
+            appwindow,
+            move |row| {
+                appwindow
+                    .engine_config()
+                    .write()
+                    .pens_config
+                    .brush_config
+                    .math
+                    .equals = row.is_active();
+            }
+        ));
+
         // dots distribution
         imp.texturedstyle_distribution_row
             .get()
@@ -482,6 +529,10 @@ impl RnBrushPage {
         self.set_texturedstyle_distribution_variant(brush_config.textured_options.distribution);
         imp.shape_recognition_toggle
             .set_active(brush_config.shape_recognition);
+        imp.math_replace_row.set_active(brush_config.math.replace);
+        imp.math_threshold_row
+            .set_value((brush_config.math.threshold * 100.0).round());
+        imp.math_equals_row.set_active(brush_config.math.equals);
         imp.shape_recognition_sensitivity_row
             .set_value((brush_config.shape_recognition_sensitivity * 100.0).round());
 

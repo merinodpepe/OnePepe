@@ -125,6 +125,13 @@ impl StrokeStore {
     }
 }
 
+impl StrokeStore {
+    /// OnePepe: the layer of a stroke.
+    pub(crate) fn stroke_layer(&self, key: StrokeKey) -> Option<StrokeLayer> {
+        self.chrono_components.get(key).map(|c| c.layer)
+    }
+}
+
 /// OnePepe: changes to the stacking order (z-order) of strokes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ZOrderChange {

@@ -367,6 +367,13 @@ impl RnAppWindow {
                 .refresh_zoom_reset_label(total_zoom);
             canvas.queue_resize();
         }
+        // OnePepe: math mode
+        if widget_flags.math_pending {
+            crate::mathhelper::schedule_recognition(self, canvas);
+        }
+        if widget_flags.math_tap {
+            crate::mathhelper::show_candidates(self, canvas);
+        }
         if widget_flags.deselect_color_setters {
             self.overlays().colorpicker().deselect_setters();
         }
@@ -787,6 +794,13 @@ impl RnAppWindow {
             let can_undo = canvas.engine_ref().can_undo();
             let can_redo = canvas.engine_ref().can_redo();
             let visual_debug = self.engine_config().read().visual_debug;
+            let math_mode = canvas.engine_ref().math_mode();
+            if let Some(action_math_mode) = self
+                .lookup_action("math-mode")
+                .and_then(|a| a.downcast::<gio::SimpleAction>().ok())
+            {
+                action_math_mode.set_state(&math_mode.to_variant());
+            }
             let ruler_enabled = canvas.engine_ref().ruler_enabled();
             if let Some(action_ruler) = self
                 .lookup_action("ruler")

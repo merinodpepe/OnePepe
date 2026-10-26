@@ -192,3 +192,71 @@ cargo test -p rnote-compose
   entero); suelta y sigue escribiendo. Mantén el botón 2 y rodea varios trazos (lazo); suelta. Pon el borrador de la
   barra en "Split Strokes" y repite con el botón 1: debe seguir borrando trazos enteros y, al soltar, la barra debe
   volver a "Split Strokes". Prueba el modo "Toggle". Prueba el extremo borrador.
+
+## Matemáticas: modo matemáticas, símbolos limpios, correcciones y resultado del "=" (Fase 3, sin tus datos)
+
+- **Qué hace:**
+  - **Modo matemáticas**: botón con "Σ×" en la barra del pincel, o **Ctrl+Alt+M**. Mientras está activo, la vista tiene
+    un **borde naranja**. Lo que escribes con el pincel se reconoce tras una pausa de 0,8 s. Al desactivarlo, la tinta
+    se queda como está y no se vuelve a analizar.
+  - **Sustitución por símbolos limpios** (activada por defecto dentro del modo): cada símbolo reconocido con confianza
+    ≥ umbral se redibuja con trazos limpios (fuente Hershey) en la misma posición y tamaño, con tu color y grosor. Son
+    trazos de pincel normales (se seleccionan y borran como siempre). Los dudosos se quedan con tu letra.
+    **Ctrl+Z** devuelve tu letra original.
+  - **Corregir**: en modo matemáticas, **toca** (sin arrastrar) un símbolo reconocido: aparece la lista de candidatas.
+    Elige la buena; con "Apply to the whole group" se corrigen todos los símbolos que se le parecen. El símbolo limpio
+    se redibuja, la corrección se guarda como ejemplo de tu letra en `~/.local/share/onepepe/math/correcciones.jsonl` y,
+    si el cuaderno tiene glosario, el símbolo se añade a él.
+  - **Resultado del "="** (desactivado por defecto): en gris junto al "=", con el LaTeX entendido debajo. No es tinta.
+    Calcula valores, despeja (`2x+1=7, x=`), simplifica, deriva (`d/dx(...)`), integra, sumatorios y límites; con
+    unidades y constantes del glosario, comprobando dimensiones. Si algo no es válido, no muestra nada.
+  - **Ajustes**: menú del pincel (rueda dentada) → "Math Mode": sustituir sí/no, umbral de confianza (50–99 %, por
+    defecto 95 %) y resultado del "=" sí/no.
+  - **Glosario por cuaderno**: archivo `.onepepe-glosario.txt` en la carpeta del cuaderno o sección, p. ej.:
+    ```
+    k_B = 1.380649e-23 J/K
+    N_A = 6.02214076e23 1/mol
+    T = 310 K
+    \Delta G
+    ```
+- **Cómo funciona por dentro**: un programa auxiliar en Python (`tools/onepepe-math`, orden `onepepe-math`) que la
+  app arranca una vez y con el que habla por JSON. Reconoce por símbolos: agrupa trazos, clasifica (red pequeña
+  entrenada con MathWriting), usa el contexto (pares de símbolos frecuentes en 230 000 fórmulas reales), agrupa símbolos
+  de forma casi igual, aplica tu glosario y tus correcciones, analiza la estructura y calcula con SymPy y pint.
+- **Lo medido aquí (con fórmulas sintéticas hechas con símbolos de escritores que el modelo NO vio, vocabulario
+  básico; no con tu letra):**
+  - un símbolo suelto: el bueno es el primero el 61 % de las veces y está entre los 5 primeros el 92 %;
+  - agrupación de trazos en símbolos: 90 % correcta;
+  - con contexto: 66 % de símbolos correctos (86 % entre los 3 primeros);
+  - sustitución con umbral 95 %: se sustituye ~50 % de los símbolos y ~84 % de esos se ven bien;
+  - estructura (potencias, subíndices, fracciones) con símbolos correctos: 76 % de fórmulas exactas;
+  - fórmula completa perfecta de principio a fin: solo ~10 %.
+  **Conclusión honesta:** con el modelo genérico, sin tu letra, la sustitución todavía se equivoca demasiado para
+  dejarla siempre activa. Lo que más lo mejora son tus correcciones (el clasificador personal las usa al instante) y
+  tus 30 expresiones, cuando me las pases.
+- **Instalación del programa auxiliar en tu equipo** (una vez):
+  ```bash
+  cd OnePepe/tools/onepepe-math
+  ./instalar.sh --entrenar     # entorno de Python, orden onepepe-math, descarga de MathWriting (2,9 GB) y entrenamiento
+  echo '{"id":1,"cmd":"ping"}' | onepepe-math      # debe responder {"ok": true, ...}
+  ```
+  El modelo (~3 MB) y tus correcciones quedan en `~/.local/share/onepepe/`, nunca en el repositorio.
+- **Si usas Flatpak:** la app, dentro de su caja de arena, no ve el Python de tu sistema. La app intenta lanzar
+  `flatpak-spawn --host onepepe-math`, pero eso necesita un permiso que **no he añadido** porque permite a la app
+  ejecutar programas fuera de la caja de arena: decide tú. Si lo quieres, en tu equipo:
+  ```bash
+  flatpak override --user --talk-name=org.freedesktop.Flatpak com.github.flxzt.rnote.Devel
+  ```
+  (se quita con `flatpak override --user --reset com.github.flxzt.rnote.Devel`). Alternativa sin ese permiso: compilar
+  OnePepe de forma nativa (sin Flatpak). También puedes indicar otra orden con la variable `ONEPEPE_MATH_CMD`.
+- **Ramas:** `feat/matematicas-limpias` (fusionada en `onepepe`).
+- **Estado:** compilado · tests ✔ (Rust: modo matemáticas con respuestas simuladas, deshacer, toque y corrección de grupo,
+  dibujo del borde y del resultado; Python: 18 tests de protocolo, glifos, estructura, cálculo, unidades y aprendizaje
+  de correcciones) · programa auxiliar probado de punta a punta con el modelo real · **no ejecutado en la app** ·
+  lápiz: pendiente.
+- **Cómo lo pruebo yo:** instala el programa auxiliar (arriba) y compila `onepepe`. Activa el modo matemáticas
+  (Ctrl+Alt+M: debe aparecer el borde naranja). Escribe `2+3` y espera un segundo: los símbolos seguros se redibujan
+  limpios. Pulsa Ctrl+Z para recuperar tu letra. Toca un símbolo limpio: elige otra candidata, y prueba "Apply to the
+  whole group" escribiendo varias veces la misma letra. Activa "Show Result After =" y escribe `2x+1=7, x=`. Crea un
+  `.onepepe-glosario.txt` con `T = 310 K` y `k_B = 1.380649e-23 J/K` en la carpeta del documento y escribe `k_B T =`.
+  Si no pasa nada, mira si salió el aviso "Could not start the math helper".

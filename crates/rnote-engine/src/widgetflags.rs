@@ -24,6 +24,10 @@ pub struct WidgetFlags {
     pub hide_redo: Option<bool>,
     /// Changes whether text input in the UI toolkit should be enabled.
     pub enable_text_input: Option<bool>,
+    /// OnePepe: strokes written in math mode wait to be recognized.
+    pub math_pending: bool,
+    /// OnePepe: a recognized math symbol was tapped (position in `Engine::math.last_tap`).
+    pub math_tap: bool,
 }
 
 impl Default for WidgetFlags {
@@ -40,6 +44,8 @@ impl Default for WidgetFlags {
             hide_undo: None,
             hide_redo: None,
             enable_text_input: None,
+            math_pending: false,
+            math_tap: false,
         }
     }
 }
@@ -55,6 +61,8 @@ impl std::ops::BitOr for WidgetFlags {
 
 impl std::ops::BitOrAssign for WidgetFlags {
     fn bitor_assign(&mut self, rhs: Self) {
+        self.math_pending |= rhs.math_pending;
+        self.math_tap |= rhs.math_tap;
         self.redraw |= rhs.redraw;
         self.resize |= rhs.resize;
         self.refresh_ui |= rhs.refresh_ui;

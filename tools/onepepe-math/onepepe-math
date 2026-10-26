@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # OnePepe: arranca el programa auxiliar de matemáticas (lo lanza Rnote; también sirve para probarlo a mano).
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PY="${ONEPEPE_PYTHON:-python3}"
 [ -x "$HOME/.local/share/onepepe/venv/bin/python" ] && PY="$HOME/.local/share/onepepe/venv/bin/python"
 cd "$DIR" && exec "$PY" -m onepepe_math.server
