@@ -114,3 +114,19 @@ cargo test -p rnote-compose
 - **Rama:** `feat/formas` (fusionada en `onepepe`).
 - **Estado:** compilado · tests ✔ (reconocedor + prueba de extremo a extremo en el motor: dibujar círculo → forma → deshacer → trazo original → rehacer) · **no ejecutado en la app** · lápiz: pendiente.
 - **Cómo lo pruebo yo:** compila `onepepe`. Con el pincel, activa el botón de tinta a formas y dibuja: una línea, un círculo, una elipse alargada, un triángulo, un rectángulo y un rectángulo girado; luego escribe unas palabras normales, una "O" grande y una "a" grande. Mira qué se convierte. Prueba Ctrl+Z tras una conversión. Cambia la sensibilidad a 20 y a 80 y repite. **Anota cuántas formas acierta y cuántas letras convierte por error**, y dímelo para ajustar los umbrales.
+
+## Matemáticas — primer entregable (informe y extractor)
+
+- **Qué hay:** [`MATEMATICAS-INFORME.md`](MATEMATICAS-INFORME.md) (arquitectura, librerías, datos, qué necesito de ti) y
+  [`tools/onepepe-math/`](tools/onepepe-math/README.md): extractor de trazos de `.rnote`, lista de 30 expresiones para
+  que las escribas y script para descargar el dataset MathWriting fuera del repositorio. **Aún no hay nada de
+  matemáticas dentro de la app.**
+- **Rama:** `feat/matematicas-prototipo` (fusionada en `onepepe`).
+- **Estado:** tests del extractor ✔ (con un `.rnote` sintético generado por el propio motor) · probado con lápiz: no aplica.
+- **Cómo lo pruebo yo:** sigue `tools/onepepe-math/README.md` ("Lo que te pido"). En resumen:
+  ```bash
+  cd OnePepe/tools/onepepe-math
+  python3 -m unittest discover -s tests
+  python3 rnote_extract.py ~/ruta/mis_expresiones_1.rnote -o expresiones_1.json --svg svg_1 --labels expresiones.txt
+  ```
+  y abre los `svg_1/renglon_XX.svg` para ver que cada uno contiene una expresión completa.

@@ -1,0 +1,6 @@
+# Datos personales y resultados: nunca al repositorio
+*.json
+svg_*/
+mis_*.rnote
+datos-*/
+__pycache__/

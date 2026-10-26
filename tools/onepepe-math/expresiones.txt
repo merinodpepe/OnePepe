@@ -1,0 +1,33 @@
+# OnePepe: 30 expresiones para escribir a mano, una por renglón y en este orden.
+# Deja un renglón vacío entre expresión y expresión. Las líneas que empiezan por # se ignoran.
+# Escríbelas como lo harías en clase (con tu letra normal, sin esmerarte).
+3+4\cdot 5=
+\frac{7}{8}-\frac{1}{4}=
+2^{10}=
+\sqrt{144}+3^{2}=
+(a+b)^{2}
+x^{2}-5x+6=0
+\alpha+\beta=\gamma
+\Delta G=\Delta H-T\Delta S
+x_{1}+x_{2}=7
+\sin^{2}\theta+\cos^{2}\theta=1
+k_{B}T=
+\Delta G^{0}=-RT\ln K
+E=mc^{2}
+1.38\times10^{-23}\,\mathrm{J/K}\cdot310\,\mathrm{K}=
+N_{A}k_{B}=R
+25\,\mathrm{mM}\cdot2\,\mathrm{L}=
+F=6\pi\eta rv
+D=\frac{k_{B}T}{6\pi\eta r}
+\tau=\frac{1}{\lambda}
+\frac{d}{dx}(x^{3}+2x)=
+\frac{\partial f}{\partial t}
+\int_{0}^{1}x^{2}\,dx=
+\int e^{-kt}\,dt
+\nabla\cdot\vec{E}=\frac{\rho}{\varepsilon_{0}}
+\sum_{i=1}^{n}i=\frac{n(n+1)}{2}
+\lim_{x\to0}\frac{\sin x}{x}=
+\pm\sqrt{b^{2}-4ac}
+\begin{pmatrix}1&2\\3&4\end{pmatrix}
+V_{m}=\frac{RT}{F}\ln\frac{[K^{+}]_{o}}{[K^{+}]_{i}}
+\Pi=cRT
