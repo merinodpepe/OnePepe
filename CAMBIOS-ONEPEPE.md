@@ -281,3 +281,12 @@ cargo test -p rnote-compose
 - **Rama:** `feat/catalogo-simbolos` · **Estado:** compilado · no ejecutado · lápiz: pendiente (no tiene tests: es solo interfaz).
 - **Cómo lo pruebo yo:** herramienta de texto, haz clic en el lienzo, pulsa "Ω" y elige ∂, luego α, luego ≈. Comprueba
   que se insertan donde está el cursor.
+
+## Estampar fecha y hora (Fase 1c)
+
+- **Qué hace:** en la barra de la herramienta de texto, un botón con un **calendario** ofrece "Date", "Time" y
+  "Date and Time". Inserta `26/10/2026`, `15:42` o `26/10/2026 15:42` en el cursor de texto, o en un cuadro de texto
+  nuevo arriba a la izquierda de la vista.
+- **Rama:** `feat/fecha-hora` · **Estado:** compilado · tests ✔ (formato: `cargo test -p rnote-engine date_tests`) ·
+  no ejecutado · lápiz: pendiente.
+- **Cómo lo pruebo yo:** herramienta de texto → botón del calendario → "Date and Time". Comprueba la hora de tu equipo.

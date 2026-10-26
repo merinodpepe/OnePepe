@@ -33,6 +33,8 @@ mod imp {
         #[template_child]
         pub(crate) symbolcatalog_menubutton: TemplateChild<MenuButton>,
         #[template_child]
+        pub(crate) datetime_menubutton: TemplateChild<MenuButton>,
+        #[template_child]
         pub(crate) text_subscript_button: TemplateChild<Button>,
         #[template_child]
         pub(crate) text_align_start_togglebutton: TemplateChild<ToggleButton>,
@@ -220,6 +222,10 @@ impl RnTypewriterPage {
         imp.symbolcatalog_menubutton
             .set_popover(Some(&symbol_catalog_popover(appwindow)));
 
+        // OnePepe: date / time stamp
+        imp.datetime_menubutton
+            .set_popover(Some(&date_time_popover(appwindow)));
+
         // OnePepe: superscript / subscript
         for (button, sup) in [
             (imp.text_superscript_button.get(), true),
@@ -401,6 +407,42 @@ fn symbol_catalog_popover(appwindow: &RnAppWindow) -> gtk4::Popover {
             flow.append(&button);
         }
         vbox.append(&flow);
+    }
+    popover.set_child(Some(&vbox));
+    popover
+}
+
+/// OnePepe: the popover to insert the date, the time or both.
+fn date_time_popover(appwindow: &RnAppWindow) -> gtk4::Popover {
+    use rnote_engine::pens::typewriter::scripts::DateTimeStamp;
+
+    let popover = gtk4::Popover::new();
+    let vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 3);
+    for (label, kind) in [
+        (gettextrs::gettext("Date"), DateTimeStamp::Date),
+        (gettextrs::gettext("Time"), DateTimeStamp::Time),
+        (
+            gettextrs::gettext("Date and Time"),
+            DateTimeStamp::DateAndTime,
+        ),
+    ] {
+        let button = gtk4::Button::with_label(&label);
+        button.add_css_class("flat");
+        button.connect_clicked(clone!(
+            #[weak]
+            appwindow,
+            #[weak]
+            popover,
+            move |_| {
+                let Some(canvas) = appwindow.active_tab_canvas() else {
+                    return;
+                };
+                let widget_flags = canvas.engine_mut().insert_date_time(kind);
+                appwindow.handle_widget_flags(widget_flags, &canvas);
+                popover.popdown();
+            }
+        ));
+        vbox.append(&button);
     }
     popover.set_child(Some(&vbox));
     popover

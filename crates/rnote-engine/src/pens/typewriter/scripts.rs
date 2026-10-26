@@ -168,3 +168,39 @@ mod tests {
         assert_eq!(toggle_script("₂", true), "²");
     }
 }
+
+/// OnePepe: what a date/time stamp contains.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DateTimeStamp {
+    Date,
+    Time,
+    DateAndTime,
+}
+
+/// OnePepe: the text of a date/time stamp, in Spanish style (26/10/2026, 15:42).
+pub fn date_time_stamp(kind: DateTimeStamp, now: chrono::NaiveDateTime) -> String {
+    match kind {
+        DateTimeStamp::Date => now.format("%d/%m/%Y").to_string(),
+        DateTimeStamp::Time => now.format("%H:%M").to_string(),
+        DateTimeStamp::DateAndTime => now.format("%d/%m/%Y %H:%M").to_string(),
+    }
+}
+
+#[cfg(test)]
+mod date_tests {
+    use super::*;
+
+    #[test]
+    fn stamps() {
+        let t = chrono::NaiveDate::from_ymd_opt(2026, 10, 5)
+            .unwrap()
+            .and_hms_opt(9, 7, 0)
+            .unwrap();
+        assert_eq!(date_time_stamp(DateTimeStamp::Date, t), "05/10/2026");
+        assert_eq!(date_time_stamp(DateTimeStamp::Time, t), "09:07");
+        assert_eq!(
+            date_time_stamp(DateTimeStamp::DateAndTime, t),
+            "05/10/2026 09:07"
+        );
+    }
+}

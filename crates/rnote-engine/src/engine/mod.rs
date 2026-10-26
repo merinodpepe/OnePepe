@@ -870,6 +870,22 @@ impl Engine {
             | self.update_content_rendering_current_viewport()
     }
 
+    /// OnePepe: inserts the current date and/or time as text (at the text cursor, or as a new text box).
+    pub fn insert_date_time(
+        &mut self,
+        kind: crate::pens::typewriter::scripts::DateTimeStamp,
+    ) -> WidgetFlags {
+        let text = crate::pens::typewriter::scripts::date_time_stamp(
+            kind,
+            chrono::Local::now().naive_local(),
+        );
+        let mut widget_flags = WidgetFlags::default();
+        if self.current_pen_style_w_override() != PenStyle::Typewriter {
+            widget_flags |= self.change_pen_style(PenStyle::Typewriter);
+        }
+        widget_flags | self.insert_text(text, None)
+    }
+
     /// OnePepe: turns the selected text into superscript (`sup`) or subscript, or back.
     pub fn text_selection_toggle_script(&mut self, sup: bool) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
