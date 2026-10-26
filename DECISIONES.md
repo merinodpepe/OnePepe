@@ -105,3 +105,14 @@ Formato: qué elegí y por qué.
   documentado como paso opcional que decides tú.
 - **Créditos de las fuentes Hershey** en `tools/onepepe-math/onepepe_math/glyphs.py`: A. V. Hershey (U.S. National
   Bureau of Standards) y James Hurt (formato de los datos); se usan a través del paquete `Hershey-Fonts` (MIT).
+
+## Fase 1c — Texto, símbolos y utilidades
+
+- **Subíndice/superíndice con caracteres Unicode** (², ₂, ⁻¹…): el texto de Rnote no tiene atributo de elevar y
+  añadirlo cambiaría el formato `.rnote` y el dibujo del texto. Limitación aceptada: hay letras sin versión Unicode.
+  Botones en vez de atajos de teclado porque Ctrl+= ya es "acercar".
+- **Listas como prefijos de párrafo** ("• ", "1. ", "☐ "/"☑ "): son caracteres normales, sin cambio de formato. No
+  continúan solas al pulsar Intro (habría que tocar el manejo del teclado del editor de texto).
+- **Fecha y hora en formato español** (dd/mm/aaaa, HH:MM) con la hora local del equipo.
+- **Catálogo de símbolos** como un desplegable junto al de emojis, reutilizando la inserción de texto de Rnote.
+- **No hice** estilos rápidos ni recorte de pantalla (opcionales en el plan).

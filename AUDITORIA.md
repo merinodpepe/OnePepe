@@ -33,7 +33,38 @@ Consecuencia para ti: casi ninguna distribución estable trae aún GNOME 50. **L
 - Botones del lápiz reconfigurables: **existe**, `crates/rnote-engine/src/pens/shortcuts.rs` (`StylusPrimaryButton`, `StylusSecondaryButton`, botones de tableta `DrawingPadButton0..3`). Útil para el "modo matemáticas mientras mantengo pulsado".
 - Formato `.rnote`: JSON comprimido con gzip (`crates/rnote-engine/src/fileformats/rnoteformat/`, no lo he leído a fondo aún). Nada de lo planeado para las Fases 1–2 necesita cambiarlo.
 
-## Qué toco primero
+## Qué toqué primero (Fase 0)
 
 1. Fase 1 en este orden: colores (barato) → reordenar capas → PDFs/imágenes por encima de la tinta (sale con lo anterior) → regla.
 2. Fase 2: tinta a formas.
+
+Todo lo de la tabla de arriba se hizo después; el estado actual está en `ESTADO.md`.
+
+## Parte B: funciones extra de OneNote (auditoría del 2026-10-26, rama `onepepe`)
+
+Estado **antes** de tocar nada, con la ruta donde lo comprobé, y qué hice.
+
+### Fase 1b: botones del lápiz
+
+| Función | Estado | Dónde | Qué se hizo |
+|---|---|---|---|
+| Reasignar botones del lápiz a cualquier herramienta | **existe** | `crates/rnote-engine/src/pens/shortcuts.rs` (`ShortcutAction::ChangePenStyle`), ajustes en `crates/rnote-ui/src/settingspanel/penshortcutrow.rs` | nada |
+| Modos "mientras pulso" y "alterna al pulsar" | **existe** | `ShortcutMode::Temporary` y `ShortcutMode::Toggle` en `shortcuts.rs`; lógica en `crates/rnote-engine/src/pens/penholder.rs` (`handle_pressed_shortcut_key`) | nada |
+| Botón 1 = borrador **de trazo entero** mientras pulso | **parcial** | por defecto el botón 1 ya era "borrador mientras pulso", pero usaba el estilo de borrador de la barra | variante "Eraser (Whole Strokes)" independiente de la barra, y por defecto (`feat/botones-lapiz`) |
+| Botón 2 = **lazo** mientras pulso | **parcial** | por defecto "selección mientras pulso", con el estilo de la barra (rectángulo por defecto, `selectorconfig.rs`) | variante "Selector (Lasso)", por defecto (`feat/botones-lapiz`) |
+| Extremo borrador del lápiz | **existe** | `crates/rnote-ui/src/canvas/input.rs:480` (`DeviceToolType::Eraser` → `PenMode::Eraser`), herramienta elegible en ajustes ("Tool for the eraser action") | documentado; el problema del README (botones que envían "Eraser Tool") no se puede distinguir desde la app (ver `CAMBIOS-ONEPEPE.md`) |
+| Borrador de trazo entero y por área en la barra | **existe** | `crates/rnote-ui/data/ui/penssidebar/eraserpage.ui` ("Trash Strokes" / "Split Strokes") | tamaños rápidos del borrador 8/24/64 (`feat/botones-lapiz`) |
+
+### Fase 1c: texto, símbolos y utilidades
+
+| Función | Estado | Dónde | Qué se hizo |
+|---|---|---|---|
+| 1. Subíndice y superíndice en el texto | **no existe** | `TextAttribute` (`crates/rnote-engine/src/strokes/textstroke.rs:85`) no tiene atributo de elevar | botones x² / x₂ con caracteres Unicode (`feat/subindices`) |
+| 2. Catálogo de símbolos | **no existe** (solo el selector de emojis) | `crates/rnote-ui/data/ui/penssidebar/typewriterpage.ui` (`emojichooser`) | botón "Ω" con griego, operadores, análisis, conjuntos y física (`feat/catalogo-simbolos`) |
+| 3. Resaltador semitransparente que no tapa la tinta, con paleta | **existe** | estilo "Marker" del pincel (`crates/rnote-engine/src/pens/pensconfig/brushconfig.rs`), capa `Highlighter` dibujada en modo multiplicar (`crates/rnote-engine/src/engine/rendering.rs:189`); color con el selector común (paleta de 48 y favoritos) | nada |
+| 4. Ejes cartesianos 2D y 3D | **existe** | `ShapeBuilderType::CoordSystem2D`, `CoordSystem3D`, `QuadrantCoordSystem2D` (`crates/rnote-compose/src/builders/mod.rs`), en la herramienta de formas | nada |
+| 5. Estampar fecha, hora o ambas | **no existe** | — | botón de calendario en la barra de texto (`feat/fecha-hora`) |
+| 6. Negrita, cursiva, subrayado, tachado, color de fuente | **existe** | botones en `typewriterpage.ui`; atributos en `textstroke.rs` (`FontWeight`, `Style`, `Underline`, `Strikethrough`, `TextColor`) | nada |
+| 7. Casillas, viñetas y listas numeradas | **no existe** | — | tres botones en la barra de texto, por párrafo (`feat/listas`) |
+| Estilos rápidos (Título 1/2, cita, código) | **no existe** | — | no hecho (opcional, "solo si sobra") |
+| Recorte de pantalla | **no existe** | — | no hecho (opcional) |

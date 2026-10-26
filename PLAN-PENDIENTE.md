@@ -31,3 +31,26 @@ NO HACER: copiar formato, adjuntar archivos como icono, búsqueda de imágenes e
 
 ORDEN SI HAY QUE RECORTAR POR CRÉDITO O TIEMPO (el crédito caduca el 5 de noviembre a las 8:59 CET):
 1) hojas infinitas comprobadas, 2) tinta a formas, 3) matemáticas, 4) botones del lápiz (1b), 5) resto de la Fase 1, 6) Fase 1c, 7) cuadernos y secciones.
+
+---
+
+## Estado del plan (actualizado 2026-10-26, añadido por Claude; el texto de arriba es el original sin cambios)
+
+PARTE A (matemáticas):
+1. Sustituir la letra por trazos limpios: **hecho** (trazos de pincel normales, umbral configurable, deshacer, ajustes;
+   sin cambiar el formato). Pendiente de medir con tu letra. La corrección tras cerrar y reabrir la página necesita tu
+   decisión sobre el archivo oculto (ver `MATEMATICAS-INFORME.md`, 0.1 y 0.4).
+2. Grupos por forma, contexto, glosario, comprobación dimensional, corrección por símbolo o grupo con actualización del
+   símbolo limpio: **hecho**.
+3. Resultado del "=" como función aparte con ajuste propio: **hecho** (valor, despejar, simplificar, derivar, integrar,
+   sumatorios, límites, unidades).
+4. Fuente: **Hershey** de trazo único (licencia anotada en `MATEMATICAS-INFORME.md`, 0.2).
+
+PARTE B:
+- Auditoría en `AUDITORIA.md` ("Parte B"): **hecha**.
+- Fase 1b (botones del lápiz): **hecha** (`feat/botones-lapiz`), salvo lo que no se puede arreglar desde la app con
+  botones que envían "Eraser Tool" (explicado en `CAMBIOS-ONEPEPE.md`).
+- Fase 1c: 1 subíndice/superíndice **hecho** (`feat/subindices`); 2 catálogo **hecho** (`feat/catalogo-simbolos`);
+  3 resaltador **ya existía**; 4 ejes 2D/3D **ya existían**; 5 fecha/hora **hecho** (`feat/fecha-hora`);
+  6 formato de texto **ya existía**; 7 casillas, viñetas y listas **hecho** (`feat/listas`).
+  Opcionales (estilos rápidos, recorte de pantalla): **no hechos**.

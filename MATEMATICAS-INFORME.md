@@ -20,8 +20,9 @@ función aparte. El reconocimiento (secciones 2.2 y siguientes) no cambia: es la
   tipo de trazo ya existe.
 - **Símbolo dudoso:** si la probabilidad de la mejor candidata (después del reescoring con contexto) no llega al
   **umbral de confianza**, tus trazos se quedan tal cual.
-- **Ajustes:** interruptor (activado/desactivado, por defecto desactivado) y umbral de confianza de 50 % a 99 %
-  (por defecto 85 %), en la configuración del pincel, como la tinta a formas.
+- **Ajustes:** interruptor (activado/desactivado) y umbral de confianza de 50 % a 99 % (por defecto **95 %**, elegido
+  midiendo, ver 0.4), en la configuración del pincel, como la tinta a formas. Todo ocurre solo dentro del modo
+  matemáticas, que viene apagado.
 - **Deshacer:** igual que tinta a formas: tu tinta original se guarda en el historial antes de sustituirla, y un Ctrl+Z
   la recupera.
 - **Cuándo se dispara:** en el modo matemáticas, tras una pausa corta sin escribir (≈ 0,8 s), sobre los trazos nuevos de
@@ -67,6 +68,45 @@ tinta**, y no se muestra nada si la lectura no es válida o la confianza es baja
 
 Junto al resultado se muestra en pequeño el LaTeX entendido, para que compruebes la lectura.
 
+
+### 0.4 Estado de la implementación (2026-10-26, sin tus datos)
+
+Hecho y fusionado en `onepepe` (rama `feat/matematicas-limpias`); detalle y pruebas en `CAMBIOS-ONEPEPE.md`:
+
+- **Programa auxiliar** `tools/onepepe-math` (Python): agrupación de trazos, clasificador (red pequeña, numpy en
+  ejecución), contexto por bigramas + Viterbi, grupos por forma, glosario por cuaderno, clasificador personal con tus
+  correcciones, estructura espacial, cálculo del "=" (tabla de 0.3: valor, despejar, simplificar, derivar, integrar,
+  sumatorios, límites, unidades y comprobación dimensional) y glifos Hershey. 18 tests.
+- **En Rnote:** modo matemáticas (botón y Ctrl+Alt+M, borde naranja), sustitución por símbolos limpios con umbral y
+  deshacer, toque para corregir un símbolo o su grupo, resultado en gris con el LaTeX entendido, ajustes. Tests del
+  motor con respuestas simuladas.
+- **Fuente:** Hershey vía el paquete `Hershey-Fonts` de PyPI (envoltorio con licencia MIT; los datos de Hershey se
+  usan con los créditos exigidos, ver 0.2). Comprobada visualmente la tabla de símbolos; θ sale con la forma ϑ (diseño
+  de Hershey); ≈ y ∼ están dibujados a mano porque no están en la fuente.
+- **Formato `.rnote`:** sin cambios. La relación símbolo ↔ trazos solo se recuerda **durante la sesión**: no he creado
+  el archivo oculto propuesto en 0.1 porque requiere tu confirmación. Consecuencia: tras cerrar y abrir la página, los
+  símbolos limpios ya no se pueden corregir tocándolos (se borran y se reescriben).
+
+**Medidas** (fórmulas sintéticas de MathWriting con símbolos de escritores que el clasificador no vio; vocabulario
+básico; **no es tu letra**):
+
+| Medida | Resultado |
+|---|---|
+| Símbolo suelto: primera candidata / entre las 5 primeras | 61 % / 92 % (229 clases) |
+| Agrupación de trazos en símbolos correcta | 90 % |
+| Símbolos correctos con contexto / entre las 3 primeras | 66 % / 86 % |
+| Sustitución con umbral 95 %: símbolos sustituidos / de ellos visualmente correctos | ~50 % / ~84 % |
+| Estructura correcta con símbolos correctos (fórmula entera) | 76 % |
+| Fórmula entera perfecta de punta a punta | ~10 % |
+| Tiempo por fórmula | ~5 ms |
+
+**Lectura:** el modelo genérico entrenado con unos 30 ejemplos por símbolo no basta para sustituir sin errores. Lo que
+falta para que sea útil es justo lo que depende de ti: tus 30 expresiones (para medir y ajustar con tu letra) y tus
+correcciones (el clasificador personal las aplica al momento). Por eso el modo matemáticas viene apagado y el umbral alto.
+
+**Pendiente que sí depende de ti:** medir con tus expresiones, ajustar umbrales y la estructura a tu letra "poco
+lineal", decidir el archivo oculto para corregir tras reabrir, y, si usas Flatpak, decidir el permiso para lanzar el
+programa auxiliar (ver `CAMBIOS-ONEPEPE.md`).
 
 ## 1. Resumen (del primer entregable; el cambio de plan está en la sección 0)
 
@@ -139,7 +179,7 @@ Pueden añadirse más adelante como **una hipótesis más** que compita en el pa
    pint (o `sympy.physics.units`) y constantes con `scipy.constants` (k_B, N_A, R, e, h, F…). Si algo no es una expresión
    válida o la confianza total es baja, **no se muestra nada**.
 
-### 2.3 Protocolo entre Rnote y el programa (borrador)
+### 2.3 Protocolo entre Rnote y el programa (borrador; el implementado está documentado en `tools/onepepe-math/onepepe_math/server.py`)
 
 Petición (una línea JSON):
 

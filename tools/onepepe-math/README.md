@@ -1,14 +1,30 @@
-# onepepe-math (prototipo, Fase 3)
+# onepepe-math (Fase 3)
 
-Herramientas para el reconocimiento de matemáticas de OnePepe. De momento **no están conectadas a la app**: sirven para
-reunir datos de tu letra y probar el reconocedor fuera de Rnote. El diseño está en [`MATEMATICAS-INFORME.md`](../../MATEMATICAS-INFORME.md).
+Programa auxiliar de matemáticas de OnePepe (lo arranca la app en el modo matemáticas) y herramientas para reunir datos
+de tu letra. Diseño, estado y medidas en [`MATEMATICAS-INFORME.md`](../../MATEMATICAS-INFORME.md); cómo probarlo en
+[`CAMBIOS-ONEPEPE.md`](../../CAMBIOS-ONEPEPE.md).
 
 | Archivo | Para qué sirve |
 |---|---|
 | `rnote_extract.py` | Saca los trazos de un `.rnote` a JSON, los separa por renglones y dibuja un SVG por renglón. Solo usa la biblioteca estándar de Python. |
 | `expresiones.txt` | Las 30 expresiones que te pido que escribas, en LaTeX, en orden. |
 | `descargar_mathwriting.sh` | Descarga el dataset público MathWriting fuera del repositorio (`~/.local/share/onepepe/`). |
-| `tests/` | Tests del extractor, con un `.rnote` sintético ("2+3=") generado por el motor de Rnote. |
+| `tests/` | Tests del extractor, con un `.rnote` sintético ("2+3=") generado por el motor de Rnote, y del reconocedor. |
+| `onepepe_math/` | El programa auxiliar: agrupación, clasificador, contexto, glosario, correcciones, estructura, cálculo y glifos. |
+| `onepepe-math` | Orden que arranca el programa auxiliar (habla JSON por entrada/salida estándar). |
+| `instalar.sh` | Instala el programa auxiliar en tu equipo; con `--entrenar` descarga MathWriting y entrena el modelo. |
+| `train_classifier.py` | Entrena el clasificador de símbolos (lo llama `instalar.sh --entrenar`). |
+
+## Instalar el programa auxiliar
+
+```bash
+cd tools/onepepe-math
+./instalar.sh --entrenar
+echo '{"id":1,"cmd":"ping"}' | onepepe-math
+```
+
+Necesita Python 3 con `venv` (en Debian/Ubuntu: `sudo apt install python3-venv`). El modelo (~3 MB) y tus correcciones
+se guardan en `~/.local/share/onepepe/`; nunca en el repositorio.
 
 ## Lo que te pido (≈ 30–40 minutos)
 
@@ -47,8 +63,9 @@ Para dármelos, lo más sencillo es una de estas dos vías:
 Archivos a enviar: `mis_expresiones_1.rnote` (y `_2` si lo hiciste) y `mis_simbolos.rnote`. Los `.json` no hacen falta:
 los genero yo.
 
-Tests:
+Tests (el extractor solo necesita Python; el resto, las dependencias de `requirements.txt`, p. ej. con el Python del
+entorno que crea `instalar.sh`):
 
 ```bash
-python3 -m unittest discover -s tests
+~/.local/share/onepepe/venv/bin/python -m unittest discover -s tests
 ```
