@@ -315,6 +315,73 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     }
     vbox.append(&flow);
     vbox.append(&group_check);
+    // fix the cut into symbols: two strokes that belong together, or one symbol that is really two
+    let cut_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    for (label, join) in [
+        (gettext("Join with the one next to it"), true),
+        (gettext("Split into strokes"), false),
+    ] {
+        let button = gtk4::Button::with_label(&label);
+        button.add_css_class("flat");
+        button.connect_clicked(clone!(
+            #[weak]
+            appwindow,
+            #[weak]
+            canvas,
+            #[weak]
+            popover,
+            move |_| {
+                let requests = if join {
+                    canvas
+                        .engine_mut()
+                        .math_join_with_next_requests(symbol_id, notebook_dir(&canvas))
+                } else {
+                    canvas
+                        .engine_mut()
+                        .math_split_requests(symbol_id, notebook_dir(&canvas))
+                };
+                popover.popdown();
+                if requests.is_empty() {
+                    appwindow.overlays().dispatch_toast_text(
+                        &gettext("Nothing to join or split here"),
+                        crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+                    );
+                    return;
+                }
+                glib::spawn_future_local(clone!(
+                    #[weak]
+                    appwindow,
+                    #[weak]
+                    canvas,
+                    async move {
+                        let Some(helper) = helper(&appwindow) else {
+                            return;
+                        };
+                        for request in requests {
+                            match helper.request(request).await {
+                                Ok(resp) => {
+                                    let widget_flags =
+                                        canvas.engine_mut().math_apply_group_fix(&resp);
+                                    appwindow.handle_widget_flags(widget_flags, &canvas);
+                                }
+                                Err(e) => {
+                                    tracing::error!(
+                                        "Fixing the cut into symbols failed, Err: {e:?}"
+                                    );
+                                    reset_helper();
+                                    return;
+                                }
+                            }
+                        }
+                        note_correction(&appwindow);
+                    }
+                ));
+            }
+        ));
+        cut_box.append(&button);
+    }
+    vbox.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
+    vbox.append(&cut_box);
     popover.set_child(Some(&vbox));
     popover.set_parent(canvas);
     popover.set_pointing_to(Some(&gdk::Rectangle::new(

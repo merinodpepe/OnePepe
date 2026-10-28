@@ -3792,3 +3792,15 @@ msgstr "Tienes muchas correcciones nuevas: reentrenar aprendería mejor tu letra
 #. OnePepe
 msgid "You have {examples} examples of your handwriting ({new} new since the last retraining). It takes about {minutes} minutes and you can keep using the app meanwhile. The new model is only used if it is not worse with your recent examples."
 msgstr "Tienes {examples} ejemplos de tu letra ({new} nuevos desde el último reentrenamiento). Tarda unos {minutes} minutos y mientras puedes seguir usando la app. El modelo nuevo solo se usa si no es peor con tus ejemplos recientes."
+
+#. OnePepe
+msgid "Join with the one next to it"
+msgstr "Unir con el de al lado"
+
+#. OnePepe
+msgid "Split into strokes"
+msgstr "Separar en trazos"
+
+#. OnePepe
+msgid "Nothing to join or split here"
+msgstr "Aquí no hay nada que unir o separar"
