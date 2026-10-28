@@ -1,7 +1,7 @@
 // Modules
 mod filerow;
 mod widgethelper;
-mod workspaceactions;
+pub(crate) mod workspaceactions;
 pub(crate) mod workspacesbar;
 
 // Re-exports

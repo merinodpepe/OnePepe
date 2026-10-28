@@ -5,6 +5,7 @@ pub mod export;
 pub mod import;
 pub mod math;
 pub mod onepepe_insert;
+pub mod onepepe_notebook;
 pub mod rendering;
 pub mod ruler;
 pub mod snapshot;
