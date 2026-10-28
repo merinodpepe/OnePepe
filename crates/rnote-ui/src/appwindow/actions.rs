@@ -92,10 +92,8 @@ impl RnAppWindow {
         self.add_action(&action_selection_duplicate);
         let action_selection_invert_color = gio::SimpleAction::new("selection-invert-color", None);
         self.add_action(&action_selection_invert_color);
-        let action_selection_z_order = gio::SimpleAction::new(
-            "selection-z-order",
-            Some(&String::static_variant_type()),
-        );
+        let action_selection_z_order =
+            gio::SimpleAction::new("selection-z-order", Some(&String::static_variant_type()));
         self.add_action(&action_selection_z_order);
         let action_selection_select_all = gio::SimpleAction::new("selection-select-all", None);
         self.add_action(&action_selection_select_all);
@@ -208,7 +206,8 @@ impl RnAppWindow {
         );
         self.add_action(&action_pen_style);
         // OnePepe: math mode of the active tab
-        let action_math_mode = gio::SimpleAction::new_stateful("math-mode", None, &false.to_variant());
+        let action_math_mode =
+            gio::SimpleAction::new_stateful("math-mode", None, &false.to_variant());
         self.add_action(&action_math_mode);
         action_math_mode.connect_activate(clone!(
             #[weak(rename_to=appwindow)]
@@ -1274,13 +1273,15 @@ impl RnAppWindow {
         app.set_accels_for_action("win.text-bold", &["<Ctrl>b"]);
         app.set_accels_for_action("win.text-italic", &["<Ctrl>i"]);
         app.set_accels_for_action("win.text-underline", &["<Ctrl>u"]);
-        app.set_accels_for_action("win.pen-style::brush", &["<Ctrl>1", "<Ctrl>KP_1"]);
-        app.set_accels_for_action("win.pen-style::shaper", &["<Ctrl>2", "<Ctrl>KP_2"]);
-        app.set_accels_for_action("win.pen-style::typewriter", &["<Ctrl>3", "<Ctrl>KP_3"]);
-        app.set_accels_for_action("win.pen-style::eraser", &["<Ctrl>4", "<Ctrl>KP_4"]);
-        app.set_accels_for_action("win.pen-style::selector", &["<Ctrl>5", "<Ctrl>KP_5"]);
-        app.set_accels_for_action("win.pen-style::tools", &["<Ctrl>6", "<Ctrl>KP_6"]);
-        (1..=9).for_each(|i| {
+        app.set_accels_for_action("win.pen-style::brush", &["<Alt>1", "<Alt>KP_1"]);
+        app.set_accels_for_action("win.pen-style::shaper", &["<Alt>2", "<Alt>KP_2"]);
+        app.set_accels_for_action("win.pen-style::typewriter", &["<Alt>3", "<Alt>KP_3"]);
+        app.set_accels_for_action("win.pen-style::eraser", &["<Alt>4", "<Alt>KP_4"]);
+        app.set_accels_for_action("win.pen-style::selector", &["<Alt>5", "<Alt>KP_5"]);
+        app.set_accels_for_action("win.pen-style::tools", &["<Alt>6", "<Alt>KP_6"]);
+        // OnePepe: Ctrl+1…Ctrl+5 choose the favorite pens (favorites.rs), so the tools moved to Alt+1…Alt+6;
+        // Ctrl+Alt+0/1/2 are the text styles (textstyles.rs), so colors 1 and 2 have no shortcut
+        (3..=9).for_each(|i| {
             app.set_accels_for_action(
                 &format!("win.set-color-{i}"),
                 &[&format!("<Ctrl><Alt>{i}"), &format!("<Ctrl><Alt>KP_{i}")],

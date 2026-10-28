@@ -6,7 +6,6 @@ use crate::RnAppWindow;
 use gettextrs::gettext;
 use gtk4::{gio, glib, glib::clone, prelude::*, subclass::prelude::*};
 use rnote_engine::engine::onepepe_insert::{FitMode, PageSize, PageTemplate};
-use rnote_engine::pens::penpresets::{PenPreset, PenPresets};
 use rnote_engine::pens::pensconfig::toolsconfig::ToolStyle;
 use rnote_engine::pens::typewriter::scripts::{DateTimeStamp, ListKind, QuickStyle};
 use rnote_engine::strokes::textstroke::TextAttribute;
@@ -14,13 +13,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::str::FromStr;
 use tracing::{debug, error};
-
-thread_local! {
-    /// The favorite pens, loaded from the settings file.
-    static PEN_PRESETS: RefCell<Option<PenPresets>> = const { RefCell::new(None) };
-    /// The box of the ribbon that shows the favorite pens.
-    static FAVORITES_BOX: RefCell<Option<glib::WeakRef<gtk4::Box>>> = const { RefCell::new(None) };
-}
 
 /// Builds the ribbon, puts it above the tabs and registers its actions.
 pub(crate) fn setup(appwindow: &RnAppWindow) {
@@ -155,6 +147,7 @@ pub(crate) fn refresh(appwindow: &RnAppWindow) {
                 .to_variant(),
         );
     }
+    crate::favorites::refresh(appwindow);
 }
 
 // ----- building blocks
@@ -460,13 +453,7 @@ fn file_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
 fn home_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
     let styles_popover = list_popover(
         "win.text-quick-style",
-        &[
-            (gettext("Heading 1"), "heading1"),
-            (gettext("Heading 2"), "heading2"),
-            (gettext("Quote"), "quote"),
-            (gettext("Code"), "code"),
-            (gettext("Normal"), "normal"),
-        ],
+        &[(gettext("Quote"), "quote"), (gettext("Code"), "code")],
     );
     let datetime_popover = list_popover(
         "win.insert-datetime",
@@ -568,31 +555,19 @@ fn home_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                 ],
             ])],
         ),
-        group(
-            &gettext("Styles"),
-            &[
-                big_button(
-                    "pen-typewriter-fontchooser-symbolic",
-                    &gettext("Heading 1"),
-                    "win.text-quick-style",
-                    s("heading1"),
-                )
-                .upcast(),
-                big_button(
-                    "pen-typewriter-fontchooser-symbolic",
-                    &gettext("Heading 2"),
-                    "win.text-quick-style",
-                    s("heading2"),
-                )
-                .upcast(),
-                big_menu(
-                    "misc-menu-symbolic",
-                    &gettext("More styles"),
-                    &styles_popover,
-                )
-                .upcast(),
-            ],
-        ),
+        group(&gettext("Styles"), &{
+            let mut widgets = crate::textstyles::gallery(&styles_popover);
+            let edit = gtk4::MenuButton::builder()
+                .icon_name(available_icon("document-edit-symbolic"))
+                .tooltip_text(gettext("Edit text styles"))
+                .popover(&crate::textstyles::edit_popover(appwindow))
+                .valign(gtk4::Align::Center)
+                .build();
+            edit.add_css_class("flat");
+            edit.set_focus_on_click(false);
+            widgets.push(edit.upcast());
+            widgets
+        }),
         group(
             &gettext("Selection"),
             &[rows(&[
@@ -773,10 +748,7 @@ fn insert_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
 }
 
 fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
-    let favorites = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
-    favorites.set_valign(gtk4::Align::Center);
-    FAVORITES_BOX.with(|b| *b.borrow_mut() = Some(favorites.downgrade()));
-    rebuild_favorites(appwindow);
+    let favorites = crate::favorites::widget(appwindow);
 
     page(&[
         group(
@@ -1105,146 +1077,6 @@ fn table_popover() -> gtk4::Popover {
 
 // ----- favorite pens
 
-fn presets_path() -> std::path::PathBuf {
-    glib::user_config_dir()
-        .join("onepepe")
-        .join("boligrafos.json")
-}
-
-fn with_presets<R>(f: impl FnOnce(&mut PenPresets) -> R) -> R {
-    PEN_PRESETS.with(|p| {
-        let mut p = p.borrow_mut();
-        let presets = p.get_or_insert_with(|| match std::fs::read_to_string(presets_path()) {
-            Ok(json) => PenPresets::from_json(&json),
-            Err(_) => PenPresets::default(),
-        });
-        f(presets)
-    })
-}
-
-fn save_presets() {
-    let json = with_presets(|p| p.to_json());
-    let path = presets_path();
-    let result = json.and_then(|json| {
-        if let Some(dir) = path.parent() {
-            std::fs::create_dir_all(dir)?;
-        }
-        std::fs::write(&path, json)?;
-        Ok(())
-    });
-    if let Err(e) = result {
-        error!("Saving the favorite pens failed, Err: {e:?}");
-    }
-}
-
-/// A round swatch with the color and (roughly) the width of the pen. Highlighters are drawn as a bar.
-fn swatch(preset: &PenPreset) -> gtk4::DrawingArea {
-    let area = gtk4::DrawingArea::builder()
-        .content_width(26)
-        .content_height(26)
-        .build();
-    let color = preset.color;
-    let marker = matches!(
-        preset.style,
-        rnote_engine::pens::pensconfig::brushconfig::BrushStyle::Marker
-    );
-    let radius = (3.0 + preset.width.sqrt() * 2.0).min(12.0);
-    area.set_draw_func(move |_, cx, w, h| {
-        cx.set_source_rgba(color.r, color.g, color.b, color.a);
-        if marker {
-            cx.rectangle(2.0, h as f64 * 0.35, w as f64 - 4.0, h as f64 * 0.3);
-        } else {
-            cx.arc(
-                w as f64 / 2.0,
-                h as f64 / 2.0,
-                radius,
-                0.0,
-                std::f64::consts::TAU,
-            );
-        }
-        let _ = cx.fill();
-    });
-    area
-}
-
-fn rebuild_favorites(appwindow: &RnAppWindow) {
-    let Some(container) = FAVORITES_BOX.with(|b| b.borrow().as_ref().and_then(|w| w.upgrade()))
-    else {
-        return;
-    };
-    while let Some(child) = container.first_child() {
-        container.remove(&child);
-    }
-    let presets = with_presets(|p| p.0.clone());
-    for (i, preset) in presets.iter().enumerate() {
-        let button = gtk4::Button::builder()
-            .child(&swatch(preset))
-            .tooltip_text(format!(
-                "{} ({})",
-                preset.name,
-                gettext("right click to remove")
-            ))
-            .action_name("win.pen-preset")
-            .action_target(&(i as i32).to_variant())
-            .build();
-        button.add_css_class("flat");
-        button.set_focus_on_click(false);
-        let gesture = gtk4::GestureClick::builder().button(3).build();
-        gesture.connect_pressed(clone!(
-            #[weak]
-            button,
-            #[weak]
-            appwindow,
-            move |_, _, _, _| {
-                let popover = gtk4::Popover::new();
-                let remove = gtk4::Button::with_label(&gettext("Remove this pen"));
-                remove.add_css_class("flat");
-                remove.connect_clicked(clone!(
-                    #[weak]
-                    popover,
-                    #[weak]
-                    appwindow,
-                    move |_| {
-                        popover.popdown();
-                        gio::prelude::ActionGroupExt::activate_action(
-                            &appwindow,
-                            "pen-preset-remove",
-                            Some(&(i as i32).to_variant()),
-                        );
-                    }
-                ));
-                popover.set_child(Some(&remove));
-                // not parented to the pen button itself: the button would take the clicks inside the popover
-                let Some(anchor) = button.parent().and_then(|favorites| favorites.parent()) else {
-                    return;
-                };
-                if let Some(bounds) = button.compute_bounds(&anchor) {
-                    popover.set_pointing_to(Some(&gtk4::gdk::Rectangle::new(
-                        bounds.x() as i32,
-                        bounds.y() as i32,
-                        bounds.width() as i32,
-                        bounds.height() as i32,
-                    )));
-                }
-                popover.set_parent(&anchor);
-                popover.connect_closed(|p| p.unparent());
-                popover.popup();
-            }
-        ));
-        button.add_controller(gesture);
-        container.append(&button);
-    }
-    let add = gtk4::Button::builder()
-        .icon_name("plus-symbolic")
-        .tooltip_text(gettext("Save the current pen as favorite"))
-        .action_name("win.pen-preset-save")
-        .build();
-    add.add_css_class("flat");
-    add.set_focus_on_click(false);
-    container.append(&add);
-    let _ = appwindow;
-}
-
 // ----- actions
 
 fn string_action(appwindow: &RnAppWindow, name: &str, f: impl Fn(&RnAppWindow, &str) + 'static) {
@@ -1362,7 +1194,8 @@ fn setup_actions(appwindow: &RnAppWindow) {
         let Ok(style) = QuickStyle::from_str(target) else {
             return;
         };
-        with_canvas(appwindow, |engine| engine.text_quick_style(style));
+        let styles = crate::textstyles::current();
+        with_canvas(appwindow, |engine| engine.text_quick_style(style, &styles));
     });
     string_action(appwindow, "text-list", |appwindow, target| {
         let kind = match target {
@@ -1496,55 +1329,8 @@ fn setup_actions(appwindow: &RnAppWindow) {
         );
     });
 
-    // favorite pens
-    let action_pen_preset = gio::SimpleAction::new("pen-preset", Some(&i32::static_variant_type()));
-    action_pen_preset.connect_activate(clone!(
-        #[weak]
-        appwindow,
-        move |_, target| {
-            let Some(index) = target.and_then(|t| t.get::<i32>()) else {
-                return;
-            };
-            let Some(preset) = with_presets(|p| p.0.get(index as usize).cloned()) else {
-                return;
-            };
-            with_canvas(&appwindow, |engine| engine.apply_pen_preset(&preset));
-            appwindow.refresh_ui();
-        }
-    ));
-    appwindow.add_action(&action_pen_preset);
-    let action_pen_preset_remove =
-        gio::SimpleAction::new("pen-preset-remove", Some(&i32::static_variant_type()));
-    action_pen_preset_remove.connect_activate(clone!(
-        #[weak]
-        appwindow,
-        move |_, target| {
-            let Some(index) = target.and_then(|t| t.get::<i32>()) else {
-                return;
-            };
-            with_presets(|p| p.remove(index as usize));
-            save_presets();
-            rebuild_favorites(&appwindow);
-        }
-    ));
-    appwindow.add_action(&action_pen_preset_remove);
-    plain_action(appwindow, "pen-preset-save", |appwindow| {
-        let Some(canvas) = appwindow.active_tab_canvas() else {
-            return;
-        };
-        let count = with_presets(|p| p.0.len());
-        let preset =
-            canvas
-                .engine_ref()
-                .current_pen_preset(format!("{} {}", gettext("Pen"), count + 1));
-        with_presets(|p| p.add(preset));
-        save_presets();
-        rebuild_favorites(appwindow);
-        appwindow.overlays().dispatch_toast_text(
-            &gettext("Saved the current pen as favorite"),
-            crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
-        );
-    });
+    crate::favorites::setup_actions(appwindow);
+    crate::textstyles::setup_accels(appwindow);
 
     appwindow
         .app()

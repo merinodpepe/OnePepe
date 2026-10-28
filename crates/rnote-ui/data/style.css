@@ -455,6 +455,26 @@ window.onepepe .onepepe-optionsbar button:hover:not(:checked) {
     background-color: @op_hover;
 }
 
+/* --- favorite pens: 28 px circles, a brand ring on the active one */
+window.onepepe .onepepe-favorites button.onepepe-pen {
+    padding: 2px;
+    border-radius: 18px;
+    min-width: 0px;
+    min-height: 0px;
+}
+
+window.onepepe .onepepe-favorites button.onepepe-pen.active {
+    box-shadow: 0px 0px 0px 2px @op_brand;
+}
+
+/* --- text styles: the names in the style */
+window.onepepe .onepepe-ribbon-body button.onepepe-style-preview {
+    min-width: 64px;
+    min-height: 52px;
+    padding: 4px 8px;
+    color: @op_fg_1;
+}
+
 /* --- high contrast: visible borders on the controls */
 window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
 window.onepepe.high-contrast .overlay_toolbar {

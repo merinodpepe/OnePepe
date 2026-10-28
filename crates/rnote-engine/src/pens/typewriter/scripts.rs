@@ -436,28 +436,153 @@ impl std::str::FromStr for QuickStyle {
     }
 }
 
-/// The text attributes of a quick style, for text with the base font size `base_font_size`.
+/// OnePepe: an editable text style of the design guide: size (and its line height) and weight.
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct TextStyleDef {
+    pub size: f64,
+    /// The line height of the design guide. Kept for the settings; the text is laid out with the line height of
+    /// its font, as in Rnote (no per-paragraph line spacing in the .rnote format).
+    pub line_height: f64,
+    pub weight: u16,
+}
+
+impl Default for TextStyleDef {
+    fn default() -> Self {
+        Self {
+            size: 16.0,
+            line_height: 24.0,
+            weight: 400,
+        }
+    }
+}
+
+impl TextStyleDef {
+    /// The text attributes of the style.
+    pub fn attributes(&self) -> Vec<crate::strokes::textstroke::TextAttribute> {
+        use crate::strokes::textstroke::TextAttribute;
+        vec![
+            TextAttribute::FontSize(self.size),
+            TextAttribute::FontWeight(self.weight),
+        ]
+    }
+}
+
+/// OnePepe: the text styles Title 1, Title 2 and Normal (design guide: 28/36 600, 22/30 600, 16/24 400).
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct TextStyles {
+    pub heading1: TextStyleDef,
+    pub heading2: TextStyleDef,
+    pub normal: TextStyleDef,
+}
+
+impl Default for TextStyles {
+    fn default() -> Self {
+        Self {
+            heading1: TextStyleDef {
+                size: 28.0,
+                line_height: 36.0,
+                weight: 600,
+            },
+            heading2: TextStyleDef {
+                size: 22.0,
+                line_height: 30.0,
+                weight: 600,
+            },
+            normal: TextStyleDef::default(),
+        }
+    }
+}
+
+impl TextStyles {
+    /// The editable style of a quick style (Title 1, Title 2 and Normal).
+    pub fn get(&self, style: QuickStyle) -> Option<TextStyleDef> {
+        match style {
+            QuickStyle::Heading1 => Some(self.heading1),
+            QuickStyle::Heading2 => Some(self.heading2),
+            QuickStyle::Normal => Some(self.normal),
+            QuickStyle::Quote | QuickStyle::Code => None,
+        }
+    }
+
+    pub fn set(&mut self, style: QuickStyle, def: TextStyleDef) {
+        match style {
+            QuickStyle::Heading1 => self.heading1 = def,
+            QuickStyle::Heading2 => self.heading2 = def,
+            QuickStyle::Normal => self.normal = def,
+            QuickStyle::Quote | QuickStyle::Code => {}
+        }
+    }
+}
+
+/// The text attributes of a quick style, for text whose own size and weight are `base_size` and `base_weight`.
 pub fn quick_style_attributes(
     style: QuickStyle,
-    base_font_size: f64,
+    styles: &TextStyles,
+    base_size: f64,
+    base_weight: u16,
 ) -> Vec<crate::strokes::textstroke::TextAttribute> {
     use crate::strokes::textstroke::{FontStyle, TextAttribute};
     match style {
-        QuickStyle::Heading1 => vec![
-            TextAttribute::FontSize((base_font_size * 1.8).round()),
-            TextAttribute::FontWeight(700),
-        ],
-        QuickStyle::Heading2 => vec![
-            TextAttribute::FontSize((base_font_size * 1.4).round()),
-            TextAttribute::FontWeight(700),
-        ],
+        QuickStyle::Heading1 => styles.heading1.attributes(),
+        QuickStyle::Heading2 => styles.heading2.attributes(),
         QuickStyle::Quote => vec![
             TextAttribute::Style(FontStyle::Italic),
             TextAttribute::TextColor(rnote_compose::Color::new(0.4, 0.4, 0.4, 1.0)),
         ],
         QuickStyle::Code => vec![TextAttribute::FontFamily("monospace".to_string())],
-        QuickStyle::Normal => vec![],
+        // only what differs from the text itself
+        QuickStyle::Normal => styles
+            .normal
+            .attributes()
+            .into_iter()
+            .filter(|a| match a {
+                TextAttribute::FontSize(size) => (size - base_size).abs() > 0.01,
+                TextAttribute::FontWeight(weight) => *weight != base_weight,
+                _ => true,
+            })
+            .collect(),
     }
+}
+
+/// OnePepe: changes the text with the style `old` to the style `new` (a text uses a style when a range of it has
+/// exactly the size and the weight of the style). Returns whether something changed.
+pub fn restyle_attributes(
+    attributes: &mut [crate::strokes::textstroke::RangedTextAttribute],
+    old: &TextStyleDef,
+    new: &TextStyleDef,
+) -> bool {
+    use crate::strokes::textstroke::TextAttribute;
+    let styled: Vec<std::ops::Range<usize>> = attributes
+        .iter()
+        .filter(|a| matches!(a.attribute, TextAttribute::FontSize(size) if (size - old.size).abs() < 0.01))
+        .map(|a| a.range.clone())
+        .filter(|range| {
+            attributes.iter().any(|a| {
+                a.range == *range
+                    && matches!(a.attribute, TextAttribute::FontWeight(w) if w == old.weight)
+            })
+        })
+        .collect();
+    let mut changed = false;
+    for a in attributes.iter_mut() {
+        if !styled.contains(&a.range) {
+            continue;
+        }
+        match &mut a.attribute {
+            TextAttribute::FontSize(size) if (*size - old.size).abs() < 0.01 => {
+                *size = new.size;
+                changed = true;
+            }
+            TextAttribute::FontWeight(weight) if *weight == old.weight => {
+                *weight = new.weight;
+                changed = true;
+            }
+            _ => {}
+        }
+    }
+    changed
 }
 
 /// The byte range of the paragraph containing the byte index `cursor`.
@@ -503,14 +628,55 @@ mod enter_tests {
 
     #[test]
     fn quick_styles() {
-        assert_eq!(quick_style_attributes(QuickStyle::Heading1, 20.0).len(), 2);
-        assert!(quick_style_attributes(QuickStyle::Normal, 20.0).is_empty());
+        let styles = TextStyles::default();
+        assert_eq!(
+            quick_style_attributes(QuickStyle::Heading1, &styles, 20.0, 500).len(),
+            2
+        );
+        assert!(quick_style_attributes(QuickStyle::Normal, &styles, 16.0, 400).is_empty());
+        assert_eq!(
+            quick_style_attributes(QuickStyle::Normal, &styles, 20.0, 400).len(),
+            1
+        );
         assert_eq!(
             "heading2".parse::<QuickStyle>().unwrap(),
             QuickStyle::Heading2
         );
         assert_eq!(paragraph_range("a\nbcd\ne", 3), 2..5);
         assert_eq!(paragraph_range("abc", 1), 0..3);
+    }
+}
+
+#[cfg(test)]
+mod restyle_tests {
+    use super::*;
+    use crate::strokes::textstroke::{RangedTextAttribute, TextAttribute};
+
+    #[test]
+    fn restyle_changes_only_the_text_with_the_style() {
+        let styles = TextStyles::default();
+        let ranged =
+            |range: std::ops::Range<usize>, attribute| RangedTextAttribute { range, attribute };
+        let mut attributes = vec![
+            ranged(0..5, TextAttribute::FontSize(28.0)),
+            ranged(0..5, TextAttribute::FontWeight(600)),
+            // same size, other weight: not Title 1
+            ranged(6..9, TextAttribute::FontSize(28.0)),
+            ranged(6..9, TextAttribute::FontWeight(400)),
+        ];
+        let new = TextStyleDef {
+            size: 32.0,
+            line_height: 40.0,
+            weight: 700,
+        };
+        assert!(restyle_attributes(&mut attributes, &styles.heading1, &new));
+        assert!(matches!(attributes[0].attribute, TextAttribute::FontSize(s) if s == 32.0));
+        assert!(matches!(
+            attributes[1].attribute,
+            TextAttribute::FontWeight(700)
+        ));
+        assert!(matches!(attributes[2].attribute, TextAttribute::FontSize(s) if s == 28.0));
+        assert!(!restyle_attributes(&mut attributes, &styles.heading2, &new));
     }
 }
 
@@ -526,7 +692,7 @@ mod quick_style_engine_tests {
         let mut engine = Engine::default();
         let _ = engine.change_pen_style(PenStyle::Typewriter);
         let _ = engine.insert_text("Apuntes".to_string(), None);
-        let _ = engine.text_quick_style(super::QuickStyle::Heading1);
+        let _ = engine.text_quick_style(super::QuickStyle::Heading1, &super::TextStyles::default());
         let key = engine.store.stroke_keys_as_rendered()[0];
         let Some(Stroke::TextStroke(textstroke)) = engine.store.get_stroke_ref(key) else {
             panic!("no text stroke");
@@ -540,7 +706,7 @@ mod quick_style_engine_tests {
         assert!(
             attrs
                 .iter()
-                .any(|a| matches!(a.attribute, TextAttribute::FontWeight(700)))
+                .any(|a| matches!(a.attribute, TextAttribute::FontWeight(600)))
         );
         assert!(attrs.iter().all(|a| a.range == (0..7)));
     }

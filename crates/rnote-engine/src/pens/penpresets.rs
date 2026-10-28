@@ -102,8 +102,7 @@ impl Default for PenPresets {
             pressure_curve: PressureCurve::Linear,
         };
         Self(vec![
-            pen("Negro fino", BrushStyle::Solid, Color::BLACK, 1.5),
-            pen("Negro", BrushStyle::Solid, Color::BLACK, 2.5),
+            pen("Negro", BrushStyle::Solid, Color::BLACK, 2.0),
             pen(
                 "Azul",
                 BrushStyle::Solid,
@@ -123,21 +122,9 @@ impl Default for PenPresets {
                 2.0,
             ),
             pen(
-                "Morado",
-                BrushStyle::Solid,
-                Color::new(0.48, 0.08, 0.88, 1.0),
-                2.0,
-            ),
-            pen(
                 "Resaltador amarillo",
                 BrushStyle::Marker,
                 Color::new(1.0, 0.92, 0.0, 1.0),
-                16.0,
-            ),
-            pen(
-                "Resaltador verde",
-                BrushStyle::Marker,
-                Color::new(0.45, 0.95, 0.35, 1.0),
                 16.0,
             ),
         ])
@@ -145,24 +132,66 @@ impl Default for PenPresets {
 }
 
 impl PenPresets {
-    /// The most favorite pens that are kept.
-    pub const MAX: usize = 24;
+    /// The slots for favorite pens (design guide: 3-5, chosen with Ctrl+1…Ctrl+5).
+    pub const MAX: usize = 5;
 
-    /// Reads the list from JSON. Falls back to the default pens when the JSON is unreadable.
+    /// Reads the list from JSON. Falls back to the default pens when the JSON is unreadable. Lists saved before the
+    /// slots (up to 24 pens) are read whole; [Self::fit_slots] keeps the first ones.
     pub fn from_json(json: &str) -> Self {
         serde_json::from_str::<Self>(json).unwrap_or_default()
+    }
+
+    /// Keeps only the pens that fit in the slots. Returns whether some were left out.
+    pub fn fit_slots(&mut self) -> bool {
+        let over = self.0.len() > Self::MAX;
+        self.0.truncate(Self::MAX);
+        over
     }
 
     pub fn to_json(&self) -> anyhow::Result<String> {
         Ok(serde_json::to_string_pretty(self)?)
     }
 
-    /// Adds a favorite pen at the end (the oldest is dropped beyond [Self::MAX]).
-    pub fn add(&mut self, preset: PenPreset) {
-        self.0.push(preset);
-        while self.0.len() > Self::MAX {
-            self.0.remove(0);
+    /// Saves a favorite pen in the first free slot. Returns false when all the slots are taken.
+    pub fn add(&mut self, preset: PenPreset) -> bool {
+        if self.0.len() >= Self::MAX {
+            return false;
         }
+        self.0.push(preset);
+        true
+    }
+
+    /// Saves a favorite pen in a slot, replacing the pen there (or in the first free slot).
+    pub fn replace(&mut self, index: usize, preset: PenPreset) {
+        match self.0.get_mut(index) {
+            Some(slot) => *slot = preset,
+            None => {
+                self.add(preset);
+            }
+        }
+    }
+
+    /// Moves the pen of slot `from` to slot `to` (the others shift).
+    pub fn move_to(&mut self, from: usize, to: usize) {
+        if from < self.0.len() && to < self.0.len() && from != to {
+            let preset = self.0.remove(from);
+            self.0.insert(to, preset);
+        }
+    }
+
+    /// The slot of the pen that is the same as `current` (type of stroke, color and width), if any.
+    pub fn position_of(&self, current: &PenPreset) -> Option<usize> {
+        // the color goes through the color picker of the UI (single precision): compare to 1/255
+        let same_color = |a: &Color, b: &Color| {
+            [(a.r, b.r), (a.g, b.g), (a.b, b.b), (a.a, b.a)]
+                .iter()
+                .all(|(x, y)| (x - y).abs() < 1.0 / 255.0)
+        };
+        self.0.iter().position(|p| {
+            p.style == current.style
+                && same_color(&p.color, &current.color)
+                && (p.width - current.width).abs() < 0.05
+        })
     }
 
     pub fn remove(&mut self, index: usize) {
@@ -217,13 +246,31 @@ mod tests {
             PenPresets::from_json("basura").0.len(),
             PenPresets::default().0.len()
         );
-        for _ in 0..40 {
-            presets.add(PenPreset::default());
-        }
+        assert!(!presets.add(PenPreset::default()));
         assert_eq!(presets.0.len(), PenPresets::MAX);
         presets.remove(0);
         presets.remove(999);
         assert_eq!(presets.0.len(), PenPresets::MAX - 1);
+        assert!(presets.add(PenPreset::default()));
+        // old lists of up to 24 pens keep their first pens
+        let mut old = PenPresets(vec![PenPreset::default(); 8]);
+        assert!(old.fit_slots());
+        assert_eq!(old.0.len(), PenPresets::MAX);
+    }
+
+    #[test]
+    fn reorder_replace_and_find() {
+        let mut presets = PenPresets::default();
+        let blue = presets.0[1].clone();
+        presets.move_to(1, 3);
+        assert_eq!(presets.position_of(&blue), Some(3));
+        presets.replace(0, blue.clone());
+        assert_eq!(presets.position_of(&blue), Some(0));
+        let mut close = blue.clone();
+        close.color.r += 0.001;
+        assert_eq!(presets.position_of(&close), Some(0));
+        presets.move_to(0, 99);
+        assert_eq!(presets.0.len(), PenPresets::MAX);
     }
 
     #[test]

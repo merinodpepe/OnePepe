@@ -3855,3 +3855,57 @@ msgstr "Derecha"
 
 msgid "Center vertically"
 msgstr "Centrar en vertical"
+
+msgid "Highlighter"
+msgstr "Resaltador"
+
+msgid "Pencil"
+msgstr "Lápiz"
+
+msgid "Hold or right click to save the current pen here"
+msgstr "Mantén pulsado o haz clic derecho para guardar aquí el boli actual"
+
+msgid "Save the current pen here"
+msgstr "Guardar aquí el boli actual"
+
+msgid "Move left"
+msgstr "Mover a la izquierda"
+
+msgid "Move right"
+msgstr "Mover a la derecha"
+
+msgid "Delete"
+msgstr "Borrar"
+
+msgid "The 5 slots are full: right click a pen to save the current one in its place"
+msgstr "Los 5 huecos están llenos: haz clic derecho en un boli para guardar el actual en su lugar"
+
+msgid "Edit text styles"
+msgstr "Editar estilos de texto"
+
+msgid "Regular"
+msgstr "Normal"
+
+msgid "Semibold"
+msgstr "Seminegrita"
+
+msgid "Size"
+msgstr "Tamaño"
+
+msgid "The text that already uses a style changes with it, in all the open documents."
+msgstr "El texto que ya usa un estilo cambia con él, en todos los documentos abiertos."
+
+msgid "Reset"
+msgstr "Restablecer"
+
+msgid "Styles saved; {} texts changed"
+msgstr "Estilos guardados; {} textos cambiados"
+
+msgid "Styles saved"
+msgstr "Estilos guardados"
+
+msgid "Favorite pens 1 to 5"
+msgstr "Bolis favoritos del 1 al 5"
+
+msgid "Text styles: Heading 1, Heading 2, Normal"
+msgstr "Estilos de texto: Título 1, Título 2, Normal"
