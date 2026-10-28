@@ -105,6 +105,78 @@ correcciones (el clasificador personal las aplica al momento). Por eso el modo m
 **Pendiente que sí depende de ti:** medir con tus expresiones, ajustar umbrales y la estructura a tu letra "poco
 lineal". (El permiso de Flatpak para lanzar el programa auxiliar ya está en el manifiesto, a petición tuya.)
 
+### 0.5 Medidas con tu letra y kNN sobre embeddings (2026-10-28)
+
+**Tus datos:** `mis_expresiones_1.rnote`, las 30 expresiones (391 trazos). Se usan solo en la nube de la sesión y
+**no se suben al repositorio**. El extractor partía las fracciones, raíces y exponentes altos en renglones aparte (43
+en vez de 30); ahora junta los renglones separados por un hueco mucho menor que el típico entre expresiones y saca
+30.
+
+**Modelo genérico (solo MathWriting) con tu letra:**
+
+| Medida | Resultado |
+|---|---|
+| Símbolos bien | 124/255 = **49 %** |
+| Fórmulas enteras exactas | **0/30** |
+| Sustituidos con seguridad ≥ 95 % | 118, de ellos bien 90 (**76 %**) |
+| Expresiones partidas en el nº correcto de símbolos | 7/29 |
+
+Dos causas principales:
+
+- **La segmentación:** cómo se cortan los trazos en símbolos. Tu "=" o tu "+" a veces se juntan con el vecino y
+  otras veces se parten.
+- **Símbolos parecidos que se confunden:** x↔×, 0↔O/∘, α↔ν, k↔F, n↔w.
+
+**Cómo se midió:**
+
+- Los símbolos esperados se emparejan con los segmentos por asignación de coste mínimo.
+- Para simular correcciones, los segmentos de las expresiones antiguas, con su etiqueta correcta, hacen de ejemplos
+  tuyos:
+  - los mal reconocidos cuentan como corregidos;
+  - los bien reconocidos cuentan como aceptados sin tocar.
+
+**División temporal (ejemplos de las expresiones 1-15, prueba en 16-30):**
+
+| Variante | Símbolos bien | Sustituidos ≥ 95 % bien |
+|---|---|---|
+| Red sola | 60/136 = 44 % | 41/60 = 68 % |
+| Red + kNN antiguo (`personal.py` anterior) | 59/136 = 43 % | 37/56 = 66 % |
+| Red + kNN nuevo (τ=0,1, d_max=0,3, λ_max=0,6) | 59/136 = 43 % | 37/51 = **73 %** |
+| **Red reentrenada con tus 99 ejemplos** (`--personal`) | **70/136 = 51 %** | **55/69 = 80 %** |
+| Red reentrenada + kNN | 66/136 = 49 % | 49/59 = **83 %** |
+
+En la división al revés (ejemplos de 16-30, prueba en 1-15), el kNN nuevo pasa de 54 % a 58 % de símbolos y de
+84 % a 85 % de sustituciones correctas.
+
+**Conclusiones:**
+
+1. **El kNN** casi no cambia el acierto, pero sustituye menos y se equivoca menos al sustituir. Como su papel es
+   cubrir lo que corriges entre reentrenamientos, se queda. Su medida de verdad será con tus correcciones reales:
+   `tools/onepepe-math/evaluar_mi_letra.py` hace la prueba temporal que pide el plan (red sola, red + kNN y modelo
+   anterior).
+2. **Reentrenar con tus ejemplos** es lo que más ayuda: +7 puntos de símbolos y +12 de sustituciones correctas con
+   solo 99 ejemplos. Con la letra de otras personas (MathWriting) el acierto no baja: top-1 0,603 frente
+   a 0,61. Por eso `instalar.sh --entrenar` ya incluye tus correcciones si existen.
+3. **Lo siguiente con más impacto:**
+   - Ajustar la segmentación a tu forma de espaciar.
+   - La página de símbolos sueltos (`mis_simbolos.rnote`), que da muchos ejemplos limpios por símbolo.
+   - El botón "Reentrenar ahora" de la app.
+
+**Qué quedó hecho del plan de kNN:**
+
+- **Red:** devuelve probabilidades y embedding en una pasada, y tiene versión de modelo.
+- **Almacén:** guarda trazos, etiqueta correcta y predicha, embedding, versión, fecha y cuaderno. Desde el programa
+  auxiliar se puede listar, borrar y cambiar (`examples`, `forget`, `relabel`). Si cambia la versión del modelo, los
+  embeddings se recalculan en segundo plano.
+- **Vecinos:** por fuerza bruta detrás de `NeighborIndex`.
+- **Mezcla:** la propuesta, con el almacén vacío idéntica a antes.
+- **Corrección en bloque:** ya usaba el mismo embedding (`shape_groups`).
+- **Reentrenamiento:** con `--personal`.
+- **Falta:**
+  - Comparar automáticamente "red nueva + kNN" con el modelo anterior dentro del futuro botón "Reentrenar ahora". El
+    script ya lo hace con `--anterior`.
+  - Una pantalla en la app para ver y borrar tus ejemplos.
+
 ## 1. Resumen (del primer entregable; el cambio de plan está en la sección 0)
 
 - **Arquitectura:** un programa auxiliar en Python (`onepepe-math`) que Rnote lanza **una vez** y mantiene abierto,

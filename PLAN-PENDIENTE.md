@@ -20,8 +20,13 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
 
 Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`):
 
-- Recibir `mis_expresiones_1.rnote` (las 30 expresiones de `tools/onepepe-math/expresiones.txt`) y `mis_simbolos.rnote`,
-  adjuntos en el chat o en tu Google Drive, nunca en el repositorio.
+- ~~Recibir `mis_expresiones_1.rnote`~~: recibido y medido (`MATEMATICAS-INFORME.md`, sección 0.5). Falta
+  `mis_simbolos.rnote` (la página de símbolos sueltos), adjunto en el chat o en tu Google Drive, nunca en el repositorio.
+- **kNN sobre embeddings con almacén de correcciones: hecho** (versión de modelo, borrar o cambiar ejemplos,
+  recalcular embeddings al reentrenar, `--personal` y `evaluar_mi_letra.py`). Falta en la app: una pantalla para ver
+  y borrar tus ejemplos.
+- **Lo que más falla con tu letra es la segmentación** (solo 7 de 29 expresiones se cortan bien en símbolos):
+  ajustarla a tu forma de espaciar es lo siguiente con más impacto.
 - Respuestas cortas: signo de multiplicar, coma o punto decimal, unidades en el mismo renglón, asignaturas y símbolos
   para el glosario.
 - Medir el reconocimiento con tu letra, ajustar umbrales, agrupación y estructura (potencias, subíndices, fracciones)

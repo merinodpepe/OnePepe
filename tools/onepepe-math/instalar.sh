@@ -31,7 +31,12 @@ if [ "${1:-}" = "--entrenar" ]; then
     if [ ! -d "$DATA/mathwriting/mathwriting-2024" ]; then
         "$DIR/descargar_mathwriting.sh"
     fi
-    "$VENV/bin/python" "$DIR/train_classifier.py" "$DATA/mathwriting/mathwriting-2024"
+    # tus correcciones, si las hay, entran en el entrenamiento
+    PERSONAL=()
+    if [ -f "$DATA/math/correcciones.jsonl" ]; then
+        PERSONAL=(--personal "$DATA/math/correcciones.jsonl")
+    fi
+    "$VENV/bin/python" "$DIR/train_classifier.py" "$DATA/mathwriting/mathwriting-2024" "${PERSONAL[@]}"
 fi
 
 if [ ! -f "$DATA/math/simbolos.npz" ]; then
