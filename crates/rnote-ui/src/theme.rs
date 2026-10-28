@@ -217,6 +217,10 @@ fn apply(appwindow: &RnAppWindow, style_manager: &adw::StyleManager) {
     ));
 }
 
+pub(crate) fn is_dark() -> bool {
+    adw::StyleManager::default().is_dark()
+}
+
 /// Whether the canvas is shown in dark colors: when the theme is dark, unless turned off in View.
 /// Only on screen: the files and the exports keep their colors.
 pub(crate) fn canvas_dark() -> bool {

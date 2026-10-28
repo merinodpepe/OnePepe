@@ -633,6 +633,7 @@ impl Typewriter {
     pub(crate) fn quick_style(
         &mut self,
         style: scripts::QuickStyle,
+        styles: &scripts::TextStyles,
         engine_view: &mut EngineViewMut,
     ) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
@@ -660,7 +661,12 @@ impl Typewriter {
         };
         textstroke.remove_attrs_for_range(range.clone());
         // pushed directly: `replace_attr_for_range` would drop the other attributes of the same range
-        for attribute in scripts::quick_style_attributes(style, textstroke.text_style.font_size) {
+        for attribute in scripts::quick_style_attributes(
+            style,
+            styles,
+            textstroke.text_style.font_size,
+            textstroke.text_style.font_weight,
+        ) {
             textstroke
                 .text_style
                 .ranged_text_attributes

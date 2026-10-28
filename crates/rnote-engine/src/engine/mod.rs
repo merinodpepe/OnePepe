@@ -28,6 +28,7 @@ use crate::pens::PenMode;
 use crate::pens::{Pen, PenStyle};
 use crate::store::render_comp::{self, RenderCompState};
 use crate::store::{StrokeKey, ZOrderChange};
+use crate::strokes::Stroke;
 use crate::strokes::content::GeneratedContentImages;
 use crate::strokes::textstroke::{TextAttribute, TextStyle};
 use crate::{Camera, Document, PenHolder, StrokeStore};
@@ -906,12 +907,46 @@ impl Engine {
     pub fn text_quick_style(
         &mut self,
         style: crate::pens::typewriter::scripts::QuickStyle,
+        styles: &crate::pens::typewriter::scripts::TextStyles,
     ) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
         if let Pen::Typewriter(typewriter) = self.penholder.current_pen_mut() {
-            widget_flags |= typewriter.quick_style(style, &mut engine_view_mut!(self));
+            widget_flags |= typewriter.quick_style(style, styles, &mut engine_view_mut!(self));
         }
         widget_flags
+    }
+
+    /// OnePepe: after editing a text style, changes all the text of the document that uses it.
+    /// Returns the widget flags and how many texts changed.
+    pub fn restyle_texts(
+        &mut self,
+        old: &crate::pens::typewriter::scripts::TextStyleDef,
+        new: &crate::pens::typewriter::scripts::TextStyleDef,
+    ) -> (WidgetFlags, usize) {
+        use crate::pens::typewriter::scripts::restyle_attributes;
+        let mut widget_flags = WidgetFlags::default();
+        let mut changed = 0;
+        for key in self.store.stroke_keys_unordered() {
+            let Some(Stroke::TextStroke(textstroke)) = self.store.get_stroke_mut(key) else {
+                continue;
+            };
+            if !restyle_attributes(&mut textstroke.text_style.ranged_text_attributes, old, new) {
+                continue;
+            }
+            changed += 1;
+            self.store.update_geometry_for_stroke(key);
+            self.store.regenerate_rendering_for_stroke(
+                key,
+                self.camera.viewport(),
+                self.camera.image_scale(),
+            );
+        }
+        if changed > 0 {
+            widget_flags |= self.store.record(Instant::now());
+            widget_flags.redraw = true;
+            widget_flags.store_modified = true;
+        }
+        (widget_flags, changed)
     }
 
     /// OnePepe: turns the selected text into superscript (`sup`) or subscript, or back.
