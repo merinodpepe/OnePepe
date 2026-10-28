@@ -147,6 +147,14 @@ pub(crate) fn refresh(appwindow: &RnAppWindow) {
                 .to_variant(),
         );
     }
+    if let (Some(canvas), Some(action)) = (
+        appwindow.active_tab_canvas(),
+        appwindow
+            .lookup_action("ruler-infinite")
+            .and_then(|a| a.downcast::<gio::SimpleAction>().ok()),
+    ) {
+        action.set_state(&canvas.engine_ref().ruler_infinite().to_variant());
+    }
     crate::favorites::refresh(appwindow);
 }
 
@@ -811,6 +819,13 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                 )
                 .upcast(),
                 big_toggle(
+                    "shapebuilder-line-symbolic",
+                    &gettext("Infinite ruler"),
+                    "win.ruler-infinite",
+                    None,
+                )
+                .upcast(),
+                big_toggle(
                     "onepepe-ink-to-shape-symbolic",
                     &gettext("Ink to Shape"),
                     "win.shape-recognition",
@@ -847,8 +862,9 @@ fn math_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
     ])
 }
 
-fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
+fn view_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
     let size_popover = page_size_popover();
+    let lines_popover = crate::lines::popover(appwindow);
     page(&[
         group(
             &gettext("Zoom"),
@@ -897,6 +913,19 @@ fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     "return-origin-page-symbolic",
                     &gettext("Back to the start"),
                     "win.return-origin-page",
+                    None,
+                )
+                .upcast(),
+            ],
+        ),
+        group(
+            &gettext("Background and lines"),
+            &[
+                big_menu("view-grid-symbolic", &gettext("Lines"), &lines_popover).upcast(),
+                big_toggle(
+                    "shapebuilder-line-symbolic",
+                    &gettext("Infinite ruler"),
+                    "win.ruler-infinite",
                     None,
                 )
                 .upcast(),
@@ -1189,6 +1218,24 @@ fn setup_actions(appwindow: &RnAppWindow) {
         }
     ));
     appwindow.add_action(&action_guides);
+    // the infinite ruler: a line across the whole canvas (kept in the hidden file of the page)
+    let action_ruler_infinite =
+        gio::SimpleAction::new_stateful("ruler-infinite", None, &false.to_variant());
+    action_ruler_infinite.connect_activate(clone!(
+        #[weak]
+        appwindow,
+        move |action, _| {
+            let Some(canvas) = appwindow.active_tab_canvas() else {
+                return;
+            };
+            let infinite = !canvas.engine_ref().ruler_infinite();
+            let widget_flags = canvas.engine_mut().set_ruler_infinite(infinite);
+            appwindow.handle_widget_flags(widget_flags, &canvas);
+            action.set_state(&infinite.to_variant());
+            appwindow.refresh_ui();
+        }
+    ));
+    appwindow.add_action(&action_ruler_infinite);
 
     string_action(appwindow, "text-quick-style", |appwindow, target| {
         let Ok(style) = QuickStyle::from_str(target) else {

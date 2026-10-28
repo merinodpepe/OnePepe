@@ -30,6 +30,8 @@ pub(crate) const TOKENS: &[(&str, &str, &str)] = &[
     ("on_header", "#FFFFFF", "#FFFFFF"),
     ("on_brand", "#FFFFFF", "#1F1F1F"),
     ("canvas_cross", "#616161", "#ADADAD"),
+    // the checkerboard that shows transparency in the color buttons: dark in both themes
+    ("checker", "#0F0F0F", "#0F0F0F"),
 ];
 
 /// High contrast: stronger lines and secondary text (light, dark).

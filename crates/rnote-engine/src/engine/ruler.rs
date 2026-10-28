@@ -6,7 +6,7 @@ use crate::WidgetFlags;
 use crate::engine_view;
 use crate::pens::PenStyle;
 use p2d::math::Vector2;
-use rnote_compose::penevent::PenEvent;
+use rnote_compose::penevent::{ModifierKey, PenEvent};
 use rnote_compose::ruler::{Ruler, RulerInteraction};
 
 impl Engine {
@@ -34,10 +34,26 @@ impl Engine {
                 angle: 0.0,
                 length: viewport.extents().x * 0.7,
                 width: Self::RULER_WIDTH / self.camera.total_zoom(),
+                ..Ruler::default()
             })
         } else {
             None
         };
+        widget_flags.redraw = true;
+        widget_flags
+    }
+
+    /// OnePepe: whether the ruler is in infinite mode (a line across the whole canvas).
+    pub fn ruler_infinite(&self) -> bool {
+        self.ruler.is_some_and(|r| r.infinite)
+    }
+
+    /// OnePepe: switches the infinite mode of the ruler (shows the ruler if it was hidden).
+    pub fn set_ruler_infinite(&mut self, infinite: bool) -> WidgetFlags {
+        let mut widget_flags = self.set_ruler_enabled(true);
+        if let Some(ruler) = self.ruler.as_mut() {
+            ruler.infinite = infinite;
+        }
         widget_flags.redraw = true;
         widget_flags
     }
@@ -66,6 +82,8 @@ impl Engine {
                 mut element,
                 modifier_keys,
             } => {
+                // OnePepe: with Shift the ruler turns in steps of 15°
+                ruler.snap_to_steps = modifier_keys.contains(&ModifierKey::KeyboardShift);
                 element.pos = self
                     .ruler_interaction
                     .pen_down(ruler, element.pos, snap_distance)?;
@@ -110,10 +128,16 @@ impl Engine {
             return Ok(());
         };
         let total_zoom = self.camera.total_zoom();
+        let viewport = self.camera.viewport();
+        let ruler = ruler.visible_part([
+            viewport.mins,
+            Vector2::new(viewport.maxs.x, viewport.mins.y),
+            viewport.maxs,
+            Vector2::new(viewport.mins.x, viewport.maxs.y),
+        ]);
         let corners = ruler.corners();
         let mins = corners.iter().fold(corners[0], |acc, c| acc.min(*c));
         let maxs = corners.iter().fold(corners[0], |acc, c| acc.max(*c));
-        let viewport = self.camera.viewport();
         if !Aabb::new(mins, maxs).intersects(&viewport) {
             return Ok(());
         }
@@ -149,11 +173,13 @@ pub fn draw_ruler(
     use rnote_compose::ext::Vector2Ext;
 
     let corners = ruler.corners();
-    let line_width = 1.5 / total_zoom;
-    let fill_color = color::GNOME_BRIGHTS[1].with_a8(200);
-    let edge_color = color::GNOME_DARKS[2].with_a8(230);
+    let line_width = 1.0 / total_zoom;
+    // OnePepe: the colors of the design guide (brand and brand-tint; in the dark theme the canvas flips them)
+    let fill_color = color::GNOME_BRIGHTS[0].with_a8(215);
+    let band_color = color::ONEPEPE_BRAND_TINT.with_a8(235);
+    let edge_color = color::ONEPEPE_BRAND;
 
-    // body
+    // body, and a 24 px band along each edge, where the strokes snap
     let mut body = kurbo::BezPath::new();
     body.move_to(corners[0].to_kurbo_point());
     for c in &corners[1..] {
@@ -161,34 +187,80 @@ pub fn draw_ruler(
     }
     body.close_path();
     piet_cx.fill(&body, &fill_color);
-    piet_cx.stroke(&body, &edge_color, line_width);
-
-    // ticks on both edges, every 10 units, longer every 50 and 100
     let half_len = ruler.length * 0.5;
     let half_width = ruler.width * 0.5;
-    let mut i = 0;
-    loop {
-        let along = -half_len + f64::from(i) * 10.0;
-        if along > half_len {
-            break;
-        }
-        let tick_len = if i % 10 == 0 {
-            0.3
-        } else if i % 5 == 0 {
-            0.2
+    let band = (24.0 / total_zoom).min(half_width);
+    for (edge, dir) in [(-half_width, 1.0), (half_width, -1.0)] {
+        let mut path = kurbo::BezPath::new();
+        path.move_to(
+            ruler
+                .from_local(Vector2::new(-half_len, edge))
+                .to_kurbo_point(),
+        );
+        path.line_to(
+            ruler
+                .from_local(Vector2::new(half_len, edge))
+                .to_kurbo_point(),
+        );
+        path.line_to(
+            ruler
+                .from_local(Vector2::new(half_len, edge + dir * band))
+                .to_kurbo_point(),
+        );
+        path.line_to(
+            ruler
+                .from_local(Vector2::new(-half_len, edge + dir * band))
+                .to_kurbo_point(),
+        );
+        path.close_path();
+        piet_cx.fill(&path, &band_color);
+    }
+    piet_cx.stroke(&body, &edge_color, line_width);
+
+    // ticks every 8 px from the center of the ruler, longer every 40, with the distance every 80
+    let center_x = ruler.to_local(ruler.center).x;
+    let first = ((center_x - half_len) / Ruler::TICK_STEP).ceil() as i64;
+    let last = ((center_x + half_len) / Ruler::TICK_STEP).floor() as i64;
+    let per_number = (Ruler::NUMBER_STEP / Ruler::TICK_STEP).round() as i64;
+    let font_size = 9.0 / total_zoom;
+    for k in first..=last {
+        let along = k as f64 * Ruler::TICK_STEP - center_x;
+        let tick_len = if k % per_number == 0 {
+            0.6
+        } else if k % (per_number / 2) == 0 {
+            0.4
         } else {
-            0.1
-        } * ruler.width;
+            0.25
+        } * band;
         for (edge, dir) in [(-half_width, 1.0), (half_width, -1.0)] {
             let p0 = ruler.from_local(Vector2::new(along, edge));
             let p1 = ruler.from_local(Vector2::new(along, edge + dir * tick_len));
             piet_cx.stroke(
                 kurbo::Line::new(p0.to_kurbo_point(), p1.to_kurbo_point()),
                 &edge_color,
-                line_width * 0.7,
+                line_width,
             );
         }
-        i += 1;
+        if k % per_number == 0
+            && let Ok(layout) = piet_cx
+                .text()
+                .new_text_layout(format!("{}", (k * Ruler::TICK_STEP as i64).abs()))
+                .text_color(color::ONEPEPE_FG_3)
+                .font(piet::FontFamily::SANS_SERIF, font_size)
+                .build()
+        {
+            piet_cx.save().map_err(|e| anyhow::anyhow!("{e:?}"))?;
+            let text_pos = ruler.from_local(Vector2::new(
+                along + 2.0 / total_zoom,
+                -half_width + band * 0.6,
+            ));
+            piet_cx.transform(
+                kurbo::Affine::translate(text_pos.to_kurbo_vec())
+                    * kurbo::Affine::rotate(ruler.angle),
+            );
+            piet_cx.draw_text(&layout, kurbo::Point::ZERO);
+            piet_cx.restore().map_err(|e| anyhow::anyhow!("{e:?}"))?;
+        }
     }
 
     // rotation handle
@@ -197,17 +269,17 @@ pub fn draw_ruler(
             ruler.rotate_handle_center().to_kurbo_point(),
             ruler.rotate_handle_radius(),
         ),
-        &color::GNOME_BLUES[3],
-        line_width * 1.5,
+        &edge_color,
+        line_width * 2.0,
     );
 
     // angle
     let angle_text = format!("{:.0}°", ruler.angle_degrees());
-    let font_size = ruler.width * 0.25;
+    let font_size = ruler.width * 0.2;
     if let Ok(layout) = piet_cx
         .text()
         .new_text_layout(angle_text)
-        .text_color(color::GNOME_DARKS[3])
+        .text_color(color::ONEPEPE_FG_3)
         .font(piet::FontFamily::SANS_SERIF, font_size)
         .build()
     {
@@ -276,6 +348,7 @@ mod tests {
             angle: -30_f64.to_radians(),
             length: 340.0,
             width: 60.0,
+            ..Ruler::default()
         };
         let surface = cairo::ImageSurface::create(cairo::Format::ARgb32, 400, 200).unwrap();
         {

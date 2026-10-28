@@ -296,6 +296,25 @@ impl Engine {
             snapshot.append_node(r);
         }
 
+        // OnePepe: the margin line of every page (it cannot go in the repeated tile of the pattern)
+        if let Some(margin) = self.document.config.background.onepepe_margin {
+            let visible = doc_bounds.intersection(&self.camera.viewport());
+            if let Some(visible) = visible {
+                let width = crate::document::background::MarginLine::WIDTH;
+                for x in margin.positions(visible) {
+                    snapshot.append_color(
+                        &gdk::RGBA::from_compose_color(margin.color),
+                        &graphene::Rect::new(
+                            (x - width * 0.5) as f32,
+                            visible.mins[1] as f32,
+                            width as f32,
+                            visible.extents()[1] as f32,
+                        ),
+                    );
+                }
+            }
+        }
+
         snapshot.pop();
         Ok(())
     }
