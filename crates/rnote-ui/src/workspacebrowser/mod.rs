@@ -1,22 +1,19 @@
 // Modules
 mod filerow;
+pub(crate) mod tree;
 mod widgethelper;
 pub(crate) mod workspaceactions;
 pub(crate) mod workspacesbar;
 
 // Re-exports
 pub(crate) use filerow::RnFileRow;
-pub(crate) use gtk4::{EveryFilter, FlattenListModel, ListHeader};
 pub(crate) use workspacesbar::RnWorkspacesBar;
 
 // Imports
 use crate::appwindow::RnAppWindow;
 use gtk4::{
-    Button, CompositeTemplate, ConstantExpression, CustomFilter, CustomSorter, DirectoryList,
-    FileFilter, FilterChange, FilterListModel, Grid, Label, ListItem, ListView, MultiSorter,
-    PropertyExpression, ScrolledWindow, Separator, SignalListItemFactory, SingleSelection,
-    SortListModel, SorterChange, Widget, gdk, gio, glib, glib::clone, glib::closure, prelude::*,
-    subclass::prelude::*,
+    Button, CompositeTemplate, DirectoryList, Grid, Label, ListView, ScrolledWindow, Separator,
+    SingleSelection, Widget, gio, glib, glib::clone, prelude::*, subclass::prelude::*,
 };
 use std::path::PathBuf;
 use tracing::warn;
@@ -29,7 +26,6 @@ mod imp {
     pub(crate) struct RnWorkspaceBrowser {
         pub(crate) action_group: gio::SimpleActionGroup,
         pub(crate) dir_list: DirectoryList,
-        pub(crate) list_selection_model: SingleSelection,
 
         #[template_child]
         pub(crate) grid: TemplateChild<Grid>,
@@ -61,7 +57,6 @@ mod imp {
             Self {
                 action_group: gio::SimpleActionGroup::new(),
                 dir_list,
-                list_selection_model: SingleSelection::default(),
 
                 grid: TemplateChild::<Grid>::default(),
                 dir_box: TemplateChild::<gtk4::Box>::default(),
@@ -227,125 +222,8 @@ impl RnWorkspaceBrowser {
     }
 
     fn setup_files_list(&self, appwindow: &RnAppWindow) {
-        let imp = self.imp();
-
-        let folders_filter = create_folders_filter();
-        let notes_filter = create_notes_filter();
-        let files_filter = create_files_filter();
-        let folders_sorter = create_folders_sorter();
-        let notes_sorter = create_notes_sorter();
-        let files_sorter = create_files_sorter();
-
-        let folders_list_model = SortListModel::new(
-            Some(FilterListModel::new(
-                Some(imp.dir_list.clone()),
-                Some(folders_filter.clone()),
-            )),
-            Some(folders_sorter.clone()),
-        );
-        let notes_list_model = SortListModel::new(
-            Some(FilterListModel::new(
-                Some(imp.dir_list.clone()),
-                Some(notes_filter.clone()),
-            )),
-            Some(notes_sorter.clone()),
-        );
-        let files_list_model = SortListModel::new(
-            Some(FilterListModel::new(
-                Some(imp.dir_list.clone()),
-                Some(files_filter.clone()),
-            )),
-            Some(files_sorter.clone()),
-        );
-        let combined_list = gio::ListStore::new::<SortListModel>();
-        combined_list.append(&folders_list_model);
-        combined_list.append(&notes_list_model);
-        combined_list.append(&files_list_model);
-
-        imp.list_selection_model
-            .set_model(Some(&SingleSelection::new(Some(FlattenListModel::new(
-                Some(combined_list),
-            )))));
-
-        imp.files_listview
-            .get()
-            .set_model(Some(&imp.list_selection_model));
-        imp.files_listview
-            .get()
-            .set_factory(Some(&create_files_list_row_factory(appwindow)));
-        imp.files_listview
-            .get()
-            .set_header_factory(Some(&create_files_list_header_factory(appwindow)));
-
-        self.imp().dir_list.connect_items_changed(clone!(
-            #[weak]
-            folders_filter,
-            #[weak]
-            folders_sorter,
-            #[weak]
-            notes_filter,
-            #[weak]
-            notes_sorter,
-            #[weak]
-            files_filter,
-            #[weak]
-            files_sorter,
-            move |_, _, _, _| {
-                folders_filter.changed(FilterChange::Different);
-                folders_sorter.changed(SorterChange::Different);
-                notes_filter.changed(FilterChange::Different);
-                notes_sorter.changed(SorterChange::Different);
-                files_filter.changed(FilterChange::Different);
-                files_sorter.changed(SorterChange::Different);
-            }
-        ));
-
-        imp.files_listview.get().connect_activate(clone!(
-            #[weak]
-            appwindow,
-            #[weak]
-            folders_filter,
-            #[weak]
-            folders_sorter,
-            #[weak]
-            notes_filter,
-            #[weak]
-            notes_sorter,
-            #[weak]
-            files_filter,
-            #[weak]
-            files_sorter,
-            move |listview, position| {
-                let file_info = listview
-                    .model()
-                    .unwrap()
-                    .item(position)
-                    .unwrap()
-                    .downcast::<gio::FileInfo>()
-                    .unwrap();
-                if let Some(input_file) = file_info.attribute_object("standard::file") {
-                    glib::spawn_future_local(clone!(
-                        #[weak]
-                        appwindow,
-                        async move {
-                            appwindow
-                                .open_file_w_dialogs(
-                                    input_file.downcast::<gio::File>().unwrap(),
-                                    None,
-                                    true,
-                                )
-                                .await;
-                        }
-                    ));
-                };
-                folders_filter.changed(FilterChange::Different);
-                folders_sorter.changed(SorterChange::Different);
-                notes_filter.changed(FilterChange::Different);
-                notes_sorter.changed(SorterChange::Different);
-                files_filter.changed(FilterChange::Different);
-                files_sorter.changed(SorterChange::Different);
-            }
-        ));
+        // OnePepe: the tree of the notebook (tree.rs) instead of the flat list of the folder
+        tree::setup(self, appwindow);
 
         self.imp().dir_list.connect_file_notify(clone!(
             #[weak(rename_to=workspacebrowser)]
@@ -362,251 +240,13 @@ impl RnWorkspaceBrowser {
 
     /// Set the selected file in the files list with its position.
     pub(crate) fn files_list_set_selected(&self, position: Option<u32>) {
-        self.imp()
-            .list_selection_model
-            .set_selected(position.unwrap_or(gtk4::INVALID_LIST_POSITION));
+        if let Some(selection) = self
+            .imp()
+            .files_listview
+            .model()
+            .and_downcast::<SingleSelection>()
+        {
+            selection.set_selected(position.unwrap_or(gtk4::INVALID_LIST_POSITION));
+        }
     }
-}
-
-fn create_files_list_row_factory(appwindow: &RnAppWindow) -> SignalListItemFactory {
-    let factory = SignalListItemFactory::new();
-
-    factory.connect_setup(clone!(
-        #[weak]
-        appwindow,
-        move |_, list_item| {
-            let list_item = list_item.downcast_ref::<ListItem>().unwrap();
-
-            let filerow = RnFileRow::new();
-            filerow.init(&appwindow);
-            list_item.set_child(Some(&filerow));
-
-            let list_item_expr = ConstantExpression::new(list_item);
-            let fileinfo_expr =
-                PropertyExpression::new(ListItem::static_type(), Some(&list_item_expr), "item");
-            let position_expr =
-                PropertyExpression::new(ListItem::static_type(), Some(&list_item_expr), "position");
-
-            let file_expr = fileinfo_expr.chain_closure::<Option<gio::File>>(closure!(
-                |_: Option<glib::Object>, fileinfo_obj: Option<glib::Object>| {
-                    fileinfo_obj
-                        .map(|fileinfo_obj| {
-                            fileinfo_obj
-                                .downcast::<gio::FileInfo>()
-                                .unwrap()
-                                .attribute_object("standard::file")
-                                .unwrap()
-                                .downcast::<gio::File>()
-                                .unwrap()
-                        })
-                        .to_value()
-                }
-            ));
-
-            let content_provider_expr =
-                fileinfo_expr.chain_closure::<gdk::ContentProvider>(closure!(
-                    |_: Option<glib::Object>, fileinfo_obj: Option<glib::Object>| {
-                        if let Some(fileinfo_obj) = fileinfo_obj
-                            && let Some(file) = fileinfo_obj
-                                .downcast::<gio::FileInfo>()
-                                .unwrap()
-                                .attribute_object("standard::file")
-                        {
-                            let file = file.downcast::<gio::File>().unwrap();
-                            return gdk::ContentProvider::for_value(&file.to_value());
-                        }
-
-                        gdk::ContentProvider::for_value(&None::<gio::File>.to_value())
-                    }
-                ));
-
-            let icon_name_expr =
-                fileinfo_expr.chain_closure::<gio::ThemedIcon>(closure!(|_: Option<
-                    glib::Object,
-                >,
-                                                                         fileinfo_obj: Option<
-                    glib::Object,
-                >| {
-                    if let Some(fileinfo_obj) = fileinfo_obj
-                        && let Some(themed_icon) = fileinfo_obj
-                            .downcast::<gio::FileInfo>()
-                            .unwrap()
-                            .attribute_object("standard::icon")
-                    {
-                        return themed_icon.downcast::<gio::ThemedIcon>().unwrap();
-                    }
-
-                    gio::ThemedIcon::from_names(&[
-                        "workspace-folder-symbolic",
-                        "folder-documents-symbolic",
-                    ])
-                }));
-
-            let basename_expr =
-                fileinfo_expr.chain_closure::<String>(closure!(|_: Option<glib::Object>,
-                                                                fileinfo_obj: Option<
-                    glib::Object,
-                >| {
-                    if let Some(fileinfo_obj) = fileinfo_obj
-                        && let Some(file) = fileinfo_obj
-                            .downcast::<gio::FileInfo>()
-                            .unwrap()
-                            .attribute_object("standard::file")
-                    {
-                        let file = file.downcast::<gio::File>().unwrap();
-                        let basename = String::from(
-                            file.basename()
-                                .expect("failed to get file.basename()")
-                                .to_string_lossy(),
-                        );
-                        // OnePepe: pages are shown by their name, like in OneNote
-                        return basename
-                            .strip_suffix(".rnote")
-                            .map(str::to_string)
-                            .unwrap_or(basename);
-                    }
-
-                    String::from("")
-                }));
-
-            file_expr.bind(&filerow, "current-file", Widget::NONE);
-            position_expr.bind(&filerow, "position", Widget::NONE);
-            basename_expr.bind(&filerow.file_label(), "label", Widget::NONE);
-            icon_name_expr.bind(&filerow.file_image(), "gicon", Widget::NONE);
-            content_provider_expr.bind(&filerow.drag_source(), "content", Widget::NONE);
-        }
-    ));
-
-    factory
-}
-
-fn create_files_list_header_factory(_appwindow: &RnAppWindow) -> SignalListItemFactory {
-    let factory = SignalListItemFactory::new();
-
-    factory.connect_setup(clone!(move |_, list_header| {
-        let list_header = list_header.downcast_ref::<ListHeader>().unwrap();
-        let separator = Separator::builder()
-            .orientation(gtk4::Orientation::Horizontal)
-            .margin_start(12)
-            .margin_end(12)
-            .build();
-        list_header.set_child(Some(&separator));
-    }));
-    factory
-}
-
-fn create_folders_filter() -> EveryFilter {
-    let file_filter = FileFilter::new();
-    file_filter.add_mime_type("inode/directory");
-    let hidden_filter = create_hidden_filter();
-
-    let every_filter = EveryFilter::new();
-    every_filter.append(file_filter);
-    every_filter.append(hidden_filter);
-    every_filter
-}
-
-fn create_folders_sorter() -> MultiSorter {
-    let sorter = MultiSorter::default();
-    sorter.append(create_human_numeric_sorter());
-    sorter
-}
-
-fn create_notes_filter() -> EveryFilter {
-    let file_filter = FileFilter::new();
-    file_filter.add_mime_type("application/rnote");
-    file_filter.add_suffix("rnote");
-    let hidden_filter = create_hidden_filter();
-
-    let every_filter = EveryFilter::new();
-    every_filter.append(file_filter);
-    every_filter.append(hidden_filter);
-    every_filter
-}
-
-fn create_notes_sorter() -> MultiSorter {
-    let sorter = MultiSorter::default();
-    sorter.append(create_human_numeric_sorter());
-    sorter
-}
-
-fn create_files_filter() -> EveryFilter {
-    let file_filter = FileFilter::new();
-    file_filter.add_mime_type("application/pdf");
-    file_filter.add_mime_type("application/x-xopp");
-    file_filter.add_mime_type("image/svg+xml");
-    file_filter.add_mime_type("image/png");
-    file_filter.add_mime_type("image/jpeg");
-    // OnePepe: like the notebooks of OneNote, only things that can go into a page (no text or code files)
-    file_filter.add_suffix("pdf");
-    file_filter.add_suffix("xopp");
-    file_filter.add_suffix("svg");
-    file_filter.add_suffix("png");
-    file_filter.add_suffix("jpg");
-    file_filter.add_suffix("jpeg");
-    let hidden_filter = create_hidden_filter();
-
-    let every_filter = EveryFilter::new();
-    every_filter.append(file_filter);
-    every_filter.append(hidden_filter);
-    every_filter
-}
-
-fn create_files_sorter() -> MultiSorter {
-    let sorter = MultiSorter::default();
-    sorter.append(create_human_numeric_sorter());
-    sorter
-}
-
-fn create_hidden_filter() -> CustomFilter {
-    CustomFilter::new(|file| {
-        let fileinfo = file.downcast_ref::<gio::FileInfo>().unwrap();
-        let name = fileinfo.name();
-
-        !name
-            .file_name()
-            .and_then(|n| n.to_str())
-            .map(|s| s.starts_with('.'))
-            .unwrap_or(false)
-    })
-}
-
-/// Sorts by if file is a folder
-#[allow(unused)]
-fn create_sorter_order_folder() -> CustomSorter {
-    CustomSorter::new(move |obj1, obj2| {
-        let first_fileinfo = obj1.clone().downcast::<gio::FileInfo>().unwrap();
-        let first_filetype = first_fileinfo.file_type();
-        let second_fileinfo = obj2.clone().downcast::<gio::FileInfo>().unwrap();
-        let second_filetype = second_fileinfo.file_type();
-
-        if first_filetype == gio::FileType::Directory && second_filetype != gio::FileType::Directory
-        {
-            gtk4::Ordering::Smaller
-        } else if first_filetype != gio::FileType::Directory
-            && second_filetype == gio::FileType::Directory
-        {
-            gtk4::Ordering::Larger
-        } else {
-            gtk4::Ordering::Equal
-        }
-    })
-}
-
-fn create_human_numeric_sorter() -> CustomSorter {
-    CustomSorter::new(move |obj1, obj2| {
-        let first_fileinfo = obj1.clone().downcast::<gio::FileInfo>().unwrap();
-        let first_file = first_fileinfo.attribute_object("standard::file").unwrap();
-        let first_file = first_file.downcast::<gio::File>().unwrap();
-        let first_display_name = first_file.basename().unwrap();
-        let first_display_name = first_display_name.to_str().unwrap_or_default();
-
-        let second_fileinfo = obj2.clone().downcast::<gio::FileInfo>().unwrap();
-        let second_file = second_fileinfo.attribute_object("standard::file").unwrap();
-        let second_file = second_file.downcast::<gio::File>().unwrap();
-        let second_display_name = second_file.basename().unwrap();
-        let second_display_name = second_display_name.to_str().unwrap_or_default();
-
-        numeric_sort::cmp(first_display_name, second_display_name).into()
-    })
 }

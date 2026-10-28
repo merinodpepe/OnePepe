@@ -1395,25 +1395,37 @@ async fn export_fitted(appwindow: &RnAppWindow, mode: FitMode) {
 
 /// The folder of the notebook section shown in the sidebar, or the home folder.
 fn section_dir(appwindow: &RnAppWindow) -> std::path::PathBuf {
-    appwindow
-        .sidebar()
-        .workspacebrowser()
-        .dir_list_dir()
-        .unwrap_or_else(glib::home_dir)
+    crate::workspacebrowser::tree::current_section(appwindow).unwrap_or_else(glib::home_dir)
+}
+
+/// The pages of a section in the order of the tree: each page followed by its subpages.
+fn section_pages_in_order(dir: &std::path::Path) -> Vec<std::path::PathBuf> {
+    use rnote_engine::onepepe_index::FolderIndex;
+    let entries = FolderIndex::read_entries(dir);
+    let index = FolderIndex::load(dir);
+    let mut out = vec![];
+    let mut stack: Vec<String> = index
+        .children(&entries, None)
+        .into_iter()
+        .rev()
+        .map(|e| e.name)
+        .collect();
+    while let Some(name) = stack.pop() {
+        if name.ends_with(".rnote") {
+            out.push(dir.join(&name));
+        }
+        for child in index.children(&entries, Some(&name)).into_iter().rev() {
+            stack.push(child.name);
+        }
+    }
+    out
 }
 
 /// Exports all the pages of the section (the folder shown in the sidebar) as a single PDF, in name order.
 async fn export_section(appwindow: &RnAppWindow) {
     let dir = section_dir(appwindow);
-    let mut files: Vec<std::path::PathBuf> = std::fs::read_dir(&dir)
-        .map(|entries| {
-            entries
-                .filter_map(|e| e.ok().map(|e| e.path()))
-                .filter(|p| p.extension().is_some_and(|e| e == "rnote"))
-                .collect()
-        })
-        .unwrap_or_default();
-    files.sort();
+    // in the order of the tree (subpages after their page)
+    let files: Vec<std::path::PathBuf> = section_pages_in_order(&dir);
     if files.is_empty() {
         appwindow
             .overlays()

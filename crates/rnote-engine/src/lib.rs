@@ -19,6 +19,7 @@ pub mod engine;
 pub mod ext;
 pub mod fileformats;
 pub mod image;
+pub mod onepepe_index;
 pub mod pens;
 pub mod selectioncollision;
 pub mod snap;
