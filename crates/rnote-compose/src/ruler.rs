@@ -42,6 +42,12 @@ pub struct Ruler {
     pub length: f64,
     /// Width across its direction.
     pub width: f64,
+    /// OnePepe: infinite mode, a line across the whole canvas (the length is ignored).
+    #[serde(default)]
+    pub infinite: bool,
+    /// OnePepe: while rotating, snap to steps of 15° (with Shift). Not saved.
+    #[serde(skip)]
+    pub snap_to_steps: bool,
 }
 
 impl Default for Ruler {
@@ -51,6 +57,8 @@ impl Default for Ruler {
             angle: 0.0,
             length: 800.0,
             width: 80.0,
+            infinite: false,
+            snap_to_steps: false,
         }
     }
 }
@@ -91,8 +99,36 @@ impl Ruler {
 
     /// The center of the rotation handle.
     pub fn rotate_handle_center(&self) -> Vector2 {
+        if self.infinite {
+            // an infinite ruler has no end: the handle is at its center
+            return self.center;
+        }
         self.from_local(Vector2::new(self.length * 0.5 - self.width * 0.5, 0.0))
     }
+
+    /// OnePepe: the part of the ruler to draw for a view: an infinite ruler, as a finite one across the view
+    /// (its center stays on the line, so the ticks do not move); a finite one, as it is.
+    pub fn visible_part(&self, view_corners: [Vector2; 4]) -> Ruler {
+        if !self.infinite {
+            return *self;
+        }
+        let along = view_corners.map(|c| self.to_local(c).x);
+        let min = along.iter().cloned().fold(f64::INFINITY, f64::min) - self.width;
+        let max = along.iter().cloned().fold(f64::NEG_INFINITY, f64::max) + self.width;
+        // the visible part is centered on a multiple of the tick spacing, so the ticks stay in place
+        let mid = ((min + max) * 0.5 / Self::TICK_STEP).round() * Self::TICK_STEP;
+        Ruler {
+            center: self.from_local(Vector2::new(mid, 0.0)),
+            length: (max - min) + 2.0 * (mid - (min + max) * 0.5).abs(),
+            infinite: false,
+            ..*self
+        }
+    }
+
+    /// OnePepe: distance between ticks (design guide: 8 px).
+    pub const TICK_STEP: f64 = 8.0;
+    /// OnePepe: distance between numbers (design guide: 80 px).
+    pub const NUMBER_STEP: f64 = 80.0;
 
     /// The radius of the rotation handle.
     pub fn rotate_handle_radius(&self) -> f64 {
@@ -116,7 +152,7 @@ impl Ruler {
             return RulerHit::RotateHandle;
         }
         let local = self.to_local(pos);
-        if local.x.abs() > self.length * 0.5 + snap_distance {
+        if !self.infinite && local.x.abs() > self.length * 0.5 + snap_distance {
             return RulerHit::None;
         }
         for edge in [RulerEdge::First, RulerEdge::Second] {
@@ -124,7 +160,8 @@ impl Ruler {
                 return RulerHit::Edge(edge);
             }
         }
-        if local.y.abs() < self.width * 0.5 && local.x.abs() <= self.length * 0.5 {
+        if local.y.abs() < self.width * 0.5 && (self.infinite || local.x.abs() <= self.length * 0.5)
+        {
             return RulerHit::Body;
         }
         RulerHit::None
@@ -142,18 +179,24 @@ impl Ruler {
     pub fn angle_degrees(&self) -> f64 {
         let deg = (-self.angle).to_degrees().rem_euclid(180.0);
         // avoid showing 180 for values that are almost 0
-        if (deg - 180.0).abs() < 1e-9 { 0.0 } else { deg }
+        // + 0.0 turns -0 into 0 (shown as "-0°" otherwise)
+        if (deg - 180.0).abs() < 1e-9 {
+            0.0
+        } else {
+            deg + 0.0
+        }
     }
 
     /// Sets the angle, snapping it to multiples of [`Self::ANGLE_SNAP_STEP_DEG`] when close.
     pub fn set_angle_snapped(&mut self, angle: f64) {
         let deg = angle.to_degrees();
         let snapped = (deg / Self::ANGLE_SNAP_STEP_DEG).round() * Self::ANGLE_SNAP_STEP_DEG;
-        self.angle = if (deg - snapped).abs() <= Self::ANGLE_SNAP_TOLERANCE_DEG {
-            snapped.to_radians()
-        } else {
-            angle
-        };
+        self.angle =
+            if self.snap_to_steps || (deg - snapped).abs() <= Self::ANGLE_SNAP_TOLERANCE_DEG {
+                snapped.to_radians()
+            } else {
+                angle
+            };
     }
 }
 
@@ -251,12 +294,58 @@ mod tests {
             angle: angle_deg.to_radians(),
             length: 600.0,
             width: 60.0,
+            infinite: false,
+            snap_to_steps: false,
         }
     }
 
     /// Distance of a point to the line of an edge.
     fn dist_to_edge(r: &Ruler, p: Vector2, edge: RulerEdge) -> f64 {
         (r.to_local(p).y - r.edge_offset(edge)).abs()
+    }
+
+    #[test]
+    fn infinite_ruler_has_no_ends() {
+        let mut r = ruler(0.0);
+        r.infinite = true;
+        // far beyond the length: still the edge and the body
+        assert_eq!(
+            r.hit(Vector2::new(5000.0, 170.0), SNAP),
+            RulerHit::Edge(RulerEdge::First)
+        );
+        assert_eq!(r.hit(Vector2::new(-5000.0, 200.0), SNAP), RulerHit::Body);
+        assert_eq!(r.hit(r.center, SNAP), RulerHit::RotateHandle);
+        // the part to draw covers the view, with ticks in place
+        let view = [
+            Vector2::new(1000.0, 0.0),
+            Vector2::new(3000.0, 0.0),
+            Vector2::new(3000.0, 500.0),
+            Vector2::new(1000.0, 500.0),
+        ];
+        let part = r.visible_part(view);
+        assert!(!part.infinite);
+        let local_center = r.to_local(part.center).x;
+        assert!((local_center / Ruler::TICK_STEP).fract().abs() < 1e-9);
+        assert!(
+            r.to_local(part.from_local(Vector2::new(-part.length * 0.5, 0.0)))
+                .x
+                <= 1000.0 - 100.0
+        );
+        assert!(
+            r.to_local(part.from_local(Vector2::new(part.length * 0.5, 0.0)))
+                .x
+                >= 3000.0 - 100.0
+        );
+    }
+
+    #[test]
+    fn snap_to_steps_with_shift() {
+        let mut r = ruler(0.0);
+        r.set_angle_snapped(20f64.to_radians());
+        assert!((r.angle.to_degrees() - 20.0).abs() < 1e-9);
+        r.snap_to_steps = true;
+        r.set_angle_snapped(20f64.to_radians());
+        assert!((r.angle.to_degrees() - 15.0).abs() < 1e-9);
     }
 
     #[test]

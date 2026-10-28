@@ -3142,9 +3142,6 @@ msgstr "blanco"
 #~ msgid "Quit"
 #~ msgstr "Salir"
 
-#~ msgid "Name"
-#~ msgstr "Nombre"
-
 #~ msgid "Change the workspace name"
 #~ msgstr "Cambiar el nombre del área de trabajo"
 
@@ -3933,3 +3930,69 @@ msgstr "Convertir en subpágina"
 
 msgid "Promote subpage"
 msgstr "Subir de nivel"
+
+msgid "Blank"
+msgstr "Liso"
+
+msgid "Isometric grid"
+msgstr "Cuadrícula isométrica"
+
+msgid "Isometric dots"
+msgstr "Puntos isométricos"
+
+msgid "Ruled 7 mm"
+msgstr "Rayado 7 mm"
+
+msgid "Ruled 8.7 mm"
+msgstr "Rayado 8,7 mm"
+
+msgid "Grid 5 mm"
+msgstr "Cuadrícula 5 mm"
+
+msgid "Dots 5 mm"
+msgstr "Puntos 5 mm"
+
+msgid "Background and lines"
+msgstr "Fondo y renglones"
+
+msgid "All the pages of the section"
+msgstr "Todas las páginas de la sección"
+
+msgid "This page"
+msgstr "Esta página"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Spacing"
+msgstr "Separación"
+
+msgid "Line color"
+msgstr "Color de las líneas"
+
+msgid "Paper color"
+msgstr "Color del papel"
+
+msgid "Margin line"
+msgstr "Línea de margen"
+
+msgid "Apply to"
+msgstr "Aplicar a"
+
+msgid "Save as…"
+msgstr "Guardar como…"
+
+msgid "Save these settings with a name"
+msgstr "Guardar estos ajustes con un nombre"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Lines changed in {} pages of the section"
+msgstr "Renglones cambiados en {} páginas de la sección"
+
+msgid " ({} could not be changed)"
+msgstr " ({} no se pudieron cambiar)"
+
+msgid "Infinite ruler"
+msgstr "Regla infinita"

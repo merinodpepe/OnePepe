@@ -55,8 +55,8 @@
     margin: 0px;
     background-blend-mode: screen;
     background-image:
-        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33)),
-        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33));
+        linear-gradient(45deg, alpha(@op_checker, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_checker, 0.33) 75%, alpha(@op_checker, 0.33)),
+        linear-gradient(45deg, alpha(@op_checker, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_checker, 0.33) 75%, alpha(@op_checker, 0.33));
     background-color: @colorpad_color;
     color: @colorpad_fg_color;
     background-size: 18px 18px;
@@ -89,8 +89,8 @@
     margin: 0px;
     background-blend-mode: screen;
     background-image:
-        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33)),
-        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33));
+        linear-gradient(45deg, alpha(@op_checker, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_checker, 0.33) 75%, alpha(@op_checker, 0.33)),
+        linear-gradient(45deg, alpha(@op_checker, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_checker, 0.33) 75%, alpha(@op_checker, 0.33));
     background-color: @colorsetter_color;
     color: @colorsetter_fg_color;
     background-size: 18px 18px;

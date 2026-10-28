@@ -123,6 +123,15 @@ struct SidecarFile {
     /// Since version 2: start and end time of the strokes.
     #[serde(default)]
     times: Vec<(StrokeKey, [f64; 2])>,
+    /// OnePepe design: the ruler of the page (position, angle, infinite).
+    #[serde(default)]
+    ruler: Option<rnote_compose::ruler::Ruler>,
+    /// OnePepe design: the width of the lines of the background, if changed.
+    #[serde(default)]
+    line_width: Option<f64>,
+    /// OnePepe design: the margin line of the pages.
+    #[serde(default)]
+    margin: Option<crate::document::background::MarginLine>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -935,7 +944,13 @@ impl Engine {
                 })
             })
             .collect::<Vec<_>>();
-        if symbols.is_empty() && self.math.overlays.is_empty() && self.math.stroke_times.is_empty()
+        let background = &self.document.config.background;
+        if symbols.is_empty()
+            && self.math.overlays.is_empty()
+            && self.math.stroke_times.is_empty()
+            && self.ruler.is_none()
+            && background.onepepe_line_width.is_none()
+            && background.onepepe_margin.is_none()
         {
             return None;
         }
@@ -962,6 +977,9 @@ impl Engine {
             symbols,
             overlays,
             times,
+            ruler: self.ruler,
+            line_width: background.onepepe_line_width,
+            margin: background.onepepe_margin,
         })
         .ok()
     }
@@ -1001,6 +1019,15 @@ impl Engine {
                 original: s.original,
             });
             restored += 1;
+        }
+        // the ruler and the background lines of the page
+        if file.ruler.is_some() {
+            self.ruler = file.ruler;
+        }
+        if file.line_width.is_some() || file.margin.is_some() {
+            self.document.config.background.onepepe_line_width = file.line_width;
+            self.document.config.background.onepepe_margin = file.margin;
+            let _ = self.background_rendering_regenerate();
         }
         self.math.stroke_times = file
             .times
@@ -1501,5 +1528,37 @@ mod sidecar_tests {
     #[test]
     fn nothing_to_remember() {
         assert!(Engine::default().math_sidecar_json().is_none());
+    }
+}
+
+#[cfg(test)]
+mod design_sidecar_tests {
+    use crate::Engine;
+    use crate::document::background::MarginLine;
+
+    #[test]
+    fn ruler_and_background_lines_go_through_the_hidden_file() {
+        let mut engine = Engine::default();
+        assert!(engine.math_sidecar_json().is_none());
+        let _ = engine.set_ruler_infinite(true);
+        engine.document.config.background.onepepe_line_width = Some(1.5);
+        engine.document.config.background.onepepe_margin = Some(MarginLine {
+            x: 90.0,
+            color: MarginLine::COLOR_DEFAULT,
+            page_width: 794.0,
+        });
+        let json = engine.math_sidecar_json().expect("something to keep");
+
+        let mut other = Engine::default();
+        let _ = other.math_load_sidecar(&json);
+        assert!(other.ruler_infinite());
+        assert_eq!(
+            other.document.config.background.onepepe_line_width,
+            Some(1.5)
+        );
+        assert_eq!(
+            other.document.config.background.onepepe_margin.map(|m| m.x),
+            Some(90.0)
+        );
     }
 }

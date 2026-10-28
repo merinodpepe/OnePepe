@@ -24,6 +24,7 @@ pub(crate) mod filetype;
 pub(crate) mod globals;
 pub(crate) mod groupediconpicker;
 pub(crate) mod iconpicker;
+pub(crate) mod lines;
 pub(crate) mod mainheader;
 pub(crate) mod mathhelper;
 pub(crate) mod optionsbar;
