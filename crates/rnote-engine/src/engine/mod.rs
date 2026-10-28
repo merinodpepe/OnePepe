@@ -4,6 +4,7 @@ pub mod config;
 pub mod export;
 pub mod import;
 pub mod math;
+pub mod onepepe_insert;
 pub mod rendering;
 pub mod ruler;
 pub mod snapshot;
