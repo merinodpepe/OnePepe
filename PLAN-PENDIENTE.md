@@ -39,6 +39,41 @@ Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`
   - Solo sustituye el modelo si el nuevo acierta más con tu letra; si no, se queda el anterior.
   - **Aviso** cuando acumules unas 50 correcciones nuevas: "conviene reentrenar". Nunca empieza solo.
   - Todo queda en tu equipo; el modelo nunca se sube a git.
+- **Gráficas de funciones.** No depende de tus datos: se puede hacer antes que el resto de esta sección.
+  - **Cómo se pide:** en modo matemáticas escribes `y = x² − 3`, `f(x) = sin x` o `x² − 3`. Después la seleccionas
+    con el lazo y pulsas **"Dibujar gráfica"**, o lo eliges en el menú que sale al tocar el resultado. Nunca aparece
+    sola.
+  - **Qué aparece:** ejes 2D con números y la curva junto a la fórmula.
+    - Son trazos normales: se mueven, se cambian de tamaño, se borran y se recolorean.
+    - Ctrl+Z la quita. No cambia el formato `.rnote` y también se ve en Rnote.
+  - **Rango:** por defecto x de −10 a 10 y la y ajustada a la curva. Se cambia escribiéndolo (`x ∈ [0, 2π]`) o
+    desde el menú.
+  - **Lo que ya tenemos:**
+    - Reconocimiento y estructura de la fórmula (`onepepe_math/recognizer.py`, `layout.py`).
+    - Conversión a SymPy con unidades (`onepepe_math/evaluate.py`).
+    - Glosario de constantes (`glossary.py`).
+    - Comunicación entre la app y el programa auxiliar (`server.py` ↔ `math_apply_response` en
+      `crates/rnote-engine/src/engine/math.rs`).
+    - Ejes 2D de Rnote (`crates/rnote-compose/src/builders/coordsystem2dbuilder.rs`) y el deshacer normal.
+  - **Lo que falta:**
+    - Elegir la variable.
+    - Calcular los puntos con numpy (`sympy.lambdify`).
+    - Cortar la curva donde salta o no existe (1/x, tan x).
+    - Elegir el rango.
+    - Convertir los puntos en trazos.
+  - **Etapas:**
+    1. `y = f(x)`, con varias curvas en los mismos ejes y un color cada una.
+    2. Constantes del glosario y unidades en los ejes.
+    3. Más adelante:
+       - Ecuaciones implícitas (`x² + y² = 4`).
+       - Cortes y máximos marcados.
+       - Un parámetro con deslizador (`y = a·x²`).
+       - Regenerar la gráfica si corriges la fórmula (el enlace se guardaría en el archivo oculto).
+  - **Pruebas:**
+    - Tests en Python con x², 1/x, tan x y √x (rango, cortes, puntos).
+    - Un test en Rust de que se inserta como trazos y que Ctrl+Z la quita.
+    - Después, la prueba con lápiz.
+  - **Esfuerzo:** medio.
 
 ## 3. Que la aplicación se llame OnePepe por dentro
 
@@ -160,8 +195,9 @@ Dentro de las ideas para más adelante, la propuesta (sin decidir) es empezar po
 
 1. Selector de tamaño de hoja.
 2. Exportar ajustado.
-3. Bolígrafos favoritos.
-4. Plantillas, con título y fecha.
-5. Copias de seguridad.
-6. Textos en español.
-7. Etiquetas y búsqueda.
+3. Gráficas de funciones (sección 2).
+4. Bolígrafos favoritos.
+5. Plantillas, con título y fecha.
+6. Copias de seguridad.
+7. Textos en español.
+8. Etiquetas y búsqueda.

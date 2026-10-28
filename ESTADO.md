@@ -55,6 +55,7 @@ Resumen (detalle en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md)):
 5. Ideas para más adelante (sección 6 de `PLAN-PENDIENTE.md`, sin implementar):
    - Reentrenar el modelo en tu equipo cuando tú quieras, con tiempo estimado.
    - Selector de tamaño de hoja y exportación encogida a una hoja.
+   - Gráficas de funciones a partir de lo que escribes en modo matemáticas.
    - Etiquetas, búsqueda y plantillas.
    - Bolígrafos favoritos.
    - Modo repaso.
