@@ -86,6 +86,19 @@ pub struct MathState {
     pub last_tap: Option<Vector2>,
     /// Correction requests sent, by request id: (symbol ids, latex).
     corrections: Vec<(u64, Vec<u64>, String)>,
+    /// When the stroke in progress started (seconds since 1970).
+    stroke_down: Option<f64>,
+    /// Start and end time of the strokes written in math mode: short pauses join strokes into one symbol.
+    /// Kept in the hidden file next to the page, never in the .rnote.
+    pub stroke_times: std::collections::HashMap<StrokeKey, [f64; 2]>,
+}
+
+/// Seconds since 1970, for the stroke times.
+fn now_seconds() -> f64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs_f64())
+        .unwrap_or(0.0)
 }
 
 // ---------- hidden file next to the page ----------
@@ -105,6 +118,9 @@ struct SidecarFile {
     symbols: Vec<SidecarSymbol>,
     #[serde(default)]
     overlays: Vec<SidecarOverlay>,
+    /// Since version 2: start and end time of the strokes.
+    #[serde(default)]
+    times: Vec<(StrokeKey, [f64; 2])>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -148,6 +164,9 @@ struct RecognizeRequest<'a> {
     threshold: f64,
     clean: bool,
     equals: bool,
+    /// Start and end time of each stroke, when all are known.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    times: Option<Vec<[f64; 2]>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -245,11 +264,16 @@ impl Engine {
         if !self.math.mode || !matches!(event, PenEvent::Up { .. }) {
             return widget_flags;
         }
+        let stroke_down = self.math.stroke_down.take();
         if let Some(&key) = self.store.keys_sorted_chrono().last()
             && matches!(self.store.get_stroke_ref(key), Some(Stroke::BrushStroke(_)))
             && !self.math.pending.contains(&key)
             && !self.math.symbols.iter().any(|s| s.keys.contains(&key))
         {
+            let end = now_seconds();
+            self.math
+                .stroke_times
+                .insert(key, [stroke_down.unwrap_or(end), end]);
             self.math.pending.push(key);
             widget_flags.math_pending = true;
         }
@@ -288,6 +312,9 @@ impl Engine {
                     self.math.tap_start = Some(element.pos);
                     self.math.tap_moved = false;
                     return None;
+                }
+                if self.math.stroke_down.is_none() {
+                    self.math.stroke_down = Some(now_seconds());
                 }
                 Some(event)
             }
@@ -355,6 +382,10 @@ impl Engine {
             .filter_map(|k| self.brush_points(*k))
             .collect::<Vec<_>>();
         let bounds = self.store.bounds_for_strokes(&keys)?;
+        let times = keys
+            .iter()
+            .map(|k| self.math.stroke_times.get(k).copied())
+            .collect::<Option<Vec<[f64; 2]>>>();
         // the already recognized symbols of the same line give context
         let band = bounds.extents().y.max(1.0);
         let known = self
@@ -391,6 +422,7 @@ impl Engine {
             threshold: options.threshold,
             clean: options.replace,
             equals: options.equals,
+            times,
         };
         serde_json::to_string(&request).ok()
     }
@@ -646,7 +678,8 @@ impl Engine {
                 })
             })
             .collect::<Vec<_>>();
-        if symbols.is_empty() && self.math.overlays.is_empty() {
+        if symbols.is_empty() && self.math.overlays.is_empty() && self.math.stroke_times.is_empty()
+        {
             return None;
         }
         let overlays = self
@@ -660,10 +693,18 @@ impl Engine {
                 latex: o.latex.clone(),
             })
             .collect();
+        let times = self
+            .math
+            .stroke_times
+            .iter()
+            .filter(|(k, _)| self.store.get_stroke_ref(**k).is_some())
+            .map(|(k, t)| (*k, *t))
+            .collect::<Vec<_>>();
         serde_json::to_string(&SidecarFile {
-            version: 1,
+            version: 2,
             symbols,
             overlays,
+            times,
         })
         .ok()
     }
@@ -704,6 +745,11 @@ impl Engine {
             });
             restored += 1;
         }
+        self.math.stroke_times = file
+            .times
+            .into_iter()
+            .filter(|(k, _)| self.store.get_stroke_ref(*k).is_some())
+            .collect();
         self.math.overlays = file
             .overlays
             .into_iter()
@@ -868,6 +914,11 @@ mod tests {
         let v: serde_json::Value = serde_json::from_str(&req).unwrap();
         assert_eq!(v["cmd"], "recognize");
         assert_eq!(v["strokes"].as_array().unwrap().len(), 3);
+        // strokes drawn in math mode carry their start and end time
+        let times = v["times"].as_array().unwrap();
+        assert_eq!(times.len(), 3);
+        assert!(times[0][0].as_f64().unwrap() <= times[0][1].as_f64().unwrap());
+        assert!(times[0][1].as_f64().unwrap() <= times[1][0].as_f64().unwrap());
         let id = v["id"].as_u64().unwrap();
         // nothing left to send
         assert!(engine.math_take_request(None).is_none());
@@ -993,6 +1044,25 @@ mod render_tests {
 #[cfg(test)]
 mod sidecar_tests {
     use super::*;
+
+    #[test]
+    fn stroke_times_survive_the_hidden_file() {
+        let mut engine = engine_with_symbols();
+        let key = engine.store.stroke_keys_as_rendered()[0];
+        engine.math.stroke_times.insert(key, [10.0, 10.4]);
+        let json = engine.math_sidecar_json().unwrap();
+        assert!(json.contains("\"version\":2"));
+        let mut reopened = engine;
+        reopened.math_reset_document();
+        let _ = reopened.math_load_sidecar(&json);
+        assert_eq!(reopened.math.stroke_times.get(&key), Some(&[10.0, 10.4]));
+        // a version 1 file (without times) is still read
+        let old = json.replace("\"version\":2", "\"version\":1");
+        let old = old[..old.find(",\"times\"").unwrap()].to_string() + "}";
+        reopened.math_reset_document();
+        assert!(reopened.math_load_sidecar(&old) > 0);
+        assert!(reopened.math.stroke_times.is_empty());
+    }
 
     #[test]
     fn sidecar_path_is_hidden_next_to_the_page() {
