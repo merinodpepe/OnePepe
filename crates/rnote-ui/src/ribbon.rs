@@ -122,6 +122,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
         None => error!("Could not place the ribbon: the tab bar has no box as parent"),
     }
     crate::statusbar::setup(appwindow);
+    crate::optionsbar::setup(appwindow);
 }
 
 /// Keeps the toggles of the ribbon in sync with the settings (called from the window refresh).

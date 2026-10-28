@@ -421,6 +421,40 @@ window.onepepe .onepepe-ribbon-body .colorsetter:checked {
     box-shadow: 0px 0px 0px 2px @op_bg_surface, 0px 0px 0px 4px @op_brand;
 }
 
+/* --- the floating tool options bar: raised surface, radius 8, the active option in brand-tint */
+window.onepepe .onepepe-optionsbar {
+    min-width: 56px;
+    padding: 4px 0px;
+}
+
+window.onepepe .onepepe-optionsbar-header {
+    padding: 0px 4px;
+    color: @op_fg_3;
+}
+
+window.onepepe .onepepe-optionsbar-header button {
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0px;
+}
+
+window.onepepe .onepepe-optionsbar-tools {
+    padding: 4px 6px;
+}
+
+window.onepepe .onepepe-optionsbar button:checked {
+    background-color: @op_brand_tint;
+    color: @op_brand;
+}
+
+window.onepepe .onepepe-optionsbar button:not(:checked):not(:hover) {
+    background: none;
+}
+
+window.onepepe .onepepe-optionsbar button:hover:not(:checked) {
+    background-color: @op_hover;
+}
+
 /* --- high contrast: visible borders on the controls */
 window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
 window.onepepe.high-contrast .overlay_toolbar {

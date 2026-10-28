@@ -57,6 +57,7 @@ crates/rnote-ui/src/workspacebrowser/mod.rs
 crates/rnote-ui/src/workspacebrowser/widgethelper.rs
 crates/rnote-ui/src/overlays.rs
 crates/rnote-ui/src/utils.rs
+crates/rnote-ui/src/optionsbar.rs
 crates/rnote-ui/src/ribbon.rs
 crates/rnote-ui/src/statusbar.rs
 crates/rnote-ui/src/mathhelper.rs

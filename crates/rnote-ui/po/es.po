@@ -3825,3 +3825,33 @@ msgstr "Tamaño personalizado"
 
 msgid "{size} · {n} pages"
 msgstr "{size} · {n} páginas"
+
+msgid "Drag to move the bar"
+msgstr "Arrastra para mover la barra"
+
+msgid "Fold the bar"
+msgstr "Plegar la barra"
+
+msgid "Customize"
+msgstr "Personalizar"
+
+msgid "Tools on the bar (up to 3)"
+msgstr "Herramientas en la barra (hasta 3)"
+
+msgid "Move up"
+msgstr "Subir"
+
+msgid "Place"
+msgstr "Posición"
+
+msgid "Automatic (left- or right-handed)"
+msgstr "Automática (zurdo o diestro)"
+
+msgid "Left"
+msgstr "Izquierda"
+
+msgid "Right"
+msgstr "Derecha"
+
+msgid "Center vertically"
+msgstr "Centrar en vertical"

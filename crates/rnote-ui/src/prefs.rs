@@ -36,7 +36,6 @@ pub(crate) fn get_bool(key: &str, default: bool) -> bool {
     get(key).and_then(|v| v.as_bool()).unwrap_or(default)
 }
 
-#[allow(dead_code)]
 pub(crate) fn get_string(key: &str, default: &str) -> String {
     get(key)
         .and_then(|v| v.as_str().map(str::to_string))
