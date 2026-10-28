@@ -46,6 +46,13 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
         .valign(gtk4::Align::Center)
         .build();
     hide_button.add_css_class("flat");
+    hide_button.set_focus_on_click(false);
+    // the tab buttons must not take the keyboard focus away from the text either
+    let mut tab_button = switcher.first_child();
+    while let Some(child) = tab_button {
+        child.set_focus_on_click(false);
+        tab_button = child.next_sibling();
+    }
     let header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     header.set_margin_start(6);
     header.set_margin_end(6);
@@ -127,6 +134,7 @@ fn big_button(
         button.set_action_target_value(Some(&target));
     }
     button.add_css_class("flat");
+    button.set_focus_on_click(false);
     button
 }
 
@@ -146,6 +154,7 @@ fn small_button(
         button.set_action_target_value(Some(&target));
     }
     button.add_css_class("flat");
+    button.set_focus_on_click(false);
     button
 }
 
@@ -165,6 +174,7 @@ fn text_button(
         button.set_action_target_value(Some(&target));
     }
     button.add_css_class("flat");
+    button.set_focus_on_click(false);
     button
 }
 
@@ -184,6 +194,7 @@ fn big_toggle(
         button.set_action_target_value(Some(&target));
     }
     button.add_css_class("flat");
+    button.set_focus_on_click(false);
     button
 }
 
@@ -195,6 +206,7 @@ fn big_menu(icon: &str, label: &str, popover: &gtk4::Popover) -> gtk4::MenuButto
         .tooltip_text(label)
         .build();
     button.add_css_class("flat");
+    button.set_focus_on_click(false);
     button
 }
 
@@ -286,6 +298,7 @@ fn list_popover(action: &str, entries: &[(String, &str)]) -> gtk4::Popover {
             .action_target(&target.to_variant())
             .build();
         button.add_css_class("flat");
+        button.set_focus_on_click(false);
         button.connect_clicked(clone!(
             #[weak]
             popover,
@@ -1006,6 +1019,7 @@ fn rebuild_favorites(appwindow: &RnAppWindow) {
             .action_target(&(i as i32).to_variant())
             .build();
         button.add_css_class("flat");
+        button.set_focus_on_click(false);
         let gesture = gtk4::GestureClick::builder().button(3).build();
         gesture.connect_pressed(clone!(
             #[weak]
@@ -1038,6 +1052,7 @@ fn rebuild_favorites(appwindow: &RnAppWindow) {
         .action_name("win.pen-preset-save")
         .build();
     add.add_css_class("flat");
+    add.set_focus_on_click(false);
     container.append(&add);
     let _ = appwindow;
 }
@@ -1078,6 +1093,18 @@ fn with_canvas(
     };
     let widget_flags = f(&mut canvas.engine_mut());
     appwindow.handle_widget_flags(widget_flags, &canvas);
+    give_focus_back(&canvas);
+}
+
+/// Gives the keyboard focus back to the canvas (after a closing popover took it), so typing continues in the text.
+fn give_focus_back(canvas: &crate::RnCanvas) {
+    glib::idle_add_local_once(clone!(
+        #[weak]
+        canvas,
+        move || {
+            canvas.grab_focus();
+        }
+    ));
 }
 
 fn setup_actions(appwindow: &RnAppWindow) {

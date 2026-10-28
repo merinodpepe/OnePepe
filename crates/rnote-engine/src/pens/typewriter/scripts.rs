@@ -513,3 +513,35 @@ mod enter_tests {
         assert_eq!(paragraph_range("abc", 1), 0..3);
     }
 }
+
+#[cfg(test)]
+mod quick_style_engine_tests {
+    use crate::Engine;
+    use crate::pens::PenStyle;
+    use crate::strokes::Stroke;
+    use crate::strokes::textstroke::TextAttribute;
+
+    #[test]
+    fn heading_keeps_size_and_weight() {
+        let mut engine = Engine::default();
+        let _ = engine.change_pen_style(PenStyle::Typewriter);
+        let _ = engine.insert_text("Apuntes".to_string(), None);
+        let _ = engine.text_quick_style(super::QuickStyle::Heading1);
+        let key = engine.store.stroke_keys_as_rendered()[0];
+        let Some(Stroke::TextStroke(textstroke)) = engine.store.get_stroke_ref(key) else {
+            panic!("no text stroke");
+        };
+        let attrs = &textstroke.text_style.ranged_text_attributes;
+        assert!(
+            attrs
+                .iter()
+                .any(|a| matches!(a.attribute, TextAttribute::FontSize(_)))
+        );
+        assert!(
+            attrs
+                .iter()
+                .any(|a| matches!(a.attribute, TextAttribute::FontWeight(700)))
+        );
+        assert!(attrs.iter().all(|a| a.range == (0..7)));
+    }
+}
