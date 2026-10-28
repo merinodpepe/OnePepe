@@ -25,8 +25,15 @@ Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`
 - **kNN sobre embeddings con almacén de correcciones: hecho** (versión de modelo, borrar o cambiar ejemplos,
   recalcular embeddings al reentrenar, `--personal` y `evaluar_mi_letra.py`). Falta en la app: una pantalla para ver
   y borrar tus ejemplos.
-- **Lo que más falla con tu letra es la segmentación** (solo 7 de 29 expresiones se cortan bien en símbolos):
-  ajustarla a tu forma de espaciar es lo siguiente con más impacto.
+- **Cortar mejor tu letra: hecho** (sección 0.6 del informe).
+  - Reentrenar con tus «trozos», que el «trozo» cuente, unir y separar en la app, tiempos entre trazos y botón
+    «Reentrenar» en la app.
+  - Pendiente: ajustar el peso de las pausas con tus páginas nuevas (ya guardan los tiempos).
+- **Cortar con varias hipótesis** (búsqueda en haz con el modelo de contexto): para más adelante.
+  - **Al usarlo:** de 5 ms a unos 10–30 ms por fórmula. No se nota, porque ya se espera 0,8 s.
+  - **Para hacerlo:** unas 3 veces el trabajo de los umbrales calibrados; va en un módulo nuevo `beam.py`.
+- **Una pantalla para ver y borrar tus ejemplos.** El programa auxiliar ya tiene las órdenes `examples`, `forget` y
+  `relabel`.
 - Respuestas cortas: signo de multiplicar, coma o punto decimal, unidades en el mismo renglón, asignaturas y símbolos
   para el glosario.
 - Medir el reconocimiento con tu letra, ajustar umbrales, agrupación y estructura (potencias, subíndices, fracciones)

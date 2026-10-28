@@ -63,6 +63,29 @@ Para dármelos, lo más sencillo es una de estas dos vías:
 Archivos a enviar: `mis_expresiones_1.rnote` (y `_2` si lo hiciste) y `mis_simbolos.rnote`. Los `.json` no hacen falta:
 los genero yo.
 
+### Enseñarle tu letra
+
+Con el entorno que crea `instalar.sh`:
+
+```bash
+PY=~/.local/share/onepepe/venv/bin/python
+# convierte tu página etiquetada en ejemplos (símbolos y «trozos») de tu almacén local
+$PY importar_mi_letra.py ~/ruta/mis_expresiones_1.rnote expresiones.txt
+# reentrena con ellos (es lo mismo que el botón «Reentrenar» de la pestaña Matemáticas)
+$PY reentrenar.py --estimar     # cuántos ejemplos hay y cuánto tardará
+$PY reentrenar.py               # reentrena; solo cambia el modelo si no empeora
+# ¿ayudan tus correcciones? prueba temporal con tus propios ejemplos
+$PY evaluar_mi_letra.py
+```
+
+Todo se guarda en `~/.local/share/onepepe/math/`:
+
+- `correcciones.jsonl`: tus ejemplos.
+- `simbolos.npz`: el modelo.
+- `simbolos.anterior.npz`: el modelo anterior.
+
+Nada sale de tu equipo.
+
 Tests (el extractor solo necesita Python; el resto, las dependencias de `requirements.txt`, p. ej. con el Python del
 entorno que crea `instalar.sh`):
 

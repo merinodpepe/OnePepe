@@ -177,6 +177,56 @@ En la división al revés (ejemplos de 16-30, prueba en 1-15), el kNN nuevo pasa
     script ya lo hace con `--anterior`.
   - Una pantalla en la app para ver y borrar tus ejemplos.
 
+### 0.6 Cortar mejor tu letra en símbolos (2026-10-28)
+
+El fallo principal con tu letra era el corte en símbolos: solo 7 de 29 expresiones quedaban bien cortadas. Se probaron
+los puntos 1 a 4 del plan, medidos con tus 30 expresiones. La medida limpia es entrenar con las 1-15 y probar en las
+16-30, que no se ven al entrenar.
+
+| Cambio | Símbolos bien (16-30) | Sustituciones correctas |
+|---|---|---|
+| Antes (modelo genérico) | 60/136 = 44 % | 41/60 = 68 % |
+| 1. Umbrales de distancia calibrados a tu letra | 61/136 = 45 % | 43/61 = 70 % |
+| 2a. Que cuente la probabilidad de «trozo» al cortar | 63/136 = 46 % | 44/62 = 71 % |
+| Reentrenar con 99 ejemplos sacados del reconocimiento | 72/136 = 53 % | 57/71 = 80 % |
+| **2b. Reentrenar con el corte forzado de tus expresiones (119 símbolos y 203 «trozos») y que el «trozo» cuente** | **76/136 = 56 %** | **53/60 = 88 %** |
+
+**1. Umbrales calibrados: no se queda.** Ni en un sentido ni en el otro mejoran a los de por defecto. Los umbrales
+siguen siendo parámetros (`SegmentParams`, `corte.json`) por si algún día hace falta, pero no hay script de
+calibración. Lo que falla no son las distancias, sino que el clasificador no reconoce bien "esto es medio símbolo"
+o "esto son dos pegados" con tu letra.
+
+**2. Enseñar a cortar con tu letra: es lo que más ayuda.** `forced.py` busca, para una expresión etiquetada, el corte
+que da exactamente los símbolos esperados. De ahí salen:
+
+- símbolos con su etiqueta;
+- «trozos»: cada trazo suelto de un símbolo de varios trazos, y cada pareja de símbolos vecinos juntados.
+
+`importar_mi_letra.py` lo hace con tu página y lo guarda en tu almacén local. `train_classifier.py --personal`
+mete los «trozos» en esa clase. Con la letra de otras personas no empeora: top-1 0,611 frente a 0,603.
+
+**3. Unir y separar en la app:** al tocar un símbolo, «Unir con el de al lado» y «Separar en trazos».
+
+- El corte que estaba mal se guarda como «trozo» y entra en el próximo reentrenamiento.
+- No se puede medir con tu archivo, porque lo haces tú a mano. Se probó en la app: separar un «=» y volver a unirlo.
+
+**4. Tiempos entre trazos:**
+
+- Se guardan en el archivo oculto de cada página; el `.rnote` no cambia.
+- Se envían al reconocedor, que favorece juntar trazos con pausas cortas (peso moderado, 0,5).
+- Tu archivo de prueba no tiene tiempos: el peso se ajustará con tus páginas nuevas.
+
+**Botón «Reentrenar»** (pestaña Matemáticas de la cinta), con `reentrenar.py`:
+
+- Avisa del tiempo estimado y deja seguir usando la app mientras reentrena.
+- Reserva tus ejemplos más recientes para comparar y solo cambia el modelo si no empeora; el anterior queda como
+  copia.
+- Se puede cancelar.
+- **Probado en la nube**, con tus 682 ejemplos importados: tardó 2 min 11 s y, en tus ejemplos reservados, pasó de
+  36/72 a 40/72.
+
+**5. Varias hipótesis de corte:** queda para más adelante (ver `PLAN-PENDIENTE.md`).
+
 ## 1. Resumen (del primer entregable; el cambio de plan está en la sección 0)
 
 - **Arquitectura:** un programa auxiliar en Python (`onepepe-math`) que Rnote lanza **una vez** y mantiene abierto,

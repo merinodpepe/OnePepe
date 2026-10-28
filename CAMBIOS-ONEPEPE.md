@@ -440,3 +440,33 @@ Rnote sin cambios). Lo que se ve en tu equipo con GTK 4.22 **sigue sin probar**,
   redondeadas.
 - **Rama:** `feat/diseno-fluent` · **Estado:** ejecutado en la nube ✔ (cambiar de pestaña, elegir color desde la cinta,
   ocultar y mostrar la cinta, modo concentración) · lápiz: pendiente.
+
+## Matemáticas: enseñarle tu letra (reentrenar, importar, unir y separar)
+
+- **Pestaña Matemáticas** en la cinta, con dos botones:
+  - **Modo matemáticas.**
+  - **«Reentrenar»:** te dice cuántos ejemplos tuyos hay y cuántos minutos tardará (unos 2–5), y pregunta. Mientras
+    reentrena puedes seguir usando la app; el progreso sale en una notificación con «Cancelar».
+    - Solo se usa el modelo nuevo si no es peor con tus ejemplos recientes; el anterior se guarda como
+      `simbolos.anterior.npz`.
+    - Cuando acumulas unas 50 correcciones nuevas, te sugiere reentrenar (nunca empieza solo).
+- **Meter tu página de expresiones como ejemplos** (en tu equipo; no se sube a ningún sitio):
+
+  ```bash
+  cd tools/onepepe-math
+  python3 importar_mi_letra.py ~/ruta/mis_expresiones_1.rnote expresiones.txt
+  ```
+
+  Después pulsa «Reentrenar».
+- **Arreglar el corte a mano:** al tocar un símbolo, además de las candidatas hay dos botones:
+  - **«Unir con el de al lado»:** por ejemplo, si un «=» quedó como dos rayas, o el punto de una «i» suelto.
+  - **«Separar en trazos»:** si dos símbolos quedaron pegados.
+
+  En los dos casos, el corte que estaba mal se guarda para el próximo reentrenamiento.
+- **Tiempos de los trazos:** se guardan en el archivo oculto de la página (no en el `.rnote`) y ayudan a cortar.
+- **Medidas** en `MATEMATICAS-INFORME.md`, sección 0.6. Con tus expresiones nuevas, las mejoras llevan los símbolos
+  bien de 44 % a 56 % y las sustituciones correctas de 68 % a 88 %.
+- **Ramas:** `feat/corte-trozo`, `feat/reentrenar-boton`, `feat/corte-app`, `feat/corte-tiempos`,
+  `feat/corte-pausas`.
+- **Estado:** tests ✔ (Python 36, Rust) · ejecutado en la nube ✔ (reentrenar, cancelar, unir, separar) · lápiz:
+  pendiente.

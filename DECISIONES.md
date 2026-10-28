@@ -199,3 +199,21 @@ Formato: qué elegí y por qué.
 - **La barra de herramientas inferior** repite la cinta: se oculta mientras la cinta está visible y vuelve si la ocultas.
 - **Todo el diseño va en CSS** con clases propias (`onepepe-*`) y con la prioridad de la aplicación; no toca el tema
   del sistema.
+
+## Cortar tu letra en símbolos y reentrenar desde la app (28/10/2026)
+
+- **Umbrales de distancia calibrados: no se quedan** (no mejoran con tus expresiones). Quedan como parámetros, sin
+  script.
+- **Corte forzado** para sacar ejemplos de tus páginas etiquetadas: con 1–4 trazos seguidos por símbolo y exactamente
+  los símbolos esperados. Las etiquetas pueden tener algo de ruido (p. ej. el punto del «·» pegado al «5»), pero
+  medido sobre expresiones no vistas mejora mucho.
+- **«Trozos» en el almacén** con `kind: "junk"`: entran en el reentrenamiento (clase «trozo»), no en el kNN.
+- **Reentrenar compara con tus ejemplos más recientes reservados** (30 %): así la comparación es honesta. Esos
+  ejemplos siguen en el kNN y entran en el siguiente reentrenamiento.
+- **Cancelar envía SIGTERM y no un kill:** `flatpak-spawn` reenvía la señal al programa del equipo, que para también el
+  entrenamiento. Además, el proceso de entrenamiento muere solo si muere su padre (`PR_SET_PDEATHSIG`).
+- **Tiempos de los trazos en el archivo oculto** (versión 2, que sigue leyendo la 1), no en el `.rnote`: no se rompe
+  la compatibilidad con Rnote ni con tus archivos.
+- **Pestaña Matemáticas** en la cinta: Dibujar ya no cabía en pantallas de 14".
+- **«Unir con el de al lado»** junta con el símbolo más cercano por cualquier lado: los trozos de un «=» o de una «i»
+  quedan uno encima del otro, no a la derecha.
