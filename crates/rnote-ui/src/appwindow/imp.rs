@@ -142,6 +142,9 @@ impl ObjectImpl for RnAppWindow {
             );
         }
 
+        // OnePepe: the colors of the light, dark and high contrast themes (theme.rs)
+        crate::theme::setup(&obj);
+
         self.setup_input();
         self.setup_overview();
         self.setup_split_view();

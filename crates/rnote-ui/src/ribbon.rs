@@ -930,6 +930,13 @@ fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                 )
                 .upcast(),
                 big_toggle("pan-up-symbolic", &gettext("Ribbon"), "win.ribbon", None).upcast(),
+                big_toggle(
+                    "weather-clear-night-symbolic",
+                    &gettext("Dark canvas"),
+                    "win.dark-canvas",
+                    None,
+                )
+                .upcast(),
             ],
         ),
     ])
@@ -1285,6 +1292,25 @@ fn setup_actions(appwindow: &RnAppWindow) {
         }
     ));
     appwindow.add_action(&action_shape_recognition);
+    // dark canvas in the dark theme (only on screen), on by default
+    let action_dark_canvas = gio::SimpleAction::new_stateful(
+        "dark-canvas",
+        None,
+        &crate::prefs::get_bool("lienzo-oscuro", true).to_variant(),
+    );
+    action_dark_canvas.connect_activate(clone!(
+        #[weak]
+        appwindow,
+        move |action, _| {
+            let enabled = !crate::prefs::get_bool("lienzo-oscuro", true);
+            crate::prefs::set("lienzo-oscuro", enabled.into());
+            action.set_state(&enabled.to_variant());
+            if let Some(canvas) = appwindow.active_tab_canvas() {
+                canvas.queue_draw();
+            }
+        }
+    ));
+    appwindow.add_action(&action_dark_canvas);
 
     string_action(appwindow, "text-quick-style", |appwindow, target| {
         let Ok(style) = QuickStyle::from_str(target) else {

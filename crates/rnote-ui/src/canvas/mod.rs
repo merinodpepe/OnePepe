@@ -487,10 +487,21 @@ mod imp {
                 // push the clip
                 snapshot.push_clip(&graphene::Rect::from_p2d_aabb(clip_bounds));
 
+                // OnePepe: in the dark theme the canvas is shown in dark colors (only on screen)
+                let dark = crate::theme::canvas_dark();
+                if dark {
+                    let (matrix, offset) = crate::theme::canvas_dark_matrix();
+                    snapshot.push_color_matrix(&matrix, &offset);
+                }
+
                 // Draw the entire engine
                 self.engine
                     .borrow()
                     .draw_to_gtk_snapshot(snapshot, obj.bounds())?;
+
+                if dark {
+                    snapshot.pop();
+                }
 
                 // pop the clip
                 snapshot.pop();

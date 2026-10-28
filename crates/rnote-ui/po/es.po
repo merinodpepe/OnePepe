@@ -3804,3 +3804,6 @@ msgstr "Separar en trazos"
 #. OnePepe
 msgid "Nothing to join or split here"
 msgstr "Aquí no hay nada que unir o separar"
+
+msgid "Dark canvas"
+msgstr "Lienzo oscuro"
