@@ -29,13 +29,14 @@ def recognize(
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]
     cand_lists = [s["candidates"] for s in syms]
+    embeddings = [classifier.embedding(g) for g in groups_strokes]
     if personal is not None and len(personal):
-        cand_lists = [personal.adjust(g, c) for g, c in zip(groups_strokes, cand_lists)]
+        cand_lists = [personal.adjust(g, c, embedding=e) for g, c, e in zip(groups_strokes, cand_lists, embeddings)]
     labels = gl.symbol_labels(glossary_names)
     if labels:
         cand_lists = [apply_glossary(c, labels) for c in cand_lists]
     # los que se parecen mucho entre sí comparten etiqueta
-    groups = shape_groups([classifier.embedding(g) for g in groups_strokes]) if syms else []
+    groups = shape_groups(embeddings) if syms else []
     cand_lists = share_within_groups(cand_lists, groups)
 
     # contexto: todos los símbolos de la línea en orden de lectura (los ya conocidos, fijos)

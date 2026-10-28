@@ -162,6 +162,8 @@ struct CorrectRequest<'a> {
     cmd: &'a str,
     strokes: Vec<Vec<[f64; 2]>>,
     latex: String,
+    /// What was recognized before the correction (kept with the example, for the evaluation).
+    predicted: String,
     notebook_dir: Option<String>,
 }
 
@@ -542,10 +544,10 @@ impl Engine {
             .symbols
             .iter()
             .filter(|s| s.id == symbol_id || (whole_group && s.group == group))
-            .map(|s| (s.id, s.original.clone()))
+            .map(|s| (s.id, s.original.clone(), s.latex.clone()))
             .collect::<Vec<_>>();
         let mut out = vec![];
-        for (id, original) in targets {
+        for (id, original, predicted) in targets {
             self.math.next_id += 1;
             let req_id = self.math.next_id;
             self.math
@@ -556,6 +558,7 @@ impl Engine {
                 cmd: "correct",
                 strokes: original,
                 latex: latex.to_string(),
+                predicted,
                 notebook_dir: notebook_dir.clone(),
             }) {
                 out.push(s);
@@ -920,6 +923,7 @@ mod tests {
         let v: serde_json::Value = serde_json::from_str(&reqs[0]).unwrap();
         assert_eq!(v["cmd"], "correct");
         assert_eq!(v["latex"], "l");
+        assert_eq!(v["predicted"], "1");
         let resp = format!(
             r#"{{"id": {}, "ok": true, "clean": [[[101, 100], [101, 140]]]}}"#,
             v["id"]

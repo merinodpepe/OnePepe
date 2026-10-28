@@ -1,12 +1,24 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Tu letra: correcciones guardadas en tu equipo y clasificador personal por vecinos más cercanos.
+"""Tu letra: almacén local de correcciones y clasificador por vecinos más cercanos (kNN) sobre el embedding de la red.
 
-Cada corrección (los trazos del símbolo y la etiqueta correcta) se añade a
-~/.local/share/onepepe/math/correcciones.jsonl. Nunca se envía a ningún sitio.
+Cubre el hueco entre reentrenamientos: cada corrección cuenta al instante, sin reentrenar. Al reentrenar
+(`train_classifier.py --personal`), estos mismos ejemplos entran en la red.
+
+Cada ejemplo se guarda en ~/.local/share/onepepe/math/correcciones.jsonl (nunca sale de tu equipo) con:
+id, trazos (crudos), etiqueta correcta, etiqueta predicha, embedding, versión del modelo, fecha y cuaderno.
+Si la versión del modelo cambia (tras reentrenar), los embeddings se recalculan en segundo plano desde los trazos.
+
+Mezcla: k vecinos, peso exp(-d/τ) con d = 1 - coseno → p_knn. λ = λ_max · cercanía · coherencia, y λ = 0 si el
+vecino más cercano está a más de d_max. p_final = (1-λ)·p_red + λ·p_knn, renormalizada. Con el almacén vacío, el
+resultado es idéntico al de la red sola.
 """
 
 import json
+import math
 import os
+import threading
+import time
+import uuid
 
 import numpy as np
 
@@ -14,59 +26,177 @@ DEFAULT_PATH = os.path.join(
     os.environ.get("ONEPEPE_DATA", os.path.expanduser("~/.local/share/onepepe")), "math", "correcciones.jsonl"
 )
 
+# Medido con tu letra (30 expresiones, división temporal): ver MATEMATICAS-INFORME.md, sección 0.5.
+K = 5
+TAU = 0.1
+D_MAX = 0.3
+LAMBDA_MAX = 0.6
+
+
+def _unit(e):
+    e = np.asarray(e, dtype=np.float32)
+    return e / (np.linalg.norm(e) + 1e-9)
+
+
+class NeighborIndex:
+    """Vecinos más cercanos por fuerza bruta en memoria. La interfaz (add, remove, neighbors) permite cambiarlo por
+    un índice aproximado (HNSW) si algún día hay muchos miles de ejemplos."""
+
+    def __init__(self):
+        self.ids = []
+        self.matrix = np.zeros((0, 0), dtype=np.float32)
+
+    def __len__(self):
+        return len(self.ids)
+
+    def rebuild(self, items):
+        """`items`: lista de (id, embedding unitario)."""
+        self.ids = [i for i, _ in items]
+        self.matrix = np.array([e for _, e in items], dtype=np.float32) if items else np.zeros((0, 0), np.float32)
+
+    def neighbors(self, embedding, k):
+        """Los k más cercanos: lista de (distancia = 1 - coseno, id), de menor a mayor distancia."""
+        if not self.ids:
+            return []
+        d = 1.0 - self.matrix @ _unit(embedding)
+        order = np.argsort(d)[:k]
+        return [(float(d[i]), self.ids[i]) for i in order]
+
 
 class PersonalModel:
-    def __init__(self, classifier, path=DEFAULT_PATH):
+    def __init__(self, classifier, path=DEFAULT_PATH, background=True):
         self.classifier = classifier
         self.path = path
-        self.labels = []
-        self.embeddings = []
+        self.version = getattr(classifier, "version", "")
+        self.examples = {}  # id -> registro
+        self.index = NeighborIndex()
+        self._lock = threading.Lock()
+        stale = []
         if os.path.exists(path):
             with open(path, encoding="utf-8") as f:
                 for line in f:
                     try:
                         item = json.loads(line)
-                        self._add(item["latex"], item["strokes"])
-                    except (ValueError, KeyError):
+                        item.setdefault("id", uuid.uuid4().hex[:12])
+                        item["strokes"] = [[tuple(p) for p in s] for s in item["strokes"]]
+                        item["latex"]
+                    except (ValueError, KeyError, TypeError):
                         continue
+                    self.examples[item["id"]] = item
+                    if item.get("model") != self.version or "embedding" not in item:
+                        stale.append(item["id"])
+        self._rebuild_index()
+        if stale:
+            if background:
+                threading.Thread(target=self._refresh, args=(stale,), daemon=True).start()
+            else:
+                self._refresh(stale)
 
-    def _add(self, latex, strokes):
-        e = self.classifier.embedding(strokes)
-        self.labels.append(latex)
-        self.embeddings.append(e / (np.linalg.norm(e) + 1e-9))
+    # ----- almacén
 
-    def add_correction(self, latex, strokes):
-        """Guarda un ejemplo de tu letra."""
-        self._add(latex, strokes)
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        with open(self.path, "a", encoding="utf-8") as f:
-            f.write(json.dumps({"latex": latex, "strokes": strokes}) + "\n")
+    def _refresh(self, ids):
+        """Recalcula embeddings de ejemplos guardados con otra versión del modelo (o sin embedding)."""
+        for i in ids:
+            item = self.examples.get(i)
+            if item is None:
+                continue
+            item["embedding"] = [round(float(v), 5) for v in _unit(self.classifier.embedding(item["strokes"]))]
+            item["model"] = self.version
+        with self._lock:
+            self._rebuild_index()
+            self._save_all()
+
+    def _rebuild_index(self):
+        self.index.rebuild(
+            [
+                (i, _unit(item["embedding"]))
+                for i, item in self.examples.items()
+                if item.get("model") == self.version and "embedding" in item
+            ]
+        )
+
+    def _save_all(self):
+        os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+        tmp = self.path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            for item in self.examples.values():
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        os.replace(tmp, self.path)
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.index)
 
-    def adjust(self, strokes, cands, k=5, min_similarity=0.85):
-        """Mezcla las candidatas del modelo general con los vecinos más parecidos de tu letra.
+    def add_correction(self, latex, strokes, predicted=None, notebook=None, embedding=None):
+        """Guarda un ejemplo de tu letra (una corrección, o un símbolo que aceptas tal cual). Devuelve su id."""
+        if embedding is None:
+            embedding = self.classifier.embedding(strokes)
+        item = {
+            "id": uuid.uuid4().hex[:12],
+            "latex": latex,
+            "predicted": predicted,
+            "strokes": [[(round(float(x), 2), round(float(y), 2)) for x, y in s] for s in strokes],
+            "embedding": [round(float(v), 5) for v in _unit(embedding)],
+            "model": self.version,
+            "date": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "notebook": notebook,
+        }
+        with self._lock:
+            self.examples[item["id"]] = item
+            self._rebuild_index()
+            os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+            with open(self.path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        return item["id"]
 
-        Cuantos más ejemplos tuyos muy parecidos hay, más pesan.
-        """
-        if not self.labels:
+    def list_examples(self):
+        """Los ejemplos guardados, sin trazos ni embedding (para mostrarlos y poder borrarlos o cambiarlos)."""
+        keys = ("id", "latex", "predicted", "date", "notebook")
+        return [{k: item.get(k) for k in keys} for item in self.examples.values()]
+
+    def forget(self, example_id):
+        """Borra un ejemplo (p. ej. una corrección equivocada)."""
+        with self._lock:
+            if self.examples.pop(example_id, None) is None:
+                return False
+            self._rebuild_index()
+            self._save_all()
+        return True
+
+    def relabel(self, example_id, latex):
+        """Cambia la etiqueta correcta de un ejemplo."""
+        with self._lock:
+            item = self.examples.get(example_id)
+            if item is None:
+                return False
+            item["latex"] = latex
+            self._save_all()
+        return True
+
+    # ----- vecinos y mezcla
+
+    def neighbors(self, embedding, k=K):
+        """(distancia, etiqueta, id) de los k ejemplos tuyos más parecidos."""
+        return [(d, self.examples[i]["latex"], i) for d, i in self.index.neighbors(embedding, k) if i in self.examples]
+
+    def adjust(self, strokes, cands, embedding=None):
+        """Mezcla las candidatas de la red con los vecinos de tu letra. Sin vecinos cercanos, no cambia nada."""
+        if not len(self.index):
             return cands
-        e = self.classifier.embedding(strokes)
-        e = e / (np.linalg.norm(e) + 1e-9)
-        sims = np.array(self.embeddings) @ e
-        order = np.argsort(-sims)[:k]
+        if embedding is None:
+            embedding = self.classifier.embedding(strokes)
+        near = [(d, lab) for d, lab, _ in self.neighbors(embedding, K) if d <= D_MAX]
+        if not near:
+            return cands
         votes = {}
-        for i in order:
-            if sims[i] >= min_similarity:
-                votes[self.labels[i]] = votes.get(self.labels[i], 0.0) + float(sims[i])
-        if not votes:
-            return cands
-        n_close = sum(1 for i in order if sims[i] >= min_similarity)
-        weight = n_close / (n_close + 1.0)
+        for d, lab in near:
+            votes[lab] = votes.get(lab, 0.0) + math.exp(-d / TAU)
         z = sum(votes.values())
-        mixed = {lab: (1 - weight) * p for lab, p in cands}
-        for lab, v in votes.items():
-            mixed[lab] = mixed.get(lab, 0.0) + weight * v / z
+        p_knn = {lab: v / z for lab, v in votes.items()}
+        closeness = math.exp(-near[0][0] / TAU)
+        coherence = max(p_knn.values())
+        lam = LAMBDA_MAX * closeness * coherence
+        mixed = {lab: (1.0 - lam) * p for lab, p in cands}
+        for lab, p in p_knn.items():
+            mixed[lab] = mixed.get(lab, 0.0) + lam * p
         zz = sum(mixed.values())
         return sorted(((lab, p / zz) for lab, p in mixed.items()), key=lambda x: -x[1])

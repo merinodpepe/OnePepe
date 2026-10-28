@@ -41,6 +41,15 @@ class TestExtract(unittest.TestCase):
         lines = rnote_extract.split_lines(strokes)
         self.assertEqual([line["stroke_ids"] for line in lines], [[0, 1], [2, 3]])
 
+    def test_high_exponent_stays_with_its_expression(self):
+        def stroke(i, y, h=30):
+            return {"id": i, "order": i, "points": [], "bbox": [0, y, 20, y + h]}
+
+        # tres expresiones separadas ~1000; la segunda tiene un exponente muy alto que queda 60 por encima
+        strokes = [stroke(0, 0), stroke(1, 1000), stroke(2, 1090), stroke(3, 2100), stroke(4, 3100)]
+        lines = rnote_extract.split_lines(strokes)
+        self.assertEqual([line["stroke_ids"] for line in lines], [[0], [1, 2], [3], [4]])
+
     def test_cli_with_labels_and_svg(self):
         with tempfile.TemporaryDirectory() as d:
             labels = os.path.join(d, "labels.txt")
