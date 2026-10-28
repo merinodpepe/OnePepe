@@ -239,7 +239,9 @@ toast {
 
 /* --- header (40 px) and tabs (36 px) in the header color; the active tab joins the ribbon */
 window.onepepe headerbar.onepepe-header,
-window.onepepe headerbar.onepepe-sidebar-header {
+window.onepepe headerbar.onepepe-sidebar-header,
+window.onepepe toolbarview > .top-bar headerbar.onepepe-header,
+window.onepepe toolbarview > .top-bar headerbar.onepepe-sidebar-header {
     background: @op_header;
     color: @op_on_header;
     box-shadow: none;
@@ -473,6 +475,22 @@ window.onepepe .onepepe-ribbon-body button.onepepe-style-preview {
     min-height: 52px;
     padding: 4px 8px;
     color: @op_fg_1;
+}
+
+/* --- the tree of the notebook: 32 px rows, 16 px indentation */
+window.onepepe .onepepe-tree row {
+    min-height: 32px;
+    padding: 0px 4px;
+}
+
+window.onepepe .onepepe-tree treeexpander indent,
+window.onepepe .onepepe-tree treeexpander expander {
+    -gtk-icon-size: 16px;
+}
+
+window.onepepe .onepepe-add-page {
+    color: @op_brand;
+    font-weight: 600;
 }
 
 /* --- high contrast: visible borders on the controls */

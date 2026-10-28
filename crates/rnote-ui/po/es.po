@@ -3909,3 +3909,27 @@ msgstr "Bolis favoritos del 1 al 5"
 
 msgid "Text styles: Heading 1, Heading 2, Normal"
 msgstr "Estilos de texto: Título 1, Título 2, Normal"
+
+msgid "Search pages"
+msgstr "Buscar páginas"
+
+msgid "New page in the notebook (or in the section of the open page)"
+msgstr "Nueva página en el cuaderno (o en la sección de la página abierta)"
+
+msgid "Fold the panel"
+msgstr "Plegar el panel"
+
+msgid "Unfold the panel"
+msgstr "Desplegar el panel"
+
+msgid "Untitled page"
+msgstr "Página sin título"
+
+msgid "Move down"
+msgstr "Bajar"
+
+msgid "Make subpage"
+msgstr "Convertir en subpágina"
+
+msgid "Promote subpage"
+msgstr "Subir de nivel"
