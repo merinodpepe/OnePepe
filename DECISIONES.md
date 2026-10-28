@@ -157,3 +157,35 @@ Formato: qué elegí y por qué.
 - Se borró el logo provisional `misc/onepepe/logo.svg`.
 - El icono monocromo pequeño (`icons/symbolic/apps/rnote-symbolic.svg`) y los `.ico` de Windows siguen siendo los de
   Rnote: falta una versión de una sola tinta del logo.
+
+## Tercera tanda: cinta tipo OneNote y mejoras sencillas (28/10/2026)
+
+- **Cinta en código, sin archivos `.ui`** (`crates/rnote-ui/src/ribbon.rs`): un error en un `.ui` solo se ve al
+  ejecutar, mientras que en código lo comprueba el compilador. La cinta usa las acciones de la ventana (`win.*`) que ya
+  existían y añade las nuevas. Va encima de las pestañas de páginas y no sustituye a la barra de herramientas de Rnote
+  (la cinta es para encontrar las cosas; la barra lateral de cada herramienta tiene los ajustes finos).
+- **Probar ejecutando en la nube:** se compiló una copia aparte contra GTK 4.14 / libadwaita 1.5 (las del sistema en
+  la nube), quitando de los `.ui` una propiedad que esa versión no conoce, y se usó con `xdotool` en una pantalla
+  virtual. Esa copia no se sube. Así se encontraron y arreglaron 4 fallos que solo se ven usando la app:
+  - Los botones quitaban el foco del teclado al texto.
+  - "Título 1" perdía el tamaño (`replace_attr_for_range` descarta los demás atributos del rango).
+  - Quitar un bolígrafo favorito no hacía nada (ventanita anclada dentro del botón).
+  - La cinta crecía en vertical.
+- **Bolígrafos favoritos** en `~/.config/onepepe/boligrafos.json` y no en los ajustes de GSettings: añadir una clave al
+  esquema obliga a reinstalar el esquema, y una clave que falta hace que la app se cierre al arrancar.
+- **Tabla dibujada** (rejilla de líneas) en lugar de tabla de texto: en una app de escritura a mano se rellena con el
+  lápiz, y es barata. Una tabla de texto de verdad queda en el plan.
+- **Plantillas fijas** (Cornell, clase, problemas, título y fecha) dibujadas en la hoja que se ve. Plantillas propias,
+  en el plan.
+- **Recorte de pantalla** por el portal del escritorio (`org.freedesktop.portal.Screenshot`) con D-Bus de GIO, sin
+  crates nuevas (el Flatpak compila sin red, y una crate nueva obligaría a regenerar sus fuentes).
+- **Copias de seguridad** en `~/.local/share/onepepe/copias/`, fuera de los cuadernos, para no llenarlos de archivos.
+  Como mucho una cada 20 minutos (el guardado automático es frecuente) y 10 por página.
+- **Exportar ajustado** no cambia la página, solo el PDF, y nunca agranda (escala ≤ 1). Avisa si la escala baja de 0,5.
+- **Diseño:** morado #7719AA (OneNote y Pepe Flock) en la barra de título y en la banda de pestañas, con la pestaña
+  activa como lengüeta clara. Los colores se fijan en CSS (`data/style.css`) con clases propias, para no tocar el
+  resto del tema. Variante para el modo oscuro.
+- **Barra lateral:** deja de listar archivos de texto (`.md`, `.txt`, código). Rnote los mostraba porque se pueden
+  abrir; en un cuaderno tipo OneNote solo estorban.
+- **Traducción:** cadenas en inglés con `gettext` (como el resto de Rnote) y su traducción en `es.po`. Se quitaron 7
+  entradas obsoletas de `es.po` que repetían textos que vuelven a usarse.

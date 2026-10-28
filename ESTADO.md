@@ -1,17 +1,20 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-26 (segunda tanda). Rama de integración: `onepepe` (creada desde `main`, que no se ha tocado).
+Actualizado: 2026-10-28 (tercera tanda). Rama de integración: `onepepe` (creada desde `main`, que no se ha tocado).
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
 - **compilado**: el motor compila de verdad; la interfaz GTK solo con `cargo check` (comprobación de tipos, sin
   enlazar ni ejecutar), porque la nube no tiene GTK 4.22 / libadwaita 1.9 ni pantalla.
 - **tests**: tests automáticos que pasan en la nube (Rust y Python).
-- **lápiz real**: probado por ti en tu equipo. **Todavía nada está probado con lápiz real ni ejecutado en la app.**
+- **ejecutada (nube)**: la app se abrió y se usó con clics simulados en la nube, en una copia de prueba con GTK 4.14
+  (tu equipo usará GTK 4.22). En la tercera tanda la app arrancó con **todos** los cambios de OnePepe, incluidos los
+  anteriores.
+- **lápiz real**: probado por ti en tu equipo. **Todavía nada está probado con lápiz real.**
 
 ## Hecho
 
-| Fase | Qué | Rama | compilado | tests | lápiz real |
+| Fase | Qué | Rama | compilado | tests · ejecutada (nube) | lápiz real |
 |---|---|---|---|---|---|
 | 0 | Auditoría (`AUDITORIA.md`), `setup-deps.sh`, compilación en la nube | `onepepe` | sí (motor); UI solo `cargo check` | — | — |
 | 0 | Hojas infinitas: ya existían; test de desplazamiento y zoom | `feat/hojas-infinitas` | sí | sí (4) | pendiente |
@@ -30,6 +33,16 @@ Leyenda de cómo se probó cada cosa:
 | 1c | Fecha y hora | `feat/fecha-hora` | sí | sí (2) | pendiente |
 | 1c | Viñetas, listas numeradas y casillas | `feat/listas` | sí | sí (4) | pendiente |
 | 4 | Cuadernos: nueva página y mover a… (lo demás ya existía) | `feat/cuadernos` | sí | sí (1) | pendiente |
+| 3ª | **Cinta tipo OneNote** (Archivo, Inicio, Insertar, Dibujar, Vista; Ctrl+F1 la oculta) | `feat/cinta` | sí | ejecutada ✔ (todos los botones, sin cierres) | pendiente |
+| 3ª | **Diseño cercano a OneNote** (morado #7719AA; la barra lateral solo muestra cuadernos) | `feat/diseno-onenote` | sí | ejecutada ✔ | pendiente |
+| 3ª | **Bolígrafos favoritos** (usar, guardar el actual, quitar) | `feat/boligrafos-favoritos` | sí | sí (3) + ejecutada ✔ | pendiente |
+| 3ª | Insertar tabla, plantillas (Cornell, clase, problemas), título y fecha | `feat/insertar` | sí | sí (4) + ejecutada ✔ | pendiente |
+| 3ª | Recorte de pantalla (portal del escritorio) | `feat/cinta` | sí | ejecutada hasta el aviso de cancelado (sin portal en la nube) | pendiente |
+| 3ª | Tamaño de hoja A5–A0 y Carta; exportar PDF ajustado a una hoja o al ancho | `feat/insertar` | sí | sí + ejecutada ✔ | pendiente |
+| 3ª | Nota rápida y exportar una sección entera a un PDF | `feat/notas-rapidas-y-seccion-pdf` | sí | sí (1) + ejecutada ✔ | pendiente |
+| 3ª | Estilos rápidos (Título 1/2, cita, código) y listas que siguen con Intro | `feat/estilos-listas` | sí | sí (5) + ejecutada ✔ | pendiente |
+| 3ª | Copias de seguridad automáticas con versiones | `feat/copias-seguridad` | sí | sí (2) + ejecutada ✔ | pendiente |
+| 3ª | Interfaz en español (138 textos nuevos) | `feat/traduccion-es` | — | `msgfmt -c` ✔ + ejecutada en español ✔ | no aplica |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
@@ -50,16 +63,13 @@ Resumen (detalle en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md)):
    "solo mientras mantengo pulsado un botón del lápiz".
 3. **Que la aplicación se llame OnePepe por dentro** (título, "Acerca de", icono e identificador), con migración de
    ajustes y posibilidad de instalarla junto a Rnote.
-4. Opcionales: estilos rápidos (Título 1/2, cita, código), recorte de pantalla, continuar listas al pulsar Intro, árbol
-   desplegable de tres niveles para los cuadernos, capturas para el README, tinta a texto (Fase 5).
+4. Opcionales: árbol desplegable de tres niveles para los cuadernos, tinta a texto (Fase 5).
 5. Ideas para más adelante (sección 6 de `PLAN-PENDIENTE.md`, sin implementar):
    - Reentrenar el modelo en tu equipo cuando tú quieras, con tiempo estimado.
-   - Selector de tamaño de hoja y exportación encogida a una hoja.
    - Gráficas de funciones a partir de lo que escribes en modo matemáticas.
-   - Etiquetas, búsqueda y plantillas.
-   - Bolígrafos favoritos.
-   - Modo repaso.
-   - Copias de seguridad, entre otras.
+   - Etiquetas y búsqueda.
+   - Menú radial bajo el lápiz y minimapa.
+   - Modo repaso, entre otras.
 
 Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas está **en el manifiesto** a petición tuya
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
@@ -104,6 +114,12 @@ python3 -m venv /tmp/venv-onepepe && /tmp/venv-onepepe/bin/pip install -r requir
 # entrenar el modelo (descarga MathWriting antes con ./descargar_mathwriting.sh):
 /tmp/venv-onepepe/bin/python train_classifier.py ~/.local/share/onepepe/mathwriting/mathwriting-2024
 ```
+
+Ejecutar la interfaz en la nube (como en la tercera tanda): en una copia aparte (`git worktree`), cambiar en
+`Cargo.toml` las características `v4_22` → `v4_14` y `v1_9` → `v1_5`, instalar `libgtk-4-dev libadwaita-1-dev xvfb
+xdotool dbus-x11`, quitar de `crates/rnote-ui/data/ui` las líneas `<property name="limit-events">` y arrancar con
+`Xvfb :99`, `GSK_RENDERER=cairo GDK_BACKEND=x11` y un esquema de ajustes compilado (`glib-compile-schemas`). Esa copia
+**no se sube**.
 
 Comprobar la interfaz sin GTK 4.22 (como se hizo en la nube; necesita las dependencias del motor y `libasound2-dev`):
 

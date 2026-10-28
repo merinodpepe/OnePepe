@@ -1,6 +1,6 @@
 # Plan de mejora de OnePepe (pendiente)
 
-Actualizado: 2026-10-26. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](ESTADO.md) y
+Actualizado: 2026-10-28. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](ESTADO.md) y
 [`CAMBIOS-ONEPEPE.md`](CAMBIOS-ONEPEPE.md); el plan original completo queda en el historial de git de este archivo.
 
 ## 1. Pruebas en tu equipo (lo primero)
@@ -12,6 +12,9 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
 - Matemáticas: modo matemáticas, sustitución, corrección por toque, resultado del "=", archivo oculto al reabrir.
 - Botones del lápiz y extremo borrador, con la salida de `evtest`.
 - Regla (tamaño de la zona de enganche y ancho), colores, capas, cuadernos y herramientas de texto.
+- Lo de la tercera tanda (ya se ejecutó en la nube, falta en tu equipo con GTK 4.22 y el lápiz): la cinta, el diseño
+  morado, los bolígrafos favoritos, insertar tabla y plantillas, recorte de pantalla, tamaño de hoja, exportar
+  ajustado y por secciones, nota rápida, estilos y listas, copias de seguridad.
 
 ## 2. Matemáticas con tu letra
 
@@ -100,12 +103,10 @@ Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue m
 
 ## 4. Mejoras opcionales (si sobra tiempo y crédito)
 
-- Listas que continúan solas al pulsar Intro (ahora hay que pulsar el botón en cada párrafo).
-- Estilos rápidos de texto: Título 1, Título 2, cita, código.
-- Recorte de pantalla.
 - Árbol desplegable de tres niveles (cuaderno → sección → página) en la barra lateral, en lugar de entrar en carpetas.
-- Capturas de pantalla de OnePepe para el README (cuando funcione en tu equipo).
 - Tinta a texto (Fase 5; poco prioritaria).
+- Tablas de texto de verdad (hoy la tabla es una rejilla dibujada para escribir a mano).
+- Plantillas propias: guardar una página como plantilla y elegirla al crear páginas (hoy hay 4 plantillas fijas).
 
 ## 5. Cosas que haces tú en GitHub
 
@@ -114,7 +115,9 @@ Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue m
 
 ## 6. Ideas para más adelante (sin implementar)
 
-Ideas comentadas el 2026-10-26, solo apuntadas. Ninguna cambia el formato `.rnote`: lo que haya que recordar va en el
+Ideas comentadas el 2026-10-26, solo apuntadas. Ya hechas en la tercera tanda (28/10) y quitadas de aquí: tamaño de
+hoja, exportar ajustado, plantillas, título y fecha, nota rápida, tabla dibujada, bolígrafos favoritos, textos en
+español, diseño morado tipo OneNote, exportar una sección a PDF y copias de seguridad. Ninguna cambia el formato `.rnote`: lo que haya que recordar va en el
 archivo oculto de cada página, como en el modo matemáticas.
 
 Esto ya existe y no hace falta hacerlo:
@@ -126,58 +129,29 @@ Esto ya existe y no hace falta hacerlo:
 - Preajustes de formato.
 - Duplicar página.
 
-### 6.1 Tamaño de hoja y exportación
-
-- **Selector rápido de tamaño de hoja** (DIN A4, A3…) en la barra de arriba, sin entrar en Ajustes.
-  - Ya existen A6, A5, A4, A3, A2, Carta, Legal y personalizado (`crates/rnote-engine/src/document/format.rs`, en
-    Ajustes → formato; por defecto A3).
-  - Se añadirían A1 y A0. Eso solo toca la lista de la interfaz: el `.rnote` guarda el ancho y el alto en mm, así
-    que no cambia el formato. Esfuerzo bajo.
-- **Exportar ajustado al tamaño pedido.** Hoy el PDF corta lo dibujado en hojas a tamaño real (`engine/export.rs`).
-  - Opciones al exportar: "tamaño real (varias hojas)", "encoger para que quepa en 1 hoja" o "encoger hasta N hojas".
-    Solo afecta al PDF, no a la página. Esfuerzo bajo-medio.
-  - **Aviso:** pasar un A0 a un A4 lo reduce a 1/4 de ancho y de alto, y una letra de 5 mm queda en ~1,2 mm, ilegible.
-    La exportación debe avisar si el texto queda demasiado pequeño y proponer A3 o repartir en 2–4 hojas.
-
 ### 6.2 Más cerca de lo mejor de OneNote
 
 - **Etiquetas** (Pendiente ☐, Importante ★, Pregunta ?, Definición, Para el examen). Un panel "Resumen de
   etiquetas" las lista de todo el cuaderno y salta a cada una. Esfuerzo medio.
 - **Búsqueda global** (Ctrl+E) en los títulos de las páginas, el texto escrito con teclado y el LaTeX reconocido en
   modo matemáticas. La tinta normal solo será buscable cuando exista "tinta a texto". Esfuerzo medio.
-- **Plantillas de página con contenido**: Cornell, "apuntes de clase", hoja de problemas, laboratorio, milimetrado.
-  - Se eligen al crear la página.
-  - Son archivos `.rnote` normales en una carpeta.
-  - Esfuerzo bajo.
-- **Título y fecha automáticos** arriba de cada página nueva (reutiliza la función de fecha y hora). Esfuerzo bajo.
 - **Subpáginas y orden manual** arrastrando en la barra lateral. Va junto al árbol de tres niveles del apartado 4.
   Esfuerzo medio-alto.
-- **Notas rápidas**: una sección especial más un atajo (`onepepe --nota-rapida`) que abre una página en blanco al
-  momento. Esfuerzo bajo.
-- **Tablas sencillas**: una rejilla de cuadros de texto que se mueve junta. Esfuerzo alto.
 
 ### 6.3 Más cómodo y visual
 
 - **Menú radial bajo el lápiz** al mantener pulsado un botón: herramientas, colores y deshacer. Esfuerzo medio.
-- **Bolígrafos favoritos**: combinaciones de color, grosor y tipo de trazo que se eligen con un clic. Hoy solo hay
-  colores favoritos y grosores sueltos. Esfuerzo bajo-medio.
 - **Vista oscura del lienzo**: invierte los colores solo en pantalla; el archivo y la exportación no cambian.
   Esfuerzo medio.
 - **Minimapa** de la página infinita para saltar de una zona a otra. Esfuerzo medio.
-- **Textos nuevos en español**: las cadenas añadidas por OnePepe ("Ink to Shape", "Math Mode"…) están en inglés.
-  Hay que traducirlas. Esfuerzo bajo.
-- **Tema OnePepe**: color de acento e iconos a juego con el logo. Va junto al apartado 3. Esfuerzo bajo.
 - **Vista previa del trazo** al cambiar grosor, presión o estilo. Esfuerzo bajo.
 - **Transición suave** cuando el modo matemáticas sustituye un símbolo. Esfuerzo bajo.
 
 ### 6.4 Más útil para tomar apuntes
 
-- **Índice de la página** con sus títulos para saltar. Depende de los estilos rápidos del apartado 4. Esfuerzo medio.
+- **Índice de la página** con sus títulos (Título 1 y 2, ya existen) para saltar. Esfuerzo medio.
 - **Modo repaso** (tarjetas de memoria): se marcan con el lazo una pregunta y su respuesta. En modo repaso la respuesta
   queda tapada hasta tocarla. Esfuerzo medio.
-- **Exportar una sección o un cuaderno entero a un solo PDF.** Esfuerzo bajo-medio.
-- **Copias de seguridad automáticas con versiones**: las últimas N versiones de cada página en una carpeta oculta.
-  Esfuerzo bajo.
 - **Guía de sincronización** con Syncthing o Nextcloud, y aviso si un archivo cambia fuera de la app. Esfuerzo bajo.
 - **Insertar del glosario**: un menú para poner una constante o un símbolo de la asignatura. Esfuerzo bajo.
 - **Lista "Para el examen"**: todo lo marcado con esa etiqueta en una página o un PDF. Va después de las etiquetas.
@@ -196,13 +170,9 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
 5) ideas para más adelante.
 
-Dentro de las ideas para más adelante, la propuesta (sin decidir) es empezar por las baratas y útiles:
+Dentro de las ideas para más adelante, la propuesta (sin decidir) es seguir por:
 
-1. Selector de tamaño de hoja.
-2. Exportar ajustado.
-3. Gráficas de funciones (sección 2).
-4. Bolígrafos favoritos.
-5. Plantillas, con título y fecha.
-6. Copias de seguridad.
-7. Textos en español.
-8. Etiquetas y búsqueda.
+1. Gráficas de funciones (sección 2).
+2. Etiquetas y búsqueda.
+3. Índice de la página.
+4. Menú radial bajo el lápiz.

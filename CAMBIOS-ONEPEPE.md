@@ -324,3 +324,104 @@ cargo test -p rnote-compose
 - **Cómo lo pruebo yo:** con el modo matemáticas, escribe algo que se sustituya, guarda (Ctrl+S), cierra la pestaña y
   vuelve a abrir la página: toca un símbolo limpio y comprueba que salen sus candidatas. Con `ls -a` en la carpeta verás
   el archivo `.…onepepe.json`. Renombra la página desde el explorador y comprueba que el archivo oculto cambia de nombre.
+
+---
+
+## Tanda 3 (28/10/2026): la app ya se ha ejecutado
+
+Por primera vez la interfaz **se ha ejecutado de verdad** en la nube. Era una copia de prueba compilada contra
+GTK 4.14 / libadwaita 1.5, en una pantalla virtual y con clics simulados. Esa copia no se sube: había que quitar una
+propiedad nueva de GTK de los `.ui` para que arrancara con la versión antigua.
+
+Con eso se comprobó:
+
+- **Arranque:** la app arranca con todos los cambios de OnePepe, también los de tandas anteriores.
+- **Cinta:** sin cierres al pulsar todos los botones de la cinta.
+- **Funciones probadas de punta a punta:** la tabla, las plantillas, el tamaño de hoja, la exportación ajustada, los
+  bolígrafos favoritos, las listas con Intro, los títulos, las copias de seguridad, la nota rápida y exportar una
+  sección. La comprobación fue guardando el archivo y leyéndolo.
+
+Limitación: en esa GTK antigua los trazos se dibujan como rectángulos rosas (fallo de texturas de 4.14, también con
+Rnote sin cambios). Lo que se ve en tu equipo con GTK 4.22 **sigue sin probar**, igual que todo con el lápiz.
+
+## Cinta tipo OneNote
+
+- **Qué hace:** encima de las pestañas de páginas hay una cinta con cinco pestañas:
+
+| Pestaña | Qué tiene |
+|---|---|
+| Archivo | Nuevo, abrir, guardar, guardar como, exportar, exportar ajustado, exportar sección, imprimir, copias de seguridad, configuración, atajos, acerca de |
+| Inicio | Pegar, cortar, copiar, deshacer, rehacer, negrita, cursiva, subrayado, tachado, x², x₂, viñetas, lista numerada, casilla, Título 1, Título 2, más estilos (cita, código, normal), selección, fecha y hora |
+| Insertar | Espacio, tabla, imagen, impresión de PDF, recorte de pantalla, cuadro de texto, formas, fecha y hora, plantillas de página, añadir hoja, nota rápida, símbolo |
+| Dibujar | Bolígrafo, borrador, lazo, formas, texto, láser, bolígrafos favoritos, regla, tinta a formas, modo matemáticas |
+| Vista | Zoom, ancho de página, tamaño de hoja, ajustar al contenido, volver al inicio, modo concentración, pantalla completa, mostrar u ocultar la cinta |
+
+- **Cómo se oculta:** con el botón ⌃ de la derecha o con **Ctrl+F1**, como en OneNote.
+- **Diseño:** la barra de título y las pestañas van en **morado** (#7719AA, el de OneNote y Pepe Flock). La pestaña
+  elegida es una lengüeta clara unida a la cinta. Tiene variante para el modo oscuro.
+- **Foco del teclado:** los botones no le quitan el teclado al texto. Puedes poner "Título 1" o una viñeta y seguir
+  escribiendo.
+- **Rama:** `feat/cinta`, `feat/diseno-onenote` · **Estado:** compilado · ejecutado en la nube ✔ · lápiz: pendiente.
+- **Cómo lo pruebo yo:** recorre las pestañas y pulsa cada botón con un documento abierto.
+
+## Bolígrafos favoritos
+
+- **Qué hace:** en Dibujar → Bolígrafos favoritos hay una fila de bolígrafos guardados. Cada uno recuerda el color, el
+  grosor, el tipo (normal, rotulador o texturizado) y la curva de presión.
+  - **Usar uno:** un clic.
+  - **Guardar el actual:** **+**.
+  - **Quitar uno:** clic derecho → "Quitar este bolígrafo".
+- **Bolígrafos que vienen de serie:** negro fino, negro, azul, rojo, verde, morado, resaltador amarillo y resaltador
+  verde.
+- **Dónde se guardan:** `~/.config/onepepe/boligrafos.json` (en Flatpak, dentro de `~/.var/app/…/config`). Nunca van
+  en los `.rnote`.
+- **Rama:** `feat/boligrafos-favoritos`, `feat/cinta` · **Estado:** tests ✔ (3) · ejecutado ✔ · lápiz: pendiente.
+
+## Insertar: tabla, plantillas, título y fecha, recorte de pantalla, nota rápida
+
+- **Tabla:** eliges filas y columnas. Se dibuja una rejilla de líneas en el centro de la vista, ya seleccionada para
+  moverla. Está pensada para escribir a mano dentro; no es una tabla de texto.
+- **Plantillas de página:** "Título y fecha", "Apuntes de clase", "Apuntes Cornell" (columna de ideas clave y resumen
+  abajo) y "Hoja de problemas" (dos columnas). Se dibujan en la hoja que estás viendo.
+- **Recorte de pantalla:** usa el portal del escritorio, que te deja elegir la zona, y pega la imagen en la página. Si
+  cancelas, sale un aviso.
+- **Nota rápida:** crea una página en la carpeta «Notas rápidas» de la sección abierta, con la fecha y la hora en el
+  nombre, el título y la fecha arriba. La abre al momento.
+- **Rama:** `feat/insertar`, `feat/cinta`, `feat/notas-rapidas-y-seccion-pdf` · **Estado:** tests ✔ · ejecutado ✔
+  (el recorte de pantalla solo hasta el aviso de cancelado: en la nube no hay portal) · lápiz: pendiente.
+
+## Tamaño de hoja y exportar ajustado
+
+- **Tamaño de hoja (Vista):** DIN A5, A4, A3, A2, A1, A0 y Carta, en vertical u horizontal. El `.rnote` solo guarda
+  ancho y alto, así que el formato no cambia.
+- **Exportar ajustado (Archivo):** dos opciones, que solo cambian el PDF y no la página:
+  - "PDF en una sola hoja": todo lo dibujado se encoge para caber en una hoja del tamaño elegido.
+  - "PDF al ancho de la hoja": se encoge al ancho y sigue en las hojas que hagan falta.
+- **Aviso de letra pequeña:** si el contenido queda a menos de la mitad, sale un aviso de cuántas veces más pequeño
+  queda.
+- **Exportar sección (Archivo):** todas las páginas de la carpeta abierta, por orden de nombre, en un solo PDF.
+- **Comprobado:** A4 horizontal guardado como 1122,5 × 793,7 px; un PDF A4 de 1 hoja; una sección de 2 páginas.
+
+## Texto: estilos rápidos y listas que siguen solas
+
+- **Estilos:** Título 1 (1,8× y negrita), Título 2 (1,4× y negrita), Cita (cursiva gris), Código (monoespaciada) y
+  Normal. Se aplican a la selección o, sin selección, al párrafo del cursor.
+- **Listas:** al pulsar Intro en una viñeta, número o casilla, la línea siguiente continúa la lista. En un elemento
+  vacío, Intro termina la lista.
+- **Comprobado:** guardado y leído "Apuntes\n• uno\n• dos\nfin"; el título guarda tamaño y negrita.
+
+## Copias de seguridad automáticas
+
+- **Qué hace:** antes de sobrescribir una página al guardar, copia la versión anterior en
+  `~/.local/share/onepepe/copias/<carpeta>/<página>.<fecha-hora>.rnote`.
+- **Cuántas guarda:** como mucho una cada 20 minutos y las 10 más nuevas de cada página.
+- **Dónde verlas:** Archivo → Copias de seguridad abre la carpeta.
+- **Cómo recuperar una:** cópiala de vuelta a tu cuaderno y quita la fecha del nombre.
+- **Estado:** tests ✔ · ejecutado ✔ (se creó la copia al guardar por segunda vez).
+
+## Interfaz en español
+
+- **Qué cambia:** todos los textos nuevos de OnePepe se tradujeron en `es.po` (cinta, matemáticas, cuadernos, botones
+  y texto). Con el sistema en español, la app sale entera en español.
+- **Barra lateral de cuadernos:** muestra solo carpetas, páginas, PDF e imágenes; ya no salen archivos de texto o
+  código.

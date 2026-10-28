@@ -6,6 +6,8 @@
 
 </div>
 
+<p align="center"><img src="misc/onepepe/captura-cinta.png" width="800" alt="OnePepe con la cinta tipo OneNote"></p>
+
 OnePepe es una aplicación de apuntes a mano para Linux pensada para tabletas gráficas (Wacom) y para estudiar
 asignaturas de ciencias: escribes con el lápiz en un lienzo infinito, ordenas tus apuntes en cuadernos, secciones y
 páginas, conviertes tus trazos en formas limpias y, en el modo matemáticas, OnePepe reconoce lo que escribes, lo pasa a
@@ -14,6 +16,17 @@ limpio y te calcula el resultado del "=".
 Está hecha en Rust con GTK4 y libadwaita, y funciona sobre Wayland.
 
 ## Qué puedes hacer con OnePepe
+
+**Como OneNote**
+
+- **Cinta** arriba con las pestañas Archivo, Inicio, Insertar, Dibujar y Vista (se oculta con Ctrl+F1), en el morado de
+  OneNote y Pepe Flock.
+- **Bolígrafos favoritos:** guarda color, grosor y tipo de trazo y cámbialos con un clic.
+- **Insertar:** tablas para rellenar a mano, plantillas de página (Cornell, apuntes de clase, hoja de problemas),
+  título y fecha, recorte de pantalla, imágenes, PDF, símbolos y notas rápidas.
+- **Estilos de texto** (Título 1, Título 2, cita, código) y listas que siguen solas al pulsar Intro.
+- **Tamaño de hoja** DIN A5 a A0 y Carta, y **exportar a PDF ajustado** a una hoja o una sección entera en un PDF.
+- **Copias de seguridad automáticas** de cada página, con las últimas versiones.
 
 **Escribir y dibujar**
 
