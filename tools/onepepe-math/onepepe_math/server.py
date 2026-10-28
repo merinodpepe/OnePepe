@@ -7,6 +7,9 @@ Peticiones:
    "notebook_dir": "/ruta", "threshold": 0.95, "clean": true, "equals": true}
   {"id": 3, "cmd": "correct", "strokes": [[[x, y], ...]], "latex": "K", "notebook_dir": "/ruta"}
   {"id": 4, "cmd": "glyph", "latex": "K", "box": [x0, y0, x1, y1]}
+  {"id": 5, "cmd": "examples"}                       tus ejemplos guardados (sin trazos)
+  {"id": 6, "cmd": "forget", "example": "id"}        borra un ejemplo
+  {"id": 7, "cmd": "relabel", "example": "id", "latex": "K"}   cambia su etiqueta
 
 Cada respuesta lleva el mismo "id". Los errores se responden con {"id", "error": "..."}; nunca se cae el programa.
 """
@@ -57,7 +60,9 @@ class Server:
             )
         if cmd == "correct":
             strokes = [[(float(p[0]), float(p[1])) for p in s] for s in req["strokes"] if s]
-            self.personal.add_correction(req["latex"], strokes)
+            self.personal.add_correction(
+                req["latex"], strokes, predicted=req.get("predicted"), notebook=req.get("notebook_dir")
+            )
             notebook_dir = req.get("notebook_dir")
             if notebook_dir and req.get("add_to_glossary", True):
                 path = gl.find_glossary(notebook_dir)
@@ -66,6 +71,12 @@ class Server:
             from .segment import bbox
 
             return {"ok": True, "clean": glyphs.place_glyph(req["latex"], bbox(strokes))}
+        if cmd == "examples":
+            return {"examples": self.personal.list_examples()}
+        if cmd == "forget":
+            return {"ok": self.personal.forget(req["example"])}
+        if cmd == "relabel":
+            return {"ok": self.personal.relabel(req["example"], req["latex"])}
         return {"error": f"orden desconocida: {cmd}"}
 
     def serve(self, inp=sys.stdin, out=sys.stdout):

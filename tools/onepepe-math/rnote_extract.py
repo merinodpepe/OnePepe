@@ -87,11 +87,32 @@ def extract_strokes(snapshot):
     return strokes
 
 
-def split_lines(strokes, gap_factor=0.35):
+def merge_close_lines(lines, merge_factor=0.5):
+    """Junta renglones separados por un hueco mucho menor que el hueco típico entre expresiones.
+
+    Un exponente alto, una raíz o la raya de una fracción pueden quedar como un "renglón" aparte; el hueco que los
+    separa de su expresión es mucho más pequeño que el que hay entre una expresión y la siguiente.
+    """
+    if len(lines) < 3:
+        return lines
+    gaps = sorted(b["top"] - a["bottom"] for a, b in zip(lines, lines[1:]))
+    limit = merge_factor * gaps[len(gaps) // 2]
+    merged = [lines[0]]
+    for line in lines[1:]:
+        if line["top"] - merged[-1]["bottom"] < limit:
+            merged[-1]["strokes"] += line["strokes"]
+            merged[-1]["bottom"] = max(merged[-1]["bottom"], line["bottom"])
+        else:
+            merged.append(line)
+    return merged
+
+
+def split_lines(strokes, gap_factor=0.35, merge_factor=0.5):
     """Agrupa los trazos en renglones según su posición vertical.
 
     Dos trazos están en el mismo renglón si sus franjas verticales se solapan o están
-    separadas menos de `gap_factor` veces la altura típica de un trazo.
+    separadas menos de `gap_factor` veces la altura típica de un trazo. Después se juntan los renglones
+    separados por un hueco mucho menor que el típico entre expresiones (ver `merge_close_lines`).
     """
     if not strokes:
         return []
@@ -106,6 +127,7 @@ def split_lines(strokes, gap_factor=0.35):
             lines[-1]["bottom"] = max(lines[-1]["bottom"], bottom)
         else:
             lines.append({"strokes": [s], "top": top, "bottom": bottom})
+    lines = merge_close_lines(lines, merge_factor)
     result = []
     for i, line in enumerate(lines):
         # dentro de un renglón se mantiene el orden de escritura

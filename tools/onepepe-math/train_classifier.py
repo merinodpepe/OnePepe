@@ -10,6 +10,7 @@ Escribe el modelo en ~/.local/share/onepepe/math/simbolos.npz (unos pocos MB). N
 """
 
 import argparse
+import json
 import glob
 import os
 import sys
@@ -52,6 +53,12 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--junk-formulas", type=int, default=3000)
     ap.add_argument("--junk-max", type=int, default=6000)
+    ap.add_argument(
+        "--personal",
+        default=None,
+        help="tus ejemplos (correcciones.jsonl): entran en el entrenamiento con más peso que los de MathWriting",
+    )
+    ap.add_argument("--personal-augment", type=int, default=90, help="variantes deformadas por ejemplo tuyo")
     args = ap.parse_args()
 
     from sklearn.neural_network import MLPClassifier
@@ -78,6 +85,18 @@ def main():
     rng.shuffle(junk)
     by_class[JUNK] = junk[: args.junk_max]
     print(f"{len(by_class[JUNK])} ejemplos de 'trozo'", file=sys.stderr)
+    personal = []
+    if args.personal and os.path.exists(args.personal):
+        with open(args.personal, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    item = json.loads(line)
+                    personal.append((item["latex"], [[tuple(p) for p in s] for s in item["strokes"]]))
+                except (ValueError, KeyError, TypeError):
+                    continue
+        for label, _ in personal:
+            by_class.setdefault(label, [])
+        print(f"{len(personal)} ejemplos tuyos", file=sys.stderr)
     classes = sorted(by_class)
     index = {c: i for i, c in enumerate(classes)}
 
@@ -97,6 +116,13 @@ def main():
             for _ in range(args.augment if c != JUNK else 2):
                 train_x.append(symbol_features(augment(strokes, rng)))
                 train_y.append(index[c])
+    # tus ejemplos: siempre en el entrenamiento (la prueba con tu letra la hace evaluar_mi_letra.py)
+    for label, strokes in personal:
+        train_x.append(symbol_features(strokes))
+        train_y.append(index[label])
+        for _ in range(args.personal_augment):
+            train_x.append(symbol_features(augment(strokes, rng)))
+            train_y.append(index[label])
     train_x, test_x = np.array(train_x), np.array(test_x)
     train_y, test_y = np.array(train_y), np.array(test_y)
     mean = train_x.mean(axis=0)
@@ -130,6 +156,8 @@ def main():
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     arrays = {"classes": np.array(classes), "mean": mean, "std": std, "n_layers": np.array(len(clf.coefs_))}
+    # versión: cambia en cada reentrenamiento, para recalcular los embeddings de tus ejemplos
+    arrays["version"] = np.array(time.strftime("%Y%m%d-%H%M%S") + f"-{len(personal)}")
     for i, (w, b) in enumerate(zip(clf.coefs_, clf.intercepts_)):
         arrays[f"W{i}"] = w.astype(np.float32)
         arrays[f"b{i}"] = b.astype(np.float32)

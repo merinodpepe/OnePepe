@@ -5,6 +5,7 @@ El modelo se guarda en un archivo .npz (pesos, nombres de clases y normalizació
 `train_classifier.py` y no se sube al repositorio.
 """
 
+import hashlib
 import os
 
 import numpy as np
@@ -23,6 +24,12 @@ JUNK = "__trozo__"
 class SymbolClassifier:
     def __init__(self, path=DEFAULT_MODEL, vocabulary=None):
         data = np.load(path, allow_pickle=False)
+        # versión del modelo: cambia en cada reentrenamiento (los embeddings guardados se recalculan)
+        if "version" in data:
+            self.version = str(data["version"])
+        else:
+            with open(path, "rb") as f:
+                self.version = hashlib.sha1(f.read()).hexdigest()[:12]
         self.classes = [str(c) for c in data["classes"]]
         self.mean = data["mean"]
         self.std = data["std"]
@@ -47,6 +54,20 @@ class SymbolClassifier:
         for w, b in self.weights[:-1]:
             x = np.maximum(x @ w + b, 0.0)
         return x
+
+    def probabilities_and_embedding(self, strokes):
+        """(probabilidades, embedding) en una sola pasada por la red."""
+        x = (symbol_features(strokes) - self.mean) / self.std
+        embedding = None
+        for i, (w, b) in enumerate(self.weights):
+            x = x @ w + b
+            if i < len(self.weights) - 1:
+                x = np.maximum(x, 0.0)
+                embedding = x
+        x = np.where(self.mask, x, -np.inf)
+        x = x - x.max()
+        e = np.exp(x)
+        return e / e.sum(), embedding
 
     def probabilities(self, strokes):
         x = (symbol_features(strokes) - self.mean) / self.std
