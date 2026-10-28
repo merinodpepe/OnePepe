@@ -86,6 +86,8 @@ pub struct MathState {
     pub last_tap: Option<Vector2>,
     /// Correction requests sent, by request id: (symbol ids, latex).
     corrections: Vec<(u64, Vec<u64>, String)>,
+    /// Join / split requests sent (fix of the cut into symbols), by request id.
+    group_fixes: Vec<GroupFix>,
     /// When the stroke in progress started (seconds since 1970).
     stroke_down: Option<f64>,
     /// Start and end time of the strokes written in math mode: short pauses join strokes into one symbol.
@@ -217,6 +219,45 @@ struct RecognizeResponse {
     result: Option<MathResult>,
     #[serde(default)]
     error: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct GroupResponse {
+    id: u64,
+    #[serde(default)]
+    candidates: Vec<Candidate>,
+    #[serde(default)]
+    confidence: f64,
+    #[serde(default)]
+    clean: Option<Vec<Vec<[f64; 2]>>>,
+    #[serde(default)]
+    error: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct GroupRequest<'a> {
+    id: u64,
+    cmd: &'a str,
+    strokes: Vec<Vec<[f64; 2]>>,
+}
+
+#[derive(Debug, Serialize)]
+struct SegmentFixRequest<'a> {
+    id: u64,
+    cmd: &'a str,
+    junk: Vec<Vec<Vec<[f64; 2]>>>,
+    notebook_dir: Option<String>,
+}
+
+/// A join or split waiting for the helper: the symbols it replaces and the handwriting of the new symbol.
+#[derive(Debug, Clone)]
+struct GroupFix {
+    req_id: u64,
+    replaces: Vec<u64>,
+    original: Vec<Vec<[f64; 2]>>,
+    style: rnote_compose::Style,
+    pressure: f64,
+    layer: Option<crate::store::chrono_comp::StrokeLayer>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -456,6 +497,222 @@ impl Engine {
             }
         }
         keys
+    }
+
+    /// Draws lines (clean glyph or handwriting) with a given style; returns their keys.
+    fn math_insert_lines(
+        &mut self,
+        lines: &[Vec<[f64; 2]>],
+        style: &rnote_compose::Style,
+        pressure: f64,
+        layer: Option<crate::store::chrono_comp::StrokeLayer>,
+    ) -> Vec<StrokeKey> {
+        let mut keys = vec![];
+        for line in lines {
+            let elements = line
+                .iter()
+                .map(|p| Element::new(Vector2::new(p[0], p[1]), pressure));
+            if let Some(path) = PenPath::try_from_elements(elements) {
+                let stroke = Stroke::BrushStroke(BrushStroke::from_penpath(path, style.clone()));
+                let key = self.store.insert_stroke(stroke, layer);
+                self.store.regenerate_rendering_for_stroke(
+                    key,
+                    self.camera.viewport(),
+                    self.camera.image_scale(),
+                );
+                keys.push(key);
+            }
+        }
+        keys
+    }
+
+    /// The nearest symbol to `symbol_id` (any side: the other bar of a "=", the dot of an "i", the next symbol),
+    /// for «join with the one next to it».
+    fn math_next_symbol(&self, symbol_id: u64) -> Option<u64> {
+        let a = self.math.symbols.iter().find(|s| s.id == symbol_id)?;
+        let gap = |b: &Aabb| {
+            let dx = (b.mins.x - a.bounds.maxs.x)
+                .max(a.bounds.mins.x - b.maxs.x)
+                .max(0.0);
+            let dy = (b.mins.y - a.bounds.maxs.y)
+                .max(a.bounds.mins.y - b.maxs.y)
+                .max(0.0);
+            (dx * dx + dy * dy).sqrt()
+        };
+        let size = a.bounds.extents().max_element().max(1.0);
+        self.math
+            .symbols
+            .iter()
+            .filter(|b| b.id != symbol_id && gap(&b.bounds) < 3.0 * size)
+            .min_by(|x, y| gap(&x.bounds).total_cmp(&gap(&y.bounds)))
+            .map(|b| b.id)
+    }
+
+    /// Style, pressure and layer of a symbol's strokes (for redrawing it).
+    fn math_symbol_style(
+        &self,
+        symbol_id: u64,
+    ) -> Option<(
+        rnote_compose::Style,
+        f64,
+        Option<crate::store::chrono_comp::StrokeLayer>,
+    )> {
+        let sym = self.math.symbols.iter().find(|s| s.id == symbol_id)?;
+        sym.keys
+            .iter()
+            .find_map(|k| match self.store.get_stroke_ref(*k) {
+                Some(Stroke::BrushStroke(b)) => {
+                    let elements = b.path.clone().into_elements();
+                    let pressure = elements.iter().map(|e| e.pressure).sum::<f64>()
+                        / elements.len().max(1) as f64;
+                    Some((b.style.clone(), pressure, self.store.stroke_layer(*k)))
+                }
+                _ => None,
+            })
+    }
+
+    fn math_group_fix_requests(
+        &mut self,
+        replaces: Vec<u64>,
+        new_symbols: Vec<Vec<Vec<[f64; 2]>>>,
+        junk: Vec<Vec<Vec<[f64; 2]>>>,
+        notebook_dir: Option<String>,
+    ) -> Vec<String> {
+        let Some((style, pressure, layer)) =
+            replaces.first().and_then(|id| self.math_symbol_style(*id))
+        else {
+            return vec![];
+        };
+        let mut out = vec![];
+        for original in new_symbols {
+            self.math.next_id += 1;
+            let req_id = self.math.next_id;
+            self.math.group_fixes.push(GroupFix {
+                req_id,
+                replaces: replaces.clone(),
+                original: original.clone(),
+                style: style.clone(),
+                pressure,
+                layer,
+            });
+            if let Ok(line) = serde_json::to_string(&GroupRequest {
+                id: req_id,
+                cmd: "recognize_group",
+                strokes: original,
+            }) {
+                out.push(line);
+            }
+        }
+        // the cut that was wrong teaches the next retraining
+        self.math.next_id += 1;
+        if let Ok(line) = serde_json::to_string(&SegmentFixRequest {
+            id: self.math.next_id,
+            cmd: "segment_fix",
+            junk,
+            notebook_dir,
+        }) {
+            out.push(line);
+        }
+        out
+    }
+
+    /// Requests (JSON lines) to join the symbol with the next one on its line into one symbol.
+    pub fn math_join_with_next_requests(
+        &mut self,
+        symbol_id: u64,
+        notebook_dir: Option<String>,
+    ) -> Vec<String> {
+        let Some(next) = self.math_next_symbol(symbol_id) else {
+            return vec![];
+        };
+        let originals = [symbol_id, next]
+            .iter()
+            .filter_map(|id| self.math.symbols.iter().find(|s| s.id == *id))
+            .map(|s| s.original.clone())
+            .collect::<Vec<_>>();
+        let joined = originals.concat();
+        self.math_group_fix_requests(vec![symbol_id, next], vec![joined], originals, notebook_dir)
+    }
+
+    /// Requests (JSON lines) to split the symbol into one symbol per stroke.
+    pub fn math_split_requests(
+        &mut self,
+        symbol_id: u64,
+        notebook_dir: Option<String>,
+    ) -> Vec<String> {
+        let Some(original) = self
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.id == symbol_id)
+            .map(|s| s.original.clone())
+        else {
+            return vec![];
+        };
+        if original.len() < 2 {
+            return vec![];
+        }
+        let parts = original.iter().map(|stroke| vec![stroke.clone()]).collect();
+        self.math_group_fix_requests(vec![symbol_id], parts, vec![original], notebook_dir)
+    }
+
+    /// Applies the answer to a join or split: the old symbols go away, the new one is drawn clean (if the helper is
+    /// sure enough) or with your handwriting.
+    pub fn math_apply_group_fix(&mut self, line: &str) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        let Ok(resp) = serde_json::from_str::<GroupResponse>(line) else {
+            return widget_flags;
+        };
+        let Some(pos) = self
+            .math
+            .group_fixes
+            .iter()
+            .position(|f| f.req_id == resp.id)
+        else {
+            return widget_flags;
+        };
+        let fix = self.math.group_fixes.remove(pos);
+        if resp.error.is_some() || resp.candidates.is_empty() {
+            return widget_flags;
+        }
+        // remove the old symbols (the first answer of a split does it for all its parts)
+        for id in &fix.replaces {
+            if let Some(idx) = self.math.symbols.iter().position(|s| s.id == *id) {
+                let old = self.math.symbols.remove(idx);
+                for k in old.keys {
+                    self.store.remove_stroke(k);
+                }
+            }
+        }
+        let options = self.math_options();
+        let lines = match resp.clean.as_ref() {
+            Some(clean) if options.replace && resp.confidence >= options.threshold => clean.clone(),
+            _ => fix.original.clone(),
+        };
+        let keys = self.math_insert_lines(&lines, &fix.style, fix.pressure, fix.layer);
+        let Some(bounds) = self.store.bounds_for_strokes(&keys) else {
+            return widget_flags;
+        };
+        let candidates = resp
+            .candidates
+            .iter()
+            .map(|c| (c.latex.clone(), c.p))
+            .collect::<Vec<_>>();
+        self.math.next_id += 1;
+        let id = self.math.next_id;
+        self.math.symbols.push(MathSymbol {
+            id,
+            keys,
+            latex: candidates[0].0.clone(),
+            bounds,
+            candidates,
+            group: (id, 0),
+            original: fix.original,
+        });
+        widget_flags |= self.record(Instant::now());
+        widget_flags.store_modified = true;
+        widget_flags.redraw = true;
+        widget_flags
     }
 
     /// Applies a recognition response (one JSON line from the helper).
@@ -931,6 +1188,82 @@ mod tests {
               "latex": "1=", "result": {{"text": "1", "latex": "1"}}}}"#
         );
         engine.math_apply_response(&resp)
+    }
+
+    #[test]
+    fn join_and_split_symbols() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let one = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "1")
+            .unwrap()
+            .id;
+        let eq = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "=")
+            .unwrap()
+            .id;
+
+        // split the "=" into its two strokes: two recognitions and the wrong cut as a "piece"
+        let reqs = engine.math_split_requests(eq, None);
+        assert_eq!(reqs.len(), 3);
+        let v: Vec<serde_json::Value> = reqs
+            .iter()
+            .map(|r| serde_json::from_str(r).unwrap())
+            .collect();
+        assert_eq!(v[0]["cmd"], "recognize_group");
+        assert_eq!(v[0]["strokes"].as_array().unwrap().len(), 1);
+        assert_eq!(v[2]["cmd"], "segment_fix");
+        assert_eq!(v[2]["junk"].as_array().unwrap().len(), 1);
+        for r in &v[..2] {
+            let resp = format!(
+                r#"{{"id": {}, "candidates": [{{"latex": "-", "p": 0.7}}], "confidence": 0.7, "clean": null}}"#,
+                r["id"]
+            );
+            assert!(engine.math_apply_group_fix(&resp).store_modified);
+        }
+        assert_eq!(engine.math.symbols.len(), 3);
+        assert_eq!(
+            engine
+                .math
+                .symbols
+                .iter()
+                .filter(|s| s.latex == "-")
+                .count(),
+            2
+        );
+        // the segment_fix answer is ignored
+        let _ = engine.math_apply_group_fix(&format!(
+            r#"{{"id": {}, "ok": true, "saved": 1}}"#,
+            v[2]["id"]
+        ));
+
+        // join the "1" with the next symbol (the first "-") into one symbol, drawn clean when sure
+        let reqs = engine.math_join_with_next_requests(one, None);
+        assert_eq!(reqs.len(), 2);
+        let v: serde_json::Value = serde_json::from_str(&reqs[0]).unwrap();
+        assert_eq!(v["strokes"].as_array().unwrap().len(), 2);
+        let resp = format!(
+            r#"{{"id": {}, "candidates": [{{"latex": "+", "p": 0.99}}], "confidence": 0.99,
+                "clean": [[[100, 120], [140, 120]], [[120, 100], [120, 140]]]}}"#,
+            v["id"]
+        );
+        let before = n_strokes(&engine);
+        assert!(engine.math_apply_group_fix(&resp).store_modified);
+        assert_eq!(engine.math.symbols.len(), 2);
+        assert!(engine.math.symbols.iter().any(|s| s.latex == "+"));
+        assert_eq!(n_strokes(&engine), before - 3 + 2);
+        // a symbol alone, far from everything: nothing to join
+        let far = engine.math.symbols[0].id;
+        for s in engine.math.symbols.iter_mut().filter(|s| s.id != far) {
+            s.bounds = Aabb::new(Vector2::new(5000.0, 5000.0), Vector2::new(5010.0, 5010.0));
+        }
+        assert!(engine.math_join_with_next_requests(far, None).is_empty());
     }
 
     #[test]
