@@ -189,3 +189,13 @@ Formato: qué elegí y por qué.
   abrir; en un cuaderno tipo OneNote solo estorban.
 - **Traducción:** cadenas en inglés con `gettext` (como el resto de Rnote) y su traducción en `es.po`. Se quitaron 7
   entradas obsoletas de `es.po` que repetían textos que vuelven a usarse.
+
+## Diseño estilo Fluent (28/10/2026)
+
+- **Referencias:** el rediseño Fluent de OneNote (cinta simplificada, pestañas con subrayado, menos espacio vertical) y,
+  como apps libres de escritura a mano, Xournal++ y Saber.
+- **Colores dentro de la cinta:** el selector de colores de Rnote se saca de la capa flotante y se mete en la cinta,
+  en lugar de copiarlo, para no tener dos selectores sincronizados.
+- **La barra de herramientas inferior** repite la cinta: se oculta mientras la cinta está visible y vuelve si la ocultas.
+- **Todo el diseño va en CSS** con clases propias (`onepepe-*`) y con la prioridad de la aplicación; no toca el tema
+  del sistema.

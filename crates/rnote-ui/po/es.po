@@ -3736,3 +3736,7 @@ msgstr "Exportar toda la sección como PDF"
 #. OnePepe
 msgid "Exported {} pages in one PDF"
 msgstr "Exportadas {} páginas en un solo PDF"
+
+#. OnePepe
+msgid "Colors"
+msgstr "Colores"

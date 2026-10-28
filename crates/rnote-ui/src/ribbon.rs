@@ -61,6 +61,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     header.append(&spacer);
     header.append(&hide_button);
 
+    let ribbon = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     let revealer = gtk4::Revealer::builder()
         .child(&stack)
         .reveal_child(true)
@@ -72,15 +73,25 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     {
         action.connect_state_notify(clone!(
             #[weak]
+            appwindow,
+            #[weak]
             revealer,
-            move |action| {
-                let shown = action.state().and_then(|s| s.get::<bool>()).unwrap_or(true);
-                revealer.set_reveal_child(shown);
-            }
+            #[weak]
+            ribbon,
+            move |_| sync_ribbon_visibility(&appwindow, &ribbon, &revealer)
         ));
     }
-
-    let ribbon = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    appwindow.connect_notify_local(
+        Some("focus-mode"),
+        clone!(
+            #[weak]
+            revealer,
+            #[weak]
+            ribbon,
+            move |appwindow, _| sync_ribbon_visibility(appwindow, &ribbon, &revealer)
+        ),
+    );
+    sync_ribbon_visibility(appwindow, &ribbon, &revealer);
     ribbon.add_css_class("onepepe-ribbon");
     stack.add_css_class("onepepe-ribbon-body");
     // OneNote-like look: the title bar and the tabs in the Pepe Flock purple (see data/style.css)
@@ -89,6 +100,10 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
         .main_header()
         .headerbar()
         .add_css_class("onepepe-header");
+    appwindow
+        .sidebar()
+        .headerbar()
+        .add_css_class("onepepe-sidebar-header");
     // never take vertical space from the canvas
     ribbon.set_vexpand(false);
     ribbon.append(&header);
@@ -516,10 +531,15 @@ fn home_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     text_button("x²", &gettext("Superscript"), "win.text-script", s("sup"))
                         .upcast(),
                     text_button("x₂", &gettext("Subscript"), "win.text-script", s("sub")).upcast(),
-                    text_button("•", &gettext("Bullet list"), "win.text-list", s("bullet"))
-                        .upcast(),
-                    text_button(
-                        "1.",
+                    small_button(
+                        "view-list-bullet-symbolic",
+                        &gettext("Bullet list"),
+                        "win.text-list",
+                        s("bullet"),
+                    )
+                    .upcast(),
+                    small_button(
+                        "view-list-ordered-symbolic",
                         &gettext("Numbered list"),
                         "win.text-list",
                         s("numbered"),
@@ -787,6 +807,7 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                 .upcast(),
             ],
         ),
+        group(&gettext("Colors"), &[colors_in_ribbon(appwindow).upcast()]),
         group(&gettext("Favorite pens"), &[favorites.upcast()]),
         group(
             &gettext("Help"),
@@ -893,6 +914,51 @@ fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
             ],
         ),
     ])
+}
+
+/// Moves the color picker from its floating bar over the canvas into the ribbon (Draw tab), like the pen colors of
+/// OneNote. The canvas stays clean.
+fn colors_in_ribbon(appwindow: &RnAppWindow) -> gtk4::Box {
+    let slot = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
+    slot.set_valign(gtk4::Align::Center);
+    let colorpicker = appwindow.overlays().colorpicker();
+    appwindow
+        .overlays()
+        .imp()
+        .toolbar_overlay
+        .remove_overlay(&colorpicker);
+    colorpicker.remove_css_class("overlay_toolbar");
+    colorpicker.set_halign(gtk4::Align::Start);
+    colorpicker.set_valign(gtk4::Align::Center);
+    colorpicker.set_margin_top(0);
+    colorpicker.set_margin_bottom(0);
+    colorpicker.set_margin_start(0);
+    colorpicker.set_margin_end(0);
+    // the settings may set a margin for the floating bar: not wanted inside the ribbon
+    colorpicker.connect_margin_top_notify(|w| {
+        if w.margin_top() != 0 {
+            w.set_margin_top(0);
+        }
+    });
+    slot.append(&colorpicker);
+    slot
+}
+
+/// The floating pen bar at the bottom of the canvas repeats the ribbon: it is shown only when the ribbon is hidden.
+/// In focus mode the ribbon is hidden as well, like the full page view of OneNote.
+fn sync_ribbon_visibility(appwindow: &RnAppWindow, ribbon: &gtk4::Box, revealer: &gtk4::Revealer) {
+    let shown = appwindow
+        .lookup_action("ribbon")
+        .and_then(|a| a.state())
+        .and_then(|s| s.get::<bool>())
+        .unwrap_or(true);
+    let focus_mode = appwindow.property::<bool>("focus-mode");
+    ribbon.set_visible(!focus_mode);
+    revealer.set_reveal_child(shown);
+    appwindow
+        .overlays()
+        .penpicker()
+        .set_visible(!shown && !focus_mode);
 }
 
 /// The popover of the page sizes: one row per size, portrait and landscape side by side.
