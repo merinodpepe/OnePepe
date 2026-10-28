@@ -11,6 +11,7 @@
 // Modules
 #[cfg(feature = "ui")]
 pub mod audioplayer;
+pub mod backup;
 pub mod camera;
 pub mod document;
 pub mod drawable;

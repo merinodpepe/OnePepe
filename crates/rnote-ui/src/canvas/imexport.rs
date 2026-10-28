@@ -251,6 +251,18 @@ impl RnCanvas {
 
         let file_write_operation = async {
             let bytes = rnote_bytes_receiver.await??;
+            // OnePepe: keep the previous version in the backups before overwriting it
+            match rnote_engine::backup::backup_before_save(
+                &filepath,
+                &crate::utils::onepepe_backup_root(),
+                rnote_engine::backup::KEEP_DEFAULT,
+                rnote_engine::backup::MIN_INTERVAL_DEFAULT,
+                chrono::Local::now().naive_local(),
+            ) {
+                Ok(Some(backup)) => debug!("Backup of the previous version at {}", backup.display()),
+                Ok(None) => {}
+                Err(e) => tracing::warn!("Backup before saving failed, Err: {e:?}"),
+            }
             // The `output_file_expect_write` should theoretically be reset to `false` by the file watcher later.
             self.set_output_file_expect_write(true);
             crate::utils::atomic_save_to_file_future(&filepath, bytes).await

@@ -265,3 +265,8 @@ pub(crate) fn path_walk_up_until_exists(path: impl AsRef<Path>) -> anyhow::Resul
     }
     Ok(path)
 }
+
+/// OnePepe: the folder of the automatic backups (outside the notebooks).
+pub(crate) fn onepepe_backup_root() -> std::path::PathBuf {
+    gtk4::glib::user_data_dir().join("onepepe").join("copias")
+}
