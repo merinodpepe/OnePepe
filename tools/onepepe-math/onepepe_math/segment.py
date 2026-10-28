@@ -33,8 +33,9 @@ class SegmentParams:
     # cuánto cuenta la probabilidad de que un grupo sea un "trozo" y no un símbolo completo
     junk_weight: float = 1.0
     # pausas entre trazos (si se conocen): por debajo de esto (s) favorece el mismo símbolo; por encima, lo contrario
+    # (sin medir aún con tu letra: tu archivo de prueba no tiene tiempos; se ajustará con tus páginas nuevas)
     pause_same: float = 0.3
-    pause_weight: float = 0.0
+    pause_weight: float = 0.5
 
     @classmethod
     def load(cls, path=DEFAULT_PARAMS_PATH):
