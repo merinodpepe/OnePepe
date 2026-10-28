@@ -91,12 +91,14 @@ def main():
             for line in f:
                 try:
                     item = json.loads(line)
-                    personal.append((item["latex"], [[tuple(p) for p in s] for s in item["strokes"]]))
+                    label = JUNK if item.get("kind") == "junk" else item["latex"]
+                    personal.append((label, [[tuple(p) for p in s] for s in item["strokes"]]))
                 except (ValueError, KeyError, TypeError):
                     continue
         for label, _ in personal:
             by_class.setdefault(label, [])
-        print(f"{len(personal)} ejemplos tuyos", file=sys.stderr)
+        n_junk = sum(1 for label, _ in personal if label == JUNK)
+        print(f"{len(personal)} ejemplos tuyos ({n_junk} de 'trozo')", file=sys.stderr)
     classes = sorted(by_class)
     index = {c: i for i, c in enumerate(classes)}
 
@@ -120,7 +122,7 @@ def main():
     for label, strokes in personal:
         train_x.append(symbol_features(strokes))
         train_y.append(index[label])
-        for _ in range(args.personal_augment):
+        for _ in range(args.personal_augment if label != JUNK else max(args.personal_augment // 6, 2)):
             train_x.append(symbol_features(augment(strokes, rng)))
             train_y.append(index[label])
     train_x, test_x = np.array(train_x), np.array(test_x)

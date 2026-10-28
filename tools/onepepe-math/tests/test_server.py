@@ -76,6 +76,22 @@ class TestServer(unittest.TestCase):
         self.assertIn("error", resp[2])
         self.assertTrue(resp[3]["clean"])
 
+    def test_recognize_group_and_segment_fix(self):
+        from onepepe_math.personal import PersonalModel
+
+        with tempfile.TemporaryDirectory() as d:
+            personal = PersonalModel(StubClassifier(), os.path.join(d, "c.jsonl"))
+            server = Server(StubClassifier(), personal)
+            two = [line(50, 7, 64, 7), line(50, 13, 64, 13)]
+            r = server.handle({"cmd": "recognize_group", "strokes": two})
+            self.assertEqual(r["candidates"][0]["latex"], "=")
+            self.assertTrue(r["clean"])
+            r = server.handle({"cmd": "segment_fix", "junk": [[two[0]], [two[1]]]})
+            self.assertEqual(r["saved"], 2)
+            # los "trozos" se guardan para reentrenar, pero no entran en el kNN
+            self.assertEqual(personal.count("junk"), 2)
+            self.assertEqual(len(personal), 0)
+
     def test_bad_json_does_not_crash(self):
         server = Server(StubClassifier(), StubPersonal())
         out = io.StringIO()

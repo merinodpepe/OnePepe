@@ -111,7 +111,7 @@ class PersonalModel:
             [
                 (i, _unit(item["embedding"]))
                 for i, item in self.examples.items()
-                if item.get("model") == self.version and "embedding" in item
+                if item.get("model") == self.version and "embedding" in item and item.get("kind") != "junk"
             ]
         )
 
@@ -126,8 +126,15 @@ class PersonalModel:
     def __len__(self):
         return len(self.index)
 
-    def add_correction(self, latex, strokes, predicted=None, notebook=None, embedding=None):
-        """Guarda un ejemplo de tu letra (una corrección, o un símbolo que aceptas tal cual). Devuelve su id."""
+    def count(self, kind=None):
+        """Ejemplos guardados (de un tipo, o todos)."""
+        return sum(1 for item in self.examples.values() if kind is None or item.get("kind", "symbol") == kind)
+
+    def add_correction(self, latex, strokes, predicted=None, notebook=None, embedding=None, kind="symbol"):
+        """Guarda un ejemplo de tu letra (una corrección, o un símbolo que aceptas tal cual). Devuelve su id.
+
+        `kind="junk"`: un "trozo" (medio símbolo, o dos juntos) para enseñar a cortar; no entra en el kNN, solo en
+        el reentrenamiento."""
         if embedding is None:
             embedding = self.classifier.embedding(strokes)
         item = {
@@ -139,6 +146,7 @@ class PersonalModel:
             "model": self.version,
             "date": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "notebook": notebook,
+            "kind": kind,
         }
         with self._lock:
             self.examples[item["id"]] = item
@@ -150,7 +158,7 @@ class PersonalModel:
 
     def list_examples(self):
         """Los ejemplos guardados, sin trazos ni embedding (para mostrarlos y poder borrarlos o cambiarlos)."""
-        keys = ("id", "latex", "predicted", "date", "notebook")
+        keys = ("id", "latex", "predicted", "date", "notebook", "kind")
         return [{k: item.get(k) for k in keys} for item in self.examples.values()]
 
     def forget(self, example_id):
