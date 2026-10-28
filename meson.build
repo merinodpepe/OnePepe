@@ -21,15 +21,16 @@ win_build_environment_path = get_option('win-build-environment-path')
 win_installer_name = get_option('win-installer-name')
 
 app_name = 'rnote'
-app_name_capitalized = 'Rnote'
+app_name_capitalized = 'OnePepe'
 cli_name = 'rnote-cli'
 base_id = 'com.github.flxzt.' + app_name
-app_website = 'https://rnote.flxzt.net'
-app_repo_url = 'https://github.com/flxzt/rnote'
-app_issues_url = 'https://github.com/flxzt/rnote/issues'
-app_support_url = 'https://github.com/flxzt/rnote/discussions'
+app_website = 'https://github.com/merinodpepe/OnePepe'
+app_repo_url = 'https://github.com/merinodpepe/OnePepe'
+app_issues_url = 'https://github.com/merinodpepe/OnePepe/issues'
+app_support_url = 'https://github.com/merinodpepe/OnePepe/issues'
+# OnePepe: "Donate" sigue apuntando a Rnote, el proyecto en el que se basa
 app_donate_url = 'https://rnote.flxzt.net/#support'
-app_author_name = 'Felix Zwettler'
+app_author_name = 'Pepe Flock'
 app_authors = run_command(
     'cat',
     meson.project_source_root() / 'AUTHORS',

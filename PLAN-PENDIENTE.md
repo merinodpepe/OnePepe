@@ -80,8 +80,12 @@ Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`
 Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue mostrando "Rnote": título de la ventana,
 "Acerca de", icono, nombre en el menú de aplicaciones e identificador (`com.github.flxzt.rnote`). Cambiarlo implica:
 
-- **Nombre visible, "Acerca de" e icono:** cambio sencillo (textos, logo de `misc/onepepe/logo.svg` como icono de la app,
-  autores y enlaces apuntando a tu repositorio, conservando el crédito a Rnote que exige la GPL).
+- **Nombre visible y "Acerca de": hecho** (`feat/nombre-onepepe`).
+  - La app se llama OnePepe en el título de la ventana, en el menú de aplicaciones y en "Acerca de OnePepe".
+  - En "Acerca de", el desarrollador es Pepe Flock, los enlaces van a tu repositorio y aparece un apartado "Rnote" con
+    sus autores.
+  - "Donar" sigue llevando a Rnote.
+- **Icono de la app con el logo de Pepe Flock / OnePepe:** pendiente de que me pases los logos (SVG, o PNG de 512 px).
 - **Identificador de la app** (p. ej. `io.github.merinodpepe.OnePepe`). Es lo delicado:
   - **Ajustes guardados:** Rnote guarda los ajustes (colores favoritos, botones del lápiz, cuadernos de la barra
     lateral, herramientas…) con su identificador. Con uno nuevo, OnePepe empezaría con los ajustes por defecto. Se
