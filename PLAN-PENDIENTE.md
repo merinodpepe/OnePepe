@@ -85,7 +85,8 @@ Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue m
   - En "Acerca de", el desarrollador es Pepe Flock, los enlaces van a tu repositorio y aparece un apartado "Rnote" con
     sus autores.
   - "Donar" sigue llevando a Rnote.
-- **Icono de la app con el logo de Pepe Flock / OnePepe:** pendiente de que me pases los logos (SVG, o PNG de 512 px).
+- **Icono de la app: hecho** con tu logo (`misc/pepeflock/onepepe_icono.svg`). Falta el icono monocromo pequeño
+  (`rnote-symbolic.svg`): hace falta una versión del logo de un solo color.
 - **Identificador de la app** (p. ej. `io.github.merinodpepe.OnePepe`). Es lo delicado:
   - **Ajustes guardados:** Rnote guarda los ajustes (colores favoritos, botones del lápiz, cuadernos de la barra
     lateral, herramientas…) con su identificador. Con uno nuevo, OnePepe empezaría con los ajustes por defecto. Se
