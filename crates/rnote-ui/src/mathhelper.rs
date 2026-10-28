@@ -298,6 +298,7 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
                                     let widget_flags =
                                         canvas.engine_mut().math_apply_correction(&resp);
                                     appwindow.handle_widget_flags(widget_flags, &canvas);
+                                    note_correction(&appwindow);
                                 }
                                 Err(e) => {
                                     tracing::error!("Math correction failed, Err: {e:?}");
@@ -391,4 +392,194 @@ pub(crate) fn sidecar_follow_trash(page: &std::path::Path) {
     {
         tracing::warn!("Trashing the hidden math file failed, Err: {e:?}");
     }
+}
+
+// ---------- «Reentrenar»: retrain the symbol recognizer with your handwriting ----------
+
+thread_local! {
+    static RETRAINING: Cell<bool> = const { Cell::new(false) };
+    static CORRECTIONS_SINCE_CHECK: Cell<u32> = const { Cell::new(0) };
+    static SUGGESTED: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Suggest retraining once this many of your examples are new since the last retraining.
+const SUGGEST_AFTER_NEW_EXAMPLES: u64 = 50;
+
+/// Runs `onepepe-math <arg>` and returns its standard output.
+async fn run_helper_once(arg: &str) -> anyhow::Result<String> {
+    let mut argv = helper_command();
+    argv.push(arg.to_string());
+    let argv_os = argv.iter().map(OsStr::new).collect::<Vec<&OsStr>>();
+    let process = gio::Subprocess::newv(&argv_os, gio::SubprocessFlags::STDOUT_PIPE)?;
+    let (stdout, _) = process.communicate_utf8_future(None).await?;
+    Ok(stdout.map(|s| s.to_string()).unwrap_or_default())
+}
+
+async fn retrain_estimate() -> anyhow::Result<serde_json::Value> {
+    let out = run_helper_once("--estimar").await?;
+    Ok(serde_json::from_str(out.trim())?)
+}
+
+/// The «Reentrenar» button: says how many examples there are and how long it takes, asks, and retrains in the
+/// background with the progress in a notification. The app can be used meanwhile.
+pub(crate) fn retrain(appwindow: &RnAppWindow) {
+    use adw::prelude::*;
+    if RETRAINING.with(|r| r.get()) {
+        appwindow.overlays().dispatch_toast_text(
+            &gettext("Retraining is already running"),
+            crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+        );
+        return;
+    }
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        async move {
+            let estimate = match retrain_estimate().await {
+                Ok(v) => v,
+                Err(e) => {
+                    tracing::error!(
+                        "Asking the math helper for the retraining estimate failed, Err: {e:?}"
+                    );
+                    appwindow.overlays().dispatch_toast_error(&gettext(
+                        "Could not start the math helper \"onepepe-math\". See tools/onepepe-math/README.md",
+                    ));
+                    return;
+                }
+            };
+            if !estimate["dataset"].as_bool().unwrap_or(false) {
+                appwindow.overlays().dispatch_toast_error(&gettext(
+                    "Retraining needs the MathWriting data: run tools/onepepe-math/instalar.sh --entrenar once",
+                ));
+                return;
+            }
+            let examples = estimate["examples"].as_u64().unwrap_or(0);
+            let new = estimate["new_since_last"].as_u64().unwrap_or(0);
+            let minutes = estimate["minutes"].as_f64().unwrap_or(5.0).max(1.0).round();
+            let body = gettext(
+                "You have {examples} examples of your handwriting ({new} new since the last retraining). It takes about {minutes} minutes and you can keep using the app meanwhile. The new model is only used if it is not worse with your recent examples.",
+            )
+            .replace("{examples}", &examples.to_string())
+            .replace("{new}", &new.to_string())
+            .replace("{minutes}", &minutes.to_string());
+            let dialog =
+                adw::AlertDialog::new(Some(&gettext("Retrain with my handwriting")), Some(&body));
+            dialog.add_response("cancel", &gettext("Cancel"));
+            dialog.add_response("retrain", &gettext("Retrain now"));
+            dialog.set_response_appearance("retrain", adw::ResponseAppearance::Suggested);
+            dialog.set_default_response(Some("retrain"));
+            dialog.set_close_response("cancel");
+            if dialog.choose_future(Some(&appwindow)).await.as_str() == "retrain" {
+                run_retraining(&appwindow).await;
+            }
+        }
+    ));
+}
+
+async fn run_retraining(appwindow: &RnAppWindow) {
+    let mut argv = helper_command();
+    argv.push("--reentrenar".to_string());
+    let argv_os = argv.iter().map(OsStr::new).collect::<Vec<&OsStr>>();
+    let process = match gio::Subprocess::newv(&argv_os, gio::SubprocessFlags::STDOUT_PIPE) {
+        Ok(p) => p,
+        Err(e) => {
+            tracing::error!("Starting the retraining failed, Err: {e:?}");
+            appwindow
+                .overlays()
+                .dispatch_toast_error(&gettext("Retraining could not be started"));
+            return;
+        }
+    };
+    RETRAINING.with(|r| r.set(true));
+    let toast_ref = appwindow.overlays().dispatch_toast_w_button(
+        &gettext("Retraining with your handwriting…"),
+        &gettext("Cancel"),
+        clone!(
+            #[weak]
+            process,
+            // SIGTERM (not a kill): flatpak-spawn passes it on to the retraining, which stops the training too
+            move |_| process.send_signal(15)
+        ),
+        None,
+    );
+    let Some(stdout) = process.stdout_pipe() else {
+        RETRAINING.with(|r| r.set(false));
+        return;
+    };
+    let stdout = gio::DataInputStream::new(&stdout);
+    let mut last: Option<serde_json::Value> = None;
+    while let Ok(Some(line)) = stdout.read_line_utf8_future(glib::Priority::DEFAULT).await {
+        let Ok(msg) = serde_json::from_str::<serde_json::Value>(&line) else {
+            continue;
+        };
+        if let (Some(toast), Some(text)) = (toast_ref.upgrade(), msg["message"].as_str()) {
+            let pct = (msg["progress"].as_f64().unwrap_or(0.0) * 100.0).round();
+            toast.set_title(&format!("{} — {} ({pct} %)", gettext("Retraining"), text));
+        }
+        last = Some(msg);
+    }
+    let _ = process.wait_future().await;
+    RETRAINING.with(|r| r.set(false));
+    if let Some(toast) = toast_ref.upgrade() {
+        toast.dismiss();
+    }
+    match last {
+        Some(msg) if msg["stage"] == "done" => {
+            if msg["replaced"].as_bool().unwrap_or(false) {
+                // the helper loads the new model when it starts again
+                reset_helper();
+            }
+            appwindow.overlays().dispatch_toast_text(
+                msg["message"].as_str().unwrap_or_default(),
+                Some(Duration::from_secs(10)),
+            );
+        }
+        Some(msg) if msg["stage"] == "error" => {
+            appwindow
+                .overlays()
+                .dispatch_toast_error(msg["message"].as_str().unwrap_or_default());
+        }
+        _ => {
+            appwindow.overlays().dispatch_toast_text(
+                &gettext("Retraining was cancelled; the current model is kept"),
+                crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+            );
+        }
+    }
+}
+
+/// After corrections: every 10, checks how many examples are new and suggests retraining (once per session) when
+/// there are enough. Never starts on its own.
+fn note_correction(appwindow: &RnAppWindow) {
+    let n = CORRECTIONS_SINCE_CHECK.with(|c| {
+        c.set(c.get() + 1);
+        c.get()
+    });
+    if n % 10 != 0 || SUGGESTED.with(|s| s.get()) || RETRAINING.with(|r| r.get()) {
+        return;
+    }
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        async move {
+            let Ok(estimate) = retrain_estimate().await else {
+                return;
+            };
+            if estimate["new_since_last"].as_u64().unwrap_or(0) >= SUGGEST_AFTER_NEW_EXAMPLES
+                && estimate["dataset"].as_bool().unwrap_or(false)
+                && !SUGGESTED.with(|s| s.replace(true))
+            {
+                appwindow.overlays().dispatch_toast_w_button(
+                    &gettext("You have many new corrections: retraining would learn your handwriting better"),
+                    &gettext("Retrain"),
+                    clone!(
+                        #[weak]
+                        appwindow,
+                        move |_| retrain(&appwindow)
+                    ),
+                    Some(Duration::from_secs(15)),
+                );
+            }
+        }
+    ));
 }

@@ -2,5 +2,10 @@
 # OnePepe: arranca el programa auxiliar de matemáticas (lo lanza Rnote; también sirve para probarlo a mano).
 DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PY="${ONEPEPE_PYTHON:-python3}"
-[ -x "$HOME/.local/share/onepepe/venv/bin/python" ] && PY="$HOME/.local/share/onepepe/venv/bin/python"
+[ -x "$HOME/.local/share/onepepe/venv/bin/python" ] && [ -z "${ONEPEPE_PYTHON:-}" ] && PY="$HOME/.local/share/onepepe/venv/bin/python"
+case "${1:-}" in
+    # el botón «Reentrenar» de la app: estimar el tiempo, o reentrenar con tus ejemplos
+    --estimar) cd "$DIR" && exec "$PY" reentrenar.py --estimar ;;
+    --reentrenar) cd "$DIR" && exec "$PY" reentrenar.py ;;
+esac
 cd "$DIR" && exec "$PY" -m onepepe_math.server
