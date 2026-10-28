@@ -84,6 +84,8 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
 
     let ribbon = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
     ribbon.add_css_class("toolbar");
+    // never take vertical space from the canvas
+    ribbon.set_vexpand(false);
     ribbon.append(&header);
     ribbon.append(&revealer);
     ribbon.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
@@ -236,7 +238,6 @@ fn available_icon(icon: &str) -> String {
 /// A group of the ribbon: its buttons and its name below.
 fn group(name: &str, children: &[gtk4::Widget]) -> gtk4::Box {
     let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
-    row.set_vexpand(true);
     row.set_valign(gtk4::Align::Center);
     for child in children {
         row.append(child);
@@ -798,27 +799,7 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
 }
 
 fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
-    let mut sizes = Vec::new();
-    for (name, id) in [
-        ("A5", "a5"),
-        ("A4", "a4"),
-        ("A3", "a3"),
-        ("A2", "a2"),
-        ("A1", "a1"),
-        ("A0", "a0"),
-        ("Letter", "letter"),
-    ] {
-        sizes.push((format!("{name} – {}", gettext("portrait")), id.to_string()));
-        sizes.push((
-            format!("{name} – {}", gettext("landscape")),
-            format!("{id}-landscape"),
-        ));
-    }
-    let sizes_ref: Vec<(String, &str)> = sizes
-        .iter()
-        .map(|(label, id)| (label.clone(), id.as_str()))
-        .collect();
-    let size_popover = list_popover("win.page-size", &sizes_ref);
+    let size_popover = page_size_popover();
     page(&[
         group(
             &gettext("Zoom"),
@@ -893,6 +874,58 @@ fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
             ],
         ),
     ])
+}
+
+/// The popover of the page sizes: one row per size, portrait and landscape side by side.
+fn page_size_popover() -> gtk4::Popover {
+    let popover = gtk4::Popover::new();
+    let grid = gtk4::Grid::builder()
+        .row_spacing(2)
+        .column_spacing(6)
+        .margin_top(6)
+        .margin_bottom(6)
+        .margin_start(6)
+        .margin_end(6)
+        .build();
+    for (row, (name, id)) in [
+        ("A5", "a5"),
+        ("A4", "a4"),
+        ("A3", "a3"),
+        ("A2", "a2"),
+        ("A1", "a1"),
+        ("A0", "a0"),
+        ("Letter", "letter"),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let label = gtk4::Label::new(Some(&gettext(name)));
+        label.add_css_class("heading");
+        label.set_halign(gtk4::Align::Start);
+        grid.attach(&label, 0, row as i32, 1, 1);
+        for (col, (text, target)) in [
+            (gettext("portrait"), id.to_string()),
+            (gettext("landscape"), format!("{id}-landscape")),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let button = gtk4::Button::builder()
+                .label(text)
+                .action_name("win.page-size")
+                .action_target(&target.to_variant())
+                .build();
+            button.add_css_class("flat");
+            button.connect_clicked(clone!(
+                #[weak]
+                popover,
+                move |_| popover.popdown()
+            ));
+            grid.attach(&button, col as i32 + 1, row as i32, 1, 1);
+        }
+    }
+    popover.set_child(Some(&grid));
+    popover
 }
 
 /// The popover to choose the number of rows and columns of a table.
@@ -1024,21 +1057,40 @@ fn rebuild_favorites(appwindow: &RnAppWindow) {
         gesture.connect_pressed(clone!(
             #[weak]
             button,
+            #[weak]
+            appwindow,
             move |_, _, _, _| {
                 let popover = gtk4::Popover::new();
-                let remove = gtk4::Button::builder()
-                    .label(gettext("Remove this pen"))
-                    .action_name("win.pen-preset-remove")
-                    .action_target(&(i as i32).to_variant())
-                    .build();
+                let remove = gtk4::Button::with_label(&gettext("Remove this pen"));
                 remove.add_css_class("flat");
                 remove.connect_clicked(clone!(
                     #[weak]
                     popover,
-                    move |_| popover.popdown()
+                    #[weak]
+                    appwindow,
+                    move |_| {
+                        popover.popdown();
+                        gio::prelude::ActionGroupExt::activate_action(
+                            &appwindow,
+                            "pen-preset-remove",
+                            Some(&(i as i32).to_variant()),
+                        );
+                    }
                 ));
                 popover.set_child(Some(&remove));
-                popover.set_parent(&button);
+                // not parented to the pen button itself: the button would take the clicks inside the popover
+                let Some(anchor) = button.parent().and_then(|favorites| favorites.parent()) else {
+                    return;
+                };
+                if let Some(bounds) = button.compute_bounds(&anchor) {
+                    popover.set_pointing_to(Some(&gtk4::gdk::Rectangle::new(
+                        bounds.x() as i32,
+                        bounds.y() as i32,
+                        bounds.width() as i32,
+                        bounds.height() as i32,
+                    )));
+                }
+                popover.set_parent(&anchor);
                 popover.connect_closed(|p| p.unparent());
                 popover.popup();
             }
