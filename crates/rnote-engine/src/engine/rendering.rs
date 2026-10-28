@@ -375,13 +375,14 @@ impl Engine {
 
 /// Origin indicator bounds in document coordinate space.
 fn origin_indicator_bounds() -> Aabb {
-    const SIZE: Vector2 = Vector2::splat(17.);
+    // OnePepe: a discrete 12 px cross
+    const SIZE: Vector2 = Vector2::splat(12.);
     Aabb::from_half_extents(Vector2::ZERO, SIZE * 0.5)
 }
 
 fn gen_origin_indicator_image(scale_factor: f64) -> anyhow::Result<Image> {
-    const PATH_COLOR: piet::Color = color::GNOME_GREENS[4];
-    const PATH_WIDTH: f64 = 1.5;
+    const PATH_COLOR: piet::Color = color::ONEPEPE_FG_3;
+    const PATH_WIDTH: f64 = 1.0;
     let bounds = origin_indicator_bounds();
 
     Image::gen_with_piet(

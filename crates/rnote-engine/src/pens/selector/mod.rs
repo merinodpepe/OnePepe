@@ -476,9 +476,11 @@ impl Selector {
     /// Rotate node diameter, in surface coordinates.
     const ROTATE_NODE_DIAMETER: f64 = 18.0;
     /// The outline color when drawing a selection
-    const SELECTION_OUTLINE_COLOR: piet::Color = color::GNOME_BRIGHTS[4].with_a8(240);
+    const SELECTION_OUTLINE_COLOR: piet::Color = color::ONEPEPE_BRAND.with_a8(240);
     /// The fill color when drawing a selection
-    const SELECTION_FILL_COLOR: piet::Color = color::GNOME_BRIGHTS[2].with_a8(13);
+    const SELECTION_FILL_COLOR: piet::Color = color::ONEPEPE_BRAND.with_a8(13);
+    /// OnePepe: the size the resize nodes are drawn at (the area to grab them stays RESIZE_NODE_SIZE).
+    const RESIZE_NODE_DRAWN_SIZE: f64 = 8.0;
 
     fn add_to_select_path(style: SelectorStyle, path: &mut Vec<Element>, element: Element) {
         match style {
@@ -722,28 +724,40 @@ impl Selector {
         indicators::draw_rectangular_node(
             piet_cx,
             resize_tl_node_state,
-            resize_tl_node_bounds,
+            Aabb::from_half_extents(
+                resize_tl_node_bounds.center(),
+                Vector2::splat(Self::RESIZE_NODE_DRAWN_SIZE * 0.5 / total_zoom),
+            ),
             total_zoom,
             piet::Color::from(background_color),
         );
         indicators::draw_rectangular_node(
             piet_cx,
             resize_tr_node_state,
-            resize_tr_node_bounds,
+            Aabb::from_half_extents(
+                resize_tr_node_bounds.center(),
+                Vector2::splat(Self::RESIZE_NODE_DRAWN_SIZE * 0.5 / total_zoom),
+            ),
             total_zoom,
             piet::Color::from(background_color),
         );
         indicators::draw_rectangular_node(
             piet_cx,
             resize_bl_node_state,
-            resize_bl_node_bounds,
+            Aabb::from_half_extents(
+                resize_bl_node_bounds.center(),
+                Vector2::splat(Self::RESIZE_NODE_DRAWN_SIZE * 0.5 / total_zoom),
+            ),
             total_zoom,
             piet::Color::from(background_color),
         );
         indicators::draw_rectangular_node(
             piet_cx,
             resize_br_node_state,
-            resize_br_node_bounds,
+            Aabb::from_half_extents(
+                resize_br_node_bounds.center(),
+                Vector2::splat(Self::RESIZE_NODE_DRAWN_SIZE * 0.5 / total_zoom),
+            ),
             total_zoom,
             piet::Color::from(background_color),
         );

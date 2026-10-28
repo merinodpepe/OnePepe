@@ -151,9 +151,10 @@ pub fn draw_rectangular_node(
     zoom: f64,
     background_color: piet::Color,
 ) {
-    const OUTLINE_COLOR: piet::Color = color::GNOME_BLUES[4];
-    const FILL_STATE_PROXIMITY: piet::Color = color::GNOME_BLUES[0].with_a8(77);
-    const FILL_STATE_DOWN: piet::Color = color::GNOME_BLUES[2].with_a8(128);
+    // OnePepe: handles in the brand color
+    const OUTLINE_COLOR: piet::Color = color::ONEPEPE_BRAND;
+    const FILL_STATE_PROXIMITY: piet::Color = color::ONEPEPE_BRAND_TINT;
+    const FILL_STATE_DOWN: piet::Color = color::ONEPEPE_BRAND.with_a8(128);
 
     let rectangular_node = rectangular_node_shape(node_state, bounds, zoom);
 
@@ -203,9 +204,10 @@ pub fn draw_circular_node(
     zoom: f64,
     background_color: piet::Color,
 ) {
-    const OUTLINE_COLOR: piet::Color = color::GNOME_BLUES[4];
-    const FILL_STATE_PROXIMITY: piet::Color = color::GNOME_BLUES[0].with_a8(77);
-    const FILL_STATE_DOWN: piet::Color = color::GNOME_BLUES[2].with_a8(128);
+    // OnePepe: handles in the brand color
+    const OUTLINE_COLOR: piet::Color = color::ONEPEPE_BRAND;
+    const FILL_STATE_PROXIMITY: piet::Color = color::ONEPEPE_BRAND_TINT;
+    const FILL_STATE_DOWN: piet::Color = color::ONEPEPE_BRAND.with_a8(128);
 
     let circular_node = circular_node_shape(node_state, bounding_sphere, zoom);
 

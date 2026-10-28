@@ -390,6 +390,37 @@ window.onepepe listview row:selected {
     box-shadow: inset 3px 0px 0px @op_brand;
 }
 
+/* --- the 24 px status bar and the faint logo of an empty document */
+window.onepepe .onepepe-statusbar {
+    min-height: 24px;
+    padding: 0px 12px;
+    background-color: @op_bg_surface;
+    border-top: 1px solid @op_stroke_2;
+    color: @op_fg_3;
+    font-size: 12px;
+}
+
+window.onepepe .onepepe-banner {
+    color: alpha(@op_fg_3, 0.12);
+}
+
+window.onepepe headerbar.onepepe-header .onepepe-logo {
+    color: @op_on_header;
+}
+
+/* --- the color swatches of the ribbon: 24 px circles, the active one with a brand ring */
+window.onepepe .onepepe-ribbon-body .colorsetter {
+    min-width: 24px;
+    min-height: 24px;
+    border-radius: 12px;
+    border: 1px solid @op_stroke_1;
+    margin: 2px;
+}
+
+window.onepepe .onepepe-ribbon-body .colorsetter:checked {
+    box-shadow: 0px 0px 0px 2px @op_bg_surface, 0px 0px 0px 4px @op_brand;
+}
+
 /* --- high contrast: visible borders on the controls */
 window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
 window.onepepe.high-contrast .overlay_toolbar {

@@ -121,6 +121,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
         Some(content_box) => content_box.prepend(&ribbon),
         None => error!("Could not place the ribbon: the tab bar has no box as parent"),
     }
+    crate::statusbar::setup(appwindow);
 }
 
 /// Keeps the toggles of the ribbon in sync with the settings (called from the window refresh).
@@ -136,6 +137,22 @@ pub(crate) fn refresh(appwindow: &RnAppWindow) {
         .and_then(|a| a.downcast::<gio::SimpleAction>().ok())
     {
         action.set_state(&shape_recognition.to_variant());
+    }
+    if let (Some(canvas), Some(action)) = (
+        appwindow.active_tab_canvas(),
+        appwindow
+            .lookup_action("doc-guides")
+            .and_then(|a| a.downcast::<gio::SimpleAction>().ok()),
+    ) {
+        action.set_state(
+            &canvas
+                .engine_ref()
+                .document
+                .config
+                .format
+                .show_borders
+                .to_variant(),
+        );
     }
 }
 
@@ -931,6 +948,13 @@ fn view_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                 .upcast(),
                 big_toggle("pan-up-symbolic", &gettext("Ribbon"), "win.ribbon", None).upcast(),
                 big_toggle(
+                    "view-grid-symbolic",
+                    &gettext("Guides"),
+                    "win.doc-guides",
+                    None,
+                )
+                .upcast(),
+                big_toggle(
                     "weather-clear-night-symbolic",
                     &gettext("Dark canvas"),
                     "win.dark-canvas",
@@ -1311,6 +1335,27 @@ fn setup_actions(appwindow: &RnAppWindow) {
         }
     ));
     appwindow.add_action(&action_dark_canvas);
+    // the page guides (the borders of the pages) of the document, saved in the document as in Rnote
+    let action_guides = gio::SimpleAction::new_stateful("doc-guides", None, &false.to_variant());
+    action_guides.connect_activate(clone!(
+        #[weak]
+        appwindow,
+        move |action, _| {
+            let Some(canvas) = appwindow.active_tab_canvas() else {
+                return;
+            };
+            let show = {
+                let mut engine = canvas.engine_mut();
+                let format = &mut engine.document.config.format;
+                format.show_borders = !format.show_borders;
+                format.show_borders
+            };
+            action.set_state(&show.to_variant());
+            canvas.set_unsaved_changes(true);
+            canvas.queue_draw();
+        }
+    ));
+    appwindow.add_action(&action_guides);
 
     string_action(appwindow, "text-quick-style", |appwindow, target| {
         let Ok(style) = QuickStyle::from_str(target) else {

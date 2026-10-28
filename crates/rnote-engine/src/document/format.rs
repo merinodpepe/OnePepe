@@ -177,8 +177,9 @@ impl Default for Format {
             dpi: Self::DPI_DEFAULT,
             orientation: Orientation::default(),
             border_color: Color::from(Self::BORDER_COLOR_DEFAULT),
-            show_borders: true,
-            show_origin_indicator: true,
+            // OnePepe: guides hidden by default (they can be shown in View → Guides)
+            show_borders: false,
+            show_origin_indicator: false,
         }
     }
 }
@@ -196,7 +197,8 @@ impl Format {
     pub const DPI_MAX: f64 = 5000.0;
     pub const DPI_DEFAULT: f64 = 96.0;
 
-    pub const BORDER_COLOR_DEFAULT: piet::Color = color::GNOME_BRIGHTS[2];
+    /// OnePepe: 1 px guides of secondary text color at 30 %.
+    pub const BORDER_COLOR_DEFAULT: piet::Color = color::ONEPEPE_FG_3.with_a8(77);
 
     pub fn width(&self) -> f64 {
         self.width

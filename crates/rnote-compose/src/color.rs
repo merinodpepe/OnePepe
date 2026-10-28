@@ -328,6 +328,13 @@ pub const GNOME_BROWNS: [piet::Color; 5] = [
 ];
 
 /// Gnome palette brights.
+/// OnePepe: the brand color (token `brand` of the design guide) for the selection and the handles on the canvas.
+pub const ONEPEPE_BRAND: piet::Color = piet::Color::rgb8(0x77, 0x19, 0xaa);
+/// OnePepe: the brand tint (token `brand_tint`).
+pub const ONEPEPE_BRAND_TINT: piet::Color = piet::Color::rgb8(0xf3, 0xe8, 0xf9);
+/// OnePepe: secondary text (token `fg_3`), for the discrete marks on the canvas.
+pub const ONEPEPE_FG_3: piet::Color = piet::Color::rgb8(0x61, 0x61, 0x61);
+
 pub const GNOME_BRIGHTS: [piet::Color; 5] = [
     piet::Color::rgb8(0xff, 0xff, 0xff),
     piet::Color::rgb8(0xf6, 0xf5, 0xf4),

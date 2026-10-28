@@ -32,6 +32,7 @@ pub(crate) mod prefs;
 pub(crate) mod ribbon;
 pub(crate) mod settingspanel;
 pub(crate) mod sidebar;
+pub(crate) mod statusbar;
 pub(crate) mod strokecontentpaintable;
 pub(crate) mod strokecontentpreview;
 pub(crate) mod strokewidthpicker;

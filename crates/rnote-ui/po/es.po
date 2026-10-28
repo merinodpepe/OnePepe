@@ -3807,3 +3807,21 @@ msgstr "Aquí no hay nada que unir o separar"
 
 msgid "Dark canvas"
 msgstr "Lienzo oscuro"
+
+msgid "Guides"
+msgstr "Guías"
+
+msgid "Unsaved changes"
+msgstr "Cambios sin guardar"
+
+msgid "Saved"
+msgstr "Guardado"
+
+msgid "{} landscape"
+msgstr "{} horizontal"
+
+msgid "Custom size"
+msgstr "Tamaño personalizado"
+
+msgid "{size} · {n} pages"
+msgstr "{size} · {n} páginas"
