@@ -129,7 +129,7 @@ fn next_free_page_name(parent: &Path) -> String {
 }
 
 /// Writes an empty document with the current document preset (format, background, layout).
-async fn write_empty_page(appwindow: &RnAppWindow, path: &Path) -> anyhow::Result<()> {
+pub(crate) async fn write_empty_page(appwindow: &RnAppWindow, path: &Path) -> anyhow::Result<()> {
     let mut engine = Engine::default();
     engine.document.config = appwindow.document_config_preset_ref().clone();
     let file_name = path

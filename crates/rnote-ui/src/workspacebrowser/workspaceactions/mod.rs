@@ -1,6 +1,6 @@
 // Modules
 mod createfolder;
-mod createpage;
+pub(crate) mod createpage;
 mod openfolder;
 
 // Re-exports

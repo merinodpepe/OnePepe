@@ -3704,3 +3704,35 @@ msgstr "Nuevo"
 #. OnePepe
 msgid "Normal"
 msgstr "Normal"
+
+#. OnePepe
+msgid "Export section"
+msgstr "Exportar sección"
+
+#. OnePepe
+msgid "Quick note"
+msgstr "Nota rápida"
+
+#. OnePepe
+msgid "Quick notes"
+msgstr "Notas rápidas"
+
+#. OnePepe
+msgid "Note"
+msgstr "Nota"
+
+#. OnePepe
+msgid "Section"
+msgstr "Sección"
+
+#. OnePepe
+msgid "This section has no pages"
+msgstr "Esta sección no tiene páginas"
+
+#. OnePepe
+msgid "Export the whole section as PDF"
+msgstr "Exportar toda la sección como PDF"
+
+#. OnePepe
+msgid "Exported {} pages in one PDF"
+msgstr "Exportadas {} páginas en un solo PDF"

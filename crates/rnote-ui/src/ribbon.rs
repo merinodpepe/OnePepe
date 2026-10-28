@@ -364,6 +364,13 @@ fn file_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                 )
                 .upcast(),
                 big_button(
+                    "workspacelistentryicon-library-symbolic",
+                    &gettext("Export section"),
+                    "win.export-section",
+                    None,
+                )
+                .upcast(),
+                big_button(
                     "document-print-symbolic",
                     &gettext("Print"),
                     "win.print-doc",
@@ -697,6 +704,13 @@ fn insert_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     "add-page-symbolic",
                     &gettext("Add page"),
                     "win.add-page-to-doc",
+                    None,
+                )
+                .upcast(),
+                big_button(
+                    "workspacelistentryicon-scratchpad-symbolic",
+                    &gettext("Quick note"),
+                    "win.quick-note",
                     None,
                 )
                 .upcast(),
@@ -1274,6 +1288,24 @@ fn setup_actions(appwindow: &RnAppWindow) {
             }
         ));
     });
+    plain_action(appwindow, "export-section", |appwindow| {
+        glib::spawn_future_local(clone!(
+            #[weak]
+            appwindow,
+            async move {
+                export_section(&appwindow).await;
+            }
+        ));
+    });
+    plain_action(appwindow, "quick-note", |appwindow| {
+        glib::spawn_future_local(clone!(
+            #[weak]
+            appwindow,
+            async move {
+                quick_note(&appwindow).await;
+            }
+        ));
+    });
     plain_action(appwindow, "insert-screenshot", |appwindow| {
         glib::spawn_future_local(clone!(
             #[weak]
@@ -1408,6 +1440,117 @@ async fn export_fitted(appwindow: &RnAppWindow, mode: FitMode) {
                 .dispatch_toast_error(&gettext("Exporting the PDF failed"));
         }
     }
+}
+
+/// The folder of the notebook section shown in the sidebar, or the home folder.
+fn section_dir(appwindow: &RnAppWindow) -> std::path::PathBuf {
+    appwindow
+        .sidebar()
+        .workspacebrowser()
+        .dir_list_dir()
+        .unwrap_or_else(glib::home_dir)
+}
+
+/// Exports all the pages of the section (the folder shown in the sidebar) as a single PDF, in name order.
+async fn export_section(appwindow: &RnAppWindow) {
+    let dir = section_dir(appwindow);
+    let mut files: Vec<std::path::PathBuf> = std::fs::read_dir(&dir)
+        .map(|entries| {
+            entries
+                .filter_map(|e| e.ok().map(|e| e.path()))
+                .filter(|p| p.extension().is_some_and(|e| e == "rnote"))
+                .collect()
+        })
+        .unwrap_or_default();
+    files.sort();
+    if files.is_empty() {
+        appwindow
+            .overlays()
+            .dispatch_toast_error(&gettext("This section has no pages"));
+        return;
+    }
+    let section_name = dir
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| gettext("Section"));
+    let filter = gtk4::FileFilter::new();
+    filter.add_mime_type("application/pdf");
+    filter.add_suffix("pdf");
+    filter.set_name(Some(&gettext("PDF")));
+    let filedialog = gtk4::FileDialog::builder()
+        .title(gettext("Export the whole section as PDF"))
+        .modal(true)
+        .accept_label(gettext("Export"))
+        .default_filter(&filter)
+        .initial_name(format!("{section_name}.pdf"))
+        .initial_folder(&gio::File::for_path(&dir))
+        .build();
+    let Ok(file) = filedialog.save_future(Some(appwindow)).await else {
+        return;
+    };
+    let Some(path) = file.path() else {
+        return;
+    };
+    appwindow.overlays().progressbar_start_pulsing();
+    let pages: Vec<(String, Vec<u8>)> = files
+        .iter()
+        .filter_map(|f| {
+            let name = f.file_stem()?.to_string_lossy().to_string();
+            std::fs::read(f).ok().map(|bytes| (name, bytes))
+        })
+        .collect();
+    let n = pages.len();
+    let result =
+        rnote_engine::engine::onepepe_notebook::export_pages_as_one_pdf(section_name, pages).await;
+    let result = match result {
+        Ok(bytes) => crate::utils::atomic_save_to_file_future(&path, bytes).await,
+        Err(e) => Err(e),
+    };
+    appwindow.overlays().progressbar_finish();
+    match result {
+        Ok(()) => {
+            appwindow.overlays().dispatch_toast_text(
+                &gettext("Exported {} pages in one PDF").replace("{}", &n.to_string()),
+                crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+            );
+        }
+        Err(e) => {
+            error!("Exporting the section failed, Err: {e:?}");
+            appwindow
+                .overlays()
+                .dispatch_toast_error(&gettext("Exporting the PDF failed"));
+        }
+    }
+}
+
+/// A new page in the "Quick notes" section of the notebook, named with the date and time, opened right away
+/// with its title and date.
+async fn quick_note(appwindow: &RnAppWindow) {
+    let dir = section_dir(appwindow).join(gettext("Quick notes"));
+    if let Err(e) = std::fs::create_dir_all(&dir) {
+        error!("Creating the quick notes folder failed, Err: {e:?}");
+        appwindow
+            .overlays()
+            .dispatch_toast_error(&gettext("Creating new page failed"));
+        return;
+    }
+    let now = chrono::Local::now();
+    let name = format!("{} {}", gettext("Note"), now.format("%Y-%m-%d %H.%M.%S"));
+    let path = dir.join(format!("{name}.rnote"));
+    if let Err(e) =
+        crate::workspacebrowser::workspaceactions::createpage::write_empty_page(appwindow, &path)
+            .await
+    {
+        error!("Creating the quick note failed, Err: {e:?}");
+        appwindow
+            .overlays()
+            .dispatch_toast_error(&gettext("Creating new page failed"));
+        return;
+    }
+    appwindow
+        .open_file_w_dialogs(gio::File::for_path(&path), None, true)
+        .await;
+    with_canvas(appwindow, |engine| engine.insert_title_and_date(&name));
 }
 
 /// Takes a screen clipping through the desktop portal (it lets you choose the area) and inserts it as a picture.
