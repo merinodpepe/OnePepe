@@ -130,7 +130,7 @@ Formato: qué elegí y por qué.
 
 ## README de OnePepe
 
-- **README propio en español** con el nombre, el logo (`misc/onepepe/logo.svg`, dibujado para OnePepe) y las funciones
+- **README propio en español** con el nombre, el logo (ahora el de Pepe Flock, en `misc/pepeflock/`) y las funciones
   de OnePepe. Se conserva, en "Licencia" y "Créditos", el aviso de que se basa en Rnote y el copyright de sus autores:
   la licencia GPL obliga a mantener esos avisos.
 - **Sin capturas de pantalla** por ahora: las de Rnote mostrarían otro programa y en la nube no puedo hacer capturas de
@@ -147,3 +147,13 @@ Formato: qué elegí y por qué.
 - El nombre del repositorio en GitHub no se cambia: no hace falta y cambiarlo exige actualizar enlaces y clones.
 - `main` sigue sin tocar. Para que la portada de GitHub muestre OnePepe en lugar de Rnote, se cambia la rama por
   defecto a `onepepe` (Settings → General → Default branch).
+
+## Logos de Pepe Flock
+
+- Los logos que subiste se movieron de la raíz a `misc/pepeflock/` (`git mv`, sin perder historial).
+- `onepepe_icono.svg` es ahora el icono de la app (`crates/rnote-ui/data/icons/scalable/apps/rnote.svg` y
+  `rnote-devel.svg`; mantienen el nombre de archivo porque meson los instala con el identificador de la app).
+- El README usa `onepepe_lateral.png` (OnePepe en grande, Pepe Flock debajo).
+- Se borró el logo provisional `misc/onepepe/logo.svg`.
+- El icono monocromo pequeño (`icons/symbolic/apps/rnote-symbolic.svg`) y los `.ico` de Windows siguen siendo los de
+  Rnote: falta una versión de una sola tinta del logo.
