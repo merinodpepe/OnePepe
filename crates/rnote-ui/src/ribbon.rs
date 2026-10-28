@@ -54,9 +54,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
         tab_button = child.next_sibling();
     }
     let header = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
-    header.set_margin_start(6);
-    header.set_margin_end(6);
-    header.set_margin_top(3);
+    header.add_css_class("onepepe-tabbar");
     header.append(&switcher);
     let spacer = gtk4::Box::new(gtk4::Orientation::Horizontal, 0);
     spacer.set_hexpand(true);
@@ -83,7 +81,14 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     }
 
     let ribbon = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
-    ribbon.add_css_class("toolbar");
+    ribbon.add_css_class("onepepe-ribbon");
+    stack.add_css_class("onepepe-ribbon-body");
+    // OneNote-like look: the title bar and the tabs in the Pepe Flock purple (see data/style.css)
+    appwindow.add_css_class("onepepe");
+    appwindow
+        .main_header()
+        .headerbar()
+        .add_css_class("onepepe-header");
     // never take vertical space from the canvas
     ribbon.set_vexpand(false);
     ribbon.append(&header);

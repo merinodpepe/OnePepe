@@ -247,3 +247,87 @@ toast {
     margin-left: 72px;
     margin-right: 72px;
 }
+
+/* OnePepe: a look close to OneNote, in the Pepe Flock purple.
+   The title bar and the ribbon tabs are purple, the chosen tab is a light "folder tab" joined to the ribbon. */
+@define-color accent_bg_color #7719aa;
+@define-color accent_color #7719aa;
+@define-color accent_fg_color #ffffff;
+
+window.onepepe {
+    --accent-bg-color: #7719aa;
+    --accent-color: #7a1fb0;
+    --accent-fg-color: #ffffff;
+}
+
+window.onepepe headerbar.onepepe-header {
+    background-color: #7719aa;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+window.onepepe headerbar.onepepe-header button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+window.onepepe .onepepe-tabbar {
+    background-color: #7719aa;
+    color: #ffffff;
+    padding: 0px 8px;
+}
+
+window.onepepe .onepepe-tabbar stackswitcher button {
+    background: none;
+    color: rgba(255, 255, 255, 0.9);
+    border-radius: 6px 6px 0px 0px;
+    box-shadow: none;
+    min-width: 76px;
+    padding: 6px 14px;
+    margin-top: 4px;
+    font-weight: normal;
+}
+
+window.onepepe .onepepe-tabbar stackswitcher button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+window.onepepe .onepepe-tabbar stackswitcher button:checked {
+    background-color: #f7f5fa;
+    color: #7719aa;
+    font-weight: bold;
+}
+
+window.onepepe .onepepe-tabbar > button {
+    color: #ffffff;
+}
+
+window.onepepe .onepepe-ribbon-body {
+    background-color: #f7f5fa;
+    color: #262626;
+}
+
+window.onepepe .onepepe-ribbon-body button:checked {
+    background-color: rgba(119, 25, 170, 0.15);
+    color: #5a1283;
+}
+
+window.onepepe .onepepe-ribbon-body button:hover {
+    background-color: rgba(119, 25, 170, 0.09);
+}
+
+@media (prefers-color-scheme: dark) {
+    window.onepepe .onepepe-ribbon-body {
+        background-color: #2a2530;
+        color: #f2f2f2;
+    }
+
+    window.onepepe .onepepe-tabbar stackswitcher button:checked {
+        background-color: #2a2530;
+        color: #e6a6ff;
+    }
+
+    window.onepepe .onepepe-ribbon-body button:checked {
+        background-color: rgba(230, 166, 255, 0.18);
+        color: #e6a6ff;
+    }
+}
