@@ -2892,27 +2892,11 @@ msgstr "blanco"
 #~ msgid "Offset the Camera"
 #~ msgstr "Desplazar la cámara arrastrando"
 
-#~ msgctxt "shortcut window"
-#~ msgid "General"
-#~ msgstr "General"
-
 #, fuzzy
 #~| msgid "Toggle fullscreen"
 #~ msgctxt "shortcut window"
 #~ msgid "Toggle Fullscreen"
 #~ msgstr "Conmutar la pantalla completa"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Zoom in"
-#~ msgstr "Ampliar"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Zoom out"
-#~ msgstr "Alejar"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Document"
-#~ msgstr "Documento"
 
 #, fuzzy
 #~| msgid "New Document"
@@ -2951,14 +2935,6 @@ msgstr "blanco"
 #~ msgctxt "shortcut window"
 #~ msgid "Duplicate Selection"
 #~ msgstr "Duplicar selección"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Undo"
-#~ msgstr "Deshacer"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Redo"
-#~ msgstr "Rehacer"
 
 #~ msgid "Main window in dark colors"
 #~ msgstr "Ventana principal en colores oscuros"
@@ -3099,9 +3075,6 @@ msgstr "blanco"
 #~ msgid "Paste from Clipboard"
 #~ msgstr "Pegar del portapapeles"
 
-#~ msgid "New"
-#~ msgstr "Nuevo"
-
 #~ msgid ".rnote file"
 #~ msgstr "Archivo .rnote"
 
@@ -3179,3 +3152,555 @@ msgstr "blanco"
 #~ msgstr ""
 #~ "Establece si las barras de desplazamiento del lienzo se ocultan "
 #~ "permanentemente."
+
+#. OnePepe
+msgid "100 %"
+msgstr "100 %"
+
+#. OnePepe
+msgid "A page with this name already exists"
+msgstr "Ya existe una página con este nombre"
+
+#. OnePepe
+msgid "A_bout OnePepe"
+msgstr "_Acerca de OnePepe"
+
+#. OnePepe
+msgid "About"
+msgstr "Acerca de"
+
+#. OnePepe
+msgid "Add page"
+msgstr "Añadir hoja"
+
+#. OnePepe
+msgid "App"
+msgstr "Aplicación"
+
+#. OnePepe
+msgid "Apply to the whole group"
+msgstr "Aplicar a todo el grupo"
+
+#. OnePepe
+msgid "Back to the start"
+msgstr "Volver al inicio"
+
+#. OnePepe
+msgid "Backups"
+msgstr "Copias de seguridad"
+
+#. OnePepe
+msgid "Bring Selection to Front"
+msgstr "Traer la selección al frente"
+
+#. OnePepe
+msgid "Bullet list"
+msgstr "Viñetas"
+
+#. OnePepe
+msgid "Bulleted List"
+msgstr "Lista con viñetas"
+
+#. OnePepe
+msgid "Can't move a folder into itself"
+msgstr "No se puede mover una carpeta dentro de sí misma"
+
+#. OnePepe
+msgid "Checkbox (Click Again to Check or Uncheck)"
+msgstr "Casilla (pulsa otra vez para marcarla o desmarcarla)"
+
+#. OnePepe
+msgid "Checkbox"
+msgstr "Casilla"
+
+#. OnePepe
+msgid "Class notes"
+msgstr "Apuntes de clase"
+
+#. OnePepe
+msgid "Clipboard"
+msgstr "Portapapeles"
+
+#. OnePepe
+msgid "Color Palette"
+msgstr "Paleta de colores"
+
+#. OnePepe
+msgid "Columns"
+msgstr "Columnas"
+
+#. OnePepe
+msgid "Confidence Threshold"
+msgstr "Umbral de seguridad"
+
+#. OnePepe
+msgid "Content"
+msgstr "Contenido"
+
+#. OnePepe
+msgid "Copy"
+msgstr "Copiar"
+
+#. OnePepe
+msgid "Cornell notes"
+msgstr "Apuntes Cornell"
+
+#. OnePepe
+msgid "Could not start the math helper \"onepepe-math\". See tools/onepepe-math/README.md"
+msgstr "No se pudo iniciar el programa de matemáticas \"onepepe-math\". Mira tools/onepepe-math/README.md"
+
+#. OnePepe
+msgid "Create new Page"
+msgstr "Crear página nueva"
+
+#. OnePepe
+msgid "Creating new page failed"
+msgstr "No se pudo crear la página"
+
+#. OnePepe
+msgid "Cut"
+msgstr "Cortar"
+
+#. OnePepe
+msgid "Date and Time"
+msgstr "Fecha y hora"
+
+#. OnePepe
+msgid "Date"
+msgstr "Fecha"
+
+#. OnePepe
+msgid "Delete selection"
+msgstr "Borrar la selección"
+
+#. OnePepe
+msgid "Deselect all"
+msgstr "Quitar la selección"
+
+#. OnePepe
+msgid "Doubtful symbols below this value (in %) keep your handwriting"
+msgstr "Los símbolos dudosos por debajo de este valor (en %) conservan tu letra"
+
+#. OnePepe
+msgid "Draw"
+msgstr "Dibujar"
+
+#. OnePepe
+msgid "Eraser (Area)"
+msgstr "Borrador (zona)"
+
+#. OnePepe
+msgid "Eraser (Whole Strokes)"
+msgstr "Borrador (trazos enteros)"
+
+#. OnePepe
+msgid "Export and print"
+msgstr "Exportar e imprimir"
+
+#. OnePepe
+msgid "Export fitted to the page"
+msgstr "Exportar ajustado a la hoja"
+
+#. OnePepe
+msgid "Export fitted"
+msgstr "Exportar ajustado"
+
+#. OnePepe
+msgid "Exported the fitted PDF"
+msgstr "PDF ajustado exportado"
+
+#. OnePepe
+msgid "Exported. Warning: everything is {} times smaller, small handwriting may be hard to read"
+msgstr "Exportado. Aviso: todo queda {} veces más pequeño; la letra pequeña puede no leerse bien"
+
+#. OnePepe
+msgid "Exporting the PDF failed"
+msgstr "No se pudo exportar el PDF"
+
+#. OnePepe
+msgid "Favorite pens"
+msgstr "Bolígrafos favoritos"
+
+#. OnePepe
+msgid "File"
+msgstr "Archivo"
+
+#. OnePepe
+msgid "Files"
+msgstr "Archivos"
+
+#. OnePepe
+msgid "Fit to content"
+msgstr "Ajustar al contenido"
+
+#. OnePepe
+msgid "Focus mode"
+msgstr "Modo concentración"
+
+#. OnePepe
+msgid "Full screen"
+msgstr "Pantalla completa"
+
+#. OnePepe
+msgid "Heading 1"
+msgstr "Título 1"
+
+#. OnePepe
+msgid "Heading 2"
+msgstr "Título 2"
+
+#. OnePepe
+msgid "Help"
+msgstr "Ayudas"
+
+#. OnePepe
+msgid "Higher values convert more strokes into lines, circles, ellipses, triangles and rectangles"
+msgstr "Con valores más altos se convierten más trazos en líneas, círculos, elipses, triángulos y rectángulos"
+
+#. OnePepe
+msgid "Home"
+msgstr "Inicio"
+
+#. OnePepe
+msgid "In gray, next to the \"=\", without changing your ink"
+msgstr "En gris, junto al \"=\", sin cambiar tu tinta"
+
+#. OnePepe
+msgid "Ink to Shape"
+msgstr "Tinta a formas"
+
+#. OnePepe
+msgid "Insert Date or Time"
+msgstr "Insertar fecha u hora"
+
+#. OnePepe
+msgid "Insert Math Symbol"
+msgstr "Insertar símbolo"
+
+#. OnePepe
+msgid "Insert space"
+msgstr "Insertar espacio"
+
+#. OnePepe
+msgid "Insert table"
+msgstr "Insertar tabla"
+
+#. OnePepe
+msgid "Insert"
+msgstr "Insertar"
+
+#. OnePepe
+msgid "Inserting the screen clipping failed"
+msgstr "No se pudo insertar el recorte de pantalla"
+
+#. OnePepe
+msgid "Lasso"
+msgstr "Lazo"
+
+#. OnePepe
+msgid "Lower Selection One Level"
+msgstr "Bajar la selección un nivel"
+
+#. OnePepe
+msgid "Math Mode"
+msgstr "Modo matemáticas"
+
+#. OnePepe
+msgid "More styles"
+msgstr "Más estilos"
+
+#. OnePepe
+msgid "Move Here"
+msgstr "Mover aquí"
+
+#. OnePepe
+msgid "Move to Folder"
+msgstr "Mover a la carpeta"
+
+#. OnePepe
+msgid "Move to…"
+msgstr "Mover a…"
+
+#. OnePepe
+msgid "Moving failed"
+msgstr "No se pudo mover"
+
+#. OnePepe
+msgid "Moving failed, the target folder already has an item with this name"
+msgstr "No se pudo mover: en la carpeta de destino ya hay algo con ese nombre"
+
+#. OnePepe
+msgid "Needs the helper program onepepe-math (tools/onepepe-math)"
+msgstr "Necesita el programa auxiliar onepepe-math (tools/onepepe-math)"
+
+#. OnePepe
+msgid "New Page"
+msgstr "Página nueva"
+
+#. OnePepe
+msgid "No screen clipping was taken"
+msgstr "No se hizo ningún recorte de pantalla"
+
+#. OnePepe
+msgid "Numbered List"
+msgstr "Lista numerada"
+
+#. OnePepe
+msgid "Numbered list"
+msgstr "Lista numerada"
+
+#. OnePepe
+msgid "PDF on one page"
+msgstr "PDF en una sola hoja"
+
+#. OnePepe
+msgid "PDF printout"
+msgstr "Impresión de PDF"
+
+#. OnePepe
+msgid "PDF to the page width"
+msgstr "PDF al ancho de la hoja"
+
+#. OnePepe
+msgid "PDF"
+msgstr "PDF"
+
+#. OnePepe
+msgid "Page Name"
+msgstr "Nombre de la página"
+
+#. OnePepe
+msgid "Page size"
+msgstr "Tamaño de hoja"
+
+#. OnePepe
+msgid "Page templates"
+msgstr "Plantillas de página"
+
+#. OnePepe
+msgid "Page width"
+msgstr "Ancho de página"
+
+#. OnePepe
+msgid "Pages"
+msgstr "Páginas"
+
+#. OnePepe
+msgid "Paste"
+msgstr "Pegar"
+
+#. OnePepe
+msgid "Pen"
+msgstr "Bolígrafo"
+
+#. OnePepe
+msgid "Picture"
+msgstr "Imagen"
+
+#. OnePepe
+msgid "Print"
+msgstr "Imprimir"
+
+#. OnePepe
+msgid "Problem sheet"
+msgstr "Hoja de problemas"
+
+#. OnePepe
+msgid "Quote"
+msgstr "Cita"
+
+#. OnePepe
+msgid "Raise Selection One Level"
+msgstr "Subir la selección un nivel"
+
+#. OnePepe
+msgid "Recognized symbols are redrawn cleanly in the same place"
+msgstr "Los símbolos reconocidos se redibujan limpios en el mismo sitio"
+
+#. OnePepe
+msgid "Remove this pen"
+msgstr "Quitar este bolígrafo"
+
+#. OnePepe
+msgid "Replace with Clean Symbols"
+msgstr "Sustituir por símbolos limpios"
+
+#. OnePepe
+msgid "Ribbon"
+msgstr "Cinta"
+
+#. OnePepe
+msgid "Rows"
+msgstr "Filas"
+
+#. OnePepe
+msgid "Ruler"
+msgstr "Regla"
+
+#. OnePepe
+msgid "Save As"
+msgstr "Guardar como"
+
+#. OnePepe
+msgid "Save the current pen as favorite"
+msgstr "Guardar el bolígrafo actual como favorito"
+
+#. OnePepe
+msgid "Saved the current pen as favorite"
+msgstr "Bolígrafo actual guardado en favoritos"
+
+#. OnePepe
+msgid "Screen clipping"
+msgstr "Recorte de pantalla"
+
+#. OnePepe
+msgid "Select all"
+msgstr "Seleccionar todo"
+
+#. OnePepe
+msgid "Selection"
+msgstr "Selección"
+
+#. OnePepe
+msgid "Selector (Lasso)"
+msgstr "Selector (lazo)"
+
+#. OnePepe
+msgid "Send Selection to Back"
+msgstr "Enviar la selección al fondo"
+
+#. OnePepe
+msgid "Sensitivity"
+msgstr "Sensibilidad"
+
+#. OnePepe
+msgid "Shortcuts"
+msgstr "Atajos"
+
+#. OnePepe
+msgid "Show Result After \"=\""
+msgstr "Mostrar el resultado tras el \"=\""
+
+#. OnePepe
+msgid "Show or hide the ribbon (Ctrl+F1)"
+msgstr "Mostrar u ocultar la cinta (Ctrl+F1)"
+
+#. OnePepe
+msgid "Space"
+msgstr "Espacio"
+
+#. OnePepe
+msgid "Styles"
+msgstr "Estilos"
+
+#. OnePepe
+msgid "Subscript (Selected Text)"
+msgstr "Subíndice (texto seleccionado)"
+
+#. OnePepe
+msgid "Subscript"
+msgstr "Subíndice"
+
+#. OnePepe
+msgid "Superscript (Selected Text)"
+msgstr "Superíndice (texto seleccionado)"
+
+#. OnePepe
+msgid "Superscript"
+msgstr "Superíndice"
+
+#. OnePepe
+msgid "Symbol"
+msgstr "Símbolo"
+
+#. OnePepe
+msgid "Symbols"
+msgstr "Símbolos"
+
+#. OnePepe
+msgid "Table"
+msgstr "Tabla"
+
+#. OnePepe
+msgid "Tables"
+msgstr "Tablas"
+
+#. OnePepe
+msgid "Text box"
+msgstr "Cuadro de texto"
+
+#. OnePepe
+msgid "Time stamp"
+msgstr "Fecha y hora"
+
+#. OnePepe
+msgid "Time"
+msgstr "Hora"
+
+#. OnePepe
+msgid "Title and date"
+msgstr "Título y fecha"
+
+#. OnePepe
+msgid "Tool Locked"
+msgstr "Herramienta bloqueada"
+
+#. OnePepe
+msgid "Unlock"
+msgstr "Desbloquear"
+
+#. OnePepe
+msgid "Window"
+msgstr "Ventana"
+
+#. OnePepe
+msgid "Zoom"
+msgstr "Zoom"
+
+#. OnePepe
+msgid "landscape"
+msgstr "horizontal"
+
+#. OnePepe
+msgid "portrait"
+msgstr "vertical"
+
+#. OnePepe
+msgid "right click to remove"
+msgstr "clic derecho para quitar"
+
+#. OnePepe
+msgid "Greek"
+msgstr "Griego"
+
+#. OnePepe
+msgid "Greek (Capitals)"
+msgstr "Griego (mayúsculas)"
+
+#. OnePepe
+msgid "Operators"
+msgstr "Operadores"
+
+#. OnePepe
+msgid "Analysis"
+msgstr "Análisis"
+
+#. OnePepe
+msgid "Sets and Logic"
+msgstr "Conjuntos y lógica"
+
+#. OnePepe
+msgid "Physics"
+msgstr "Física"
+
+#. OnePepe
+msgid "Letter"
+msgstr "Carta"
+
+#. OnePepe
+msgid "New"
+msgstr "Nuevo"
+
+#. OnePepe
+msgid "Normal"
+msgstr "Normal"
