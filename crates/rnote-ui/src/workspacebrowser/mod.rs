@@ -532,14 +532,13 @@ fn create_files_filter() -> EveryFilter {
     file_filter.add_mime_type("image/svg+xml");
     file_filter.add_mime_type("image/png");
     file_filter.add_mime_type("image/jpeg");
-    file_filter.add_mime_type("text/plain");
+    // OnePepe: like the notebooks of OneNote, only things that can go into a page (no text or code files)
     file_filter.add_suffix("pdf");
     file_filter.add_suffix("xopp");
     file_filter.add_suffix("svg");
     file_filter.add_suffix("png");
     file_filter.add_suffix("jpg");
     file_filter.add_suffix("jpeg");
-    file_filter.add_suffix("txt");
     let hidden_filter = create_hidden_filter();
 
     let every_filter = EveryFilter::new();
