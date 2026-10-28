@@ -628,6 +628,52 @@ impl Typewriter {
         self.insert_text(converted, None, engine_view)
     }
 
+    /// OnePepe: applies a quick style (headings, quote, code, normal) to the selection, or to the paragraph of the
+    /// text cursor when nothing is selected.
+    pub(crate) fn quick_style(
+        &mut self,
+        style: scripts::QuickStyle,
+        engine_view: &mut EngineViewMut,
+    ) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        let (range, stroke_key) = if let Some(selection) = self.selection_range() {
+            selection
+        } else if let TypewriterState::Modifying {
+            stroke_key, cursor, ..
+        } = &self.state
+        {
+            let Some(Stroke::TextStroke(textstroke)) =
+                engine_view.store.get_stroke_ref(*stroke_key)
+            else {
+                return widget_flags;
+            };
+            (
+                scripts::paragraph_range(&textstroke.text, cursor.cur_cursor()),
+                *stroke_key,
+            )
+        } else {
+            return widget_flags;
+        };
+        let Some(Stroke::TextStroke(textstroke)) = engine_view.store.get_stroke_mut(stroke_key)
+        else {
+            return widget_flags;
+        };
+        textstroke.remove_attrs_for_range(range.clone());
+        for attribute in scripts::quick_style_attributes(style, textstroke.text_style.font_size) {
+            textstroke.replace_attr_for_range(range.clone(), attribute);
+        }
+        engine_view.store.update_geometry_for_stroke(stroke_key);
+        engine_view.store.regenerate_rendering_for_stroke(
+            stroke_key,
+            engine_view.camera.viewport(),
+            engine_view.camera.image_scale(),
+        );
+        widget_flags |= engine_view.store.record(Instant::now());
+        widget_flags.redraw = true;
+        widget_flags.store_modified = true;
+        widget_flags
+    }
+
     /// OnePepe: applies a list style (bullet, number, checkbox) to the paragraph of the text cursor.
     pub(crate) fn paragraph_list(
         &mut self,

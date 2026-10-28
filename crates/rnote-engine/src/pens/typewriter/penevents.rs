@@ -680,7 +680,26 @@ impl Typewriter {
                                     }
                                 }
                                 KeyboardKey::CarriageReturn | KeyboardKey::Linefeed => {
-                                    textstroke.insert_text_after_cursor("\n", cursor);
+                                    // OnePepe: lists continue on Enter, an empty item ends the list
+                                    let (pos, remove, insert) = super::scripts::enter_edit(
+                                        &textstroke.text,
+                                        cursor.cur_cursor(),
+                                    );
+                                    if remove > 0 {
+                                        let removed =
+                                            textstroke.text[pos..pos + remove].chars().count();
+                                        *cursor = unicode_segmentation::GraphemeCursor::new(
+                                            pos,
+                                            textstroke.text.len(),
+                                            true,
+                                        );
+                                        for _ in 0..removed {
+                                            textstroke.remove_grapheme_after_cursor(cursor);
+                                        }
+                                    }
+                                    if !insert.is_empty() {
+                                        textstroke.insert_text_after_cursor(&insert, cursor);
+                                    }
                                     update_stroke(engine_view.store, true);
 
                                     EventResult {

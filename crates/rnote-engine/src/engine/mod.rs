@@ -900,6 +900,18 @@ impl Engine {
         widget_flags
     }
 
+    /// OnePepe: quick text style for the selection or the paragraph of the text cursor.
+    pub fn text_quick_style(
+        &mut self,
+        style: crate::pens::typewriter::scripts::QuickStyle,
+    ) -> WidgetFlags {
+        let mut widget_flags = WidgetFlags::default();
+        if let Pen::Typewriter(typewriter) = self.penholder.current_pen_mut() {
+            widget_flags |= typewriter.quick_style(style, &mut engine_view_mut!(self));
+        }
+        widget_flags
+    }
+
     /// OnePepe: turns the selected text into superscript (`sup`) or subscript, or back.
     pub fn text_selection_toggle_script(&mut self, sup: bool) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();

@@ -372,3 +372,144 @@ mod engine_tests {
         assert_eq!(text_of(&engine).len(), "26/10/2026".len());
     }
 }
+
+/// OnePepe: what pressing Enter does at the byte index `cursor`, as an edit
+/// (position, bytes to remove there, text to insert there).
+///
+/// Inside a list paragraph the list continues on the next line ("• ", the next number, an empty "☐ ").
+/// Enter on an empty list item ends the list: its prefix is removed and no new line is added.
+pub fn enter_edit(text: &str, cursor: usize) -> (usize, usize, String) {
+    let cursor = cursor.min(text.len());
+    let start = text[..cursor].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    let end = text[start..]
+        .find('\n')
+        .map(|i| start + i)
+        .unwrap_or(text.len());
+    let paragraph = &text[start..end];
+    let Some(prefix_len) = list_prefix_len(paragraph) else {
+        return (cursor, 0, "\n".to_string());
+    };
+    if cursor < start + prefix_len {
+        // the cursor is inside the prefix: a plain new line
+        return (cursor, 0, "\n".to_string());
+    }
+    if paragraph[prefix_len..].trim().is_empty() {
+        return (start, prefix_len, String::new());
+    }
+    let next = if let Some(n) = number_of(paragraph) {
+        format!("{}. ", n + 1)
+    } else if paragraph.starts_with("• ") {
+        "• ".to_string()
+    } else {
+        "☐ ".to_string()
+    };
+    (cursor, 0, format!("\n{next}"))
+}
+
+/// OnePepe: quick text styles, like the paragraph styles of OneNote.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum QuickStyle {
+    /// Big and bold.
+    Heading1,
+    /// Medium and bold.
+    Heading2,
+    /// Italic and gray.
+    Quote,
+    /// Monospace.
+    Code,
+    /// Removes the styles.
+    Normal,
+}
+
+impl std::str::FromStr for QuickStyle {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "heading1" => Ok(Self::Heading1),
+            "heading2" => Ok(Self::Heading2),
+            "quote" => Ok(Self::Quote),
+            "code" => Ok(Self::Code),
+            "normal" => Ok(Self::Normal),
+            _ => Err(anyhow::anyhow!("unknown quick style '{s}'")),
+        }
+    }
+}
+
+/// The text attributes of a quick style, for text with the base font size `base_font_size`.
+pub fn quick_style_attributes(
+    style: QuickStyle,
+    base_font_size: f64,
+) -> Vec<crate::strokes::textstroke::TextAttribute> {
+    use crate::strokes::textstroke::{FontStyle, TextAttribute};
+    match style {
+        QuickStyle::Heading1 => vec![
+            TextAttribute::FontSize((base_font_size * 1.8).round()),
+            TextAttribute::FontWeight(700),
+        ],
+        QuickStyle::Heading2 => vec![
+            TextAttribute::FontSize((base_font_size * 1.4).round()),
+            TextAttribute::FontWeight(700),
+        ],
+        QuickStyle::Quote => vec![
+            TextAttribute::Style(FontStyle::Italic),
+            TextAttribute::TextColor(rnote_compose::Color::new(0.4, 0.4, 0.4, 1.0)),
+        ],
+        QuickStyle::Code => vec![TextAttribute::FontFamily("monospace".to_string())],
+        QuickStyle::Normal => vec![],
+    }
+}
+
+/// The byte range of the paragraph containing the byte index `cursor`.
+pub fn paragraph_range(text: &str, cursor: usize) -> std::ops::Range<usize> {
+    let cursor = cursor.min(text.len());
+    let start = text[..cursor].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    let end = text[start..]
+        .find('\n')
+        .map(|i| start + i)
+        .unwrap_or(text.len());
+    start..end
+}
+
+#[cfg(test)]
+mod enter_tests {
+    use super::*;
+
+    fn apply(text: &str, cursor: usize) -> String {
+        let (pos, remove, insert) = enter_edit(text, cursor);
+        format!("{}{}{}", &text[..pos], insert, &text[pos + remove..])
+    }
+
+    #[test]
+    fn plain_text_gets_a_new_line() {
+        assert_eq!(apply("hola", 4), "hola\n");
+    }
+
+    #[test]
+    fn lists_continue() {
+        assert_eq!(apply("• uno", "• uno".len()), "• uno\n• ");
+        assert_eq!(apply("1. uno", 6), "1. uno\n2. ");
+        assert_eq!(apply("9. x", 4), "9. x\n10. ");
+        assert_eq!(apply("☑ hecho", "☑ hecho".len()), "☑ hecho\n☐ ");
+    }
+
+    #[test]
+    fn empty_item_ends_the_list() {
+        let text = "• uno\n• ";
+        assert_eq!(apply(text, text.len()), "• uno\n");
+        let text = "1. a\n2. ";
+        assert_eq!(apply(text, text.len()), "1. a\n");
+    }
+
+    #[test]
+    fn quick_styles() {
+        assert_eq!(quick_style_attributes(QuickStyle::Heading1, 20.0).len(), 2);
+        assert!(quick_style_attributes(QuickStyle::Normal, 20.0).is_empty());
+        assert_eq!(
+            "heading2".parse::<QuickStyle>().unwrap(),
+            QuickStyle::Heading2
+        );
+        assert_eq!(paragraph_range("a\nbcd\ne", 3), 2..5);
+        assert_eq!(paragraph_range("abc", 1), 0..3);
+    }
+}
