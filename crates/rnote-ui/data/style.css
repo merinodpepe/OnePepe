@@ -32,16 +32,16 @@
 }
 
 .canvas_scroller {
-    background-color: rgba(120, 120, 130, 0.2);
+    background-color: @op_bg_frame;
 }
 
 .modifiernode {
-    color: rgba(0, 60, 240, 255);
+    color: @op_brand;
     transition: color 0.15s;
 }
 
 .modifiernode:hover {
-    color: rgba(0, 200, 20, 255);
+    color: @op_brand_hover;
 }
 
 .flat-destructive-action {
@@ -55,8 +55,8 @@
     margin: 0px;
     background-blend-mode: screen;
     background-image:
-        linear-gradient(45deg, #0f0f0f55 25%, transparent 25%, transparent 75%, #0f0f0f55 75%, #0f0f0f55),
-        linear-gradient(45deg, #0f0f0f55 25%, transparent 25%, transparent 75%, #0f0f0f55 75%, #0f0f0f55);
+        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33)),
+        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33));
     background-color: @colorpad_color;
     color: @colorpad_fg_color;
     background-size: 18px 18px;
@@ -89,8 +89,8 @@
     margin: 0px;
     background-blend-mode: screen;
     background-image:
-        linear-gradient(45deg, #0f0f0f55 25%, transparent 25%, transparent 75%, #0f0f0f55 75%, #0f0f0f55),
-        linear-gradient(45deg, #0f0f0f55 25%, transparent 25%, transparent 75%, #0f0f0f55 75%, #0f0f0f55);
+        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33)),
+        linear-gradient(45deg, alpha(@op_fg_1, 0.33) 25%, transparent 25%, transparent 75%, alpha(@op_fg_1, 0.33) 75%, alpha(@op_fg_1, 0.33));
     background-color: @colorsetter_color;
     color: @colorsetter_fg_color;
     background-size: 18px 18px;
@@ -136,31 +136,17 @@
 }
 */
 
-/*
-from https://gitlab.com/posidon_software/paper/-/blob/main/src/css/style.css
-*/
 .workspacerow {
     min-width: 30px;
     min-height: 40px;
     margin: 4px 3px;
     padding: 3px;
-    transition: opacity .1s;
-    opacity: 0.75;
-    background-image:
-        linear-gradient(mix(@workspacerow_color, #fff, 0.15) 0%,
-            mix(@workspacerow_color, #fff, 0.1) 50%,
-            alpha(mix(@workspacerow_color, #fff, 0.05), 0.6) 75%,
-            alpha(@workspacerow_color, 0) 100%),
-        linear-gradient(mix(@workspacerow_color, #fff, 0.2), @workspacerow_color);
-    border-radius: 0 3px 3px 0;
+    transition: opacity 150ms ease-out;
+    opacity: 0.8;
+    background-color: @workspacerow_color;
+    border-radius: 0 4px 4px 0;
     color: @workspacerow_fg_color;
-    box-shadow:
-        inset 0 .5px 0px 0px rgba(255, 255, 255, 0.2),
-        inset 3px 0 0 0 shade(@workspacerow_color, 0.8),
-        inset 0 -2px 0px 0px #f0f3f8,
-        inset 0 -1px 0px 0px @workspacerow_color,
-        inset 1px 0 0 0 shade(@workspacerow_color, 0.8),
-        inset 0 -3px 0px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 3px 0 0 0 alpha(@op_fg_1, 0.2);
 }
 
 .workspacerow > label {
@@ -228,18 +214,18 @@ from https://gitlab.com/posidon_software/paper/-/blob/main/src/css/style.css
 
 .overlay_toolbar {
     padding: 6px;
-    border-radius: 12px;
-    background-color: @window_bg_color;
-    border: 1px solid @borders;
-    box-shadow: 0px 3px 6px @shade_color;
+    border-radius: 8px;
+    background-color: @op_bg_raised;
+    border: 1px solid @op_stroke_2;
+    box-shadow: 0px 2px 6px @op_shadow;
 }
 
 .overlay_toolbar_scrollable {
     padding: 0px;
-    border-radius: 12px;
-    background-color: @window_bg_color;
-    border: 1px solid @borders;
-    box-shadow: 0px 3px 6px @shade_color;
+    border-radius: 8px;
+    background-color: @op_bg_raised;
+    border: 1px solid @op_stroke_2;
+    box-shadow: 0px 2px 6px @op_shadow;
 }
 
 toast {
@@ -248,40 +234,44 @@ toast {
     margin-right: 72px;
 }
 
-/* OnePepe: a design close to the current OneNote (Fluent), in the Pepe Flock purple.
-   Purple title bar and tab strip, the active tab marked with a light underline; below, the ribbon as a white rounded
-   card floating on a soft lavender band; icons of the ribbon in purple; the canvas without the floating toolbars. */
-@define-color accent_bg_color #7719aa;
-@define-color accent_color #7719aa;
-@define-color accent_fg_color #ffffff;
+/* ===== OnePepe (design guide). Colors only from the tokens of src/theme.rs (@op_*), which switch with the
+   light, dark and high contrast themes. Spacing 2/4/6/8/12/16/24/32, radii 4/6/8/12, motion 100-200 ms. */
 
-window.onepepe {
-    --accent-bg-color: #7719aa;
-    --accent-color: #7a1fb0;
-    --accent-fg-color: #ffffff;
-}
-
-window.onepepe headerbar.onepepe-header {
-    background-image: linear-gradient(to right, #6a1599, #7719aa 45%, #8b2fc0);
-    color: #ffffff;
+/* --- header (40 px) and tabs (36 px) in the header color; the active tab joins the ribbon */
+window.onepepe headerbar.onepepe-header,
+window.onepepe headerbar.onepepe-sidebar-header {
+    background: @op_header;
+    color: @op_on_header;
     box-shadow: none;
     border-bottom: none;
+    min-height: 40px;
 }
 
-window.onepepe headerbar.onepepe-header button {
-    color: #ffffff;
+window.onepepe headerbar.onepepe-header button,
+window.onepepe headerbar.onepepe-sidebar-header button {
+    color: @op_on_header;
 }
 
 window.onepepe headerbar.onepepe-header button:hover,
-window.onepepe headerbar.onepepe-header button:checked {
-    background-color: rgba(255, 255, 255, 0.16);
+window.onepepe headerbar.onepepe-header button:checked,
+window.onepepe headerbar.onepepe-sidebar-header button:hover,
+window.onepepe headerbar.onepepe-sidebar-header button:checked {
+    background-color: alpha(@op_on_header, 0.16);
 }
 
-/* the strip of tabs continues the title bar */
+window.onepepe headerbar.onepepe-header .title {
+    font-weight: 600;
+}
+
+window.onepepe headerbar.onepepe-header .subtitle {
+    font-size: 12px;
+    color: alpha(@op_on_header, 0.8);
+}
+
 window.onepepe .onepepe-tabbar {
-    background-image: linear-gradient(to right, #6a1599, #7719aa 45%, #8b2fc0);
-    color: #ffffff;
-    padding: 0px 10px;
+    background: @op_header;
+    color: @op_on_header;
+    padding: 0px 8px;
     min-height: 36px;
 }
 
@@ -293,40 +283,40 @@ window.onepepe .onepepe-tabbar stackswitcher button {
     background: none;
     border: none;
     box-shadow: none;
-    color: rgba(255, 255, 255, 0.82);
-    border-radius: 0px;
+    color: alpha(@op_on_header, 0.8);
+    border-radius: 6px 6px 0px 0px;
     min-width: 0px;
-    padding: 6px 14px 4px 14px;
-    margin: 0px 2px;
-    font-weight: 500;
-    border-bottom: 3px solid transparent;
-    transition: color 150ms, border-color 150ms;
+    min-height: 0px;
+    padding: 6px 12px;
+    margin: 4px 2px 0px 2px;
+    font-weight: 400;
+    transition: color 150ms ease-out, background-color 150ms ease-out;
 }
 
 window.onepepe .onepepe-tabbar stackswitcher button:hover {
-    color: #ffffff;
-    border-bottom-color: rgba(255, 255, 255, 0.35);
+    color: @op_on_header;
+    background-color: alpha(@op_on_header, 0.12);
 }
 
 window.onepepe .onepepe-tabbar stackswitcher button:checked {
-    color: #ffffff;
-    font-weight: bold;
-    border-bottom-color: #ffffff;
+    color: @op_brand;
+    background-color: @op_bg_surface;
+    font-weight: 600;
 }
 
 window.onepepe .onepepe-tabbar > button {
-    color: #ffffff;
-    border-radius: 99px;
+    color: @op_on_header;
+    border-radius: 6px;
 }
 
 window.onepepe .onepepe-tabbar > button:hover {
-    background-color: rgba(255, 255, 255, 0.16);
+    background-color: alpha(@op_on_header, 0.16);
 }
 
-/* the ribbon: a white rounded card on a lavender band */
+/* --- the ribbon: full width, no frame, only a 1 px line below */
 window.onepepe .onepepe-ribbon {
-    background-color: #efeaf4;
-    border-bottom: 1px solid rgba(60, 20, 90, 0.10);
+    background-color: @op_bg_surface;
+    border-bottom: 1px solid @op_stroke_2;
 }
 
 window.onepepe .onepepe-ribbon > separator {
@@ -335,106 +325,73 @@ window.onepepe .onepepe-ribbon > separator {
 }
 
 window.onepepe .onepepe-ribbon-body {
-    background-color: #ffffff;
-    color: #2b2433;
-    border-radius: 10px;
-    margin: 6px 8px 7px 8px;
-    box-shadow: 0px 1px 3px rgba(40, 10, 60, 0.14), 0px 0px 0px 1px rgba(40, 10, 60, 0.05);
+    background: none;
+    color: @op_fg_2;
+    margin: 4px 8px;
+    min-height: 88px;
 }
 
 window.onepepe .onepepe-ribbon-body separator.vertical {
-    background-color: rgba(60, 20, 90, 0.10);
-    margin: 8px 2px;
+    background-color: @op_stroke_2;
+    margin: 8px 4px;
     min-width: 1px;
 }
 
 window.onepepe .onepepe-ribbon-body button.flat {
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 4px 8px;
     min-height: 0px;
-    transition: background-color 120ms;
+    color: @op_fg_2;
+    transition: background-color 100ms ease-out, color 100ms ease-out;
 }
 
-window.onepepe .onepepe-ribbon-body button.flat image {
-    color: #7719aa;
+window.onepepe .onepepe-ribbon-body button.flat label {
+    font-size: 12px;
 }
 
 window.onepepe .onepepe-ribbon-body button.flat:hover {
-    background-color: rgba(119, 25, 170, 0.08);
+    background-color: @op_hover;
+    color: @op_fg_1;
 }
 
 window.onepepe .onepepe-ribbon-body button.flat:active {
-    background-color: rgba(119, 25, 170, 0.16);
+    background-color: @op_brand_tint;
 }
 
 window.onepepe .onepepe-ribbon-body button.flat:checked {
-    background-color: rgba(119, 25, 170, 0.14);
-    box-shadow: inset 0px -2px 0px #7719aa;
-    color: #4a0f6b;
+    background-color: @op_brand_tint;
+    color: @op_brand;
+    font-weight: 600;
 }
 
-window.onepepe .onepepe-ribbon-body .caption {
-    font-size: 0.82em;
+window.onepepe .onepepe-ribbon-body button.flat:disabled {
+    color: @op_fg_disabled;
 }
 
+window.onepepe .onepepe-ribbon-body .caption,
 window.onepepe .onepepe-ribbon-body .dim-label {
-    color: rgba(43, 36, 51, 0.55);
+    font-size: 12px;
+    color: @op_fg_3;
 }
 
-/* the notebooks sidebar: its header joins the purple title bar */
-window.onepepe headerbar.onepepe-sidebar-header {
-    background-image: linear-gradient(to right, #5e1289, #6a1599);
-    color: #ffffff;
-    box-shadow: none;
-}
-
-window.onepepe headerbar.onepepe-sidebar-header button {
-    color: #ffffff;
-}
-
-window.onepepe headerbar.onepepe-sidebar-header button:hover,
-window.onepepe headerbar.onepepe-sidebar-header button:checked {
-    background-color: rgba(255, 255, 255, 0.16);
-}
-
-window.onepepe listview row:selected {
-    background-color: rgba(119, 25, 170, 0.14);
-    color: #4a0f6b;
-}
-
+/* --- notebooks: active row in brand-tint with a 3 px brand bar */
 window.onepepe listview row {
-    border-radius: 8px;
+    border-radius: 4px;
     margin: 1px 6px;
 }
 
-@media (prefers-color-scheme: dark) {
-    window.onepepe .onepepe-ribbon {
-        background-color: #221d28;
-        border-bottom-color: rgba(255, 255, 255, 0.06);
-    }
+window.onepepe listview row:hover {
+    background-color: @op_hover;
+}
 
-    window.onepepe .onepepe-ribbon-body {
-        background-color: #2e2836;
-        color: #f2eef6;
-        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5), 0px 0px 0px 1px rgba(255, 255, 255, 0.05);
-    }
+window.onepepe listview row:selected {
+    background-color: @op_brand_tint;
+    color: @op_fg_1;
+    box-shadow: inset 3px 0px 0px @op_brand;
+}
 
-    window.onepepe .onepepe-ribbon-body button.flat image {
-        color: #d9a3ff;
-    }
-
-    window.onepepe .onepepe-ribbon-body button.flat:checked {
-        background-color: rgba(217, 163, 255, 0.16);
-        box-shadow: inset 0px -2px 0px #d9a3ff;
-        color: #f2e3ff;
-    }
-
-    window.onepepe .onepepe-ribbon-body .dim-label {
-        color: rgba(242, 238, 246, 0.55);
-    }
-
-    window.onepepe listview row:selected {
-        background-color: rgba(217, 163, 255, 0.16);
-        color: #f2e3ff;
-    }
+/* --- high contrast: visible borders on the controls */
+window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
+window.onepepe.high-contrast .overlay_toolbar {
+    border: 1px solid @op_stroke_1;
 }
