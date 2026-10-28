@@ -1,9 +1,14 @@
 <div align="center">
+
+<sub><b>PEPE FLOCK</b></sub>
+
 <img src="misc/onepepe/logo.svg" width="200" alt="Logo de OnePepe">
 
 # OnePepe
 
 **Tus apuntes a mano, como en OneNote, pero en Linux.**
+
+<sub>Un proyecto de la familia <b>Pepe Flock</b></sub>
 
 </div>
 

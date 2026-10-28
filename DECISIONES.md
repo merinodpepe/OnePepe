@@ -135,3 +135,15 @@ Formato: qué elegí y por qué.
   la licencia GPL obliga a mantener esos avisos.
 - **Sin capturas de pantalla** por ahora: las de Rnote mostrarían otro programa y en la nube no puedo hacer capturas de
   OnePepe. Se pueden añadir cuando lo ejecutes en tu equipo.
+
+## Nombre OnePepe dentro de la app (marca Pepe Flock)
+
+- Solo cambia el **nombre visible** (`app_name_capitalized = 'OnePepe'` en `meson.build`): título de la ventana,
+  "Acerca de OnePepe", menú de aplicaciones y metadatos. El nombre interno (`rnote`) y el identificador
+  (`com.github.flxzt.rnote`) **no cambian**, para no perder ajustes ni romper Flatpak, la ruta de datos o las
+  traducciones. Cambiarlos sigue en `PLAN-PENDIENTE.md` (sección 3).
+- "Acerca de": desarrollador "Pepe Flock", enlaces a `merinodpepe/OnePepe` y un apartado "Rnote" con los autores de
+  `AUTHORS` (crédito de la base, GPL). "Donar" sigue apuntando a Rnote.
+- El nombre del repositorio en GitHub no se cambia: no hace falta y cambiarlo exige actualizar enlaces y clones.
+- `main` sigue sin tocar. Para que la portada de GitHub muestre OnePepe en lugar de Rnote, se cambia la rama por
+  defecto a `onepepe` (Settings → General → Default branch).
