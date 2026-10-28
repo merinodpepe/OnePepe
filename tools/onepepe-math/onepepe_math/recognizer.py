@@ -19,13 +19,15 @@ def recognize(
     threshold=0.95,
     clean=True,
     equals=True,
+    segment_params=None,
+    times=None,
 ):
     """Reconoce una línea de matemáticas.
 
     `strokes`: trazos nuevos (listas de (x, y)) en orden de escritura. `known`: símbolos ya reconocidos antes en esa
     línea, como [{"latex", "box"}], que dan contexto. Devuelve un dict con "symbols", "latex", "result".
     """
-    syms = segment(strokes, classifier)
+    syms = segment(strokes, classifier, params=segment_params, times=times)
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]
     cand_lists = [s["candidates"] for s in syms]

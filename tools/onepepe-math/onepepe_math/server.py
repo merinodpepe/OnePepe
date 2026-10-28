@@ -10,6 +10,8 @@ Peticiones:
   {"id": 5, "cmd": "examples"}                       tus ejemplos guardados (sin trazos)
   {"id": 6, "cmd": "forget", "example": "id"}        borra un ejemplo
   {"id": 7, "cmd": "relabel", "example": "id", "latex": "K"}   cambia su etiqueta
+  {"id": 8, "cmd": "recognize_group", "strokes": [...]}   reconoce estos trazos como UN símbolo (sin cortar)
+  {"id": 9, "cmd": "segment_fix", "junk": [[trazos], ...]}  guarda "trozos" (cortes que estaban mal) para reentrenar
 
 Cada respuesta lleva el mismo "id". Los errores se responden con {"id", "error": "..."}; nunca se cae el programa.
 """
@@ -33,6 +35,9 @@ class Server:
             personal = PersonalModel(classifier)
         self.classifier = classifier
         self.personal = personal
+        from .segment import SegmentParams
+
+        self.segment_params = SegmentParams.load()
 
     def handle(self, req):
         cmd = req.get("cmd")
@@ -57,6 +62,8 @@ class Server:
                 threshold=float(req.get("threshold", 0.95)),
                 clean=bool(req.get("clean", True)),
                 equals=bool(req.get("equals", True)),
+                segment_params=self.segment_params,
+                times=req.get("times"),
             )
         if cmd == "correct":
             strokes = [[(float(p[0]), float(p[1])) for p in s] for s in req["strokes"] if s]
@@ -71,6 +78,29 @@ class Server:
             from .segment import bbox
 
             return {"ok": True, "clean": glyphs.place_glyph(req["latex"], bbox(strokes))}
+        if cmd == "recognize_group":
+            from .segment import bbox
+
+            strokes = [[(float(p[0]), float(p[1])) for p in s] for s in req["strokes"] if s]
+            cands, junk = self.classifier.candidates_w_junk(strokes, 6)
+            if len(self.personal):
+                cands = self.personal.adjust(strokes, cands)
+            top, p = cands[0]
+            return {
+                "candidates": [{"latex": c, "p": round(q, 4)} for c, q in cands[:6]],
+                "confidence": round(p * (1.0 - junk), 4),
+                "clean": glyphs.place_glyph(top, bbox(strokes)),
+            }
+        if cmd == "segment_fix":
+            n = 0
+            for group in req.get("junk", []):
+                strokes = [[(float(p[0]), float(p[1])) for p in s] for s in group if s]
+                if strokes:
+                    self.personal.add_correction(
+                        "__trozo__", strokes, notebook=req.get("notebook_dir"), kind="junk"
+                    )
+                    n += 1
+            return {"ok": True, "saved": n}
         if cmd == "examples":
             return {"examples": self.personal.list_examples()}
         if cmd == "forget":
