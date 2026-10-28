@@ -58,6 +58,7 @@ crates/rnote-ui/src/workspacebrowser/widgethelper.rs
 crates/rnote-ui/src/overlays.rs
 crates/rnote-ui/src/utils.rs
 crates/rnote-ui/src/ribbon.rs
+crates/rnote-ui/src/statusbar.rs
 crates/rnote-ui/src/mathhelper.rs
 crates/rnote-ui/src/penssidebar/typewriterpage.rs
 crates/rnote-ui/src/workspacebrowser/filerow/actions/move_to.rs

@@ -44,6 +44,55 @@ impl PageSize {
     }
 }
 
+impl PageSize {
+    pub const ALL: [PageSize; 7] = [
+        PageSize::A5,
+        PageSize::A4,
+        PageSize::A3,
+        PageSize::A2,
+        PageSize::A1,
+        PageSize::A0,
+        PageSize::Letter,
+    ];
+
+    /// The name shown to the user.
+    pub fn name(self) -> &'static str {
+        match self {
+            PageSize::A5 => "A5",
+            PageSize::A4 => "A4",
+            PageSize::A3 => "A3",
+            PageSize::A2 => "A2",
+            PageSize::A1 => "A1",
+            PageSize::A0 => "A0",
+            PageSize::Letter => "Carta",
+        }
+    }
+
+    /// The size that matches a page of `width` × `height` millimeters (1 mm of margin), and whether it is landscape.
+    pub fn matching(width: f64, height: f64) -> Option<(PageSize, bool)> {
+        Self::ALL.into_iter().find_map(|size| {
+            let (w, h) = size.size_mm();
+            if (w - width).abs() < 1.0 && (h - height).abs() < 1.0 {
+                Some((size, false))
+            } else if (h - width).abs() < 1.0 && (w - height).abs() < 1.0 {
+                Some((size, true))
+            } else {
+                None
+            }
+        })
+    }
+}
+
+/// OnePepe: what the status bar shows about a document.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DocStatus {
+    pub strokes: usize,
+    pub pages: usize,
+    /// The page size, if it is a standard one, and whether it is landscape.
+    pub page_size: Option<(PageSize, bool)>,
+    pub zoom: f64,
+}
+
 impl std::str::FromStr for PageSize {
     type Err = anyhow::Error;
 
@@ -160,6 +209,20 @@ pub fn template_lines(template: PageTemplate, page: Aabb) -> Vec<Line> {
 
 impl Engine {
     /// Sets the page size of the document (DIN A5 to A0, Letter), portrait or landscape.
+    pub fn doc_status(&self) -> DocStatus {
+        let format = &self.document.config.format;
+        let to_mm = |px: f64| px / format.dpi() * 25.4;
+        let pages_down = (self.document.config.layout == crate::document::Layout::FixedSize
+            || self.document.config.layout == crate::document::Layout::ContinuousVertical)
+            .then(|| (self.document.height / format.height()).ceil().max(1.0) as usize);
+        DocStatus {
+            strokes: self.store.stroke_keys_unordered().len(),
+            pages: pages_down.unwrap_or(1),
+            page_size: PageSize::matching(to_mm(format.width()), to_mm(format.height())),
+            zoom: self.camera.zoom(),
+        }
+    }
+
     pub fn set_page_size(&mut self, size: PageSize, landscape: bool) -> WidgetFlags {
         let (mut w_mm, mut h_mm) = size.size_mm();
         if landscape {
@@ -383,6 +446,17 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn page_size_matching() {
+        use super::PageSize;
+        assert_eq!(
+            PageSize::matching(210.0, 297.0),
+            Some((PageSize::A4, false))
+        );
+        assert_eq!(PageSize::matching(297.2, 210.0), Some((PageSize::A4, true)));
+        assert_eq!(PageSize::matching(100.0, 100.0), None);
+    }
+
     use super::*;
 
     #[test]
