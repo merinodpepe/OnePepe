@@ -4,6 +4,7 @@ pub mod eraser;
 pub mod penbehaviour;
 pub mod penholder;
 pub mod penmode;
+pub mod penpresets;
 pub mod pensconfig;
 pub mod selector;
 pub mod shaper;
