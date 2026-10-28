@@ -3740,3 +3740,55 @@ msgstr "Exportadas {} páginas en un solo PDF"
 #. OnePepe
 msgid "Colors"
 msgstr "Colores"
+
+#. OnePepe
+msgid "Math"
+msgstr "Matemáticas"
+
+#. OnePepe
+msgid "Your handwriting"
+msgstr "Tu letra"
+
+#. OnePepe
+msgid "Retrain"
+msgstr "Reentrenar"
+
+#. OnePepe
+msgid "Retrain now"
+msgstr "Reentrenar ahora"
+
+#. OnePepe
+msgid "Retrain with my handwriting"
+msgstr "Reentrenar con mi letra"
+
+#. OnePepe
+msgid "Retraining"
+msgstr "Reentrenando"
+
+#. OnePepe
+msgid "Retraining with your handwriting…"
+msgstr "Reentrenando con tu letra…"
+
+#. OnePepe
+msgid "Retraining is already running"
+msgstr "Ya se está reentrenando"
+
+#. OnePepe
+msgid "Retraining needs the MathWriting data: run tools/onepepe-math/instalar.sh --entrenar once"
+msgstr "Para reentrenar hacen falta los datos de MathWriting: ejecuta una vez tools/onepepe-math/instalar.sh --entrenar"
+
+#. OnePepe
+msgid "Retraining could not be started"
+msgstr "No se pudo empezar a reentrenar"
+
+#. OnePepe
+msgid "Retraining was cancelled; the current model is kept"
+msgstr "Reentrenamiento cancelado; se mantiene el modelo actual"
+
+#. OnePepe
+msgid "You have many new corrections: retraining would learn your handwriting better"
+msgstr "Tienes muchas correcciones nuevas: reentrenar aprendería mejor tu letra"
+
+#. OnePepe
+msgid "You have {examples} examples of your handwriting ({new} new since the last retraining). It takes about {minutes} minutes and you can keep using the app meanwhile. The new model is only used if it is not worse with your recent examples."
+msgstr "Tienes {examples} ejemplos de tu letra ({new} nuevos desde el último reentrenamiento). Tarda unos {minutes} minutos y mientras puedes seguir usando la app. El modelo nuevo solo se usa si no es peor con tus ejemplos recientes."

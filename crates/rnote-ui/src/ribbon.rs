@@ -35,6 +35,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     stack.add_titled(&home_page(appwindow), Some("home"), &gettext("Home"));
     stack.add_titled(&insert_page(appwindow), Some("insert"), &gettext("Insert"));
     stack.add_titled(&draw_page(appwindow), Some("draw"), &gettext("Draw"));
+    stack.add_titled(&math_page(appwindow), Some("math"), &gettext("Math"));
     stack.add_titled(&view_page(appwindow), Some("view"), &gettext("View"));
     stack.set_visible_child_name("home");
 
@@ -826,14 +827,32 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     None,
                 )
                 .upcast(),
-                big_toggle(
-                    "onepepe-math-symbolic",
-                    &gettext("Math Mode"),
-                    "win.math-mode",
-                    None,
-                )
-                .upcast(),
             ],
+        ),
+    ])
+}
+
+fn math_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
+    page(&[
+        group(
+            &gettext("Math Mode"),
+            &[big_toggle(
+                "onepepe-math-symbolic",
+                &gettext("Math Mode"),
+                "win.math-mode",
+                None,
+            )
+            .upcast()],
+        ),
+        group(
+            &gettext("Your handwriting"),
+            &[big_button(
+                "restore-symbolic",
+                &gettext("Retrain"),
+                "win.math-retrain",
+                None,
+            )
+            .upcast()],
         ),
     ])
 }
@@ -1358,6 +1377,9 @@ fn setup_actions(appwindow: &RnAppWindow) {
                 export_fitted(&appwindow, mode).await;
             }
         ));
+    });
+    plain_action(appwindow, "math-retrain", |appwindow| {
+        crate::mathhelper::retrain(appwindow);
     });
     plain_action(appwindow, "export-section", |appwindow| {
         glib::spawn_future_local(clone!(
