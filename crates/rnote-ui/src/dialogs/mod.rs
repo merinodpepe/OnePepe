@@ -35,12 +35,18 @@ pub(crate) fn dialog_about(appwindow: &RnAppWindow) {
         .issue_url(config::APP_ISSUES_URL)
         .support_url(config::APP_SUPPORT_URL)
         .developer_name(config::APP_AUTHOR_NAME)
-        .developers(config::APP_AUTHORS.lines().collect::<Vec<&str>>())
+        .developers(["merinodpepe https://github.com/merinodpepe"])
         // TRANSLATORS: 'Name <email@domain.com>' or 'Name https://website.example'
         .translator_credits(gettext("translator-credits"))
         .license_type(globals::APP_LICENSE)
         .version((String::from(config::APP_VERSION) + config::APP_VERSION_SUFFIX).as_str())
         .build();
+
+    // OnePepe is based on Rnote (GPL-3.0-or-later): credit its authors
+    aboutdialog.add_acknowledgement_section(
+        Some("Rnote"),
+        &config::APP_AUTHORS.lines().collect::<Vec<&str>>(),
+    );
 
     if config::PROFILE == "devel" {
         aboutdialog.add_css_class("devel");

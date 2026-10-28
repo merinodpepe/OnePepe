@@ -139,7 +139,7 @@
             <attribute name="action">win.donate</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">A_bout Rnote</attribute>
+            <attribute name="label" translatable="yes">A_bout OnePepe</attribute>
             <attribute name="action">win.about</attribute>
           </item>
         </section>
