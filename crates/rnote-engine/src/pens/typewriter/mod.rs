@@ -659,8 +659,15 @@ impl Typewriter {
             return widget_flags;
         };
         textstroke.remove_attrs_for_range(range.clone());
+        // pushed directly: `replace_attr_for_range` would drop the other attributes of the same range
         for attribute in scripts::quick_style_attributes(style, textstroke.text_style.font_size) {
-            textstroke.replace_attr_for_range(range.clone(), attribute);
+            textstroke
+                .text_style
+                .ranged_text_attributes
+                .push(RangedTextAttribute {
+                    attribute,
+                    range: range.clone(),
+                });
         }
         engine_view.store.update_geometry_for_stroke(stroke_key);
         engine_view.store.regenerate_rendering_for_stroke(

@@ -28,6 +28,7 @@ pub(crate) mod mathhelper;
 pub(crate) mod overlays;
 pub(crate) mod penpicker;
 pub(crate) mod penssidebar;
+pub(crate) mod ribbon;
 pub(crate) mod settingspanel;
 pub(crate) mod sidebar;
 pub(crate) mod strokecontentpaintable;

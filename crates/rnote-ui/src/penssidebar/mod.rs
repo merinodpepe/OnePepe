@@ -4,7 +4,7 @@ mod eraserpage;
 mod selectorpage;
 mod shaperpage;
 mod toolspage;
-mod typewriterpage;
+pub(crate) mod typewriterpage;
 
 // Re-exports
 pub(crate) use brushpage::RnBrushPage;

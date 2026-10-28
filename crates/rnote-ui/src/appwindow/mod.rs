@@ -269,6 +269,8 @@ impl RnAppWindow {
         self.setup_icon_theme();
         self.setup_actions();
         self.setup_action_accels();
+        // OnePepe: the ribbon like OneNote
+        crate::ribbon::setup(self);
 
         if !self.app().settings_schema_found() {
             // Display an error toast if settings schema could not be found
@@ -801,6 +803,7 @@ impl RnAppWindow {
             {
                 action_math_mode.set_state(&math_mode.to_variant());
             }
+            crate::ribbon::refresh(self);
             let ruler_enabled = canvas.engine_ref().ruler_enabled();
             if let Some(action_ruler) = self
                 .lookup_action("ruler")

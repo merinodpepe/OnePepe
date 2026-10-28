@@ -259,7 +259,9 @@ impl RnCanvas {
                 rnote_engine::backup::MIN_INTERVAL_DEFAULT,
                 chrono::Local::now().naive_local(),
             ) {
-                Ok(Some(backup)) => debug!("Backup of the previous version at {}", backup.display()),
+                Ok(Some(backup)) => {
+                    debug!("Backup of the previous version at {}", backup.display())
+                }
                 Ok(None) => {}
                 Err(e) => tracing::warn!("Backup before saving failed, Err: {e:?}"),
             }

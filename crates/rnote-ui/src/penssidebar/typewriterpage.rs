@@ -402,7 +402,7 @@ const SYMBOL_CATALOG: &[(&str, &str)] = &[
 ];
 
 /// OnePepe: the popover of the symbol catalog. A click inserts the symbol into the text.
-fn symbol_catalog_popover(appwindow: &RnAppWindow) -> gtk4::Popover {
+pub(crate) fn symbol_catalog_popover(appwindow: &RnAppWindow) -> gtk4::Popover {
     let popover = gtk4::Popover::new();
     let vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
     for (title, symbols) in SYMBOL_CATALOG {
