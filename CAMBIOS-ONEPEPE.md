@@ -425,3 +425,18 @@ Rnote sin cambios). Lo que se ve en tu equipo con GTK 4.22 **sigue sin probar**,
   y texto). Con el sistema en español, la app sale entera en español.
 - **Barra lateral de cuadernos:** muestra solo carpetas, páginas, PDF e imágenes; ya no salen archivos de texto o
   código.
+
+## Diseño nuevo (estilo Fluent del OneNote actual)
+
+- **Arriba:** la barra de título y la fila de pestañas van en morado degradado. La pestaña elegida se marca con un
+  subrayado blanco, como el OneNote actual.
+- **Cinta:** es una tarjeta blanca de esquinas redondeadas, flotando sobre una franja lavanda. Los iconos van en
+  morado y los botones activos llevan una línea morada debajo. Tiene versión para el modo oscuro.
+- **Lienzo limpio:**
+  - Los colores pasan a la pestaña Dibujar (grupo "Colores").
+  - La barra de herramientas de abajo solo aparece si ocultas la cinta (Ctrl+F1).
+  - En modo concentración se oculta todo, como la vista de página completa de OneNote.
+- **Barra lateral:** la cabecera también va en morado. Las páginas se ven sin la extensión ".rnote" y las filas son
+  redondeadas.
+- **Rama:** `feat/diseno-fluent` · **Estado:** ejecutado en la nube ✔ (cambiar de pestaña, elegir color desde la cinta,
+  ocultar y mostrar la cinta, modo concentración) · lápiz: pendiente.

@@ -248,8 +248,9 @@ toast {
     margin-right: 72px;
 }
 
-/* OnePepe: a look close to OneNote, in the Pepe Flock purple.
-   The title bar and the ribbon tabs are purple, the chosen tab is a light "folder tab" joined to the ribbon. */
+/* OnePepe: a design close to the current OneNote (Fluent), in the Pepe Flock purple.
+   Purple title bar and tab strip, the active tab marked with a light underline; below, the ribbon as a white rounded
+   card floating on a soft lavender band; icons of the ribbon in purple; the canvas without the floating toolbars. */
 @define-color accent_bg_color #7719aa;
 @define-color accent_color #7719aa;
 @define-color accent_fg_color #ffffff;
@@ -261,73 +262,179 @@ window.onepepe {
 }
 
 window.onepepe headerbar.onepepe-header {
-    background-color: #7719aa;
+    background-image: linear-gradient(to right, #6a1599, #7719aa 45%, #8b2fc0);
     color: #ffffff;
     box-shadow: none;
+    border-bottom: none;
 }
 
-window.onepepe headerbar.onepepe-header button:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-window.onepepe .onepepe-tabbar {
-    background-color: #7719aa;
+window.onepepe headerbar.onepepe-header button {
     color: #ffffff;
-    padding: 0px 8px;
+}
+
+window.onepepe headerbar.onepepe-header button:hover,
+window.onepepe headerbar.onepepe-header button:checked {
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* the strip of tabs continues the title bar */
+window.onepepe .onepepe-tabbar {
+    background-image: linear-gradient(to right, #6a1599, #7719aa 45%, #8b2fc0);
+    color: #ffffff;
+    padding: 0px 10px;
+    min-height: 36px;
+}
+
+window.onepepe .onepepe-tabbar stackswitcher {
+    background: none;
 }
 
 window.onepepe .onepepe-tabbar stackswitcher button {
     background: none;
-    color: rgba(255, 255, 255, 0.9);
-    border-radius: 6px 6px 0px 0px;
+    border: none;
     box-shadow: none;
-    min-width: 76px;
-    padding: 6px 14px;
-    margin-top: 4px;
-    font-weight: normal;
+    color: rgba(255, 255, 255, 0.82);
+    border-radius: 0px;
+    min-width: 0px;
+    padding: 6px 14px 4px 14px;
+    margin: 0px 2px;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    transition: color 150ms, border-color 150ms;
 }
 
 window.onepepe .onepepe-tabbar stackswitcher button:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-bottom-color: rgba(255, 255, 255, 0.35);
 }
 
 window.onepepe .onepepe-tabbar stackswitcher button:checked {
-    background-color: #f7f5fa;
-    color: #7719aa;
+    color: #ffffff;
     font-weight: bold;
+    border-bottom-color: #ffffff;
 }
 
 window.onepepe .onepepe-tabbar > button {
     color: #ffffff;
+    border-radius: 99px;
+}
+
+window.onepepe .onepepe-tabbar > button:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* the ribbon: a white rounded card on a lavender band */
+window.onepepe .onepepe-ribbon {
+    background-color: #efeaf4;
+    border-bottom: 1px solid rgba(60, 20, 90, 0.10);
+}
+
+window.onepepe .onepepe-ribbon > separator {
+    min-height: 0px;
+    background: none;
 }
 
 window.onepepe .onepepe-ribbon-body {
-    background-color: #f7f5fa;
-    color: #262626;
+    background-color: #ffffff;
+    color: #2b2433;
+    border-radius: 10px;
+    margin: 6px 8px 7px 8px;
+    box-shadow: 0px 1px 3px rgba(40, 10, 60, 0.14), 0px 0px 0px 1px rgba(40, 10, 60, 0.05);
 }
 
-window.onepepe .onepepe-ribbon-body button:checked {
-    background-color: rgba(119, 25, 170, 0.15);
-    color: #5a1283;
+window.onepepe .onepepe-ribbon-body separator.vertical {
+    background-color: rgba(60, 20, 90, 0.10);
+    margin: 8px 2px;
+    min-width: 1px;
 }
 
-window.onepepe .onepepe-ribbon-body button:hover {
-    background-color: rgba(119, 25, 170, 0.09);
+window.onepepe .onepepe-ribbon-body button.flat {
+    border-radius: 8px;
+    padding: 4px 8px;
+    min-height: 0px;
+    transition: background-color 120ms;
+}
+
+window.onepepe .onepepe-ribbon-body button.flat image {
+    color: #7719aa;
+}
+
+window.onepepe .onepepe-ribbon-body button.flat:hover {
+    background-color: rgba(119, 25, 170, 0.08);
+}
+
+window.onepepe .onepepe-ribbon-body button.flat:active {
+    background-color: rgba(119, 25, 170, 0.16);
+}
+
+window.onepepe .onepepe-ribbon-body button.flat:checked {
+    background-color: rgba(119, 25, 170, 0.14);
+    box-shadow: inset 0px -2px 0px #7719aa;
+    color: #4a0f6b;
+}
+
+window.onepepe .onepepe-ribbon-body .caption {
+    font-size: 0.82em;
+}
+
+window.onepepe .onepepe-ribbon-body .dim-label {
+    color: rgba(43, 36, 51, 0.55);
+}
+
+/* the notebooks sidebar: its header joins the purple title bar */
+window.onepepe headerbar.onepepe-sidebar-header {
+    background-image: linear-gradient(to right, #5e1289, #6a1599);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+window.onepepe headerbar.onepepe-sidebar-header button {
+    color: #ffffff;
+}
+
+window.onepepe headerbar.onepepe-sidebar-header button:hover,
+window.onepepe headerbar.onepepe-sidebar-header button:checked {
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+window.onepepe listview row:selected {
+    background-color: rgba(119, 25, 170, 0.14);
+    color: #4a0f6b;
+}
+
+window.onepepe listview row {
+    border-radius: 8px;
+    margin: 1px 6px;
 }
 
 @media (prefers-color-scheme: dark) {
+    window.onepepe .onepepe-ribbon {
+        background-color: #221d28;
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+
     window.onepepe .onepepe-ribbon-body {
-        background-color: #2a2530;
-        color: #f2f2f2;
+        background-color: #2e2836;
+        color: #f2eef6;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5), 0px 0px 0px 1px rgba(255, 255, 255, 0.05);
     }
 
-    window.onepepe .onepepe-tabbar stackswitcher button:checked {
-        background-color: #2a2530;
-        color: #e6a6ff;
+    window.onepepe .onepepe-ribbon-body button.flat image {
+        color: #d9a3ff;
     }
 
-    window.onepepe .onepepe-ribbon-body button:checked {
-        background-color: rgba(230, 166, 255, 0.18);
-        color: #e6a6ff;
+    window.onepepe .onepepe-ribbon-body button.flat:checked {
+        background-color: rgba(217, 163, 255, 0.16);
+        box-shadow: inset 0px -2px 0px #d9a3ff;
+        color: #f2e3ff;
+    }
+
+    window.onepepe .onepepe-ribbon-body .dim-label {
+        color: rgba(242, 238, 246, 0.55);
+    }
+
+    window.onepepe listview row:selected {
+        background-color: rgba(217, 163, 255, 0.16);
+        color: #f2e3ff;
     }
 }

@@ -454,11 +454,16 @@ fn create_files_list_row_factory(appwindow: &RnAppWindow) -> SignalListItemFacto
                             .attribute_object("standard::file")
                     {
                         let file = file.downcast::<gio::File>().unwrap();
-                        return String::from(
+                        let basename = String::from(
                             file.basename()
                                 .expect("failed to get file.basename()")
                                 .to_string_lossy(),
                         );
+                        // OnePepe: pages are shown by their name, like in OneNote
+                        return basename
+                            .strip_suffix(".rnote")
+                            .map(str::to_string)
+                            .unwrap_or(basename);
                     }
 
                     String::from("")
