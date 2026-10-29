@@ -33,6 +33,7 @@ pub(crate) mod penpicker;
 pub(crate) mod penssidebar;
 pub(crate) mod prefs;
 pub(crate) mod ribbon;
+pub(crate) mod settingslayout;
 pub(crate) mod settingspanel;
 pub(crate) mod sidebar;
 pub(crate) mod statusbar;

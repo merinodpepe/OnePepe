@@ -45,6 +45,7 @@ crates/rnote-ui/src/dialogs/export.rs
 crates/rnote-ui/src/dialogs/import.rs
 crates/rnote-ui/src/dialogs/mod.rs
 crates/rnote-ui/src/penssidebar/shaperpage.rs
+crates/rnote-ui/src/settingslayout.rs
 crates/rnote-ui/src/settingspanel/mod.rs
 crates/rnote-ui/src/settingspanel/penshortcutmodels.rs
 crates/rnote-ui/src/workspacebrowser/filerow/actions/duplicate.rs

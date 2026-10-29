@@ -3996,3 +3996,72 @@ msgstr " ({} no se pudieron cambiar)"
 
 msgid "Infinite ruler"
 msgstr "Regla infinita"
+
+msgid "Background"
+msgstr "Fondo"
+
+msgid "Line width, margin line and presets"
+msgstr "Grosor de línea, línea de margen y valores rápidos"
+
+msgid "In the View tab → Background and lines"
+msgstr "En la pestaña Vista → Fondo y renglones"
+
+msgid "Keyboard shortcuts"
+msgstr "Atajos de teclado"
+
+msgid "Tools: brush, shapes, text, eraser, selection, others"
+msgstr "Herramientas: pincel, formas, texto, borrador, selección, otras"
+
+msgid "Math mode"
+msgstr "Modo matemáticas"
+
+msgid "Show or hide the ribbon"
+msgstr "Mostrar u ocultar la cinta"
+
+msgid "All the shortcuts"
+msgstr "Todos los atajos"
+
+msgid "Appearance"
+msgstr "Apariencia"
+
+msgid "Theme"
+msgstr "Tema"
+
+msgid "All the window changes together"
+msgstr "Toda la ventana cambia a la vez"
+
+msgid "System"
+msgstr "Sistema"
+
+msgid "Light"
+msgstr "Claro"
+
+msgid "Dark"
+msgstr "Oscuro"
+
+msgid "In the dark theme, the page is shown dark (only on screen)"
+msgstr "Con el tema oscuro, la página se ve oscura (solo en pantalla)"
+
+msgid "Right-handed"
+msgstr "Diestro"
+
+msgid "Off: the panels and the tool bar change sides, for left-handed people"
+msgstr "Desactivado: los paneles y la barra cambian de lado, para zurdos"
+
+msgid "Show the ribbon (Ctrl+F1)"
+msgstr "Mostrar la cinta (Ctrl+F1)"
+
+msgid "Canvas and document"
+msgstr "Lienzo y documento"
+
+msgid "Input and pen"
+msgstr "Entrada y lápiz"
+
+msgid "OnePepe settings"
+msgstr "Configuración de OnePepe"
+
+msgid "Changes not applied"
+msgstr "Cambios sin aplicar"
+
+msgid "Settings applied"
+msgstr "Ajustes aplicados"
