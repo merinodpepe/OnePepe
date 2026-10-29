@@ -41,6 +41,15 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
     - un toque sigue abriendo las candidatas;
     - un punto junto a la tinta no cuenta como toque.
   - **Esfuerzo:** bajo-medio.
+- **Tampoco deja dibujar donde acabas de borrar.**
+  - **Causa:** al borrar un símbolo reconocido, su entrada sigue en `math.symbols`. `math_symbol_index_at` no mira
+    si sus trazos siguen vivos, así que el hueco sigue «ocupado» y el trazo se toma como toque.
+  - Además, `math_take_request` manda como contexto («known») símbolos borrados. Comprueba
+    `get_stroke_ref(...).is_some()`, pero los trazos borrados siguen en el almacén, marcados en la papelera
+    (`store.trashed(key)`, `crates/rnote-engine/src/store/trash_comp.rs`).
+  - **Arreglo:** un símbolo cuenta solo si alguno de sus trazos existe y no está en la papelera. Se aplica en
+    `math_symbol_index_at`, en `known` y en el archivo oculto. Si se deshace el borrado (Ctrl+Z), vuelve a contar.
+  - **Test:** reconocer «1», borrarlo y dibujar encima → se dibuja y no hay toque.
 
 **2. Con mucho zoom (escribiendo pequeño) reconoce peor.**
 - **Comprobado:** la parte de Python no depende del tamaño. Con 150 fórmulas de MathWriting reducidas hasta 1/200
@@ -82,6 +91,48 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
     repiten;
   - prueba en la app de la nube con un `.rnote` escrito sin el modo.
 - **Esfuerzo:** bajo-medio (reutiliza todo el camino actual).
+
+**4. Reconoce mal la i y la j.**
+- **Medido** con MathWriting (fórmulas sintéticas, solo los casos en que el corte acertó):
+
+  | Letra | Primera opción | Sustituidas |
+  |---|---|---|
+  | i | 626 de 640 | 579 (las demás salen como «;») |
+  | j | 100 de 244 (41 %) | 81 |
+
+  La j se confunde con i (67), «;» (60) y t (15).
+- **Causas probables:**
+  - el punto se corta aparte (sale «.» o «·») o se junta mal;
+  - la j es casi una i con cola, y la «;» también es un punto sobre un trazo.
+- **Propuestas:**
+  1. Medir también los fallos de corte (el punto separado).
+  2. Regla de contexto: un punto justo encima de un palo corto → i o j; es j si el palo baja de la línea base (la
+     calcula ya `layout.py`) e i si no.
+  3. Tus correcciones (kNN) y reentrenar mejoran tu letra en concreto.
+
+**5. Escribir tú qué símbolo es cuando no sale ni entre las opciones.**
+- **Hoy:** la ventanita de candidatas (`show_candidates` en `crates/rnote-ui/src/mathhelper.rs`) solo ofrece las 8
+  primeras, «Unir» y «Separar».
+- **Propuesta:** debajo, un campo **«Otro…»**:
+  - **Búsqueda por nombre**, en español o en LaTeX y sin barra (`delta`, `alfa`/`alpha`, `sumatorio`, `integral`,
+    `flecha`, `distinto`, `menor o igual`, `infinito`…), con sugerencias mientras escribes.
+  - También se puede **teclear el carácter** (`δ`, `≤`) **o el LaTeX** (`\delta`).
+  - **Atajos cortos** para lo difícil de teclear, mostrados al lado de cada símbolo: `\d` → δ, `\D` → Δ, `\a` → α,
+    `\b` → β, `\l` → λ, `\p` → π, `\s` → σ, `\S` → Σ, `->` → →, `=>` → ⇒, `<=` → ≤, `>=` → ≥, `!=` → ≠,
+    `inf` → ∞.
+  - **Una rejilla plegable** con los símbolos difíciles por grupos (griego, operadores, flechas, relaciones), para
+    elegir con el lápiz sin teclado.
+- **Por dentro:**
+  - La corrección se envía como hoy (`math_correction_requests` → orden `correct`).
+  - El kNN personal ya acepta etiquetas que el modelo no tiene, así que desde entonces lo puede proponer.
+  - El símbolo limpio sale si hay glifo en `glyphs.py` (griego completo y casi todos los operadores); si no, se
+    queda tu tinta.
+  - Los nombres y atajos van en un archivo nuevo, `tools/onepepe-math/onepepe_math/nombres.py`, que el programa
+    auxiliar envía con una orden nueva, `names`, para no duplicarlos en la app.
+- **Tests:**
+  - en Python, «delta», «\d» y «δ» dan `\delta`;
+  - en Rust, una corrección con una etiqueta fuera de las candidatas se aplica.
+- **Esfuerzo:** medio.
 
 Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`):
 
@@ -253,7 +304,7 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 
 ## Orden de prioridad
 
-0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos, zoom y reconocer lo ya escrito).
+0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y donde has borrado, zoom, reconocer lo ya escrito, i/j y escribir tú el símbolo).
 1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
 5) ideas para más adelante.
 
