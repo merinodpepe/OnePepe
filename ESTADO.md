@@ -164,6 +164,6 @@ flatpak-builder --user --install --force-clean _flatpak_app build-aux/com.github
 flatpak run com.github.flxzt.rnote.Devel
 ```
 
-Para que Claude retome: pídele que lea `ESTADO.md`, `PLAN-PENDIENTE.md`, `MATEMATICAS-INFORME.md` y `DECISIONES.md`,
+Para que otra IA retome: que lea primero [`CONTEXTO-IA.md`](CONTEXTO-IA.md) (contexto completo) y luego `ESTADO.md`, `PLAN-PENDIENTE.md`, `MATEMATICAS-INFORME.md` y `DECISIONES.md`,
 y que siga el orden de prioridad de `PLAN-PENDIENTE.md` (una rama `feat/<nombre>` por función, fusionada en `onepepe`
 cuando compile y pase sus tests).
