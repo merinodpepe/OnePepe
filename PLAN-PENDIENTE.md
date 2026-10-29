@@ -23,6 +23,45 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
 
 ## 2. Matemáticas con tu letra
 
+### Problemas que tienes al usarlo (prioridad alta, sin hacer)
+
+**1. No deja escribir cerca de símbolos reconocidos (lo que más te pasa).**
+- **Causa** (`crates/rnote-engine/src/engine/math.rs`, `math_filter_pen_event`): si el lápiz baja dentro de la caja
+  de un símbolo reconocido (ampliada 4 px), se toma como un toque para corregirlo y se traga el trazo entero aunque
+  luego se mueva. El trazo se pierde.
+- **Arreglo propuesto:**
+  - Decidir al levantar el lápiz:
+    - se guardan los eventos en un búfer;
+    - si el lápiz se mueve más de 6 px de pantalla, se reenvían al pincel desde el primer punto;
+    - si no se mueve, se abren las candidatas.
+    - `math_filter_pen_event` devolvería `Vec<PenEvent>` y `handle_pen_event` (`engine/mod.rs`) enviaría cada uno.
+  - La zona del toque sería la tinta del símbolo (`hitboxes()` de sus trazos), no su caja.
+  - **Tests:**
+    - un trazo que empieza en la caja y se mueve se dibuja entero;
+    - un toque sigue abriendo las candidatas;
+    - un punto junto a la tinta no cuenta como toque.
+  - **Esfuerzo:** bajo-medio.
+
+**2. Con mucho zoom (escribiendo pequeño) reconoce peor.**
+- **Comprobado:** la parte de Python no depende del tamaño. Con 150 fórmulas de MathWriting reducidas hasta 1/200
+  (símbolos de unas 3 unidades), el resultado es prácticamente igual: 462 → 460 símbolos bien sustituidos. El fallo
+  está en la app (Rust) o en cómo se captura la tinta con zoom.
+- **Sospechas por revisar:**
+  1. El suavizado del pincel (`crates/rnote-compose/src/builders/penpathmodeledbuilder.rs`, `MODELER_PARAMS`)
+     trabaja en unidades del documento: con zoom grande, el mismo gesto es mucho más lento en esas unidades y el
+     suavizado puede deformar los trazos pequeños.
+  2. La elección de los símbolos del mismo renglón (`math_take_request`, banda de ±0,5 × altura) y otras
+     tolerancias en unidades del documento.
+  3. El grosor del pincel es fijo en unidades del documento: un símbolo pequeño queda muy gordo para su tamaño, y
+     el limpio también.
+- **Cómo investigarlo:**
+  - en la app de prueba de la nube, escribir el mismo símbolo con xdotool al 100 % y al 800–1600 %;
+  - comparar el JSON que se envía al programa auxiliar y su respuesta.
+- **Arreglo probable:**
+  - pasar a escala de pantalla (dividir por el zoom) lo que dependa de la distancia o la velocidad;
+  - o enviar los puntos crudos del lápiz.
+- **Mientras tanto:** escribe con un zoom moderado (100–200 %).
+
 Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`):
 
 - ~~Recibir `mis_expresiones_1.rnote`~~: recibido y medido (`MATEMATICAS-INFORME.md`, sección 0.5). Falta
@@ -193,6 +232,7 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 
 ## Orden de prioridad
 
+0) Antes que nada: los dos problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y zoom).
 1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
 5) ideas para más adelante.
 
