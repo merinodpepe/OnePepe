@@ -110,6 +110,20 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
      calcula ya `layout.py`) e i si no.
   3. Tus correcciones (kNN) y reentrenar mejoran tu letra en concreto.
 
+**6. El resultado del «=» no sale en casos normales.** Probado en la nube el 2026-10-30: «2+3=» da 5, tanto escrito
+de una vez como con el «=» añadido después. Pero no sale en estos casos:
+- **Lo escrito antes de activar la opción:** no se recalcula. Solo cuenta lo que escribes después.
+- **Al corregir un símbolo** (tocarlo y elegir otro, unir o separar): `math_apply_correction` no vuelve a calcular
+  el resultado del renglón.
+- **Un símbolo mal reconocido** (un «1» leído como «|», un «=» cortado en dos «−»): el programa auxiliar devuelve
+  `result: null` y la app no avisa de nada.
+
+**Propuesta:**
+- Recalcular el resultado del renglón tras cada corrección y al activar la opción, con una orden `evaluate` que
+  envía los `known` del renglón.
+- Si no se puede calcular, mostrar un «?» gris tras el «=». Al tocarlo, explica qué ha leído (el LaTeX), para ver
+  qué símbolo corregir.
+
 **5. Escribir tú qué símbolo es cuando no sale ni entre las opciones.**
 - **Hoy:** la ventanita de candidatas (`show_candidates` en `crates/rnote-ui/src/mathhelper.rs`) solo ofrece las 8
   primeras, «Unir» y «Separar».
@@ -304,7 +318,7 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 
 ## Orden de prioridad
 
-0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y donde has borrado, zoom, reconocer lo ya escrito, i/j y escribir tú el símbolo).
+0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y donde has borrado, zoom, reconocer lo ya escrito, i/j, escribir tú el símbolo y el resultado del «=»).
 1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
 5) ideas para más adelante.
 
