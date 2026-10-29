@@ -5,7 +5,13 @@ ALIASES = {
     r"\ne": r"\neq", r"\le": r"\leq", r"\ge": r"\geq", r"\to": r"\rightarrow", r"\gets": r"\leftarrow",
     r"\lt": "<", r"\gt": ">", r"\%": "%", r"\vert": "|", r"\mid": "|", r"\lbrace": r"\{", r"\rbrace": r"\}",
     r"\prime": "'", r"\ast": "*", r"\colon": ":",
+    # flechas de "paso siguiente": la larga es la misma flecha
+    r"\longrightarrow": r"\rightarrow", r"\implies": r"\Rightarrow", r"\Longrightarrow": r"\Rightarrow",
+    r"\iff": r"\Leftrightarrow",
 }
+
+# Separan los pasos de un desarrollo ("2x+4=10 → 2x=6 → x=3") o expresiones en una línea ("x=1; y=2"): no son "=".
+STEP_SEPARATORS = {";", r"\rightarrow", r"\Rightarrow", r"\Leftrightarrow"}
 
 GREEK = {
     r"\alpha", r"\beta", r"\gamma", r"\delta", r"\epsilon", r"\varepsilon", r"\zeta", r"\eta", r"\theta",
@@ -15,7 +21,7 @@ GREEK = {
 }
 BINARY_OPS = {"+", "-", r"\pm", r"\mp", r"\times", r"\cdot", r"\div", "*", "/"}
 RELATIONS = {"=", r"\neq", "<", ">", r"\leq", r"\geq", r"\approx", r"\sim", r"\simeq", r"\equiv", r"\propto",
-             r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\in", r"\subset", r"\supset"}
+             r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\Leftrightarrow", r"\in", r"\subset", r"\supset"}
 OPEN = {"(", "[", r"\{", r"\langle", r"\lfloor", r"\lceil"}
 CLOSE = {")", "]", r"\}", r"\rangle", r"\rfloor", r"\rceil"}
 BIG_OPS = {r"\sum", r"\prod", r"\int", r"\oint", r"\iint", r"\bigcup", r"\bigcap"}
@@ -49,7 +55,7 @@ def category(latex):
         return "bigop"
     if latex in {r"\sqrt"}:
         return "sqrt"
-    if latex in {".", ",", "'", "!"}:
+    if latex in {".", ",", "'", "!", ";", ":"}:
         return "punct"
     return "other"
 
@@ -69,7 +75,7 @@ CORE = (
     | {"+", "-", r"\pm", r"\mp", r"\times", r"\cdot", r"\div", "/", "=", r"\neq", "<", ">", r"\leq", r"\geq",
        r"\approx", r"\sim", r"\equiv", r"\propto", "(", ")", "[", "]", r"\{", r"\}", "|", ",", ".", "'", "!",
        r"\frac", r"\sqrt", r"\int", r"\sum", r"\prod", r"\partial", r"\nabla", r"\infty", r"\rightarrow",
-       r"\leftarrow", r"\in", "%", r"\circ", r"\lim", "*"}
+       r"\leftarrow", r"\in", "%", r"\circ", r"\lim", "*", ";", ":", r"\Rightarrow", r"\Leftrightarrow"}
 )
 
 # Símbolos que, colocados en la caja del símbolo escrito, se dibujan igual: confundirlos no cambia el resultado
