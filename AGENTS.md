@@ -1,0 +1,15 @@
+# Instrucciones para agentes de IA (OnePepe)
+
+**Lee primero [`CONTEXTO-IA.md`](CONTEXTO-IA.md)**: tiene todo el contexto del proyecto (qué es, reglas, arquitectura,
+cada función, formatos, cómo compilar y probar, estado y trampas conocidas).
+
+Reglas que no se rompen nunca (detalle en `CONTEXTO-IA.md`, sección 3):
+
+- Responde al usuario **en español**, simple y con comandos copiables.
+- **No toques `main`**. Trabaja en `feat/<nombre>` y fusiona en `onepepe` con `--no-ff` cuando compile y pasen los
+  tests. **Nunca** `push --force` ni borrar ramas. Solo el repositorio `merinodpepe/OnePepe`.
+- **No cambies el formato `.rnote`** sin avisar antes al usuario y explicar la alternativa (archivo oculto, índice
+  oculto, ajustes, `#[serde(skip)]`).
+- **Nada de modelos, datasets ni datos personales en git.** Mantén la licencia GPL y sus cabeceras.
+- Distingue compilado / tests / ejecutado en la nube / probado con lápiz real. **No des por probado lo que solo
+  compila.** Apunta las decisiones en `DECISIONES.md` y el estado en `ESTADO.md`.
