@@ -4,8 +4,29 @@
 > **todo** el proyecto sin haber visto las conversaciones anteriores. Está escrito en español porque el usuario y el
 > resto de documentos del repositorio lo están; los nombres de código, rutas y comandos van tal cual.
 >
-> Actualizado: 2026-10-29. Rama de trabajo: `onepepe`. Si algo de aquí contradice al código, manda el código; si
+> Actualizado: 2026-10-30. Rama de trabajo: `onepepe` (y `main`, que avanza igual). Si algo de aquí contradice al código, manda el código; si
 > contradice una petición nueva del usuario, manda el usuario (y actualiza este documento).
+
+> **Lo último (2026-10-29/30), por si solo lees esto:**
+>
+> - **`main` ya es OnePepe.** El Rnote original está en la rama `rnote-original`. Se quitó lo visible de Rnote:
+>   - borrados `CONTRIBUTING.md`, `MAINTAINING.md`, `docs/`, `.github/` (también el CI), las capturas de Rnote y
+>     «Donar»;
+>   - reescritos `BUILDING.md`, los metadatos de tienda, el `.desktop` y el icono monocromo.
+>   - Ver §12, «Sin Rnote a la vista».
+> - El usuario **probó el modo matemáticas** y encontró fallos. **Están apuntados, no arreglados**, en
+>   `PLAN-PENDIENTE.md` §2, puntos 1–8, con causa y arreglo propuesto. Ver aquí §13.1:
+>   - no deja escribir cerca de símbolos reconocidos ni donde has borrado;
+>   - va peor con mucho zoom;
+>   - no reconoce lo ya escrito;
+>   - i y j;
+>   - escribir tú el símbolo;
+>   - el resultado del «=» en algunos casos;
+>   - funciones `sin x` y `log_b`.
+> - El usuario mandó su **plan tipo MyScript Math** (`PLAN-MYSCRIPT.md`): tachar, diccionario, variables, revisión
+>   de álgebra, LaTeX, fracciones y gráficos. Está en `PLAN-PENDIENTE.md` §7 y aquí en §13.2.
+> - **Últimamente pide «apúntalo, no lo hagas»:** documentar en `PLAN-PENDIENTE.md` sin tocar código. Respétalo:
+>   no implementes nada de §13 sin que lo pida.
 
 ---
 
@@ -53,6 +74,7 @@
 - **Documentos humanos** (en la raíz): `ESTADO.md` (qué está hecho), `PLAN-PENDIENTE.md` (qué falta),
   `DECISIONES.md` (por qué), `CAMBIOS-ONEPEPE.md` (cómo probar cada cosa con el lápiz), `DISENO.md` (diseño y
   capturas), `MATEMATICAS-INFORME.md` (matemáticas, medidas), `AUDITORIA.md` (qué traía Rnote).
+  `PLAN-MYSCRIPT.md` (plan del usuario tipo MyScript Math). `BUILDING.md` (cómo compilar, corto).
 
 ---
 
@@ -67,12 +89,14 @@
     suyos. Su README y su informe antiguos se renombraron a `README-viejo.md` y `MATEMATICAS-INFORME-viejo.md`.
   - Tiene un script **`~/instalar-onepepe.sh`** (creado en una sesión anterior, no está en el repositorio). Trae lo
     último, compila con Flatpak, instala, abre OnePepe y avisa con `notify-send` si algo falla.
-  - Para actualizar, siempre se le da:
+  - Desde el 2026-10-29, `main` = OnePepe. Para actualizar, siempre se le da:
     ```bash
     cd /home/pepe/Pepe_Flock/One_Pepe
+    git checkout main
     git pull
     ~/instalar-onepepe.sh
     ```
+    (Su copia estaba en `onepepe`; las dos ramas tienen lo mismo.)
 - **Cómo pide las cosas:**
   - A veces manda planes largos y estructurados (por ejemplo, la guía de diseño con tokens de color).
   - A veces deja a la IA trabajando sola: «no me preguntes nada», «yo no voy a estar presente». En ese caso hay que
@@ -957,6 +981,9 @@ Detalle completo en `MATEMATICAS-INFORME.md`, secciones 0.4–0.7.
 - Esperar 0,8 s.
 - Corregir al principio y reentrenar tras unas 50 correcciones.
 - **Apagar «Tinta a formas»** en matemáticas.
+- (2026-10-30) Zoom moderado, del 100 % al 200 %: con mucho zoom reconoce peor (§13.1, punto 2).
+- (2026-10-30) Funciones con paréntesis, `ln(x)` y `sin(x)`: `sin x` sin paréntesis no se calcula.
+- (2026-10-30) Si falla un símbolo, tocarlo y corregirlo 3–4 veces: el kNN aprende al momento.
 
 ---
 
@@ -1170,13 +1197,59 @@ dbus-x11 imagemagick`):
   `@define-color` y una clase `dark` (sección 12).
 - Los tests de `theme.rs` se ejecutan en el árbol de prueba: `cargo test -p rnote theme`.
 
+**d) Probar el modo matemáticas con letra real en la app de la nube** (así se comprobó el «=» el 2026-10-30).
+
+Los scripts de la nube se pierden en cada sesión; este es el esencial.
+
+1. Necesitas:
+   - el venv con `requirements-train.txt`;
+   - MathWriting descargado (`descargar_mathwriting.sh`);
+   - un modelo entrenado (`train_classifier.py`);
+   - un lanzador con `ONEPEPE_DATA`, `ONEPEPE_MATHWRITING` y `ONEPEPE_PYTHON`, que haga `exec
+     tools/onepepe-math/onepepe-math`. Ese lanzador se pasa en `ONEPEPE_MATH_CMD`.
+2. Este script dibuja con xdotool símbolos de verdad de MathWriting:
+
+   ```python
+   # xdraw.py <dir mathwriting-2024> <k> "2,+,3,=" <x0> <y0>  > draw.txt ; luego: xdotool - < draw.txt
+   import sys
+   from onepepe_math.synth import load_holdout_symbols, _fit
+   d = load_holdout_symbols(sys.argv[1]); k = int(sys.argv[2]); x, y0 = int(sys.argv[4]), int(sys.argv[5])
+   for lab in sys.argv[3].split(","):
+       box = (x, y0, x + 45, y0 + 60) if lab not in "=-+" else (x, y0 + 18, x + 45, y0 + 45)
+       for s in _fit(d[lab][k % len(d[lab])], box):
+           pts = s[::max(1, len(s) // 25)] + [s[-1]]
+           print("mousemove %d %d mousedown 1" % pts[0])
+           for p in pts[1:]: print("mousemove %d %d sleep 0.01" % p)
+           print("mouseup 1 sleep 0.15")
+       x += 60
+   ```
+
+   Se ejecuta con `PYTHONPATH=tools/onepepe-math`.
+3. Pasos en la app:
+   1. activa el modo con Ctrl+Alt+M;
+   2. activa la opción del «=»: el ⚙ de la barra flotante → «Modo matemáticas» → «Mostrar el resultado tras el
+      "="»;
+   3. dibuja y espera unos 5 s.
+4. **Prueba sin la app:** se le pasan al programa auxiliar los símbolos ya reconocidos:
+
+   ```bash
+   echo '{"id":1,"cmd":"recognize","strokes":[],"known":[{"latex":"2","box":[0,0,30,40]},{"latex":"+","box":[40,12,70,30]},{"latex":"3","box":[80,0,110,40]},{"latex":"=","box":[120,15,150,28]}],"equals":true}' | onepepe-math
+   # → "result": {"latex": "5", ...}
+   ```
+
+   Es la misma orden que se le dio al usuario para comprobar su instalación.
+
 ---
 
 ## 11. Estado: ramas, pruebas y lo que falta probar
 
 **Ramas fusionadas en `onepepe`**, de la más reciente a la más antigua:
 
-- **Últimas:** `feat/matematicas-pasos`, `feat/zoom-amplio`, `feat/regla-angulo`.
+- **Solo documentación (2026-10-30):** `feat/contexto-ia-2`, `feat/pendiente-myscript`, `feat/pendiente-funciones`,
+  `feat/pendiente-resultado`, `feat/pendiente-matematicas-2`, `feat/pendiente-reconocer-seleccion`,
+  `feat/pendiente-matematicas`.
+- **Sin Rnote a la vista (2026-10-29):** `feat/sin-rnote`, y la rama `rnote-original` creada.
+- **Antes:** `feat/contexto-ia`, `feat/matematicas-pasos`, `feat/zoom-amplio`, `feat/regla-angulo`.
 - **Diseño:** `feat/diseno-ajustes`, `feat/diseno-regla-renglones`, `feat/diseno-arbol`, `feat/diseno-favoritos`,
   `feat/diseno-barra`, `feat/diseno-cinta`, `feat/diseno-tokens`.
 - **Corte y reentrenamiento:** `feat/corte-app`, `feat/corte-pausas`, `feat/corte-tiempos`,
@@ -1204,7 +1277,9 @@ La tabla detallada de qué se probó en cada una está en `ESTADO.md` → «Hech
 
 **Cosas que el usuario tiene que hacer:**
 - Probar con el lápiz siguiendo `CAMBIOS-ONEPEPE.md`.
-- Poner `onepepe` como rama por defecto en GitHub.
+- Comprobar que la rama por defecto en GitHub es `main` (Settings → General → Default branch).
+- Ejecutar la prueba del «=» de §10.3d en su equipo: en la app no le sale el resultado (§13.1, punto 6).
+- Decir sus asignaturas, para preparar la lista de unas 80 expresiones de entrenamiento (§13.1, punto 8).
 - Enviar `mis_simbolos.rnote`.
 - Contestar las preguntas cortas de `MATEMATICAS-INFORME.md` §5: signo de multiplicar, coma o punto decimal, unidades,
   asignaturas.
@@ -1257,29 +1332,189 @@ Resumen de `DECISIONES.md`; allí está todo.
 - **Tinta a formas:** algoritmo geométrico propio, sin modelos; desactivada por defecto.
 - **Copias de seguridad:** fuera de los cuadernos, una cada 20 minutos como mucho, 10 por página.
 - **Nombre:** solo el nombre visible es OnePepe; el id `com.github.flxzt.rnote` no cambia (ajustes, Flatpak).
+- **Sin Rnote a la vista (2026-10-29):**
+  - `main` = OnePepe y Rnote original en `rnote-original`.
+  - Se borraron los documentos, el CI y las plantillas de GitHub de Rnote; siguen en `rnote-original`.
+  - Se quedan los nombres internos (`rnote`, `com.github.flxzt.rnote`, `.rnote`) y los créditos que pide la GPL
+    (`LICENSE`, `AUTHORS`, «Acerca de → Rnote» y la nota del README).
+  - `build-aux/inno_build.py` y `rnote_inno.iss.in` se quedan porque `meson.build` los exige.
+  - **No hay CI:** si se quiere, se recupera `ci.yml` de `rnote-original`.
 
 ---
 
 ## 13. Pendiente y prioridades
 
-Ver `PLAN-PENDIENTE.md`. En orden:
+Todo está en `PLAN-PENDIENTE.md` (manda ese archivo: si cambia, actualiza esto). **Nada de esta sección está
+implementado.** El usuario pidió apuntarlo; no lo hagas sin que lo pida.
 
-1. **Pruebas del usuario** con lápiz real y GTK 4.22. Arreglar lo que salga.
+**Orden de prioridad del usuario:**
+
+0. Los fallos del modo matemáticas (§13.1).
+1. Pruebas con el lápiz real.
+2. Matemáticas con su letra; el entrenamiento, en paralelo.
+3. El plan tipo MyScript (§13.2), en su orden.
+4. Nombre interno OnePepe.
+5. Mejoras opcionales.
+6. Ideas.
+
+### 13.1 Fallos del modo matemáticas (encontrados por el usuario el 2026-10-30)
+
+**1. No deja escribir cerca de un símbolo reconocido, ni donde acabas de borrar uno.** Lo que más le pasa.
+
+- **Causa, cerca de un símbolo:** `math_filter_pen_event` (`crates/rnote-engine/src/engine/math.rs`, hacia la
+  línea 336).
+  - Si el lápiz baja dentro de la caja de un símbolo (ampliada 4 px / zoom), guarda `tap_start` y devuelve `None`
+    para **todos** los eventos del trazo.
+  - Aunque el lápiz se mueva, el trazo se pierde; solo se abren las candidatas si no se movió.
+- **Causa, donde has borrado:**
+  - el símbolo borrado sigue en `math.symbols`, y `math_symbol_index_at` no comprueba si sus trazos viven;
+  - `math_take_request` comprueba `get_stroke_ref(...).is_some()`, pero los trazos borrados siguen en el almacén,
+    marcados en la papelera (`store.trashed(key)`, `store/trash_comp.rs`); así manda como contexto símbolos
+    borrados.
+- **Arreglo propuesto:**
+  - Guardar los eventos en un búfer y decidir al levantar:
+    - si se mueve más de 6 px de pantalla, se reenvían al pincel desde el primer punto;
+    - si no se mueve, es un toque;
+    - `math_filter_pen_event` devolvería `Vec<PenEvent>`, y `Engine::handle_pen_event` (`engine/mod.rs`, hacia la
+      línea 519) enviaría cada uno.
+  - La zona del toque, la tinta (`hitboxes()` de sus trazos) y no la caja.
+  - Ignorar los símbolos con todos sus trazos en la papelera, tanto en el toque como en `known` y en el archivo
+    oculto.
+- **Tests:**
+  - un trazo que empieza en la caja y se mueve se dibuja entero;
+  - un toque abre las candidatas (el test actual `tap_on_symbol_and_group_correction`);
+  - un punto junto a la tinta no cuenta;
+  - borrar y dibujar encima funciona.
+
+**2. Con mucho zoom (escribiendo pequeño) reconoce peor.** Causa no confirmada.
+
+- **Medido:** Python no depende del tamaño. Con 150 fórmulas de MathWriting reducidas hasta 1/200, los símbolos bien
+  sustituidos pasan de 462 a 460.
+- **Sospechas:**
+  1. `MODELER_PARAMS` del pincel modelado (`crates/rnote-compose/src/builders/penpathmodeledbuilder.rs`) trabaja en
+     unidades del documento: el mismo gesto es más lento en esas unidades con zoom.
+  2. La banda de renglón de `math_take_request` (±0,5 × altura).
+  3. El grosor fijo del pincel, que deja los símbolos pequeños muy gordos.
+- **Cómo investigarlo:**
+  - en la app de prueba, el mismo símbolo con xdraw (§10.3d) al 100 % y al 800–1600 %;
+  - comparar el JSON enviado al programa auxiliar y su respuesta.
+
+**3. Reconocer lo ya escrito fuera del modo.**
+
+- **Hoy:** solo entra en la cola lo escrito con el modo activo (`math_after_pen_event`).
+- **Propuesta:**
+  - un botón «Reconocer selección» (pestaña Matemáticas y menú de la selección);
+  - una función `math_queue_strokes(keys)` que agrupa por renglones (bandas de y) y manda una petición por renglón,
+    con `times: null`;
+  - la acción `win.math-recognize-selection` en `crates/rnote-ui/src/mathhelper.rs` llama a `recognize_now` por
+    renglón.
+
+**4. La i y la j.**
+
+| Letra | Primera opción | Sustituidas |
+|---|---|---|
+| i | 626 de 640 | 579 |
+| j | 100 de 244 | 81 (se confunde con i, «;» y t) |
+
+Medido con MathWriting, solo los casos en que el corte acertó. Propuestas:
+- medir los fallos de corte del punto;
+- regla «punto encima de un palo corto»: es j si el palo baja de la línea base (`layout.py`) e i si no;
+- kNN y reentrenar.
+
+**5. Escribir tú el símbolo cuando no está entre las candidatas.**
+
+- **Hoy:** `show_candidates` (`mathhelper.rs`) solo ofrece 8 candidatas, «Unir» y «Separar».
+- **Propuesta:** un campo «Otro…»:
+  - búsqueda por nombre en español o en LaTeX (`delta`, `alfa`, `sumatorio`, `menor o igual`);
+  - el carácter o el LaTeX directamente (`δ`, `\delta`);
+  - atajos (`\d` → δ, `\D` → Δ, `\a` → α, `->` → →, `=>` → ⇒, `<=` → ≤, `!=` → ≠, `inf` → ∞);
+  - una rejilla plegable con griego, operadores y flechas.
+- **Por dentro:**
+  - va por `math_correction_requests` / `correct`;
+  - el kNN acepta etiquetas que el modelo no tiene;
+  - el glifo, si está en `glyphs.py`;
+  - los nombres y atajos, en un `nombres.py` nuevo con la orden `names`.
+- Encaja con la fase 2 de MyScript.
+
+**6. El resultado del «=».**
+
+- **Funciona en la nube** (2026-10-30, app de prueba con xdraw): «2+3=» → 5, escrito de una vez y con el «=»
+  después.
+- **No sale:**
+  - en lo escrito antes de activar la opción;
+  - tras corregir un símbolo: `math_apply_correction` no recalcula;
+  - si un símbolo está mal leído: devuelve `result: null` y no avisa.
+- **Propuesta:**
+  - recalcular tras corregir y al activar la opción (una orden `evaluate` con los `known` del renglón);
+  - un «?» gris cuando no se puede calcular, que al tocarlo enseñe el LaTeX leído.
+- **Al usuario no le sale en su equipo:** falta que ejecute la prueba de §10.3d y diga qué sale.
+- La opción está apagada por defecto. Se activa con el ⚙ de la barra flotante → «Modo matemáticas» → «Mostrar el
+  resultado tras el "="».
+
+**7. Funciones** (`FUNCTIONS` en `layout.py`: sin, cos, tan, cot, sec, csc, sinh, cosh, tanh, arcsin, arccos,
+arctan, ln, log, exp, lim, max, min, det).
+
+| Escrito | Sale | ¿Bien? |
+|---|---|---|
+| `ln(1)=`, `log(100)=`, `sin(0)=`, `exp(0)=` | 0, 2, 0, 1 | sí |
+| `ln 2=` | «log(2) ≈ 0.6931» | el valor sí, pero el nombre no: SymPy imprime log |
+| `sin x=` | nada | no: `\sin_{x}`, la x tomada como subíndice |
+| `log₂(8)=` | 0,9031 | **no**: ignora la base y calcula log₁₀ 8 |
+| `ln` con la «l» leída como «1» | n | **no**, y sin avisar |
+
+**Arreglos propuestos:**
+- tras una función, el argumento no es subíndice;
+- `log_b(x)` → `log(x, b)`;
+- mostrar `ln`;
+- unión tolerante («1» o «|» + `n` / `og` → `ln` / `log`, si «l» está entre las candidatas);
+- añadir `sen`, `tg`, `arcsen` y `arctg`;
+- tests con cada fila.
+
+**8. Cuánto escribir para entrenar.**
+
+- **Recomendación:**
+  - unas **80 expresiones variadas**, cerca de 1 hora, de una lista que prepara la IA cuando el usuario diga sus
+    asignaturas;
+  - más una **página de símbolos sueltos**, unos 20 de cada símbolo difícil.
+- **Por qué:** cuentan los ejemplos por símbolo (10–20), no el número de expresiones.
+- **Medido:** de 0 a 15 expresiones, los símbolos bien pasan del 44 % al 56 % y las sustituciones correctas del
+  68 % al 88 % (`MATEMATICAS-INFORME.md` §0.6). La curva más allá no se conoce.
+- **Después:** importar (`importar_mi_letra.py`), reentrenar y medir con una parte reservada.
+- **Sus `.rnote`, por el chat o por Drive, nunca por git.**
+
+### 13.2 Plan tipo MyScript Math (documento del usuario, `PLAN-MYSCRIPT.md`)
+
+Todo en local, sin IA en la nube. Cada fase se usa sola, se prueba antes de la siguiente y se activa desde ajustes;
+lo matemático va en un módulo propio.
+
+| Fase | Prioridad | Ya existe | Falta |
+|---|---|---|---|
+| 1. Tachar con zigzag para borrar (deshacer en un paso; ajustes de sensibilidad y herramienta) | máxima | nada (`rnote-compose/src/shaperecognition.rs` sirve de modelo para el gesto) | todo; el riesgo es confundirlo con w o z |
+| 2. Diccionario y catálogo (nombre, LaTeX, categoría, alias; buscador; constantes editables; química y unidades raras opcionales) | alta | `CORE` (`symbols.py`), `glyphs.py`, `FUNCTIONS`, pint, `glossary.py`, catálogo de símbolos para insertar | un solo fichero de datos y el buscador (junto con §13.1, punto 5) |
+| 3. Variables (`x = 3`, `m = 70 kg`; se recalcula al cambiar; resultado al lado, en color suave; alcance la página) | muy alta | árbol `layout.py`, `evaluate.py` con SymPy, glosario con valores | definir, recalcular y mostrar; guardarlo en el archivo oculto; x variable frente a ×, por contexto |
+| 4. Revisión de álgebra paso a paso (equivalencia con valores aleatorios, marcar en rojo, explicar errores típicos) | — | `STEP_SEPARATORS` (`→ ⇒ ⇔ ;`) | todo; empezar por una variable |
+| 5. Exportar a LaTeX («Copiar como LaTeX» sobre una selección) | — | `to_latex(tree)`, que ya devuelve `recognize` | el botón y ampliar el árbol si falta algo |
+| 6. Fracciones (decimal ↔ fracción ↔ mixta) y gráficos de y = f(x) | — | gráficas ya planeadas en `PLAN-PENDIENTE.md` §2 | todo |
+
+Aplazado por el usuario: resolver desde una foto o un PDF.
+
+### 13.3 Lo que ya estaba pendiente
+
+1. **Pruebas del usuario** con el lápiz real y GTK 4.22. Arreglar lo que salga.
 2. **Matemáticas con su letra:**
-   - medir de nuevo con páginas nuevas, que ya tienen tiempos (ajustar `pause_weight`);
+   - páginas nuevas con tiempos, para ajustar `pause_weight`;
    - `mis_simbolos.rnote`;
-   - una pantalla para ver y borrar sus ejemplos (el protocolo ya tiene `examples`, `forget` y `relabel`);
-   - el modo matemáticas «solo mientras mantengo pulsado un botón del lápiz»;
-   - **que el modo matemáticas ignore la tinta a formas** (ofrecido al usuario, no hecho);
-   - **búsqueda en haz** (varias hipótesis de corte, `beam.py`; estimado como unas 3 veces el trabajo del corte
-     simple);
-   - **comprobar los pasos** de un desarrollo con flechas.
-3. **Que la app se llame OnePepe por dentro:** identificador, migración de ajustes, instalable junto a Rnote.
-4. **Detalles de diseño:** color del cuaderno en el árbol, curvas de animación exactas, ajustes en una ventana aparte.
-5. **Ideas** (sin implementar):
-   - gráficas de funciones desde el modo matemáticas;
-   - etiquetas y búsqueda dentro de las páginas;
-   - menú radial bajo el lápiz;
+   - una pantalla para ver y borrar sus ejemplos (`examples`, `forget`, `relabel` ya existen);
+   - el modo matemáticas mientras se mantiene un botón del lápiz;
+   - **que el modo matemáticas ignore la tinta a formas**;
+   - **búsqueda en haz** (`beam.py`).
+3. **Nombre interno OnePepe:** id, migración de ajustes, instalable junto a Rnote.
+4. **Diseño:** color del cuaderno en el árbol, curvas de animación, ajustes en una ventana aparte.
+5. **Ideas:**
+   - gráficas de funciones;
+   - etiquetas y búsqueda;
+   - índice de la página;
+   - menú radial;
    - minimapa;
    - modo repaso;
    - plantillas propias;
@@ -1383,7 +1618,8 @@ bórralas.
    git clone https://github.com/merinodpepe/OnePepe.git && cd OnePepe
    git checkout onepepe && git pull
    git log --oneline -15
-   git rev-parse origin/main   # debe seguir siendo 6bbc9b2…
+   git rev-parse origin/rnote-original   # debe seguir siendo 6bbc9b2… (el Rnote original, no se toca)
+   git rev-parse origin/main origin/onepepe   # deben ser iguales
    ```
 2. **Lee, en este orden:** este documento → `ESTADO.md` → `PLAN-PENDIENTE.md` → lo específico (`DISENO.md`,
    `MATEMATICAS-INFORME.md`, `DECISIONES.md`).
@@ -1395,10 +1631,12 @@ bórralas.
    - `cargo check` de la interfaz (sección 10.3a);
    - si toca la interfaz, verlo en la app de prueba;
    - actualizar `es.po`/`POTFILES` y los documentos (`ESTADO`, `CAMBIOS`, `DECISIONES`, `PLAN`);
-   - `git merge --no-ff` en `onepepe` y `git push`.
+   - `git merge --no-ff` en `onepepe`, `git push origin onepepe` y `git push origin onepepe:main` (avance rápido).
+   - Si el usuario dice «apúntalo» o «no lo hagas», solo se documenta en `PLAN-PENDIENTE.md`.
 5. **Antes de subir:** `git ls-files | grep -E "npz|jsonl|mis_|dataset"` debe salir vacío. Nada del usuario ni del
    modelo en git.
 6. **Al terminar**, dile al usuario en español, en pocas líneas:
    - qué se hizo;
    - cómo está probado (compilado / tests / nube / lápiz);
-   - qué tiene que hacer él, con los comandos exactos (normalmente `git pull` + `~/instalar-onepepe.sh`).
+   - qué tiene que hacer él, con los comandos exactos (normalmente `git checkout main && git pull` y
+     `~/instalar-onepepe.sh`).
