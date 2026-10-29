@@ -64,10 +64,8 @@ impl Default for Ruler {
 }
 
 impl Ruler {
-    /// Angles are snapped to multiples of this (in degrees) when close enough.
+    /// With Shift, the angle goes in steps of this (in degrees).
     pub const ANGLE_SNAP_STEP_DEG: f64 = 15.0;
-    /// The maximum angle difference (in degrees) for snapping.
-    pub const ANGLE_SNAP_TOLERANCE_DEG: f64 = 1.5;
 
     /// Unit vector along the ruler.
     pub fn direction(&self) -> Vector2 {
@@ -123,6 +121,13 @@ impl Ruler {
             infinite: false,
             ..*self
         }
+    }
+
+    /// OnePepe: the point of an infinite ruler nearest to `pos`, on a multiple of the number spacing (so the
+    /// numbers keep their places). The rotation handle of an infinite ruler is there, in the view.
+    pub fn anchor_near(&self, pos: Vector2) -> Vector2 {
+        let along = (self.to_local(pos).x / Self::NUMBER_STEP).round() * Self::NUMBER_STEP;
+        self.from_local(Vector2::new(along, 0.0))
     }
 
     /// OnePepe: distance between ticks (design guide: 8 px).
@@ -187,12 +192,13 @@ impl Ruler {
         }
     }
 
-    /// Sets the angle, snapping it to multiples of [`Self::ANGLE_SNAP_STEP_DEG`] when close.
+    /// Sets the angle, snapped to multiples of [`Self::ANGLE_SNAP_STEP_DEG`] with [`Self::snap_to_steps`].
     pub fn set_angle_snapped(&mut self, angle: f64) {
         let deg = angle.to_degrees();
         let snapped = (deg / Self::ANGLE_SNAP_STEP_DEG).round() * Self::ANGLE_SNAP_STEP_DEG;
         self.angle =
-            if self.snap_to_steps || (deg - snapped).abs() <= Self::ANGLE_SNAP_TOLERANCE_DEG {
+            // OnePepe: the angle is free; with Shift, in steps of 15°
+            if self.snap_to_steps {
                 snapped.to_radians()
             } else {
                 angle
@@ -470,8 +476,16 @@ mod tests {
             SNAP,
         );
         assert_relative_eq!(r.angle, a, epsilon = 1e-9);
-        // rotate to 44.2 degrees: snapped to 45
+        // 44.2 degrees stays 44.2 (the angle is free)...
         let a = 44.2_f64.to_radians();
+        interaction.pen_down(
+            &mut r,
+            center + Vector2::new(a.cos(), a.sin()) * radius,
+            SNAP,
+        );
+        assert_relative_eq!(r.angle, a, epsilon = 1e-9);
+        // ...and with Shift it goes to 45
+        r.snap_to_steps = true;
         interaction.pen_up(
             &mut r,
             center + Vector2::new(a.cos(), a.sin()) * radius,

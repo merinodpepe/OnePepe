@@ -58,6 +58,22 @@ impl Engine {
         widget_flags
     }
 
+    /// OnePepe: the angle of the ruler as shown to the user (0–180°, counter-clockwise).
+    pub fn ruler_angle_degrees(&self) -> Option<f64> {
+        self.ruler.map(|r| r.angle_degrees())
+    }
+
+    /// OnePepe: sets the angle of the ruler (as shown to the user), showing the ruler if it was hidden.
+    pub fn set_ruler_angle_degrees(&mut self, degrees: f64) -> WidgetFlags {
+        let mut widget_flags = self.set_ruler_enabled(true);
+        if let Some(ruler) = self.ruler.as_mut() {
+            // y points down on the canvas: counter-clockwise on screen is a negative angle
+            ruler.angle = -degrees.to_radians();
+        }
+        widget_flags.redraw = true;
+        widget_flags
+    }
+
     /// Applies the ruler to a pen event.
     ///
     /// Returns the (possibly snapped) event that should be passed on to the pen,
@@ -76,6 +92,10 @@ impl Engine {
             return Some(event);
         }
         let snap_distance = Self::RULER_SNAP_DISTANCE / self.camera.total_zoom();
+        // OnePepe: the rotation handle of an infinite ruler is always in the view (where it is drawn)
+        if ruler.infinite && self.ruler_interaction == RulerInteraction::Idle {
+            ruler.center = ruler.anchor_near(self.camera.viewport().center());
+        }
 
         match event {
             PenEvent::Down {
@@ -129,6 +149,7 @@ impl Engine {
         };
         let total_zoom = self.camera.total_zoom();
         let viewport = self.camera.viewport();
+        let handle = ruler.infinite.then(|| ruler.anchor_near(viewport.center()));
         let ruler = ruler.visible_part([
             viewport.mins,
             Vector2::new(viewport.maxs.x, viewport.mins.y),
@@ -154,7 +175,7 @@ impl Engine {
         let mut piet_cx = piet_cairo::CairoRenderContext::new(&cairo_cx);
         piet_cx.transform(self.camera.transform().to_kurbo());
 
-        draw_ruler(&mut piet_cx, &ruler, total_zoom)?;
+        draw_ruler(&mut piet_cx, &ruler, total_zoom, handle)?;
 
         piet_cx.finish().map_err(|e| anyhow::anyhow!("{e:?}"))?;
         snapshot.restore();
@@ -163,10 +184,12 @@ impl Engine {
 }
 
 /// Draws the ruler with a piet render context in document coordinates.
+/// `handle`: where to draw the rotation handle, if not at its usual place (infinite rulers).
 pub fn draw_ruler(
     piet_cx: &mut impl piet::RenderContext,
     ruler: &Ruler,
     total_zoom: f64,
+    handle: Option<Vector2>,
 ) -> anyhow::Result<()> {
     use piet::{Text, TextLayoutBuilder};
     use rnote_compose::color;
@@ -266,7 +289,9 @@ pub fn draw_ruler(
     // rotation handle
     piet_cx.stroke(
         kurbo::Circle::new(
-            ruler.rotate_handle_center().to_kurbo_point(),
+            handle
+                .unwrap_or_else(|| ruler.rotate_handle_center())
+                .to_kurbo_point(),
             ruler.rotate_handle_radius(),
         ),
         &edge_color,
@@ -356,7 +381,7 @@ mod tests {
             cx.set_source_rgb(1.0, 1.0, 1.0);
             cx.paint().unwrap();
             let mut piet_cx = piet_cairo::CairoRenderContext::new(&cx);
-            draw_ruler(&mut piet_cx, &ruler, 1.0).unwrap();
+            draw_ruler(&mut piet_cx, &ruler, 1.0, None).unwrap();
             piet::RenderContext::finish(&mut piet_cx).unwrap();
         }
         if let Ok(path) = std::env::var("ONEPEPE_RENDER_RULER") {
@@ -372,5 +397,34 @@ mod tests {
             not_white > 500,
             "the ruler was not drawn ({not_white} pixels)"
         );
+    }
+}
+
+#[cfg(test)]
+mod onepepe_angle_tests {
+    use super::*;
+    use rnote_compose::penpath::Element;
+    use std::collections::HashSet;
+
+    #[test]
+    fn exact_angle_and_handle_in_view_for_infinite_ruler() {
+        let mut engine = Engine::default();
+        let _ = engine.camera_set_size(Vector2::new(1000.0, 800.0));
+        let _ = engine.set_ruler_angle_degrees(37.5);
+        assert!((engine.ruler_angle_degrees().unwrap() - 37.5).abs() < 1e-9);
+
+        // an infinite ruler whose center is far away: the handle comes to the view
+        let _ = engine.set_ruler_infinite(true);
+        let far = engine.ruler.unwrap().direction() * 50_000.0;
+        engine.ruler.as_mut().unwrap().center += far;
+        let view_center = engine.camera.viewport().center();
+        let _ = engine.apply_ruler_to_pen_event(PenEvent::Down {
+            element: Element::new(view_center + Vector2::new(0.0, 300.0), 0.5),
+            modifier_keys: HashSet::new(),
+        });
+        let ruler = engine.ruler.unwrap();
+        assert!((ruler.center - view_center).length() < 2000.0);
+        // the angle did not change
+        assert!((engine.ruler_angle_degrees().unwrap() - 37.5).abs() < 1e-9);
     }
 }
