@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-28 (tercera tanda). Rama de integración: `onepepe` (creada desde `main`, que no se ha tocado).
+Actualizado: 2026-10-29 (diseño nuevo según tu guía; detalle y capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe` (creada desde `main`, que no se ha tocado).
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
@@ -43,6 +43,13 @@ Leyenda de cómo se probó cada cosa:
 | 3ª | Estilos rápidos (Título 1/2, cita, código) y listas que siguen con Intro | `feat/estilos-listas` | sí | sí (5) + ejecutada ✔ | pendiente |
 | 3ª | Copias de seguridad automáticas con versiones | `feat/copias-seguridad` | sí | sí (2) + ejecutada ✔ | pendiente |
 | 3ª | Interfaz en español (138 textos nuevos) | `feat/traduccion-es` | — | `msgfmt -c` ✔ + ejecutada en español ✔ | no aplica |
+| Diseño | Tokens de color, tema claro/oscuro/alto contraste, lienzo oscuro solo en pantalla | `feat/diseno-tokens` | sí | sí (contraste y colores sueltos) + ejecutada en los 3 temas ✔ | pendiente |
+| Diseño | Cabecera con logo, cinta según la guía, barra de estado, guías y cruz del origen discretas, selección en color de marca | `feat/diseno-cinta` | sí | sí + ejecutada ✔ | pendiente |
+| Diseño | Barra de opciones: herramientas elegidas, plegar, arrastrar, anclar a izquierda o derecha | `feat/diseno-barra` | sí | ejecutada ✔ (arrastre arriba/abajo y de lado ✔) | pendiente |
+| Diseño | Bolis favoritos en 5 huecos (Ctrl+1…5) y estilos de texto editables (Ctrl+Alt+1/2/0) | `feat/diseno-favoritos` | sí | sí (6) + ejecutada ✔ (arrastrar para reordenar sin probar) | pendiente |
+| Diseño | Árbol del cuaderno con subpáginas, búsqueda, «+ Página», panel plegable | `feat/diseno-arbol` | sí | sí (4) + ejecutada ✔ (arrastrar sin probar: no funciona el arrastre simulado en la nube) | pendiente |
+| Diseño | Regla infinita y «Fondo y renglones» (grosor, margen, valores rápidos, toda la sección) | `feat/diseno-regla-renglones` | sí | sí (8) + ejecutada ✔ | pendiente |
+| Diseño | Ajustes en pestañas con logo y barra Revertir/Aplicar | `feat/diseno-ajustes` | sí | ejecutada ✔ (Revertir probado con interruptores y tema) | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
@@ -75,6 +82,14 @@ Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas e
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
 
 ## Qué necesito de ti
+
+**Del diseño nuevo (29/10/2026), cuando lo instales:**
+
+- Mira si te gustan los colores en claro y en oscuro (`DISENO.md` tiene las capturas).
+- Prueba a arrastrar páginas en el árbol y bolis en la cinta: en la nube no se pudo probar el arrastre.
+- Los atajos cambiaron: las herramientas pasan a **Alt+1…Alt+6**, y Ctrl+1…Ctrl+5 son tus bolis favoritos. Si
+  prefieres otra cosa, dímelo.
+- Si tenías más de 5 bolis favoritos, la lista entera sigue en `~/.config/onepepe/boligrafos.anterior.json`.
 
 1. **Cómo compilas:** `./setup-deps.sh --check`. Si dice "DEMASIADO VIEJA", usa Flatpak.
 2. **Probar con el lápiz** siguiendo `CAMBIOS-ONEPEPE.md` y contarme qué falla (y cuánto acierta la tinta a formas).

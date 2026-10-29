@@ -1,6 +1,6 @@
 # Plan de mejora de OnePepe (pendiente)
 
-Actualizado: 2026-10-28. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](ESTADO.md) y
+Actualizado: 2026-10-29. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](ESTADO.md) y
 [`CAMBIOS-ONEPEPE.md`](CAMBIOS-ONEPEPE.md); el plan original completo queda en el historial de git de este archivo.
 
 ## 1. Pruebas en tu equipo (lo primero)
@@ -15,6 +15,11 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
 - Lo de la tercera tanda (ya se ejecutó en la nube, falta en tu equipo con GTK 4.22 y el lápiz): la cinta, el diseño
   morado, los bolígrafos favoritos, insertar tabla y plantillas, recorte de pantalla, tamaño de hoja, exportar
   ajustado y por secciones, nota rápida, estilos y listas, copias de seguridad.
+- El diseño nuevo de tu guía (`DISENO.md`). Ya está hecho; falta probarlo en tu equipo:
+  - colores en claro, oscuro y alto contraste;
+  - **arrastrar** en el árbol y en los favoritos (en la nube no se pudo);
+  - los atajos nuevos (Alt+1…6 herramientas, Ctrl+1…5 favoritos);
+  - la regla infinita con el lápiz.
 
 ## 2. Matemáticas con tu letra
 
@@ -119,6 +124,13 @@ Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue m
 - Tinta a texto (Fase 5; poco prioritaria).
 - Tablas de texto de verdad (hoy la tabla es una rejilla dibujada para escribir a mano).
 - Plantillas propias: guardar una página como plantilla y elegirla al crear páginas (hoy hay 4 plantillas fijas).
+
+### Diseño: detalles que quedan
+
+- Los colores de cada cuaderno se eligen ya en la barra de cuadernos de Rnote. Falta que la fila del cuaderno en el
+  árbol muestre su color.
+- Una tabla de curvas de animación exacta: no tenía la de la guía y se usó `ease-out` de 100–200 ms.
+- Ajustes como ventana aparte (ahora siguen en el panel lateral, más ancho cuando se abren).
 
 ## 5. Cosas que haces tú en GitHub
 

@@ -217,3 +217,34 @@ Formato: qué elegí y por qué.
 - **Pestaña Matemáticas** en la cinta: Dibujar ya no cabía en pantallas de 14".
 - **«Unir con el de al lado»** junta con el símbolo más cercano por cualquier lado: los trozos de un «=» o de una «i»
   quedan uno encima del otro, no a la derecha.
+
+## Diseño según tu guía (29/10/2026)
+
+Detalle, capturas y contrastes en [`DISENO.md`](DISENO.md).
+
+- **Una sola tabla de colores** (`theme.rs`). De ella sale el CSS de claro, oscuro y alto contraste, y los colores
+  de libadwaita.
+  - Se usa `@define-color` y no `var(--…)`: así funciona en GTK 4.14 (donde lo pruebo) y en 4.22. Las variables de
+    libadwaita 1.6+ solo se escriben con GTK 4.16 o más nueva.
+- **Lienzo oscuro solo en pantalla**, con una matriz de color que conserva el tono. Ni el `.rnote` ni lo exportado
+  cambian.
+- **Atajos:**
+  - Ctrl+1…5 son los bolis favoritos; las herramientas pasan a Alt+1…6.
+  - Ctrl+Alt+1/2/0 son los estilos de texto; los colores 1 y 2 pierden su atajo (del 3 al 9 siguen).
+- **Favoritos:** 5 huecos. Una lista antigua más larga se guarda entera en `boligrafos.anterior.json`.
+- **Estilos de texto:** un texto «tiene» un estilo si coincide en tamaño y grosor. No se guarda nada aparte, y vale
+  con páginas de Rnote. El interlineado de la guía no se aplica: el `.rnote` no lo guarda por párrafo.
+- **Árbol y subpáginas:** el orden y quién es subpágina de quién van en un archivo oculto por carpeta,
+  `.onepepe-indice.json`. Los archivos no se mueven ni se renombran.
+  - Si borras ese archivo, se vuelve al orden por nombre (con números en orden natural: Tema 2 antes que Tema 10).
+- **Regla:**
+  - Infinita = una línea que cruza todo el lienzo; gira desde el centro, y con Mayús de 15° en 15°.
+  - Su estado va en el archivo oculto de cada página, no en el `.rnote`.
+- **Renglones:**
+  - Tipo, separación y colores son el fondo del `.rnote`, como en Rnote.
+  - El grosor y la línea de margen no existen en el formato: van en el archivo oculto. Se ven en pantalla y al
+    exportar, pero no si abres la página en Rnote.
+  - «Toda la sección» reescribe las demás páginas de la carpeta. Antes guarda una copia de seguridad de cada una y
+    escribe por archivo temporal, para no dejar nunca una página a medias.
+- **Ajustes:** se mantienen los ajustes inmediatos de Rnote. «Revertir» vuelve a como estaban al abrirlos o al último
+  «Aplicar»; cerrar sin aplicar los deja puestos.

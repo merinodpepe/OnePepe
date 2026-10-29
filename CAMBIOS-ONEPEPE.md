@@ -470,3 +470,42 @@ Rnote sin cambios). Lo que se ve en tu equipo con GTK 4.22 **sigue sin probar**,
   `feat/corte-pausas`.
 - **Estado:** tests ✔ (Python 36, Rust) · ejecutado en la nube ✔ (reentrenar, cancelar, unir, separar) · lápiz:
   pendiente.
+
+## Diseño nuevo según tu guía (29/10/2026)
+
+Capturas y detalles: [`DISENO.md`](DISENO.md). Cómo probarlo:
+
+1. **Temas:** Ajustes → Apariencia → Sistema / Claro / Oscuro. Cambia toda la ventana a la vez.
+   - En oscuro, la página también se ve oscura; se apaga en Vista → «Lienzo oscuro».
+   - Exporta un PDF en oscuro: debe salir blanco, como siempre.
+2. **Bolis favoritos** (Dibujar):
+   - **Ctrl+1…Ctrl+5** eligen; el activo lleva un anillo morado.
+   - Mantén pulsado un boli (o clic derecho → «Guardar aquí el boli actual») para cambiarlo por el que llevas.
+   - Arrástralo para reordenar.
+   - Las herramientas están ahora en **Alt+1…Alt+6**.
+3. **Estilos** (Inicio):
+   - Título 1, Título 2 y Normal, con **Ctrl+Alt+1 / 2 / 0** mientras escribes.
+   - El lápiz de al lado edita tamaño y grosor; al aplicar, cambia el texto que ya tenía ese estilo (y se puede
+     deshacer).
+4. **Barra de opciones** (la flotante del lienzo):
+   - Arrastra los puntitos de arriba para moverla o pasarla al otro lado.
+   - La flecha la pliega.
+   - «⋮» elige hasta 3 herramientas, su orden y su lado.
+5. **Árbol** (panel izquierdo):
+   - Despliega las secciones y busca páginas.
+   - «+ Página» crea una detrás de la abierta.
+   - Menú «⋮» de una página: Subir, Bajar, Convertir en subpágina, Subir de nivel.
+   - Arrastra una página sobre otra (se pone delante) o sobre una sección (se mueve allí).
+   - La flecha de la cabecera pliega el panel a la barra de cuadernos.
+6. **Regla infinita** (Dibujar o Vista):
+   - Cruza todo el lienzo; arrástrala para moverla.
+   - Gírala desde el círculo del centro; con Mayús, de 15° en 15°.
+   - Al guardar y reabrir la página, sigue donde estaba.
+7. **Fondo y renglones** (Vista → Líneas):
+   - Prueba «Rayado 7 mm» con línea de margen y el grosor.
+   - Cierra sin aplicar: vuelve a como estaba.
+   - Con «Todas las páginas de la sección», cambia las demás páginas de la carpeta (antes guarda copia de cada una).
+8. **Ajustes:**
+   - Pestañas Lienzo y documento / Fondo y renglones / Entrada y lápiz / Atajos / Apariencia.
+   - Cambia algo y pulsa «Revertir»: vuelve atrás.
+9. **Barra de estado** (abajo): tamaño de hoja, páginas, guardado y zoom.
