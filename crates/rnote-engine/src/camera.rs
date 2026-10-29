@@ -74,9 +74,16 @@ impl Snapshotable for Camera {
     }
 }
 
+/// OnePepe: the vector zoom is a setting of the app, the same for all the documents.
+static VECTOR_ZOOM: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 impl Camera {
-    pub const ZOOM_MIN: f64 = 0.2;
-    pub const ZOOM_MAX: f64 = 6.0;
+    /// OnePepe: from 5 % (to see a lot of the page at once)...
+    pub const ZOOM_MIN: f64 = 0.05;
+    /// ...to 1600 % (the limit, unless the vector zoom is on).
+    pub const ZOOM_MAX: f64 = 16.0;
+    /// OnePepe: with the vector zoom on, up to 100 000 %.
+    pub const ZOOM_MAX_VECTOR: f64 = 1000.0;
     pub const ZOOM_DEFAULT: f64 = 1.0;
     // The zoom timeout time.
     pub const ZOOM_TIMEOUT: Duration = Duration::from_millis(400);
@@ -85,8 +92,27 @@ impl Camera {
     pub const OVERSHOOT_HORIZONTAL: f64 = 96.0;
     pub const OVERSHOOT_VERTICAL: f64 = 96.0;
 
+    /// OnePepe: the highest zoom right now (higher with the vector zoom on).
+    pub fn zoom_max() -> f64 {
+        if VECTOR_ZOOM.load(std::sync::atomic::Ordering::Relaxed) {
+            Self::ZOOM_MAX_VECTOR
+        } else {
+            Self::ZOOM_MAX
+        }
+    }
+
+    /// OnePepe: whether the vector zoom is on: much higher zoom, only on screen (the strokes are vectors, they stay
+    /// sharp; the exports do not change).
+    pub fn vector_zoom() -> bool {
+        VECTOR_ZOOM.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    pub fn set_vector_zoom(on: bool) {
+        VECTOR_ZOOM.store(on, std::sync::atomic::Ordering::Relaxed);
+    }
+
     pub fn with_zoom(mut self, zoom: f64) -> Self {
-        self.zoom = zoom.clamp(Self::ZOOM_MIN, Self::ZOOM_MAX);
+        self.zoom = zoom.clamp(Self::ZOOM_MIN, Self::zoom_max());
         self
     }
 
@@ -177,7 +203,7 @@ impl Camera {
     /// Set the permanent zoom.
     pub fn zoom_to(&mut self, zoom: f64) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
-        self.zoom = zoom.clamp(Self::ZOOM_MIN, Self::ZOOM_MAX);
+        self.zoom = zoom.clamp(Self::ZOOM_MIN, Self::zoom_max());
         widget_flags.zoomed = true;
         widget_flags
     }
@@ -191,7 +217,7 @@ impl Camera {
     pub fn zoom_temporarily_to(&mut self, temporary_zoom: f64) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
         self.temporary_zoom =
-            temporary_zoom.clamp(Camera::ZOOM_MIN / self.zoom, Camera::ZOOM_MAX / self.zoom);
+            temporary_zoom.clamp(Camera::ZOOM_MIN / self.zoom, Camera::zoom_max() / self.zoom);
         widget_flags.zoomed_temporarily = true;
         widget_flags
     }

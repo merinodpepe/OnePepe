@@ -316,6 +316,10 @@ impl Image {
         bounds.ensure_positive();
         bounds.loosen(1.0);
         bounds.assert_valid()?;
+        // OnePepe: never an image larger than this on either side (cairo cannot make them, and the memory would
+        // explode with a very high zoom): it is rendered at a lower resolution instead
+        const MAX_SIDE: f64 = 4096.0;
+        let image_scale = image_scale.min(MAX_SIDE / bounds.extents().max_element().max(1.0));
 
         let width_scaled = ((bounds.extents()[0]) * image_scale).round() as u32;
         let height_scaled = ((bounds.extents()[1]) * image_scale).round() as u32;

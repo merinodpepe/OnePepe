@@ -75,7 +75,7 @@ impl ZoomTool {
                 let new_zoom =
                     total_zoom_old * (1.0 - offset[1] * Camera::DRAG_ZOOM_MAGN_ZOOM_FACTOR);
 
-                if (Camera::ZOOM_MIN..=Camera::ZOOM_MAX).contains(&new_zoom) {
+                if (Camera::ZOOM_MIN..=Camera::zoom_max()).contains(&new_zoom) {
                     widget_flags |= engine_view
                         .camera
                         .zoom_w_timeout(new_zoom, engine_view.tasks_tx.clone());

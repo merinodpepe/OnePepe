@@ -50,6 +50,8 @@ Leyenda de cómo se probó cada cosa:
 | Diseño | Árbol del cuaderno con subpáginas, búsqueda, «+ Página», panel plegable | `feat/diseno-arbol` | sí | sí (4) + ejecutada ✔ (arrastrar sin probar: no funciona el arrastre simulado en la nube) | pendiente |
 | Diseño | Regla infinita y «Fondo y renglones» (grosor, margen, valores rápidos, toda la sección) | `feat/diseno-regla-renglones` | sí | sí (8) + ejecutada ✔ | pendiente |
 | Diseño | Ajustes en pestañas con logo y barra Revertir/Aplicar | `feat/diseno-ajustes` | sí | ejecutada ✔ (Revertir probado con interruptores y tema) | pendiente |
+| — | Regla: ángulo libre (también infinita) y ángulo exacto | `feat/regla-angulo` | sí | sí (2) + ejecutada ✔ (girada a mano a 152°, puesta a 30°) | pendiente |
+| — | Zoom del 5 % al 1600 %, «Zoom vectorial» hasta 100 000 %, herramienta Mano (Alt+7) | `feat/zoom-amplio` | sí | sí (1) + ejecutada ✔ (5 % y 91 710 % sin errores; la mano mueve la vista) | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con

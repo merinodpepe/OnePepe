@@ -299,6 +299,7 @@ pub(crate) fn setup(panel: &RnSettingsPanel, appwindow: &RnAppWindow) {
         (gettext("Heading 1"), "<Ctrl><Alt>1"),
         (gettext("Heading 2"), "<Ctrl><Alt>2"),
         (gettext("Normal"), "<Ctrl><Alt>0"),
+        (gettext("Hand (move around the page)"), "<Alt>7"),
         (gettext("Ruler"), "<Ctrl><Alt>r"),
         (gettext("Math mode"), "<Ctrl><Alt>m"),
         (gettext("Show or hide the ribbon"), "<Ctrl>F1"),

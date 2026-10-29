@@ -4074,3 +4074,15 @@ msgstr "Ángulo de la regla"
 
 msgid "You can also turn it by its circle; with Shift, in steps of 15°."
 msgstr "También puedes girarla desde su círculo; con Mayús, de 15° en 15°."
+
+msgid "Hand"
+msgstr "Mano"
+
+msgid "Hand (move around the page)"
+msgstr "Mano (moverse por la página)"
+
+msgid "Vector zoom"
+msgstr "Zoom vectorial"
+
+msgid "Zoom in up to 100 000 % (normally up to 1600 %). Only on screen: the exports do not change."
+msgstr "Acercarse hasta el 100 000 % (normalmente hasta el 1600 %). Solo en pantalla: lo que exportas no cambia."

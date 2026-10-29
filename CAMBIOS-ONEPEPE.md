@@ -509,3 +509,22 @@ Capturas y detalles: [`DISENO.md`](DISENO.md). Cómo probarlo:
    - Pestañas Lienzo y documento / Fondo y renglones / Entrada y lápiz / Atajos / Apariencia.
    - Cambia algo y pulsa «Revertir»: vuelve atrás.
 9. **Barra de estado** (abajo): tamaño de hoja, páginas, guardado y zoom.
+
+## Regla con ángulo libre, más zoom y herramienta de mano (29/10/2026)
+
+1. **Regla:**
+   - Gírala desde su círculo a cualquier ángulo; ya no se pega sola a 0°, 15°, 30°… (con Mayús sí, de 15° en 15°).
+   - En modo infinito el círculo aparece siempre en el centro de lo que ves.
+   - Dibujar → **Ángulo**: escribe el ángulo exacto (por ejemplo 37,5°) o elige 0, 30, 45, 60, 90 o 135°.
+2. **Zoom:**
+   - Ahora va del **5 %** al **1600 %** (antes, del 20 % al 600 %).
+   - Vista → **Zoom vectorial**: permite acercarse hasta el **100 000 %**.
+   - Los trazos se vuelven a dibujar a esa escala, así que siguen nítidos. Solo afecta a la pantalla: lo exportado no
+     cambia.
+   - Muy alejado, la cuadrícula del fondo no se dibuja (las líneas no se distinguirían), solo el color del papel.
+   - Muy cerca, el fondo puede verse algo suave.
+3. **Mano:**
+   - Dibujar → **Mano**, Vista → **Mano**, o **Alt+7**: arrastra con el lápiz o el ratón para moverte por la página
+     sin mantener ninguna tecla.
+   - Para volver a escribir, elige un boli (Ctrl+1…5) o el pincel (Alt+1).
+   - También se puede poner en la barra flotante: «⋮» → Mano.

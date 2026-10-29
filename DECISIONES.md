@@ -248,3 +248,20 @@ Detalle, capturas y contrastes en [`DISENO.md`](DISENO.md).
     escribe por archivo temporal, para no dejar nunca una página a medias.
 - **Ajustes:** se mantienen los ajustes inmediatos de Rnote. «Revertir» vuelve a como estaban al abrirlos o al último
   «Aplicar»; cerrar sin aplicar los deja puestos.
+
+## Regla, zoom y mano (29/10/2026)
+
+- **Regla:** el ángulo es libre por defecto. Antes se pegaba a múltiplos de 15° cuando estaba a menos de 1,5°; ahora
+  eso solo pasa con Mayús.
+  - En modo infinito, al empezar a tocarla, su centro se recoloca en el punto de la regla más cercano al centro de la
+    vista (en múltiplos de 80 px, para que los números no bailen). Así el círculo de giro siempre está a mano.
+- **Zoom:**
+  - Límites del 5 % al 1600 %; con «Zoom vectorial», hasta el 100 000 %. Es un ajuste de la app, no del documento.
+  - Para que funcione sin agotar la memoria:
+    - las imágenes de cada trazo se recortan a la parte visible (también las de cada tramo);
+    - ninguna imagen pasa de 4096 px de lado;
+    - la tesela del fondo tiene la resolución limitada;
+    - muy alejado, la cuadrícula no se dibuja.
+  - El zoom guardado en un `.rnote` puede pasar del 600 %; Rnote lo recorta al abrirlo, no se rompe nada.
+- **Mano:** es la herramienta «desplazar vista» que ya tenía Rnote (dentro de Herramientas), con un botón y el atajo
+  Alt+7, siguiendo a Alt+1…6.
