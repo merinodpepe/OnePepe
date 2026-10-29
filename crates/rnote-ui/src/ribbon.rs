@@ -115,6 +115,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     }
     crate::statusbar::setup(appwindow);
     crate::optionsbar::setup(appwindow);
+    crate::settingslayout::setup(&appwindow.sidebar().settings_panel(), appwindow);
 }
 
 /// Keeps the toggles of the ribbon in sync with the settings (called from the window refresh).

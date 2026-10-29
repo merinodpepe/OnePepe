@@ -493,6 +493,49 @@ window.onepepe .onepepe-add-page {
     font-weight: 600;
 }
 
+/* --- settings: logo on top, flat tabs with an underline, 48 px rows, a fixed bar at the bottom */
+window.onepepe .onepepe-settings-header {
+    padding: 16px 16px 0px 16px;
+    border-bottom: 1px solid @op_stroke_2;
+}
+
+window.onepepe .onepepe-settings-header image {
+    color: @op_brand;
+}
+
+window.onepepe .onepepe-settings-tabs button {
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0px;
+    padding: 8px 8px;
+    color: @op_fg_2;
+    border-bottom: 2px solid transparent;
+    transition: color 150ms ease-out, border-color 150ms ease-out;
+}
+
+window.onepepe .onepepe-settings-tabs button:hover {
+    color: @op_fg_1;
+    background-color: @op_hover;
+}
+
+window.onepepe .onepepe-settings-tabs button:checked {
+    background: none;
+    color: @op_brand;
+    font-weight: 600;
+    border-bottom-color: @op_brand;
+}
+
+window.onepepe .onepepe-settings row {
+    min-height: 48px;
+}
+
+window.onepepe .onepepe-settings-bar {
+    padding: 8px 16px;
+    background-color: @op_bg_surface;
+    border-top: 1px solid @op_stroke_2;
+}
+
 /* --- high contrast: visible borders on the controls */
 window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
 window.onepepe.high-contrast .overlay_toolbar {

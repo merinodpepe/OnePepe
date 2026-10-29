@@ -437,7 +437,7 @@ pub(crate) fn setup(browser: &RnWorkspaceBrowser, appwindow: &RnAppWindow) {
                 (true, true) => (48.0, 64.0, 0.05),
                 (true, false) => (260.0, 320.0, 0.2),
                 // the settings need more room
-                (false, _) => (500.0, 550.0, 0.3),
+                (false, _) => (580.0, 640.0, 0.35),
             };
             split.set_min_sidebar_width(min);
             split.set_max_sidebar_width(max);
