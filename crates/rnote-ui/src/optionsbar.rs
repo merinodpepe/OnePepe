@@ -12,7 +12,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 /// The tools that can be put on the bar: (pen style, icon, name).
-fn tools() -> [(&'static str, &'static str, String); 6] {
+fn tools() -> [(&'static str, &'static str, String); 7] {
     [
         ("brush", "pen-brush-symbolic", gettext("Brush")),
         ("shaper", "pen-shaper-symbolic", gettext("Shaper")),
@@ -24,6 +24,12 @@ fn tools() -> [(&'static str, &'static str, String); 6] {
         ("eraser", "pen-eraser-symbolic", gettext("Eraser")),
         ("selector", "pen-selector-symbolic", gettext("Selector")),
         ("tools", "pen-tools-symbolic", gettext("Tools")),
+        // the hand: to move around the page (a style of the tools)
+        (
+            "hand",
+            "pen-tools-offsetcameratool-symbolic",
+            gettext("Hand"),
+        ),
     ]
 }
 
@@ -102,11 +108,16 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
                 let Some((_, icon, name)) = tools().into_iter().find(|(t, ..)| t == id) else {
                     continue;
                 };
+                let (action, target) = if id == "hand" {
+                    ("win.tool-style", "offsetcamera")
+                } else {
+                    ("win.pen-style", id.as_str())
+                };
                 let button = gtk4::ToggleButton::builder()
                     .icon_name(icon)
                     .tooltip_text(name)
-                    .action_name("win.pen-style")
-                    .action_target(&id.to_variant())
+                    .action_name(action)
+                    .action_target(&target.to_variant())
                     .build();
                 button.add_css_class("flat");
                 button.add_css_class("sidebar_action_button");

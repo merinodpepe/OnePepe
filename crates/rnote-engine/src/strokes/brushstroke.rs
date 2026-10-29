@@ -112,12 +112,20 @@ impl Content for BrushStroke {
                     let mut prev = self.path.start;
                     for seg in self.path.segments.iter() {
                         let seg_path = PenPath::new_w_segments(prev, [*seg]);
+                        // OnePepe: only the part in the view (with a high zoom a whole segment would be a huge
+                        // image)
+                        let Some(seg_bounds) =
+                            seg_path.composed_bounds(options).intersection(&viewport)
+                        else {
+                            prev = seg.end();
+                            continue;
+                        };
                         let image = Image::gen_with_piet(
                             |piet_cx| {
                                 seg_path.draw_composed(piet_cx, options);
                                 Ok(())
                             },
-                            seg_path.composed_bounds(options),
+                            seg_bounds,
                             image_scale,
                         );
                         match image {
@@ -143,12 +151,22 @@ impl Content for BrushStroke {
                     let mut prev = self.path.start;
                     for seg in self.path.segments.iter() {
                         let seg_path = PenPath::new_w_segments(prev, [*seg]);
+                        // OnePepe: only the part in the view (with a high zoom a whole segment would be a huge
+                        // image)
+                        let Some(seg_bounds) =
+                            seg_path.composed_bounds(&options).intersection(&viewport)
+                        else {
+                            // the texture of the next segments must not change
+                            options.advance_seed();
+                            prev = seg.end();
+                            continue;
+                        };
                         let image = Image::gen_with_piet(
                             |piet_cx| {
                                 seg_path.draw_composed(piet_cx, &options);
                                 Ok(())
                             },
-                            seg_path.composed_bounds(&options),
+                            seg_bounds,
                             image_scale,
                         );
                         match image {
@@ -373,5 +391,40 @@ impl BrushStroke {
         };
 
         Ok(image)
+    }
+}
+
+#[cfg(test)]
+mod onepepe_zoom_tests {
+    use super::*;
+    use rnote_compose::{PenPath, Style};
+
+    /// OnePepe: with the vector zoom (up to 1000×) the images of a stroke stay inside the view and can be made.
+    #[test]
+    fn images_at_extreme_zoom() {
+        let mut path = PenPath::new(Element::new(Vector2::new(0.0, 0.0), 0.5));
+        for i in 1..40 {
+            path.segments.push(Segment::LineTo {
+                end: Element::new(Vector2::new(i as f64 * 3.0, (i as f64).sin() * 4.0), 0.5),
+            });
+        }
+        let stroke = BrushStroke::from_penpath(path, Style::default());
+        for zoom in [16.0, 100.0, 1000.0] {
+            for cx in [0.0, 10.0, 30.0, 55.0, 110.0] {
+                let half = Vector2::new(800.0, 450.0) / zoom;
+                let c = Vector2::new(cx, 0.0);
+                let viewport = Aabb::new(c - half * 1.6, c + half * 1.6);
+                let images = match stroke.gen_images(viewport, zoom).unwrap() {
+                    GeneratedContentImages::Full(images) => images,
+                    GeneratedContentImages::Partial { images, .. } => images,
+                };
+                if viewport.intersects(&stroke.bounds()) {
+                    assert!(!images.is_empty(), "zoom {zoom}, x {cx}: no images");
+                }
+                for image in images {
+                    assert!(image.pixel_width <= 4096 && image.pixel_height <= 4096);
+                }
+            }
+        }
     }
 }

@@ -380,7 +380,7 @@ mod imp {
                             old_zoom * (1.0 / (1.0 + dy * RnCanvas::ZOOM_SCROLL_STEP))
                         };
 
-                        if (Camera::ZOOM_MIN..=Camera::ZOOM_MAX).contains(&new_zoom) {
+                        if (Camera::ZOOM_MIN..=Camera::zoom_max()).contains(&new_zoom) {
                             let camera_offset = canvas.engine_ref().camera.offset();
                             let camera_size = canvas.engine_ref().camera.size();
                             let screen_offset = canvaswrapper
@@ -577,7 +577,7 @@ mod imp {
                     move |gesture, scale| {
                         let canvas = canvaswrapper.canvas();
 
-                        if (Camera::ZOOM_MIN..=Camera::ZOOM_MAX)
+                        if (Camera::ZOOM_MIN..=Camera::zoom_max())
                             .contains(&(zoom_begin.get() * scale))
                         {
                             new_zoom.set(zoom_begin.get() * scale);
@@ -782,7 +782,7 @@ mod imp {
                                     - (new_offset[1] - prev_offset.get()[1])
                                         * Camera::DRAG_ZOOM_MAGN_ZOOM_FACTOR);
 
-                            if (Camera::ZOOM_MIN..=Camera::ZOOM_MAX).contains(&new_zoom) {
+                            if (Camera::ZOOM_MIN..=Camera::zoom_max()).contains(&new_zoom) {
                                 let viewport_center = canvas.engine_ref().camera.viewport_center();
 
                                 let mut widget_flags = canvas.engine_mut().zoom_w_timeout(new_zoom);

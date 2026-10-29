@@ -805,6 +805,13 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     s("laser"),
                 )
                 .upcast(),
+                big_button(
+                    "pen-tools-offsetcameratool-symbolic",
+                    &gettext("Hand"),
+                    "win.tool-style",
+                    s("offsetcamera"),
+                )
+                .upcast(),
             ],
         ),
         group(&gettext("Colors"), &[colors_in_ribbon(appwindow).upcast()]),
@@ -896,6 +903,26 @@ fn view_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     &gettext("Page width"),
                     "win.zoom-fit-width",
                     None,
+                )
+                .upcast(),
+                {
+                    let toggle = big_toggle(
+                        "zoom-original-symbolic",
+                        &gettext("Vector zoom"),
+                        "win.vector-zoom",
+                        None,
+                    );
+                    toggle.set_tooltip_text(Some(&gettext(
+                        "Zoom in up to 100 000 % (normally up to 1600 %). Only on screen: the exports do not change.",
+                    )));
+                    toggle
+                }
+                .upcast(),
+                big_button(
+                    "pen-tools-offsetcameratool-symbolic",
+                    &gettext("Hand"),
+                    "win.tool-style",
+                    s("offsetcamera"),
                 )
                 .upcast(),
             ],
@@ -1296,6 +1323,47 @@ fn setup_actions(appwindow: &RnAppWindow) {
         }
     ));
     appwindow.add_action(&action_guides);
+    // OnePepe: vector zoom, up to 100 000 % (only on screen); without it, up to 1600 %
+    rnote_engine::Camera::set_vector_zoom(crate::prefs::get_bool("zoom-vectorial", false));
+    let action_vector_zoom = gio::SimpleAction::new_stateful(
+        "vector-zoom",
+        None,
+        &rnote_engine::Camera::vector_zoom().to_variant(),
+    );
+    action_vector_zoom.connect_activate(clone!(
+        #[weak]
+        appwindow,
+        move |action, _| {
+            let on = !rnote_engine::Camera::vector_zoom();
+            rnote_engine::Camera::set_vector_zoom(on);
+            crate::prefs::set("zoom-vectorial", on.into());
+            action.set_state(&on.to_variant());
+            if on {
+                return;
+            }
+            // back to the normal limit
+            for page in appwindow.tabs_snapshot() {
+                let Some(wrapper) = page
+                    .child()
+                    .downcast_ref::<crate::RnCanvasWrapper>()
+                    .cloned()
+                else {
+                    continue;
+                };
+                let canvas = wrapper.canvas();
+                if canvas.engine_ref().camera.zoom() <= rnote_engine::Camera::ZOOM_MAX {
+                    continue;
+                }
+                let center = canvas.engine_ref().camera.viewport_center();
+                let mut widget_flags = canvas
+                    .engine_mut()
+                    .zoom_w_timeout(rnote_engine::Camera::ZOOM_MAX);
+                widget_flags |= canvas.engine_mut().camera.set_viewport_center(center);
+                appwindow.handle_widget_flags(widget_flags, &canvas);
+            }
+        }
+    ));
+    appwindow.add_action(&action_vector_zoom);
     // the infinite ruler: a line across the whole canvas (kept in the hidden file of the page)
     let action_ruler_infinite =
         gio::SimpleAction::new_stateful("ruler-infinite", None, &false.to_variant());
@@ -1460,6 +1528,10 @@ fn setup_actions(appwindow: &RnAppWindow) {
     appwindow
         .app()
         .set_accels_for_action("win.ribbon", &["<Ctrl>F1"]);
+    // the hand, to move around the page without holding a key (next to the tools, Alt+1…Alt+6)
+    appwindow
+        .app()
+        .set_accels_for_action("win.tool-style::offsetcamera", &["<Alt>7", "<Alt>KP_7"]);
 }
 
 /// Exports the drawing as PDF on pages of the page size, shrunk to fit, and warns when the text gets small.

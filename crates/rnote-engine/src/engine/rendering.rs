@@ -24,7 +24,15 @@ impl Engine {
             let viewport = self.camera.viewport();
             let mut rendernodes: Vec<gsk::RenderNode> = vec![];
 
-            if let Some(image) = &self.background_tile_image {
+            // OnePepe: zoomed far out the lines are too close to see, and thousands of tiles slow everything
+            // down: then only the paper color is drawn
+            let tiles = viewport.extents() / self.document.config.background.tile_size();
+            let too_many_tiles = tiles.x * tiles.y > 4000.0;
+            if let Some(image) = self
+                .background_tile_image
+                .as_ref()
+                .filter(|_| !too_many_tiles)
+            {
                 // Only create the texture once, it is expensive
                 let new_texture = match image.to_memtexture() {
                     Ok(t) => t,
@@ -127,8 +135,10 @@ impl Engine {
     /// Regenerate the background tile image, origin indicator and updates the background rendering.
     pub fn background_rendering_regenerate(&mut self) -> WidgetFlags {
         let mut widget_flags = WidgetFlags::default();
-        let image_scale = self.camera.image_scale();
         let scale_factor = self.camera.scale_factor();
+        // OnePepe: with a very high zoom the tile image would be huge; it is capped (the lines get a little soft)
+        let tile_extent = self.document.config.background.tile_size().max_element();
+        let image_scale = self.camera.image_scale().min(4096.0 / tile_extent.max(1.0));
 
         match self.document.config.background.gen_tile_image(image_scale) {
             Ok(image) => {
