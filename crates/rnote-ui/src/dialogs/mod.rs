@@ -30,7 +30,7 @@ pub(crate) fn dialog_about(appwindow: &RnAppWindow) {
     let aboutdialog = adw::AboutDialog::builder()
         .application_name(config::APP_NAME_CAPITALIZED)
         .application_icon(app_icon_name)
-        .comments(gettext("Sketch and take handwritten notes"))
+        .comments(gettext("Handwritten notes and math for studying science"))
         .website(config::APP_WEBSITE)
         .issue_url(config::APP_ISSUES_URL)
         .support_url(config::APP_SUPPORT_URL)

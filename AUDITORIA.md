@@ -1,6 +1,6 @@
 # Auditoría de Rnote para OnePepe
 
-Base: rama `main` del fork (Rnote 0.15.0, commit `6bbc9b2`). Fecha: 2026-10-26.
+Base: el Rnote original (Rnote 0.15.0, commit `6bbc9b2`, hoy en la rama `rnote-original`). Fecha: 2026-10-26.
 Leyenda: **existe** / **parcial** / **no existe**. Las rutas son las que he leído; lo que no he comprobado lo indico.
 
 ## Compilación en este entorno (nube, Ubuntu 24.04, sin pantalla)

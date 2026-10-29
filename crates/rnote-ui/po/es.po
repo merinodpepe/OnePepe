@@ -21,26 +21,38 @@ msgstr ""
 #: crates/rnote-ui/data/app.desktop.in.in:4
 #: crates/rnote-ui/data/app.metainfo.xml.in.in:9
 #: crates/rnote-ui/src/dialogs/mod.rs:33
-msgid "Sketch and take handwritten notes"
-msgstr "Dibujar y tomar notas a mano"
+msgid "Handwritten notes and math for studying science"
+msgstr "Apuntes a mano y matemáticas para estudiar ciencias"
 
 #. Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
 #: crates/rnote-ui/data/app.desktop.in.in:14
-msgid "Gnome;GTK;Office;Graphics;Notes;"
-msgstr "Gnome;GTK;Office;Graphics;Notes;Oficina;Gráficos;Notas;"
+msgid "OnePepe;Notes;Handwriting;Math;Notebook;Office;"
+msgstr "OnePepe;Notes;Handwriting;Math;Notebook;Office;Apuntes;Notas;Matemáticas;Cuaderno;Oficina;"
 
 #: crates/rnote-ui/data/app.desktop.in.in:19
 #: crates/rnote-ui/data/ui/shortcuts.ui:20
 msgid "New Window"
 msgstr "Ventana nueva"
 
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:21
-msgid ""
-"Rnote is a vector-based drawing app for sketching, handwritten notes and to "
-"annotate documents and pictures."
-msgstr ""
-"Rnote es una aplicación de dibujo basada en vectores para hacer bocetos, "
-"notas manuscritas y para anotar documentos e imágenes."
+#: crates/rnote-ui/data/app.metainfo.xml.in.in
+msgid "Notebooks, ribbon and ink"
+msgstr "Cuadernos, cinta y tinta"
+
+#: crates/rnote-ui/data/app.metainfo.xml.in.in
+msgid "Dark mode"
+msgstr "Modo oscuro"
+
+#: crates/rnote-ui/data/app.metainfo.xml.in.in
+msgid "Infinite ruler with free angle"
+msgstr "Regla infinita con ángulo libre"
+
+#: crates/rnote-ui/data/app.metainfo.xml.in.in
+msgid "Lined pages with a margin"
+msgstr "Hojas con renglones y margen"
+
+#: crates/rnote-ui/data/app.metainfo.xml.in.in
+msgid "Appearance settings"
+msgstr "Ajustes de apariencia"
 
 #: crates/rnote-ui/data/app.metainfo.xml.in.in:25
 msgid ""
@@ -49,34 +61,6 @@ msgid ""
 msgstr ""
 "Advertencia: El formato de los archivos es todavía inestable. Podría cambiar "
 "y romper la compatibilidad entre versiones."
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:35
-msgid "An overview"
-msgstr "Panorama general"
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:40
-msgid "A selection"
-msgstr "Una selección"
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:45
-msgid "Write text with the typewriter"
-msgstr "Escribir el texto a máquina de escribir"
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:50
-msgid "Hide toolbars with the focus mode"
-msgstr "Ocultar las barras de herramientas con el modo de enfoque"
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:55
-msgid "Quickly access files through workspace"
-msgstr "Acceso rápido a los archivos a través del espacio de trabajo"
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:60
-msgid "Adjust document settings"
-msgstr "Ajustar la configuración del documento"
-
-#: crates/rnote-ui/data/app.metainfo.xml.in.in:65
-msgid "Configure action shortcuts"
-msgstr "Configurar los atajos para las acciones"
 
 #: crates/rnote-ui/data/ui/dialogs/dialogs.ui:5
 #: crates/rnote-ui/data/ui/shortcuts.ui:191
@@ -1143,14 +1127,6 @@ msgstr "Con_figuración"
 #: crates/rnote-ui/data/ui/appmenu.ui:134
 msgid "_Keyboard Shortcuts"
 msgstr "Atajos del _teclado"
-
-#: crates/rnote-ui/data/ui/appmenu.ui:138
-msgid "_Donate 💝"
-msgstr "_Donar 💝"
-
-#: crates/rnote-ui/data/ui/appmenu.ui:142
-msgid "A_bout Rnote"
-msgstr "A_cerca de Rnote"
 
 #: crates/rnote-ui/data/ui/appmenu.ui:173
 msgid "Sidebar on the Left Side"

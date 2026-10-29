@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-29 (diseño nuevo según tu guía; detalle y capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe` (creada desde `main`, que no se ha tocado).
+Actualizado: 2026-10-29 (diseño nuevo según tu guía; detalle y capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
@@ -84,6 +84,12 @@ Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas e
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
 
 ## Qué necesito de ti
+
+**De `main` = OnePepe (29/10/2026):**
+
+- Si la portada de GitHub no muestra OnePepe: **Settings → General → Default branch** → `main`.
+- El Rnote original sigue en la rama `rnote-original`. Para actualizar tu copia:
+  `git fetch origin && git checkout main && git pull`.
 
 **Del diseño nuevo (29/10/2026), cuando lo instales:**
 
