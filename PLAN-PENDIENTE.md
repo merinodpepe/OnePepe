@@ -124,6 +124,33 @@ de una vez como con el «=» añadido después. Pero no sale en estos casos:
 - Si no se puede calcular, mostrar un «?» gris tras el «=». Al tocarlo, explica qué ha leído (el LaTeX), para ver
   qué símbolo corregir.
 
+**7. Funciones (ln, log, sin, cos, exp…): se detectan, con fallos.** Las letras seguidas se unen en función
+(`FUNCTIONS` en `tools/onepepe-math/onepepe_math/layout.py`: sin, cos, tan, cot, sec, csc, sinh, cosh, tanh,
+arcsin, arccos, arctan, ln, log, exp, lim, max, min, det).
+
+Probado el 2026-10-30 con símbolos ya reconocidos:
+
+| Escrito | Sale | ¿Bien? |
+|---|---|---|
+| `ln(1)=` | 0 | sí |
+| `log(100)=` | 2 | sí |
+| `sin(0)=` | 0 | sí |
+| `exp(0)=` | 1 | sí |
+| `ln 2=` | «log(2) ≈ 0,6931» | el valor sí, pero escribe «log» en vez de «ln» (así lo imprime SymPy) |
+| `sin x=` | nada | no: la x sin paréntesis se toma como subíndice (`\sin_{x}`) |
+| `log₂(8)=` | 0,9031 | **no**: ignora la base y calcula log₁₀ 8 (debería dar 3) |
+| `ln` con la «l» leída como «1» | «n» | **no**, y sin avisar: `1n(1)` se toma como 1·n·1 |
+
+**Arreglos propuestos:**
+- El argumento sin paréntesis (`sin x`, `ln x`, `log 8`) es argumento, no subíndice. Tras una función, solo es
+  subíndice lo que queda claramente por debajo de la línea base (la base de `log`).
+- `log_b(x)` → `log(x, b)` en `evaluate.py`.
+- Mostrar `ln` en el resultado, no `log`. En español, `log` sin base es log₁₀ (ya es así).
+- Unión tolerante: si «1» o «|» va seguido de `n` o de `og`, y «l» está entre sus candidatas, se une como `ln` o
+  `log`. Igual con `0`/`o` en `cos` y `log`.
+- Faltan: `sen` (seno en español), `tg` y `arcsen`, `arctg`. También `\sqrt[n]{}` con índice, si no está.
+- **Tests en Python** con cada fila de la tabla.
+
 **5. Escribir tú qué símbolo es cuando no sale ni entre las opciones.**
 - **Hoy:** la ventanita de candidatas (`show_candidates` en `crates/rnote-ui/src/mathhelper.rs`) solo ofrece las 8
   primeras, «Unir» y «Separar».
@@ -318,7 +345,7 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 
 ## Orden de prioridad
 
-0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y donde has borrado, zoom, reconocer lo ya escrito, i/j, escribir tú el símbolo y el resultado del «=»).
+0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y donde has borrado, zoom, reconocer lo ya escrito, i/j, escribir tú el símbolo, el resultado del «=» y las funciones ln/log/sin).
 1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
 5) ideas para más adelante.
 
