@@ -265,3 +265,11 @@ Detalle, capturas y contrastes en [`DISENO.md`](DISENO.md).
   - El zoom guardado en un `.rnote` puede pasar del 600 %; Rnote lo recorta al abrirlo, no se rompe nada.
 - **Mano:** es la herramienta «desplazar vista» que ya tenía Rnote (dentro de Herramientas), con un botón y el atajo
   Alt+7, siguiendo a Alt+1…6.
+
+## Flechas y «;» en matemáticas (29/10/2026)
+
+- `→ ⇒ ⇔ ;` separan pasos o expresiones. Para el resultado del «=» solo cuenta el último paso: si es solo una letra
+  (`→ x =`), se despeja esa letra de la ecuación anterior.
+- No se comprueba todavía si cada paso se sigue del anterior. Sería posible con SymPy y queda como idea en
+  `PLAN-PENDIENTE.md`.
+- `⟶` es la misma flecha que `→` (alias), y `⟹` la misma que `⇒`.

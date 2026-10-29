@@ -227,6 +227,37 @@ mete los «trozos» en esa clase. Con la letra de otras personas no empeora: top
 
 **5. Varias hipótesis de corte:** queda para más adelante (ver `PLAN-PENDIENTE.md`).
 
+### 0.7 Flechas y punto y coma: pasos de un desarrollo (2026-10-29)
+
+**Qué cambia:**
+- `;`, `:`, `→`, `⇒` y `⇔` entran en el vocabulario básico. El modelo ya los conocía, pero solo `→` estaba permitido.
+- `⟶` cuenta como `→`: el modelo los tenía como dos clases y ahora suman su probabilidad.
+- Se dibujan limpios: `⇒` y `⇔` están dibujados a mano, porque no vienen en la fuente Hershey.
+
+**Las flechas y el `;` separan pasos o expresiones; no son un «=».** Para el resultado del «=» solo cuenta lo último:
+
+| Escribes | Resultado |
+|---|---|
+| `2x+4=10 → x =` | x = 3 (como `2x+4=10, x =`) |
+| `2x+4=10 ⇒ 2x=6 =` | x = 3 (el último paso) |
+| `3+4 → 7+1 =` | 8 |
+| `2x=8; x =` | x = 4 |
+| `2x=6 → x=3` (sin «=» al final) | nada |
+
+**Medido en los ejemplos reservados de MathWriting** (muestras pequeñas):
+
+| Símbolo | Aciertos |
+|---|---|
+| `→` | 10/10 |
+| `⇒` | 5/5 |
+| `⇔` | 9/9 |
+| `:` | 2/2 |
+| `;` | 2/4 (se confunde con «j») |
+
+El resto de símbolos no empeora: 559 frente a 560 de 842 aciertos.
+
+Con tu letra, corrige el `;` las primeras veces (o escríbelo en `mis_simbolos.rnote`) y lo aprenderá.
+
 ## 1. Resumen (del primer entregable; el cambio de plan está en la sección 0)
 
 - **Arquitectura:** un programa auxiliar en Python (`onepepe-math`) que Rnote lanza **una vez** y mantiene abierto,

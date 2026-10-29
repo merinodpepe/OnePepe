@@ -95,6 +95,9 @@ Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`
     - Después, la prueba con lápiz.
   - **Esfuerzo:** medio.
 
+- Idea: en un desarrollo con flechas (`2x+4=10 → 2x=6 → x=3`), comprobar con SymPy que cada paso se sigue del
+  anterior y marcar en gris el paso que no.
+
 ## 3. Que la aplicación se llame OnePepe por dentro
 
 Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue mostrando "Rnote": título de la ventana,

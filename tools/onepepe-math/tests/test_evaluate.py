@@ -52,6 +52,22 @@ class TestAnswer(unittest.TestCase):
         r = self.text(row(sup("x", "2"), "-", "5", "x", "+", "6", "=", "0", "="))
         self.assertEqual(r, "x = 2, x = 3")
 
+    def test_steps_with_arrows_are_not_equals(self):
+        # 2x+4=10 → x =   (la flecha separa pasos: se despeja x de la ecuación de antes)
+        self.assertEqual(
+            self.text(row("2", "x", "+", "4", "=", "1", "0", r"\rightarrow", "x", "=")), "x = 3"
+        )
+        # 2x+4=10 ⇒ 2x=6 =   (solo cuenta el último paso)
+        self.assertEqual(
+            self.text(row("2", "x", "+", "4", "=", "1", "0", r"\Rightarrow", "2", "x", "=", "6", "=")), "x = 3"
+        )
+        # 3+4 → 7 =  : el valor del último paso, no "3+4 = 7"
+        self.assertEqual(self.text(row("3", "+", "4", r"\rightarrow", "7", "+", "1", "=")), "8")
+        # x=1; y+x=  ";" separa expresiones
+        self.assertEqual(self.text(row("2", "x", "=", "8", ";", "x", "=")), "x = 4")
+        # un desarrollo sin "=" al final no da resultado (nada que calcular)
+        self.assertIsNone(self.text(row("2", "x", "=", "6", r"\rightarrow", "x", "=", "3")))
+
     def test_simplify(self):
         self.assertEqual(self.text(row("2", "a", "+", "3", "a", "-", "b", "=")), "5*a - b")
         # ya simplificado: nada
@@ -113,3 +129,16 @@ class TestLayout(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestStepSymbols(unittest.TestCase):
+    def test_arrows_and_semicolon_are_known_and_drawn(self):
+        from onepepe_math.glyphs import place_glyph
+        from onepepe_math.symbols import CORE, normalize_label
+
+        for s in [";", ":", r"\rightarrow", r"\Rightarrow", r"\Leftrightarrow"]:
+            self.assertIn(s, CORE)
+        self.assertEqual(normalize_label(r"\longrightarrow"), r"\rightarrow")
+        for s in [";", r"\rightarrow", r"\Rightarrow", r"\Leftrightarrow"]:
+            lines = place_glyph(s, (0.0, 0.0, 40.0, 20.0))
+            self.assertTrue(lines, s)

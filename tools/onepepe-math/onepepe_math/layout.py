@@ -130,7 +130,8 @@ def _node(s):
 FUNCTIONS = ["sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "arcsin", "arccos", "arctan",
              "ln", "log", "exp", "lim", "max", "min", "det"]
 # no pueden ser exponente ni subíndice por sí solos
-_NEVER_SCRIPT = {",", ".", "=", "<", ">", r"\leq", r"\geq", r"\neq", r"\approx", r"\rightarrow"}
+_NEVER_SCRIPT = {",", ".", "=", "<", ">", r"\leq", r"\geq", r"\neq", r"\approx", r"\rightarrow", r"\Rightarrow",
+                 r"\Leftrightarrow", ";", ":"}
 
 
 def _merge_functions(syms, typical):

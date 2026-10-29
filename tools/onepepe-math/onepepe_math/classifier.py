@@ -40,8 +40,12 @@ class SymbolClassifier:
             from .symbols import CORE
 
             vocabulary = CORE
+        from .symbols import normalize_label
+
         allowed = set(vocabulary) | {JUNK}
-        self.mask = np.array([c in allowed for c in self.classes])
+        # una clase con otro nombre para el mismo símbolo (\longrightarrow = \rightarrow) cuenta como él
+        self.labels = [normalize_label(c) if c != JUNK else c for c in self.classes]
+        self.mask = np.array([label in allowed for label in self.labels])
         self.lm = None
         if "lm_vocab" in data:
             from .context import BigramModel
@@ -88,5 +92,10 @@ class SymbolClassifier:
         """(candidatas sin "trozo", probabilidad de que el grupo sea un trozo y no un símbolo)."""
         p = self.probabilities(strokes)
         junk = float(p[self.classes.index(JUNK)]) if JUNK in self.classes else 0.0
-        idx = [i for i in np.argsort(-p) if self.classes[i] != JUNK and self.mask[i]][:k]
-        return [(self.classes[i], float(p[i])) for i in idx], junk
+        # las clases que son el mismo símbolo suman su probabilidad
+        merged = {}
+        for i in np.flatnonzero(self.mask):
+            if self.classes[i] != JUNK:
+                merged[self.labels[i]] = merged.get(self.labels[i], 0.0) + float(p[i])
+        best = sorted(merged.items(), key=lambda x: -x[1])[:k]
+        return best, junk

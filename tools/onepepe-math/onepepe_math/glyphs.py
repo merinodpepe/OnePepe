@@ -39,6 +39,19 @@ _MANUAL = {
         [(0.0, 0.70), (0.15, 0.60), (0.35, 0.60), (0.5, 0.70), (0.65, 0.80), (0.85, 0.80), (1.0, 0.70)],
     ],
     r"\sim": [[(0.0, 0.55), (0.15, 0.45), (0.35, 0.45), (0.5, 0.55), (0.65, 0.65), (0.85, 0.65), (1.0, 0.55)]],
+    # flecha doble ⇒ (dos rayas y una punta)
+    r"\Rightarrow": [
+        [(0.0, 0.40), (0.85, 0.40)],
+        [(0.0, 0.60), (0.85, 0.60)],
+        [(0.70, 0.20), (1.0, 0.50), (0.70, 0.80)],
+    ],
+    # flecha doble con dos puntas ⇔
+    r"\Leftrightarrow": [
+        [(0.15, 0.40), (0.85, 0.40)],
+        [(0.15, 0.60), (0.85, 0.60)],
+        [(0.30, 0.20), (0.0, 0.50), (0.30, 0.80)],
+        [(0.70, 0.20), (1.0, 0.50), (0.70, 0.80)],
+    ],
 }
 
 
@@ -101,7 +114,7 @@ def _bounds(lines):
 
 
 # símbolos que son casi líneas horizontales: se ajustan por su anchura y no por su altura
-_FLAT = {"-", "=", r"\sim", r"\approx", r"\equiv", r"\rightarrow", r"\leftarrow"}
+_FLAT = {"-", "=", r"\sim", r"\approx", r"\equiv", r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\Leftrightarrow"}
 
 
 def place_glyph(latex, target_box):

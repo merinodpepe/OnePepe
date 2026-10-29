@@ -528,3 +528,14 @@ Capturas y detalles: [`DISENO.md`](DISENO.md). Cómo probarlo:
      sin mantener ninguna tecla.
    - Para volver a escribir, elige un boli (Ctrl+1…5) o el pincel (Alt+1).
    - También se puede poner en la barra flotante: «⋮» → Mano.
+
+## Matemáticas: flechas y punto y coma (29/10/2026)
+
+En modo matemáticas, `→`, `⇒`, `⇔` y `;` se reconocen y se dibujan limpios. Para la calculadora son «paso
+siguiente», no «=».
+
+Escribe `2x+4=10 → x =`: debe salir `x = 3`. Un desarrollo como `2x+4=10 → 2x=6 → x=3`, sin «=» al final, no calcula
+nada.
+
+Más ejemplos en `MATEMATICAS-INFORME.md`, sección 0.7. Si el `;` sale como «j», corrígelo: aprende de tus
+correcciones.

@@ -15,7 +15,7 @@ con un analizador propio. Comportamiento (ver MATEMATICAS-INFORME.md, sección 0
 import sympy as sp
 
 from .latex_tokens import visible_tokens
-from .symbols import GREEK
+from .symbols import GREEK, STEP_SEPARATORS
 
 GREEK_NAMES = {g: g[1:] for g in GREEK}
 FUNCS = {
@@ -336,7 +336,9 @@ def _answer(tree, glossary, units):
     if not tokens or not (tokens[-1][0] == "sym" and tokens[-1][1] == "=" and tokens[-1][2] is None):
         return None
     tokens = tokens[:-1]
-    statements = [s for s, _ in _split(tokens, {","})]
+    # las comas, los ";" y las flechas separan expresiones o pasos: solo cuenta lo último ("2x+4=10 → x =" despeja x
+    # de la ecuación de antes, como "2x+4=10, x =")
+    statements = [s for s, _ in _split(tokens, {","} | STEP_SEPARATORS)]
     last = statements[-1]
     # "ecuación, x ="
     if len(statements) >= 2 and len(last) == 1 and last[0][0] == "sym":
