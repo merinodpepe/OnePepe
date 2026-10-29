@@ -62,6 +62,27 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
   - o enviar los puntos crudos del lápiz.
 - **Mientras tanto:** escribe con un zoom moderado (100–200 %).
 
+**3. Reconocer lo que ya escribiste fuera del modo matemáticas (no existe todavía).**
+- **Hoy:** solo se reconocen los trazos escritos con el modo matemáticas activo (`math_after_pen_event` en
+  `crates/rnote-engine/src/engine/math.rs`). Activar el modo después no hace nada con lo ya escrito.
+- **Propuesta:** un botón **«Reconocer selección»** en la pestaña Matemáticas, también en el menú de la selección.
+  - Seleccionas con el lazo lo escrito y lo pulsas.
+- **Motor** (`math.rs`), una función nueva `math_queue_strokes(keys)`:
+  - toma los trazos de pincel seleccionados que no sean ya símbolos;
+  - los agrupa en renglones por su altura (bandas de y que se solapan; el reconocedor trabaja línea a línea);
+  - los mete en la cola `pending`, un renglón por petición.
+  - Esos trazos no tienen tiempos: se envía `times: null` y el corte usa solo la forma, como en los archivos viejos.
+- **Interfaz** (`crates/rnote-ui/src/mathhelper.rs`):
+  - la acción `win.math-recognize-selection` llama a `recognize_now` una vez por renglón;
+  - activa el modo matemáticas si no lo estaba, para que se vean el borde y los toques.
+- **Resultado:** lo reconocido con confianza se sustituye por símbolos limpios, igual que al escribir. Ctrl+Z
+  devuelve la tinta original. Lo dudoso se queda como estaba y se puede tocar para corregirlo.
+- **Tests:**
+  - en Rust, dos renglones seleccionados → dos peticiones con sus trazos; los trazos que ya eran símbolos no se
+    repiten;
+  - prueba en la app de la nube con un `.rnote` escrito sin el modo.
+- **Esfuerzo:** bajo-medio (reutiliza todo el camino actual).
+
 Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`):
 
 - ~~Recibir `mis_expresiones_1.rnote`~~: recibido y medido (`MATEMATICAS-INFORME.md`, sección 0.5). Falta
@@ -232,7 +253,7 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 
 ## Orden de prioridad
 
-0) Antes que nada: los dos problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y zoom).
+0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos, zoom y reconocer lo ya escrito).
 1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
 5) ideas para más adelante.
 
