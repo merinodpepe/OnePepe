@@ -110,6 +110,30 @@ Nada se ha ejecutado todavía en la aplicación ni probado con lápiz real. Segu
      calcula ya `layout.py`) e i si no.
   3. Tus correcciones (kNN) y reentrenar mejoran tu letra en concreto.
 
+**5. Escribir tú qué símbolo es cuando no sale ni entre las opciones.**
+- **Hoy:** la ventanita de candidatas (`show_candidates` en `crates/rnote-ui/src/mathhelper.rs`) solo ofrece las 8
+  primeras, «Unir» y «Separar».
+- **Propuesta:** debajo, un campo **«Otro…»**:
+  - **Búsqueda por nombre**, en español o en LaTeX y sin barra (`delta`, `alfa`/`alpha`, `sumatorio`, `integral`,
+    `flecha`, `distinto`, `menor o igual`, `infinito`…), con sugerencias mientras escribes.
+  - También se puede **teclear el carácter** (`δ`, `≤`) **o el LaTeX** (`\delta`).
+  - **Atajos cortos** para lo difícil de teclear, mostrados al lado de cada símbolo: `\d` → δ, `\D` → Δ, `\a` → α,
+    `\b` → β, `\l` → λ, `\p` → π, `\s` → σ, `\S` → Σ, `->` → →, `=>` → ⇒, `<=` → ≤, `>=` → ≥, `!=` → ≠,
+    `inf` → ∞.
+  - **Una rejilla plegable** con los símbolos difíciles por grupos (griego, operadores, flechas, relaciones), para
+    elegir con el lápiz sin teclado.
+- **Por dentro:**
+  - La corrección se envía como hoy (`math_correction_requests` → orden `correct`).
+  - El kNN personal ya acepta etiquetas que el modelo no tiene, así que desde entonces lo puede proponer.
+  - El símbolo limpio sale si hay glifo en `glyphs.py` (griego completo y casi todos los operadores); si no, se
+    queda tu tinta.
+  - Los nombres y atajos van en un archivo nuevo, `tools/onepepe-math/onepepe_math/nombres.py`, que el programa
+    auxiliar envía con una orden nueva, `names`, para no duplicarlos en la app.
+- **Tests:**
+  - en Python, «delta», «\d» y «δ» dan `\delta`;
+  - en Rust, una corrección con una etiqueta fuera de las candidatas se aplica.
+- **Esfuerzo:** medio.
+
 **6. El resultado del «=» no sale en casos normales.** Probado en la nube el 2026-10-30: «2+3=» da 5, tanto escrito
 de una vez como con el «=» añadido después. Pero no sale en estos casos:
 - **Lo escrito antes de activar la opción:** no se recalcula. Solo cuenta lo que escribes después.
@@ -151,31 +175,22 @@ Probado el 2026-10-30 con símbolos ya reconocidos:
 - Faltan: `sen` (seno en español), `tg` y `arcsen`, `arctg`. También `\sqrt[n]{}` con índice, si no está.
 - **Tests en Python** con cada fila de la tabla.
 
-**5. Escribir tú qué símbolo es cuando no sale ni entre las opciones.**
-- **Hoy:** la ventanita de candidatas (`show_candidates` en `crates/rnote-ui/src/mathhelper.rs`) solo ofrece las 8
-  primeras, «Unir» y «Separar».
-- **Propuesta:** debajo, un campo **«Otro…»**:
-  - **Búsqueda por nombre**, en español o en LaTeX y sin barra (`delta`, `alfa`/`alpha`, `sumatorio`, `integral`,
-    `flecha`, `distinto`, `menor o igual`, `infinito`…), con sugerencias mientras escribes.
-  - También se puede **teclear el carácter** (`δ`, `≤`) **o el LaTeX** (`\delta`).
-  - **Atajos cortos** para lo difícil de teclear, mostrados al lado de cada símbolo: `\d` → δ, `\D` → Δ, `\a` → α,
-    `\b` → β, `\l` → λ, `\p` → π, `\s` → σ, `\S` → Σ, `->` → →, `=>` → ⇒, `<=` → ≤, `>=` → ≥, `!=` → ≠,
-    `inf` → ∞.
-  - **Una rejilla plegable** con los símbolos difíciles por grupos (griego, operadores, flechas, relaciones), para
-    elegir con el lápiz sin teclado.
-- **Por dentro:**
-  - La corrección se envía como hoy (`math_correction_requests` → orden `correct`).
-  - El kNN personal ya acepta etiquetas que el modelo no tiene, así que desde entonces lo puede proponer.
-  - El símbolo limpio sale si hay glifo en `glyphs.py` (griego completo y casi todos los operadores); si no, se
-    queda tu tinta.
-  - Los nombres y atajos van en un archivo nuevo, `tools/onepepe-math/onepepe_math/nombres.py`, que el programa
-    auxiliar envía con una orden nueva, `names`, para no duplicarlos en la app.
-- **Tests:**
-  - en Python, «delta», «\d» y «δ» dan `\delta`;
-  - en Rust, una corrección con una etiqueta fuera de las candidatas se aplica.
-- **Esfuerzo:** medio.
+**8. Cuánto escribir para entrenar con tu letra.**
+- **Recomendación:**
+  - unas **80 expresiones variadas** (cerca de 1 hora), de una lista que te preparo yo para cubrir todos tus
+    símbolos;
+  - más una **página de símbolos sueltos**: unos 20 de cada símbolo difícil (i, j, δ, ∫, x/×, 1/l, 0/o…).
+- **Por qué:** cuentan los ejemplos de cada símbolo (10–20 bastan para aprender tu forma), no el número de
+  expresiones. Con unos 40 símbolos frecuentes salen 400–800 apariciones, unas 60–100 expresiones. A partir de ahí,
+  repetir lo mismo ayuda poco; ayudan los símbolos raros.
+- **Medida actual:** de 0 a 15 expresiones, los símbolos bien pasan del 44 % al 56 % y las sustituciones correctas
+  del 68 % al 88 % (`MATEMATICAS-INFORME.md` 0.6). Todavía no se sabe cómo sigue la curva.
+- **Después:** reentrenar y medir con una parte reservada. Si al pasar de 40 a 80 expresiones aún mejora bastante,
+  merece la pena seguir.
+- **Mejor en varias sesiones cortas** que de golpe, y al tamaño y con el zoom de siempre.
+- **Pendiente mío:** preparar la lista de expresiones y de símbolos cuando me digas tus asignaturas.
 
-Bloqueado hasta tener tus datos (instrucciones en `tools/onepepe-math/README.md`):
+### Con tus datos (instrucciones en `tools/onepepe-math/README.md`)
 
 - ~~Recibir `mis_expresiones_1.rnote`~~: recibido y medido (`MATEMATICAS-INFORME.md`, sección 0.5). Falta
   `mis_simbolos.rnote` (la página de símbolos sueltos), adjunto en el chat o en tu Google Drive, nunca en el repositorio.
@@ -337,6 +352,24 @@ Esto ya existe y no hace falta hacerlo:
 Descartado: todo lo de la lista "No hacer". También "reproducir la tinta", porque el formato no guarda el momento de
 cada punto y añadirlo cambiaría el formato.
 
+## 7. Plan tipo MyScript Math (tu documento)
+
+El plan completo está en [`PLAN-MYSCRIPT.md`](PLAN-MYSCRIPT.md). Todo en local, sin IA en la nube.
+
+**Criterios:**
+- cada fase se usa sola y se prueba antes de pasar a la siguiente;
+- se activa desde ajustes;
+- lo matemático va en un módulo propio.
+
+| Fase | Prioridad | Qué existe ya | Qué falta |
+|---|---|---|---|
+| 1. Tachar con zigzag para borrar | máxima | nada (la tinta a formas, `rnote-compose/src/shaperecognition.rs`, sirve de modelo para detectar el gesto) | todo |
+| 2. Diccionario y catálogo de símbolos | alta | vocabulario `CORE` (`symbols.py`), glifos (`glyphs.py`), `FUNCTIONS` (`layout.py`), unidades con pint, glosario por cuaderno (`glossary.py`), catálogo para insertar (`feat/catalogo-simbolos`) | un solo fichero de datos con nombre, LaTeX, categoría y alias; buscador; constantes editables. Va junto con el punto 5 de la sección 2 |
+| 3. Variables (`x = 3` y se recalcula) | muy alta | árbol (`layout.py`), evaluador con SymPy (`evaluate.py`), glosario con valores | definir al escribir `letra = valor`, recalcular las líneas que la usan y mostrarlo al lado; guardarlo en el archivo oculto |
+| 4. Revisión de álgebra paso a paso | — | separadores de pasos `→ ⇒ ⇔ ;` (`STEP_SEPARATORS`) | equivalencia por valores aleatorios, marcar en rojo y explicar errores típicos |
+| 5. Exportar a LaTeX | — | `to_latex(tree)` (ya lo devuelve `recognize`) | botón «Copiar como LaTeX» sobre una selección |
+| 6. Fracciones y gráficos | — | gráficas ya planeadas (sección 2) | alternar decimal ↔ fracción ↔ mixta |
+
 ## No hacer
 
 Copiar formato, adjuntar archivos como icono, búsqueda de imágenes en línea, tinta con texturas, editor de ecuaciones
@@ -346,8 +379,10 @@ ni otros repositorios ni la licencia, no subir modelos, datasets ni datos person
 ## Orden de prioridad
 
 0) Antes que nada: los problemas del modo matemáticas de la sección 2 (escribir cerca de símbolos y donde has borrado, zoom, reconocer lo ya escrito, i/j, escribir tú el símbolo, el resultado del «=» y las funciones ln/log/sin).
-1) Pruebas en tu equipo, 2) matemáticas con tu letra, 3) nombre OnePepe dentro de la app, 4) mejoras opcionales,
-5) ideas para más adelante.
+1) Pruebas en tu equipo, 2) matemáticas con tu letra (el entrenamiento, en paralelo, cuando escribas tus
+expresiones), 3) plan tipo MyScript (sección 7) en su orden: tachar → diccionario → variables → revisión de álgebra
+→ LaTeX → fracciones y gráficos, 4) nombre OnePepe dentro de la app, 5) mejoras opcionales, 6) ideas para más
+adelante.
 
 Dentro de las ideas para más adelante, la propuesta (sin decidir) es seguir por:
 
