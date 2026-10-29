@@ -135,10 +135,6 @@
             <attribute name="action">win.keyboard-shortcuts</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">_Donate 💝</attribute>
-            <attribute name="action">win.donate</attribute>
-          </item>
-          <item>
             <attribute name="label" translatable="yes">A_bout OnePepe</attribute>
             <attribute name="action">win.about</attribute>
           </item>
