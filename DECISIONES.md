@@ -143,10 +143,9 @@ Formato: qué elegí y por qué.
   (`com.github.flxzt.rnote`) **no cambian**, para no perder ajustes ni romper Flatpak, la ruta de datos o las
   traducciones. Cambiarlos sigue en `PLAN-PENDIENTE.md` (sección 3).
 - "Acerca de": desarrollador "Pepe Flock", enlaces a `merinodpepe/OnePepe` y un apartado "Rnote" con los autores de
-  `AUTHORS` (crédito de la base, GPL). "Donar" sigue apuntando a Rnote.
+  `AUTHORS` (crédito de la base, GPL). "Donar" se quitó del menú el 2026-10-29 (llevaba a Rnote).
 - El nombre del repositorio en GitHub no se cambia: no hace falta y cambiarlo exige actualizar enlaces y clones.
-- `main` sigue sin tocar. Para que la portada de GitHub muestre OnePepe en lugar de Rnote, se cambia la rama por
-  defecto a `onepepe` (Settings → General → Default branch).
+- (Sustituido el 2026-10-29, ver «`main` = OnePepe y sin Rnote a la vista».)
 
 ## Logos de Pepe Flock
 
@@ -273,3 +272,28 @@ Detalle, capturas y contrastes en [`DISENO.md`](DISENO.md).
 - No se comprueba todavía si cada paso se sigue del anterior. Sería posible con SymPy y queda como idea en
   `PLAN-PENDIENTE.md`.
 - `⟶` es la misma flecha que `→` (alias), y `⟹` la misma que `⇒`.
+
+## `main` = OnePepe y sin Rnote a la vista (2026-10-29)
+
+Petición del usuario: «sacar todas las referencias grandes a Rnote del repositorio; el `main` siendo de Rnote me
+molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe» y «lo visible».
+
+- **Ramas:** el Rnote original (`6bbc9b2`) se guarda en la rama **`rnote-original`**. `main` avanza hasta `onepepe`
+  con `git push origin onepepe:main` (avance rápido, sin force push; ninguna rama borrada). Desde ahora, tras cada
+  fusión en `onepepe` se avanza también `main`. La antigua regla «no toques `main`» queda sustituida.
+- **Borrado (sigue en `rnote-original`):** `CONTRIBUTING.md`, `MAINTAINING.md`, `docs/` (arquitectura y
+  compilación en macOS/Windows), `.github/` (donaciones, plantillas de incidencias y los flujos de CI, nightly,
+  instalador de Windows y traducciones de Rnote), `build-aux/deploy-remote.sh` y las capturas de Rnote
+  (`crates/rnote-ui/data/screenshots/`). Los flujos de CI se quitaron también: eran los de Rnote (publicaban
+  nightlies, instaladores…) y no se han probado con OnePepe; se pueden recuperar de `rnote-original` si se quiere CI.
+- **Reescrito:** `BUILDING.md` (guía corta en español). Metadatos de tienda (`app.metainfo.xml.in.in`): resumen,
+  capturas de OnePepe (`misc/onepepe/diseno/`, enlazadas desde `main`), una sola versión 0.15.0 de OnePepe en lugar
+  del historial de Rnote, sin contacto ni enlace de donación de Rnote. `.desktop`: comentario y palabras clave.
+  Tipo de archivo: «OnePepe notes file». «Acerca de»: el mismo resumen. Menú: sin «Donar». Icono monocromo de la
+  app: el logo de OnePepe. `es.po` al día.
+- **Se queda (GPL y compatibilidad):** `LICENSE`, `AUTHORS`, cabeceras, el apartado «Rnote» de créditos en «Acerca
+  de», la nota de crédito del README y los comentarios del código. El id `com.github.flxzt.rnote`, el binario
+  `rnote`, los crates y la extensión `.rnote` no cambian (ver «Nombre»).
+- **Se queda (lo necesita meson):** `build-aux/inno_build.py` y `rnote_inno.iss.in` (meson los pide aunque solo
+  se usan en Windows) y `dist-vendor.sh`.
+

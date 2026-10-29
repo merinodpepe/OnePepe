@@ -40,9 +40,9 @@
   reconoce, las sustituye por símbolos limpios y calcula el resultado del «=».
 - El reconocimiento lo hace un **programa auxiliar en Python** (`tools/onepepe-math`) que la app lanza y con el que
   habla por JSON línea a línea. Aprende de las correcciones del usuario (kNN) y se puede **reentrenar** desde la app.
-- Rama de integración **`onepepe`**; `main` es el Rnote original sin tocar. Cada función va en una rama `feat/*`
-  fusionada con `--no-ff`.
-- Unos **156 archivos cambiados**, **~21 700 líneas añadidas** respecto a `main`.
+- Rama de integración **`onepepe`**; **`main` = OnePepe** (avanza igual que `onepepe`). El Rnote original está en la
+  rama **`rnote-original`** (`6bbc9b2`). Cada función va en una rama `feat/*` fusionada con `--no-ff`.
+- Unos **156 archivos cambiados**, **~21 700 líneas añadidas** respecto a `rnote-original`.
 - **Estado:**
   - Todo compila y los tests pasan: motor de Rust 64 + 4 + 2 (+1 ignorado), `rnote-compose` 19 (+1 ignorado) y
     Python 34 (+1 saltado sin modelo).
@@ -101,9 +101,11 @@ Literales o casi literales del usuario. **No se negocian** sin preguntarle.
 ### 3.1 Git
 
 - **«Trabaja solo en mi fork. No toques ningún otro repositorio.»** Repositorio: `merinodpepe/OnePepe`.
-- **«No modifiques `main`»:** se queda como el Rnote original para poder sincronizar con el proyecto de origen.
-  Comprueba con `git rev-parse origin/main` que sigue en `6bbc9b2…`.
-- **Rama de integración `onepepe`** (creada desde `main`).
+- **`main` es OnePepe** (decisión del usuario del 2026-10-29, sustituye a la antigua regla «no toques `main`»).
+  Tras fusionar en `onepepe`, avanza `main` con `git push origin onepepe:main` (siempre avance rápido, nunca force).
+- **`rnote-original`** guarda el Rnote de partida (`6bbc9b2`) para comparar o sincronizar con el proyecto de origen.
+  **No se toca.** Comprueba con `git rev-parse origin/rnote-original`.
+- **Rama de integración `onepepe`** (creada desde el Rnote original).
 - **Una rama por función**, `feat/<nombre-en-español>` (por ejemplo `feat/diseno-arbol`, `feat/regla-angulo`). Se
   fusiona en `onepepe` con **`git merge --no-ff`** cuando **compila y pasan sus tests** (y, si toca la interfaz, se ha
   visto funcionando en la app de prueba).

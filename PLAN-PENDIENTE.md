@@ -137,8 +137,7 @@ Hoy el README y la documentación ya son de OnePepe, pero la aplicación sigue m
 
 ## 5. Cosas que haces tú en GitHub
 
-- Para que la portada del repositorio muestre el README de OnePepe sin tocar `main`: **Settings → General → Default
-  branch** → `onepepe`.
+- `main` ya es OnePepe. Si la portada aún muestra otra rama: **Settings → General → Default branch** → `main`.
 
 ## 6. Ideas para más adelante (sin implementar)
 
@@ -189,7 +188,7 @@ cada punto y añadirlo cambiaría el formato.
 ## No hacer
 
 Copiar formato, adjuntar archivos como icono, búsqueda de imágenes en línea, tinta con texturas, editor de ecuaciones
-nativo, enlaces entre páginas y notas, grabación de audio. No cambiar el formato `.rnote` sin avisar, no tocar `main`
+nativo, enlaces entre páginas y notas, grabación de audio. No cambiar el formato `.rnote` sin avisar, no tocar `rnote-original`
 ni otros repositorios ni la licencia, no subir modelos, datasets ni datos personales.
 
 ## Orden de prioridad
