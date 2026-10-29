@@ -4065,3 +4065,12 @@ msgstr "Cambios sin aplicar"
 
 msgid "Settings applied"
 msgstr "Ajustes aplicados"
+
+msgid "Angle"
+msgstr "Ángulo"
+
+msgid "Angle of the ruler"
+msgstr "Ángulo de la regla"
+
+msgid "You can also turn it by its circle; with Shift, in steps of 15°."
+msgstr "También puedes girarla desde su círculo; con Mayús, de 15° en 15°."

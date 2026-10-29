@@ -826,6 +826,12 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
                     None,
                 )
                 .upcast(),
+                big_menu(
+                    "object-rotate-left-symbolic",
+                    &gettext("Angle"),
+                    &ruler_angle_popover(appwindow),
+                )
+                .upcast(),
                 big_toggle(
                     "onepepe-ink-to-shape-symbolic",
                     &gettext("Ink to Shape"),
@@ -1015,6 +1021,77 @@ fn sync_ribbon_visibility(appwindow: &RnAppWindow, ribbon: &gtk4::Box, revealer:
 }
 
 /// The popover of the page sizes: one row per size, portrait and landscape side by side.
+/// The exact angle of the ruler: typed, or one of the usual ones. Turning the handle is free too (Shift: 15° steps).
+fn ruler_angle_popover(appwindow: &RnAppWindow) -> gtk4::Popover {
+    let content = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+    content.set_margin_top(8);
+    content.set_margin_bottom(8);
+    content.set_margin_start(8);
+    content.set_margin_end(8);
+    let row = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
+    row.append(&gtk4::Label::new(Some(&gettext("Angle of the ruler"))));
+    let spin = gtk4::SpinButton::with_range(0.0, 180.0, 1.0);
+    spin.set_digits(1);
+    spin.set_wrap(true);
+    row.append(&spin);
+    row.append(&gtk4::Label::new(Some("°")));
+    content.append(&row);
+    let quick = gtk4::Box::new(gtk4::Orientation::Horizontal, 2);
+    quick.add_css_class("linked");
+    for degrees in [0.0, 30.0, 45.0, 60.0, 90.0, 135.0] {
+        let button = gtk4::Button::with_label(&format!("{degrees:.0}°"));
+        button.connect_clicked(clone!(
+            #[weak]
+            spin,
+            move |_| spin.set_value(degrees)
+        ));
+        quick.append(&button);
+    }
+    content.append(&quick);
+    let hint = gtk4::Label::new(Some(&gettext(
+        "You can also turn it by its circle; with Shift, in steps of 15°.",
+    )));
+    hint.add_css_class("dim-label");
+    hint.set_wrap(true);
+    hint.set_max_width_chars(32);
+    content.append(&hint);
+    let popover = gtk4::Popover::builder().child(&content).build();
+    let filling = std::rc::Rc::new(std::cell::Cell::new(false));
+    popover.connect_show(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        spin,
+        #[strong]
+        filling,
+        move |_| {
+            let angle = appwindow
+                .active_tab_canvas()
+                .and_then(|c| c.engine_ref().ruler_angle_degrees())
+                .unwrap_or(0.0);
+            filling.set(true);
+            spin.set_value(angle);
+            filling.set(false);
+        }
+    ));
+    spin.connect_value_changed(clone!(
+        #[weak]
+        appwindow,
+        #[strong]
+        filling,
+        move |spin| {
+            if filling.get() {
+                return;
+            }
+            with_canvas(&appwindow, |engine| {
+                engine.set_ruler_angle_degrees(spin.value())
+            });
+            appwindow.refresh_ui();
+        }
+    ));
+    popover
+}
+
 fn page_size_popover() -> gtk4::Popover {
     let popover = gtk4::Popover::new();
     let grid = gtk4::Grid::builder()
