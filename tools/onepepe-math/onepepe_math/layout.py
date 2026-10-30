@@ -13,12 +13,13 @@ Nodos del árbol (tuplas):
     ("frac", numerador, denominador)
     ("sqrt", radicando)
     ("root", índice, radicando)          raíz n-ésima
+    ("accent", acento, base)             ŷ, x̄, x̃ (acento: \\hat, \\overline, \\tilde)
 """
 
 import re
 from dataclasses import dataclass
 
-from .symbols import category
+from .symbols import ACCENTS, category
 
 
 @dataclass
@@ -59,6 +60,8 @@ def _typical_height(syms):
 
 def _middle(s, typical):
     """Altura del centro de la línea a la que pertenece el símbolo (corrige letras con rabo hacia arriba o abajo)."""
+    if getattr(s, "accent_base", None) is not None:
+        return _middle(s.accent_base, typical)
     if s.label in _FLAT:
         return s.cy
     if s.label in _DESC:
@@ -106,7 +109,35 @@ def _parse_region(syms, typical):
             node.node = ("frac", num, den)
             rest = [s for s in syms if s is not bar and s not in above and s not in below]
             return _parse_region(rest + [node], typical)
-    # 2. raíces: lo que está dentro de la caja de la √ y a la derecha de su gancho
+    # 2. acentos: un sombrero, una raya o una virgulilla pequeños justo encima de un símbolo (ŷ, x̄, x̃). La raya de
+    # una fracción tiene algo debajo y encima; la de una media, solo su letra debajo y más estrecha.
+    for acc in [s for s in syms if s.label in ACCENTS or s.label == "-"]:
+        if acc not in syms:
+            continue
+        below = [
+            s
+            for s in syms
+            if s is not acc
+            and s.label not in ACCENTS
+            and s.box[0] - 0.35 * s.w <= acc.cx <= s.box[2] + 0.35 * s.w
+            and -0.15 * typical <= s.box[1] - acc.box[3] < 0.6 * typical
+            and acc.w <= 2.2 * max(s.w, 0.4 * typical)
+        ]
+        if len(below) != 1:
+            continue
+        base = below[0]
+        # la raya: solo si es corta (como su letra) y no hay nada encima (si no, es una fracción o un «=»)
+        if acc.label == "-":
+            over = [s for s in syms if s is not acc and s.box[3] <= acc.box[1] and abs(s.cx - acc.cx) < acc.w]
+            if over or acc.w > 1.6 * max(base.w, 0.4 * typical) or base.label in _FLAT:
+                continue
+        kind = r"\overline" if acc.label == "-" else acc.label
+        node = Sym(label="", box=(min(acc.box[0], base.box[0]), acc.box[1], max(acc.box[2], base.box[2]), base.box[3]))
+        node.node = ("accent", kind, _node(base))
+        node.accent_base = base
+        rest = [s for s in syms if s is not acc and s is not base]
+        return _parse_region(rest + [node], typical)
+    # 3. raíces: lo que está dentro de la caja de la √ y a la derecha de su gancho
     for root in [s for s in syms if s.label == r"\sqrt"]:
         inside = [
             s
@@ -136,7 +167,7 @@ def _parse_region(syms, typical):
             node.node = ("root", _parse_region(index, typical), radicand) if index else ("sqrt", radicand)
             rest = [s for s in syms if s is not root and s not in inside and s not in index]
             return _parse_region(rest + [node], typical)
-    # 3. línea base con potencias y subíndices
+    # 4. línea base con potencias y subíndices
     return _parse_row(sorted(syms, key=lambda s: s.box[0]), typical)
 
 
@@ -290,9 +321,11 @@ def to_latex(node):
         return f"\\sqrt{{{to_latex(node[1])}}}"
     if kind == "root":
         return f"\\sqrt[{to_latex(node[1])}]{{{to_latex(node[2])}}}"
+    if kind == "accent":
+        return f"{node[1]}{{{to_latex(node[2])}}}"
     raise ValueError(kind)
 
 
 def _group(node):
     t = to_latex(node)
-    return t if node[0] == "sym" else "{" + t + "}"
+    return t if node[0] in ("sym", "accent") else "{" + t + "}"

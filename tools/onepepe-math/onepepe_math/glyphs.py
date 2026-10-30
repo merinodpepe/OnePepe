@@ -39,6 +39,18 @@ _MANUAL = {
         [(0.0, 0.70), (0.15, 0.60), (0.35, 0.60), (0.5, 0.70), (0.65, 0.80), (0.85, 0.80), (1.0, 0.70)],
     ],
     r"\sim": [[(0.0, 0.55), (0.15, 0.45), (0.35, 0.45), (0.5, 0.55), (0.65, 0.65), (0.85, 0.65), (1.0, 0.55)]],
+    # acentos (2026-10-30): sombrero, raya de la media y virgulilla, en la caja del acento escrito
+    r"\hat": [[(0.0, 1.0), (0.5, 0.0), (1.0, 1.0)]],
+    r"\overline": [[(0.0, 0.5), (1.0, 0.5)]],
+    r"\tilde": [[(0.0, 0.7), (0.2, 0.35), (0.45, 0.35), (0.55, 0.65), (0.8, 0.65), (1.0, 0.3)]],
+    # equilibrio ⇌ (dos medias flechas)
+    r"\rightleftharpoons": [
+        [(0.0, 0.40), (1.0, 0.40), (0.75, 0.15)],
+        [(1.0, 0.60), (0.0, 0.60), (0.25, 0.85)],
+    ],
+    r"\langle": [[(0.8, 0.0), (0.2, 0.5), (0.8, 1.0)]],
+    r"\rangle": [[(0.2, 0.0), (0.8, 0.5), (0.2, 1.0)]],
+    r"\top": [[(0.0, 0.0), (1.0, 0.0)], [(0.5, 0.0), (0.5, 1.0)]],
     # flecha doble ⇒ (dos rayas y una punta)
     r"\Rightarrow": [
         [(0.0, 0.40), (0.85, 0.40)],
@@ -114,7 +126,8 @@ def _bounds(lines):
 
 
 # símbolos que son casi líneas horizontales: se ajustan por su anchura y no por su altura
-_FLAT = {"-", "=", r"\sim", r"\approx", r"\equiv", r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\Leftrightarrow"}
+_FLAT = {"-", "=", r"\sim", r"\approx", r"\equiv", r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\Leftrightarrow",
+         r"\overline", r"\hat", r"\tilde", r"\rightleftharpoons"}
 
 
 def place_glyph(latex, target_box):

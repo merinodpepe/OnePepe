@@ -26,6 +26,7 @@ from .evaluate import (
     _Parser,
     _split,
     _tokens,
+    accent_token,
     answer,
 )
 from .layout import Sym, parse, to_latex
@@ -128,6 +129,11 @@ def _definition(tokens, env, units):
     if len(parts) != 2 or parts[0][1] != "=":
         return None
     lhs, rhs = parts[0][0], parts[1][0]
+    if len(lhs) == 1 and lhs[0][0] == "accent":
+        try:
+            lhs = [accent_token(lhs[0])]
+        except ParseError:
+            return None
     if len(lhs) != 1 or lhs[0][0] != "sym" or lhs[0][2] is not None or not rhs:
         return None
     try:

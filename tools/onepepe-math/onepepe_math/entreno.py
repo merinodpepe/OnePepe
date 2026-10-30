@@ -35,7 +35,11 @@ def expected_symbols(latex):
     latex = re.sub(r"\\(begin|end)\{[a-z]*\}", " ", latex)
     latex = latex.replace(r"\mathrm", "").replace(r"\,", " ").replace(r"\quad", " ").replace(r"\ ", " ")
     out = []
-    for t in _TOKEN.findall(latex):
+    # 𝔼, ℙ, ℝ son un solo símbolo
+    tokens = []
+    for part in re.split(r"(\\mathbb\{[A-Z]\})", latex):
+        tokens += [part] if part.startswith(r"\mathbb") else _TOKEN.findall(part)
+    for t in tokens:
         if t in _INVISIBLE or t in "{}":
             continue
         name = t[1:] if t.startswith("\\") else None
