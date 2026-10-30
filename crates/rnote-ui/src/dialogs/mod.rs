@@ -39,7 +39,7 @@ pub(crate) fn dialog_about(appwindow: &RnAppWindow) {
         // TRANSLATORS: 'Name <email@domain.com>' or 'Name https://website.example'
         .translator_credits(gettext("translator-credits"))
         .license_type(globals::APP_LICENSE)
-        .version((String::from(config::APP_VERSION) + config::APP_VERSION_SUFFIX).as_str())
+        .version(&crate::globals::onepepe_version())
         .build();
 
     // OnePepe is based on Rnote (GPL-3.0-or-later): credit its authors

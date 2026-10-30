@@ -172,7 +172,7 @@ Comprobar la interfaz sin GTK 4.22 (como se hizo en la nube; necesita las depend
 ```bash
 # 1) generar un config.rs local (meson lo crea normalmente; no se sube al repositorio)
 sed -e 's/@APP_NAME@/"rnote"/;s/@APP_NAME_CAPITALIZED@/"Rnote"/;s/@APP_ID@/"com.github.flxzt.rnote"/' \
-    -e 's/@APP_IDPATH@/"\/com\/github\/flxzt\/rnote\/"/;s/@APP_VERSION@/"0.15.0"/;s/@APP_VERSION_SUFFIX@/""/' \
+    -e 's/@APP_IDPATH@/"\/com\/github\/flxzt\/rnote\/"/;s/@APP_VERSION@/"1.1.0"/;s/@APP_VERSION_SUFFIX@/""/' \
     -e 's/@APP_AUTHOR_NAME@/"x"/;s/@APP_AUTHORS@/"x"/;s/@APP_WEBSITE@/"x"/;s/@APP_REPO_URL@/"x"/' \
     -e 's/@APP_ISSUES_URL@/"x"/;s/@APP_SUPPORT_URL@/"x"/;s/@APP_DONATE_URL@/"x"/;s/@PROFILE@/"devel"/' \
     -e 's/@GETTEXT_PACKAGE@/"rnote"/;s/@LOCALEDIR@/"\/usr\/share\/locale"/;s/@DATADIR@/"\/usr\/share"/;s/@LIBDIR@/"\/usr\/lib"/' \

@@ -71,6 +71,13 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.1.0" date="2026-10-30">
+      <description>
+        <p>Math mode fixes (writing next to symbols, zoom, i and j, functions, the result of "="), recognize a
+          selection, write the symbol yourself, scratch-out, variables, step check, copy as LaTeX, fractions and
+          plots. The version is shown in the status bar.</p>
+      </description>
+    </release>
     <release version="0.15.0" date="2026-10-29">
       <description>
         <p>First OnePepe release: notebooks with subpages, OneNote-style ribbon, favorite pens, text styles,
