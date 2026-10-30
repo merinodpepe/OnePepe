@@ -5,3 +5,4 @@ lark
 pint
 scipy
 Hershey-Fonts
+matplotlib  # dibujar las expresiones del modo entreno
