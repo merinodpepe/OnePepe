@@ -42,7 +42,11 @@ probarlo en `CAMBIOS-ONEPEPE.md`. Lo que queda de cada punto:
 6. **Resultado del «=»:** hecho (se recalcula siempre; «?» que explica; formas de una fracción).
 7. **Funciones:** hecho (`sin x`, `ln`, `log₂`, «1n» → ln, sen/tg/arcsen/arctg, ∛).
 
-**8. Cuánto escribir para entrenar con tu letra.**
+**8. Cuánto escribir para entrenar con tu letra.** Desde la versión 1.2 hay **modo entreno** (Matemáticas → Nuevo
+entreno) con un set general de **200** expresiones; lo de abajo sigue valiendo para decidir cuántas. Queda: un set
+de tus asignaturas cuando me las digas; un control para elegir el set (hoy solo hay uno); que solo se usen los
+símbolos que el modelo ve plausibles (con letra ajena, el 6 % de los ejemplos salía con corte o etiqueta mal).
+
 - **Recomendación:**
   - unas **80 expresiones variadas** (cerca de 1 hora), de una lista que te preparo yo para cubrir todos tus
     símbolos;

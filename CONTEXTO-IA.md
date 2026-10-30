@@ -7,6 +7,15 @@
 > Actualizado: 2026-10-30 (tarde). Rama de trabajo: `onepepe` (y `main`, que avanza igual). Si algo de aquí contradice al código, manda el código; si
 > contradice una petición nueva del usuario, manda el usuario (y actualiza este documento).
 
+> **Lo más nuevo: versión 1.2 (modo entreno).** El usuario fijó que lo anterior es la **1.1** y que cada tanda sube
+> la versión y se apunta en **`VERSIONES.md`** (obligatorio desde ahora; número en `meson.build` y en
+> `crates/rnote-ui/data/app.metainfo.xml.in.in`). La versión se ve en la barra de estado con el commit
+> (`globals::onepepe_version`, `build.rs`). Modo entreno: `crates/rnote-ui/src/entreno.rs` (ventana, archivo
+> `*.entreno.json` en `Documentos/OnePepe entrenos`), `tools/onepepe-math/onepepe_math/entreno.py` (órdenes
+> `training_sets`, `training_new`, `training_render`, `training_import`) y el set
+> `tools/onepepe-math/entrenos/general-200.json`. Necesita **matplotlib** (`requirements.txt`). Detalle en
+> `DECISIONES.md` («Modo entreno y versiones»).
+>
 > **Lo último (2026-10-30, tarde), por si solo lees esto:**
 >
 > - **Hechos los 7 fallos del modo matemáticas y una primera versión de las 6 fases del plan MyScript** (rama
@@ -61,7 +70,7 @@
 - Unos **156 archivos cambiados**, **~21 700 líneas añadidas** respecto a `rnote-original`.
 - **Estado:**
   - Todo compila y los tests pasan: motor de Rust 77 + 4 + 2 (+1 ignorado), `rnote-compose` 23 (+1 ignorado) y
-    Python 72 (+1 saltado sin modelo).
+    Python 79 (+1 saltado sin modelo).
   - Casi todo se ha **ejecutado en una app de prueba en la nube** (GTK 4.14 sobre Xvfb, manejada con xdotool).
   - **Nada está probado todavía con el lápiz real** del usuario ni con GTK 4.22.
 - **El formato `.rnote` no se ha cambiado**: lo nuevo que no cabe va a un **archivo oculto** por página, a un índice
@@ -798,6 +807,9 @@ programa nunca se cae.
 | `names` | `query` (opcional) | `{entries:[{latex,char,group,names,shortcut}], exact}`; sin `query`, todo y `groups` (`nombres.py`) |
 | `page` | `rows:[{symbols:[{latex,box,alts}]}]`, `equals`, `variables`, `check`, `notebook_dir` | `{rows:[{latex, marks:[{kind,text,latex,anchor,height,at?,formats?}]}]}`; `kind`: value/solve/…, `unknown` («?»), `variable`, `error` (`pagina.py`) |
 | `latex` | `rows` | `{latex:[…]}` |
+| `training_sets` / `training_new` | — / `set` | `{sets}` / `{session}` (lo que la app guarda en `*.entreno.json`) |
+| `training_render` | `lines`, `color` | `{png}` en base64 o null |
+| `training_import` | `session` (el contenido, no la ruta: Flatpak) | `{imported:[ids], failed:[ids], symbols, junk}` |
 | `plot` | `rows`, `size:[w,h]` | `{axes, labels, curves, x_range, y_range, functions}` como líneas en la caja, o `{error}` (`grafica.py`) |
 
 **Lanzador `tools/onepepe-math/onepepe-math`** (bash):
@@ -826,6 +838,7 @@ programa nunca se cae.
 | `nombres.py` | diccionario de símbolos (nombre es/en, LaTeX, carácter, grupo, atajo), `resolve`, `search` |
 | `pagina.py` | orden `page`: «=», «?», variables, revisión de pasos (errores típicos), formas de fracción; `latex_rows` |
 | `grafica.py` | orden `plot`: y = f(x) con numpy, cortes en asíntotas, ejes y números con glifos Hershey |
+| `entreno.py` | modo entreno: sets (`entrenos/*.json`), sesión nueva, dibujar con matplotlib, importar con el corte forzado (renglones guía de `line_height`); `expected_symbols` (también lo usa `importar_mi_letra.py`) |
 | `server.py` | el servidor del protocolo |
 
 **`classifier.py`:**
@@ -1050,6 +1063,13 @@ Va en la misma carpeta que la página (`math_sidecar_path`). JSON con `version: 
 - Una subpágina cuyo padre ya no existe aparece arriba del todo.
 - Si queda vacío, el archivo se borra.
 
+### 8.3b Archivo de entreno: `*.entreno.json` (versión 1.2)
+
+En `Documentos/OnePepe entrenos/` por defecto. No es un `.rnote`. JSON: `format: "onepepe-entreno"`, `version: 1`,
+`app_version`, `set`, `title`, `created`, `current`, `items: [{id, kind: expr|steps|symbols, lines, hint}]`,
+`answers: {id: {strokes, times, size, lines, line_height, written, skipped, imported}}`. Contiene la letra del
+usuario: **nunca a git**. Clave de ajustes `ultimo-entreno` (ruta del último abierto).
+
 ### 8.4 Ajustes de la app
 
 **`~/.config/onepepe/ajustes.json`** (`prefs.rs`):
@@ -1157,7 +1177,7 @@ cd tools/onepepe-math && ./instalar.sh --entrenar
 cargo test -p rnote-compose -p rnote-engine        # 23 (+1 ign.) y 77 + 4 + 2 (+1 ign.)
 cd tools/onepepe-math
 python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -r requirements-train.txt
-/tmp/venv/bin/python -m unittest discover -s tests   # 72 (1 saltado sin modelo)
+/tmp/venv/bin/python -m unittest discover -s tests   # 79 (1 saltado sin modelo)
 msgfmt -c -o /dev/null crates/rnote-ui/po/es.po      # traducción
 ```
 
@@ -1266,6 +1286,7 @@ Los scripts de la nube se pierden en cada sesión; este es el esencial.
 
 **Ramas fusionadas en `onepepe`**, de la más reciente a la más antigua:
 
+- **Versiones 1.1 y 1.2 (2026-10-30):** `feat/version`, `feat/modo-entreno`.
 - **Arreglos de matemáticas y plan MyScript (2026-10-30, tarde):** `feat/matematicas-arreglos`.
 - **Solo documentación (2026-10-30):** `feat/contexto-ia-2`, `feat/pendiente-myscript`, `feat/pendiente-funciones`,
   `feat/pendiente-resultado`, `feat/pendiente-matematicas-2`, `feat/pendiente-reconocer-seleccion`,
@@ -1664,9 +1685,11 @@ bórralas.
    - actualizar `es.po`/`POTFILES` y los documentos (`ESTADO`, `CAMBIOS`, `DECISIONES`, `PLAN`);
    - `git merge --no-ff` en `onepepe`, `git push origin onepepe` y `git push origin onepepe:main` (avance rápido).
    - Si el usuario dice «apúntalo» o «no lo hagas», solo se documenta en `PLAN-PENDIENTE.md`.
-5. **Antes de subir:** `git ls-files | grep -E "npz|jsonl|mis_|dataset"` debe salir vacío. Nada del usuario ni del
+5. **Versión:** si la tanda trae algo nuevo, sube la versión (`meson.build` y metadatos) y añade su apartado en
+   `VERSIONES.md` (lo pidió el usuario).
+6. **Antes de subir:** `git ls-files | grep -E "npz|jsonl|mis_|dataset"` debe salir vacío. Nada del usuario ni del
    modelo en git.
-6. **Al terminar**, dile al usuario en español, en pocas líneas:
+7. **Al terminar**, dile al usuario en español, en pocas líneas:
    - qué se hizo;
    - cómo está probado (compilado / tests / nube / lápiz);
    - qué tiene que hacer él, con los comandos exactos (normalmente `git checkout main && git pull` y
