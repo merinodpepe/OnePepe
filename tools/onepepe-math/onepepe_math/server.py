@@ -12,6 +12,11 @@ Peticiones:
   {"id": 7, "cmd": "relabel", "example": "id", "latex": "K"}   cambia su etiqueta
   {"id": 8, "cmd": "recognize_group", "strokes": [...]}   reconoce estos trazos como UN símbolo (sin cortar)
   {"id": 9, "cmd": "segment_fix", "junk": [[trazos], ...]}  guarda "trozos" (cortes que estaban mal) para reentrenar
+  {"id": 10, "cmd": "names", "query": "delta"}       diccionario de símbolos; sin "query", todo (nombres.py)
+  {"id": 11, "cmd": "page", "rows": [{"symbols": [{"latex", "box"}]}], "equals", "variables", "check"}
+                                                     lo que se anota al lado de cada renglón (pagina.py)
+  {"id": 12, "cmd": "latex", "rows": [...]}           el LaTeX de cada renglón
+  {"id": 13, "cmd": "plot", "rows": [...], "size": [w, h]}   gráfica de y = f(x) (grafica.py)
 
 Cada respuesta lleva el mismo "id". Los errores se responden con {"id", "error": "..."}; nunca se cae el programa.
 """
@@ -101,6 +106,35 @@ class Server:
                     )
                     n += 1
             return {"ok": True, "saved": n}
+        if cmd == "names":
+            from . import nombres
+
+            query = req.get("query")
+            if query is None:
+                return {"entries": nombres.entries(), "groups": nombres.GROUPS}
+            return {"entries": nombres.search(query), "exact": nombres.resolve(query)}
+        if cmd == "page":
+            from . import pagina
+
+            path = gl.find_glossary(req.get("notebook_dir"))
+            _, values = gl.load(path)
+            return {
+                "rows": pagina.page(
+                    req.get("rows", []),
+                    equals=bool(req.get("equals", True)),
+                    variables=bool(req.get("variables", False)),
+                    check=bool(req.get("check", False)),
+                    glossary_units=gl.units(values),
+                )
+            }
+        if cmd == "latex":
+            from . import pagina
+
+            return {"latex": pagina.latex_rows(req.get("rows", []))}
+        if cmd == "plot":
+            from . import grafica
+
+            return grafica.plot_rows(req.get("rows", []), size=tuple(req.get("size", (300.0, 200.0))))
         if cmd == "examples":
             return {"examples": self.personal.list_examples()}
         if cmd == "forget":
