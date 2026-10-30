@@ -30,7 +30,7 @@ def recognize(
     """
     syms = segment(strokes, classifier, params=segment_params, times=times)
     if syms:
-        syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes), known=known)
+        syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes))
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]
     cand_lists = [s["candidates"] for s in syms]

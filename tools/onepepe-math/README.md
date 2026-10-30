@@ -92,3 +92,24 @@ entorno que crea `instalar.sh`):
 ```bash
 ~/.local/share/onepepe/venv/bin/python -m unittest discover -s tests
 ```
+
+## Órdenes del programa auxiliar (para probar a mano)
+
+Una petición JSON por línea; la lista completa está al principio de `onepepe_math/server.py`. Las del 2026-10-30:
+
+```bash
+# diccionario de símbolos (campo «Otro…»): por nombre, carácter, LaTeX o atajo
+echo '{"id":1,"cmd":"names","query":"menor o igual"}' | onepepe-math
+# lo que se anota junto a cada renglón: «=», «?», variables y revisión de pasos
+echo '{"id":2,"cmd":"page","equals":true,"variables":true,"rows":[
+  {"symbols":[{"latex":"x","box":[0,10,8,20]},{"latex":"=","box":[10,12,18,17]},{"latex":"3","box":[20,4,28,20]}]},
+  {"symbols":[{"latex":"x","box":[0,50,8,60]},{"latex":"+","box":[10,51,18,58]},{"latex":"1","box":[20,44,28,60]},
+              {"latex":"=","box":[30,52,38,57]}]}]}' | tr -d '\n' | onepepe-math; echo
+# → el segundo renglón da 4
+```
+
+- `page` (`pagina.py`): resultado del «=» final (o «?» con lo leído), variables (`x = 3`, `m = 70 kg`), revisión de
+  pasos (`check`) con explicación de errores típicos, y las formas de una fracción (fracción, decimal, mixta).
+- `latex`: el LaTeX de cada renglón («Copiar como LaTeX»).
+- `plot` (`grafica.py`): `y = f(x)` como líneas dentro de una caja; intervalo con un renglón `x ∈ [0; 5]`.
+- `names` (`nombres.py`): el diccionario.

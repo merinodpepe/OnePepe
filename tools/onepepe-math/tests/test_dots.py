@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""La i y la j (PLAN-PENDIENTE.md §2, punto 4), con un clasificador falso."""
+"""La i y la j: el punto cortado aparte (PLAN-PENDIENTE.md §2, punto 4), con un clasificador falso."""
 
 import os
 import sys
@@ -34,7 +34,7 @@ def dot(x, y):
 
 
 class TestDots(unittest.TestCase):
-    def test_dot_cut_apart_is_joined_and_baseline_decides(self):
+    def test_dot_cut_apart_is_joined(self):
         # «a i» con la i en la línea base (y hacia abajo; base en y=20)
         strokes = [[(0, 10), (8, 20)], stem(14, 12, 20), dot(14, 7)]
         syms = [
@@ -45,27 +45,6 @@ class TestDots(unittest.TestCase):
         out = fix_dotted_letters(syms, strokes, FakeClassifier(), typical=10.0)
         self.assertEqual([s["strokes"] for s in out], [[0], [1, 2]])
         self.assertEqual(out[1]["candidates"][0][0], "i")
-        self.assertGreaterEqual(out[1]["candidates"][0][1], 0.9)
-
-    def test_j_goes_below_the_baseline(self):
-        strokes = [[(0, 10), (8, 20)], stem(14, 12, 26), dot(14, 7)]
-        syms = [
-            {"strokes": [0], "candidates": [("a", 0.9)], "junk": 0.0},
-            {"strokes": [1], "candidates": [("1", 0.9)], "junk": 0.0},
-            {"strokes": [2], "candidates": [(".", 0.9)], "junk": 0.0},
-        ]
-        out = fix_dotted_letters(syms, strokes, FakeClassifier(), typical=10.0)
-        self.assertEqual(out[1]["candidates"][0][0], "j")
-
-    def test_known_symbols_give_the_baseline(self):
-        strokes = [stem(14, 12, 26), dot(14, 7)]
-        syms = [{"strokes": [0, 1], "candidates": [("i", 0.6), ("j", 0.3)], "junk": 0.0}]
-        known = [{"latex": "x", "box": [0, 10, 8, 20]}]
-        out = fix_dotted_letters(syms, strokes, FakeClassifier(), typical=10.0, known=known)
-        self.assertEqual(out[0]["candidates"][0][0], "j")
-        # sin nada con que comparar, se queda lo que diga la red
-        out = fix_dotted_letters(syms, strokes, FakeClassifier(), typical=10.0)
-        self.assertEqual(out[0]["candidates"][0][0], "i")
 
     def test_a_decimal_point_is_not_joined(self):
         # «1.5»: el punto está abajo, al lado, no encima

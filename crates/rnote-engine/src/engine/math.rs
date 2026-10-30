@@ -1486,7 +1486,7 @@ impl Engine {
         }
         heights.sort_by(f64::total_cmp);
         let h = heights[heights.len() / 2].max(1.0);
-        let width = (16.0 * h).max(160.0 / self.camera.total_zoom());
+        let width = (10.0 * h).max(160.0 / self.camera.total_zoom());
         let size = Vector2::new(width, width * 2.0 / 3.0);
         let origin = Vector2::new(bounds.maxs.x + 2.0 * h, bounds.mins.y);
         self.math.next_id += 1;
