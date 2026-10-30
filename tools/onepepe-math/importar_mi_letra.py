@@ -15,34 +15,15 @@ Uso:
 
 import argparse
 import os
-import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import rnote_extract  # noqa: E402
 from onepepe_math.classifier import SymbolClassifier  # noqa: E402
+from onepepe_math.entreno import expected_symbols  # noqa: E402
 from onepepe_math.forced import forced_groups, junk_examples  # noqa: E402
-from onepepe_math.latex_tokens import _INVISIBLE, _TOKEN  # noqa: E402
 from onepepe_math.personal import DEFAULT_PATH, PersonalModel  # noqa: E402
-from onepepe_math.symbols import normalize_label  # noqa: E402
-
-FUNCTIONS = ("sin", "cos", "tan", "ln", "log", "lim", "exp")
-
-
-def expected_symbols(latex):
-    """Los símbolos que se escriben a mano en una expresión (las funciones, letra a letra)."""
-    latex = re.sub(r"\\(begin|end)\{[a-z]*\}", " ", latex).replace(r"\mathrm", "")
-    out = []
-    for t in _TOKEN.findall(latex):
-        if t in _INVISIBLE or t in "{}":
-            continue
-        if t.startswith("\\") and t[1:] in FUNCTIONS:
-            out += list(t[1:])
-            continue
-        out.append(normalize_label(t))
-    return out
-
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

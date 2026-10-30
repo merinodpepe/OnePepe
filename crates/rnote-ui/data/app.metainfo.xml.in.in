@@ -71,6 +71,12 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.2.0" date="2026-10-30">
+      <description>
+        <p>Training mode: write 200 known expressions in a box to teach your handwriting to the math recognizer.
+          Saved in its own training file, so you can stop and go on another day.</p>
+      </description>
+    </release>
     <release version="1.1.0" date="2026-10-30">
       <description>
         <p>Math mode fixes (writing next to symbols, zoom, i and j, functions, the result of "="), recognize a

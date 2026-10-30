@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-30 (arreglos del modo matemáticas y plan tipo MyScript; antes, el diseño nuevo según tu guía, con capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
+Actualizado: 2026-10-30. **Versión 1.2** (modo entreno; qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Antes, en el mismo día: arreglos del modo matemáticas y plan tipo MyScript; antes, el diseño nuevo según tu guía, con capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
@@ -65,6 +65,8 @@ Leyenda de cómo se probó cada cosa:
 | MyScript 4 | **Revisar pasos** (rojo con explicación de errores típicos) | `feat/matematicas-arreglos` | sí | sí (9) + ejecutada (sin falsos avisos) | pendiente |
 | MyScript 5 | **Copiar como LaTeX** | `feat/matematicas-arreglos` | sí | sí + ejecutada ✔ (aviso «LaTeX copiado») | pendiente |
 | MyScript 6 | **Fracciones** (tocar: fracción → decimal → mixta) y **gráficas** de y = f(x) | `feat/matematicas-arreglos` | sí | sí (2 + 6) + gráfica ejecutada (en la nube los trazos salen como cajas rosas) | pendiente |
+| 1.1 | **Versión visible** (barra de estado y «Acerca de», con el commit) y `VERSIONES.md` | `feat/version` | sí | ejecutada ✔ | no aplica |
+| 1.2 | **Modo entreno**: ventana con la expresión y un recuadro; archivo `*.entreno.json`; set de 200; «Usar para entrenar» | `feat/modo-entreno` | sí | sí (7, Python) + medido (200 de 200 encajan; 93,7 % de símbolos exactos con letra ajena) + ejecutada ✔ (crear, escribir, siguiente, saltar, anterior, importar, cálculo de 3 renglones) | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
@@ -97,6 +99,14 @@ Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas e
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
 
 ## Qué necesito de ti
+
+**Del modo entreno (1.2):**
+
+- Una vez, para que se vean dibujadas las expresiones: `cd tools/onepepe-math && ./instalar.sh` (instala matplotlib;
+  tu modelo no se toca).
+- Escribe las 200 en varias sesiones (Matemáticas → Nuevo entreno; para seguir, Abrir entreno), pulsa **Usar para
+  entrenar** y luego **Reentrenar**. Si quieres que yo mida tu letra, mándame el `.entreno.json` por el chat o Drive.
+- Cuando me digas tus asignaturas preparo otro set solo con lo tuyo.
 
 **De los arreglos de matemáticas y el plan tipo MyScript (30/10/2026):** no me hace falta ningún permiso nuevo. Cuando
 lo instales:

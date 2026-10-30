@@ -17,6 +17,10 @@ Peticiones:
                                                      lo que se anota al lado de cada renglón (pagina.py)
   {"id": 12, "cmd": "latex", "rows": [...]}           el LaTeX de cada renglón
   {"id": 13, "cmd": "plot", "rows": [...], "size": [w, h]}   gráfica de y = f(x) (grafica.py)
+  {"id": 14, "cmd": "training_sets"}                 sets del modo entreno (entreno.py)
+  {"id": 15, "cmd": "training_new", "set": "general-200"}   una sesión nueva (lo que la app guarda)
+  {"id": 16, "cmd": "training_render", "lines": ["x^2"], "color": "#000000"}   la expresión: {"png": base64 o null}
+  {"id": 17, "cmd": "training_import", "session": {...}}   tu letra al almacén: {"imported", "failed", ...}
 
 Cada respuesta lleva el mismo "id". Los errores se responden con {"id", "error": "..."}; nunca se cae el programa.
 """
@@ -135,6 +139,23 @@ class Server:
             from . import grafica
 
             return grafica.plot_rows(req.get("rows", []), size=tuple(req.get("size", (300.0, 200.0))))
+        if cmd == "training_sets":
+            from . import entreno
+
+            return {"sets": entreno.list_sets()}
+        if cmd == "training_new":
+            from . import entreno
+
+            return {"session": entreno.new_session(req.get("set", "general-200"))}
+        if cmd == "training_render":
+            from . import entreno
+
+            lines = req.get("lines") or [req["latex"]]
+            return {"png": entreno.render(tuple(lines), req.get("color", "#000000"))}
+        if cmd == "training_import":
+            from . import entreno
+
+            return entreno.import_session(req["session"], self.classifier, self.personal)
         if cmd == "examples":
             return {"examples": self.personal.list_examples()}
         if cmd == "forget":

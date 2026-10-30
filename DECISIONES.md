@@ -338,3 +338,28 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - **Formato `.rnote`: sin cambios.** Lo nuevo va a los ajustes de la app (`variables`, `check`, `scratch_out`,
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
+
+## Modo entreno y versiones (2026-10-30)
+
+- **Versión de OnePepe**: se empezó en **1.1** (lo hecho hasta el 30/10) y el modo entreno es la **1.2**. El número
+  está en `meson.build` y en los metadatos; cada versión se describe en **`VERSIONES.md`**. Se muestra en la barra de
+  estado y en «Acerca de» con el commit de git (`build.rs`; vacío si no hay git al compilar). Los crates siguen con
+  la versión interna de Rnote (0.15.0): no se ven.
+- **Archivo de entreno propio** (`*.entreno.json`), no un `.rnote`: así el formato `.rnote` no cambia y Rnote no ve
+  archivos que no entiende. Va en `Documentos/OnePepe entrenos`, a la vista y fácil de copiar, y donde Flatpak puede
+  escribir (`--filesystem=xdg-documents`). Lleva el set entero (para que valga aunque el set cambie), por dónde vas,
+  tus trazos con tiempos, el tamaño del recuadro, y la versión de la app que lo escribió.
+- **El recuadro es un lienzo propio** (`gtk::DrawingArea`), no un lienzo de Rnote: más simple, sin herramientas que
+  confundan, y los trazos llegan crudos (sin el suavizado del pincel).
+- **Renglones de los cálculos seguidos**: el recuadro se divide en bandas iguales, una por paso, con su línea guía;
+  cada trazo va al paso de su altura. Así no hay que adivinar renglones.
+- **La app envía el contenido, no la ruta**, al programa auxiliar: dentro de Flatpak las rutas del selector de
+  archivos no valen fuera.
+- **Importar** usa el corte forzado de siempre. Medido con letra de MathWriting y el modelo genérico: las 200
+  encajan y el 93,7 % de los ~1700 símbolos sale con corte y etiqueta exactos; el resto son ejemplos con ruido
+  (pocos frente a los buenos). Con tu letra y tras reentrenar, debería mejorar.
+- **Dibujar las expresiones** con matplotlib (en el programa auxiliar, del color del texto para el tema oscuro).
+  Es una librería nueva: hay que pasar `./instalar.sh` una vez.
+- **El set de 200** sin tus asignaturas: general (aritmética, fracciones, potencias, álgebra, ecuaciones,
+  funciones, cálculo, física y biofísica) más símbolos sueltos y cálculos seguidos. Cuando digas tus asignaturas se
+  añade otro set en `tools/onepepe-math/entrenos/`.

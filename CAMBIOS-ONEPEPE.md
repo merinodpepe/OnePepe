@@ -575,3 +575,23 @@ Todo en la pestaña **Matemáticas** de la cinta. Lo nuevo de «Calcular» viene
 12. **Gráfica (fase 6).** Escribe `y = x²` (o `f(x) = sin(x)`), selecciónalo y pulsa **Gráfica**: aparecen ejes,
     números y la curva a la derecha, como trazos normales (se mueven, se borran, Ctrl+Z). Para otro intervalo,
     escribe debajo `x ∈ [0; 5]` y selecciona los dos renglones.
+
+## Modo entreno (versión 1.2, 30/10/2026)
+
+Para enseñarle tu letra al modo matemáticas sabiendo exactamente qué escribes.
+
+1. **Una vez**, para que se dibujen las expresiones: `cd tools/onepepe-math && ./instalar.sh` (instala matplotlib;
+   tu modelo y tus correcciones no se tocan). Sin él, se ve el LaTeX en texto.
+2. Pestaña **Matemáticas → Tu letra → Nuevo entreno**. Elige dónde guardarlo (por defecto `Documentos/OnePepe
+   entrenos/General 200 expresiones.entreno.json`).
+3. Arriba ves la expresión; escríbela en el recuadro **a tu tamaño de siempre**, como en clase.
+   - **Siguiente →** guarda y pasa a la siguiente. **Saltar** si no quieres hacerla. **← Anterior** vuelve (y
+     puedes rehacerla con **Borrar**). **Deshacer trazo** quita el último trazo.
+   - En los **cálculos seguidos** hay un renglón guía por paso: escribe cada paso en su renglón.
+   - En los de **símbolos sueltos**, el mismo símbolo seis veces con un hueco entre ellos.
+4. Puedes cerrar cuando quieras: se guarda en cada paso. Para seguir: **Abrir entreno** (sale el último).
+5. Cuando lleves bastantes (por ejemplo 50), pulsa **Usar para entrenar**: tus símbolos pasan a tus ejemplos y te
+   dice cuántas expresiones no encajaron. Después **Reentrenar**. Lo ya usado no se vuelve a usar.
+6. La versión de la app se ve abajo a la derecha (por ejemplo `OnePepe 1.2.0 · 1a2b3c4`) y en «Acerca de».
+
+Si quieres que mire tu letra yo, mándame el `.entreno.json` por el chat o por Drive (**nunca por git**).

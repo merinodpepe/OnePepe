@@ -193,6 +193,19 @@ async fn recognize_now(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     }
 }
 
+/// One request to the helper and its answer, or None (with a message if it can't be started).
+pub(crate) async fn ask(appwindow: &RnAppWindow, request: String) -> Option<String> {
+    let helper = helper(appwindow)?;
+    match helper.request(request).await {
+        Ok(resp) => Some(resp),
+        Err(e) => {
+            tracing::error!("Asking the math helper failed, Err: {e:?}");
+            reset_helper();
+            None
+        }
+    }
+}
+
 /// Asks again, after a short pause, what goes next to the recognized lines (results, "?", variables, wrong steps).
 pub(crate) fn schedule_page(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     PAGE_TIMER.with(|t| {
