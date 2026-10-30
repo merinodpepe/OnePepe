@@ -19,7 +19,7 @@ Peticiones:
   {"id": 13, "cmd": "plot", "rows": [...], "size": [w, h]}   gráfica de y = f(x) (grafica.py)
   {"id": 14, "cmd": "training_sets"}                 sets del modo entreno (entreno.py)
   {"id": 15, "cmd": "training_new", "set": "general-200"}   una sesión nueva (lo que la app guarda)
-  {"id": 16, "cmd": "training_render", "latex": "x^2"}      la expresión dibujada: {"png": base64 o null}
+  {"id": 16, "cmd": "training_render", "lines": ["x^2"], "color": "#000000"}   la expresión: {"png": base64 o null}
   {"id": 17, "cmd": "training_import", "session": {...}}   tu letra al almacén: {"imported", "failed", ...}
 
 Cada respuesta lleva el mismo "id". Los errores se responden con {"id", "error": "..."}; nunca se cae el programa.
@@ -150,7 +150,8 @@ class Server:
         if cmd == "training_render":
             from . import entreno
 
-            return {"png": entreno.render(req["latex"])}
+            lines = req.get("lines") or [req["latex"]]
+            return {"png": entreno.render(tuple(lines), req.get("color", "#000000"))}
         if cmd == "training_import":
             from . import entreno
 

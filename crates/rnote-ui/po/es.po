@@ -4130,3 +4130,84 @@ msgid ""
 msgstr ""
 "No se puede calcular. He leído: {latex}\n"
 "Toca el símbolo mal leído para corregirlo."
+
+#: crates/rnote-ui/src/entreno.rs
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Done! Press «Use for training», and then «Retrain» in the Math tab."
+msgstr "¡Terminado! Pulsa «Usar para entrenar» y luego «Reentrenar» en la pestaña Matemáticas."
+
+msgid "Handwriting saved"
+msgstr "Letra guardada"
+
+msgid "Learning your handwriting…"
+msgstr "Aprendiendo tu letra…"
+
+msgid "New training"
+msgstr "Nuevo entreno"
+
+msgid "Next →"
+msgstr "Siguiente →"
+
+msgid "One step on each line, as in class"
+msgstr "Un paso en cada renglón, como en clase"
+
+msgid "OnePepe training"
+msgstr "Entreno de OnePepe"
+
+msgid "Open training"
+msgstr "Abrir entreno"
+
+msgid "Skip"
+msgstr "Saltar"
+
+msgid "The math helper could not create the training: update it (git pull)"
+msgstr "El programa de matemáticas no pudo crear el entreno: actualízalo (git pull)"
+
+msgid "The same symbol six times, with a gap between them"
+msgstr "El mismo símbolo seis veces, con un hueco entre ellos"
+
+msgid "The training file could not be written"
+msgstr "No se pudo escribir el archivo del entreno"
+
+msgid "This is not an OnePepe training file"
+msgstr "Esto no es un archivo de entreno de OnePepe"
+
+msgid "Training"
+msgstr "Entreno"
+
+msgid "Undo stroke"
+msgstr "Deshacer trazo"
+
+msgid "Use for training"
+msgstr "Usar para entrenar"
+
+msgid "Write it as you would in class"
+msgstr "Escríbela como en clase"
+
+msgid "Write it, or press Skip"
+msgstr "Escríbela o pulsa Saltar"
+
+msgid "Your handwriting goes to your examples (on this computer). Then you can retrain."
+msgstr "Tu letra pasa a tus ejemplos (en este equipo). Después puedes reentrenar."
+
+msgid "already used for training"
+msgstr "ya usada para entrenar"
+
+msgid "skipped"
+msgstr "saltada"
+
+msgid ""
+"{n} expressions ({symbols} symbols of your handwriting) are now among your examples. {failed} did not fit (more "
+"or fewer strokes than symbols) and were left out. Retrain to use them in the model; the corrections count at once."
+msgstr ""
+"{n} expresiones ({symbols} símbolos de tu letra) ya están entre tus ejemplos. {failed} no encajaron (más o menos "
+"trazos que símbolos) y se dejaron fuera. Reentrena para usarlas en el modelo; como correcciones ya cuentan al "
+"momento."
+
+msgid "← Previous"
+msgstr "← Anterior"

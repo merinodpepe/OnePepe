@@ -963,13 +963,29 @@ fn math_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
         ),
         group(
             &gettext("Your handwriting"),
-            &[big_button(
-                "restore-symbolic",
-                &gettext("Retrain"),
-                "win.math-retrain",
-                None,
-            )
-            .upcast()],
+            &[
+                big_button(
+                    "document-new-symbolic",
+                    &gettext("New training"),
+                    "win.math-training-new",
+                    None,
+                )
+                .upcast(),
+                big_button(
+                    "document-open-symbolic",
+                    &gettext("Open training"),
+                    "win.math-training-open",
+                    None,
+                )
+                .upcast(),
+                big_button(
+                    "restore-symbolic",
+                    &gettext("Retrain"),
+                    "win.math-retrain",
+                    None,
+                )
+                .upcast(),
+            ],
         ),
     ])
 }
@@ -1639,6 +1655,12 @@ fn setup_actions(appwindow: &RnAppWindow) {
     });
     plain_action(appwindow, "math-retrain", |appwindow| {
         crate::mathhelper::retrain(appwindow);
+    });
+    plain_action(appwindow, "math-training-new", |appwindow| {
+        crate::entreno::new_training(appwindow);
+    });
+    plain_action(appwindow, "math-training-open", |appwindow| {
+        crate::entreno::open_training(appwindow);
     });
     plain_action(appwindow, "math-recognize-selection", |appwindow| {
         crate::mathhelper::recognize_selection(appwindow);

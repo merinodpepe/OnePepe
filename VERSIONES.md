@@ -7,6 +7,20 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.2 (2026-10-30)
+
+- **Modo entreno** (pestaña Matemáticas → Tu letra → **Nuevo entreno** / **Abrir entreno**). Se ve la expresión
+  dibujada y un recuadro para escribirla; con **Siguiente**, **Saltar**, **Anterior**, **Deshacer trazo** y
+  **Borrar**. Para los cálculos seguidos hay un renglón guía por paso.
+- **Set de 200**: 56 de símbolos sueltos (cada uno seis veces; los que más se confunden, dos veces), 104 expresiones
+  de todos los temas y 40 cálculos seguidos de 2 a 4 renglones. Está en `tools/onepepe-math/entrenos/`.
+- **Archivo de entreno** propio (`*.entreno.json`, en `Documentos/OnePepe entrenos`), no un `.rnote`: guarda el set,
+  por dónde vas y tus trazos con sus tiempos y la versión de la app. Se guarda en cada paso; puedes parar y seguir.
+- **Usar para entrenar**: lo escrito pasa a tus ejemplos (en tu equipo) cortado en símbolos sabiendo lo que dice;
+  después, **Reentrenar**.
+- El programa de matemáticas necesita **matplotlib** para dibujar las expresiones: `cd tools/onepepe-math &&
+  ./instalar.sh` una vez (sin él se ve el LaTeX en texto).
+
 ## 1.1 (2026-10-30)
 
 Primera versión numerada como OnePepe (antes se veía el número de Rnote, 0.15.0). Incluye todo lo hecho hasta ahora:

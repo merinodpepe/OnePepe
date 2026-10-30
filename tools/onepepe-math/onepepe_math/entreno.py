@@ -76,6 +76,7 @@ def new_session(name, directory=SETS_DIR):
     {"format": "onepepe-entreno", "version": 1, "set": nombre, "title", "created", "current": 0,
      "items": [{"id", "kind": "expr" | "steps" | "symbols", "lines": [latex, ...], "hint"}],
      "answers": {id: {"strokes": [[[x, y], ...]], "times": [[t0, t1]], "size": [ancho, alto], "lines": n,
+                      "line_height": alto de cada renglón guía,
                       "written": fecha, "skipped": bool, "imported": bool}}}
 
     La app añade además "app_version" al guardar.
@@ -97,18 +98,24 @@ def new_session(name, directory=SETS_DIR):
 
 
 @lru_cache(maxsize=512)
-def render(latex, dpi=140):
-    """PNG (en base64) de la expresión dibujada con matplotlib, o None si matplotlib no está o no la entiende."""
+def render(lines, color="#000000", dpi=140):
+    """PNG (en base64) de la expresión dibujada con matplotlib, un renglón debajo de otro, en `color` sobre fondo
+    transparente (para el tema claro y el oscuro). None si matplotlib no está o no la entiende."""
+    if isinstance(lines, str):
+        lines = (lines,)
     try:
         import matplotlib
 
         matplotlib.use("Agg")
-        from matplotlib import mathtext
+        from matplotlib.figure import Figure
     except ImportError:
         return None
+    fig = Figure(figsize=(0.01, 0.01))
+    text = "\n".join(f"${line}$" for line in lines)
+    fig.text(0, 0, text, fontsize=22, color=color, linespacing=1.9)
     buf = io.BytesIO()
     try:
-        mathtext.math_to_image(f"${latex}$", buf, dpi=dpi, format="png")
+        fig.savefig(buf, dpi=dpi, format="png", transparent=True, bbox_inches="tight", pad_inches=0.05)
     except Exception:  # noqa: BLE001 - una expresión que no sabe dibujar se enseña como texto
         return None
     return base64.b64encode(buf.getvalue()).decode("ascii")
@@ -117,11 +124,12 @@ def render(latex, dpi=140):
 # ---------- importar ----------
 
 
-def _split_by_guides(strokes, size, n_lines):
-    """Reparte los trazos entre los renglones guía del recuadro (bandas iguales de alto) por su centro vertical."""
+def _split_by_guides(strokes, size, n_lines, line_height=None):
+    """Reparte los trazos entre los renglones guía del recuadro (bandas de `line_height`, o de alto igual si no se
+    sabe) por su centro vertical."""
     if n_lines <= 1:
         return [list(range(len(strokes)))]
-    band = size[1] / n_lines
+    band = line_height or size[1] / n_lines
     out = [[] for _ in range(n_lines)]
     for i, s in enumerate(strokes):
         cy = (min(p[1] for p in s) + max(p[1] for p in s)) / 2
@@ -144,7 +152,7 @@ def import_session(session, classifier, store, source=None):
             continue
         strokes = [[(float(p[0]), float(p[1])) for p in s] for s in answer["strokes"] if s]
         lines = item["lines"]
-        groups = _split_by_guides(strokes, answer.get("size", [1.0, 1.0]), len(lines))
+        groups = _split_by_guides(strokes, answer.get("size", [1.0, 1.0]), len(lines), answer.get("line_height"))
         labeled_lines = []
         for latex, idx in zip(lines, groups):
             line_strokes = [strokes[i] for i in idx]

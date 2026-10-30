@@ -126,7 +126,7 @@ class TestServer(unittest.TestCase):
         self.assertEqual(session["format"], "onepepe-entreno")
         self.assertEqual(len(session["items"]), 200)
         self.assertEqual(session["answers"], {})
-        r = server.handle({"cmd": "training_render", "latex": r"\frac{1}{2}"})
+        r = server.handle({"cmd": "training_render", "lines": [r"\frac{1}{2}", "x=1"], "color": "#ffffff"})
         if HAVE_MPL:
             self.assertTrue(r["png"])
         self.assertIn("sets", server.handle({"cmd": "training_sets"}))
