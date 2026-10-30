@@ -20,6 +20,7 @@ use p2d::bounding_volume::{Aabb, BoundingVolume};
 use p2d::math::Vector2;
 use rnote_compose::penevent::PenEvent;
 use rnote_compose::penpath::{Element, PenPath};
+use rnote_compose::shapes::Shapeable;
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
@@ -70,6 +71,8 @@ pub struct MathOverlay {
     pub height: f64,
     pub text: String,
     pub latex: String,
+    /// The strokes of the "=" (or of the line) the result belongs to: erasing them hides the result.
+    pub keys: Vec<StrokeKey>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -81,7 +84,8 @@ pub struct MathState {
     pub overlays: Vec<MathOverlay>,
     next_id: u64,
     tap_start: Option<Vector2>,
-    tap_moved: bool,
+    /// The events of a possible tap, held back until it is clear whether the pen moves (then they are a stroke).
+    tap_events: Vec<PenEvent>,
     /// Where the last tap on a symbol happened, for the UI to show the candidates.
     pub last_tap: Option<Vector2>,
     /// Correction requests sent, by request id: (symbol ids, latex).
@@ -153,6 +157,8 @@ struct SidecarOverlay {
     height: f64,
     text: String,
     latex: String,
+    #[serde(default)]
+    keys: Vec<StrokeKey>,
 }
 
 fn aabb_to_array(b: Aabb) -> [f64; 4] {
@@ -330,68 +336,107 @@ impl Engine {
         widget_flags
     }
 
-    /// In math mode, a tap with the brush on a recognized symbol opens its candidates instead of drawing.
+    /// In math mode, a tap with the brush on the ink of a recognized symbol opens its candidates instead of drawing.
     ///
-    /// Returns None when the event was used for the tap.
+    /// The events that start on a symbol are held back until it is clear what they are: if the pen moves away they
+    /// are given back all together (a normal stroke, from its first point), if it is lifted without moving it was a
+    /// tap. Returns the events for the pen (none while waiting, or when it was a tap).
     pub(crate) fn math_filter_pen_event(
         &mut self,
         event: PenEvent,
         widget_flags: &mut WidgetFlags,
-    ) -> Option<PenEvent> {
+    ) -> Vec<PenEvent> {
         if !self.math.mode
             || self
                 .penholder
                 .current_pen_style_w_override(&crate::engine_view!(self))
                 != PenStyle::Brush
         {
-            return Some(event);
+            self.math.tap_start = None;
+            self.math.tap_events.clear();
+            return vec![event];
         }
         let tolerance = Self::MATH_TAP_TOLERANCE / self.camera.total_zoom();
         match &event {
             PenEvent::Down { element, .. } => {
                 if let Some(start) = self.math.tap_start {
+                    self.math.tap_events.push(event.clone());
                     if (element.pos - start).length() > tolerance {
-                        self.math.tap_moved = true;
+                        // it is a stroke: draw it from its first point
+                        self.math.tap_start = None;
+                        if self.math.stroke_down.is_none() {
+                            self.math.stroke_down = Some(now_seconds());
+                        }
+                        return std::mem::take(&mut self.math.tap_events);
                     }
-                    return None;
+                    return vec![];
                 }
-                if self.math_symbol_index_at(element.pos).is_some()
-                    && self.penholder.current_pen_progress()
-                        != rnote_compose::penevent::PenProgress::InProgress
+                if self.penholder.current_pen_progress()
+                    != rnote_compose::penevent::PenProgress::InProgress
+                    && self.math_symbol_index_at(element.pos).is_some()
                 {
                     self.math.tap_start = Some(element.pos);
-                    self.math.tap_moved = false;
-                    return None;
+                    self.math.tap_events = vec![event];
+                    self.math.stroke_down = Some(now_seconds());
+                    return vec![];
                 }
                 if self.math.stroke_down.is_none() {
                     self.math.stroke_down = Some(now_seconds());
                 }
-                Some(event)
+                vec![event]
             }
             PenEvent::Up { element, .. } => {
                 if let Some(start) = self.math.tap_start.take() {
-                    if !self.math.tap_moved && (element.pos - start).length() <= tolerance {
+                    if (element.pos - start).length() <= tolerance {
+                        self.math.tap_events.clear();
+                        self.math.stroke_down = None;
                         self.math.last_tap = Some(start);
                         widget_flags.math_tap = true;
+                        return vec![];
                     }
-                    return None;
+                    let mut events = std::mem::take(&mut self.math.tap_events);
+                    events.push(event);
+                    return events;
                 }
-                Some(event)
+                vec![event]
             }
             PenEvent::Cancel => {
                 self.math.tap_start = None;
-                Some(event)
+                self.math.tap_events.clear();
+                vec![event]
             }
-            _ => Some(event),
+            _ => {
+                if self.math.tap_start.is_some() {
+                    return vec![];
+                }
+                vec![event]
+            }
         }
     }
 
+    /// A symbol counts while some of its strokes are in the page (not erased: erased strokes stay in the store, in
+    /// the trash, and come back with undo).
+    fn math_keys_alive(&self, keys: &[StrokeKey]) -> bool {
+        keys.iter().any(|k| {
+            self.store.get_stroke_ref(*k).is_some() && !self.store.trashed(*k).unwrap_or(false)
+        })
+    }
+
     fn math_symbol_index_at(&self, pos: Vector2) -> Option<usize> {
+        // the ink of the symbol, not its box: writing next to it (an exponent, the next symbol) must draw
         let loosen = 4.0 / self.camera.total_zoom();
-        self.math
-            .symbols
-            .iter()
-            .position(|s| s.bounds.loosened(loosen).contains_local_point(pos))
+        self.math.symbols.iter().position(|s| {
+            s.bounds.loosened(loosen).contains_local_point(pos)
+                && self.math_keys_alive(&s.keys)
+                && s.keys.iter().any(|k| {
+                    self.store.get_stroke_ref(*k).is_some_and(|stroke| {
+                        stroke
+                            .hitboxes()
+                            .iter()
+                            .any(|h| h.loosened(loosen).contains_local_point(pos))
+                    })
+                })
+        })
     }
 
     /// The symbol at the position: (symbol id, candidates).
@@ -445,9 +490,7 @@ impl Engine {
             .filter(|s| {
                 s.bounds.maxs.y > bounds.mins.y - 0.5 * band
                     && s.bounds.mins.y < bounds.maxs.y + 0.5 * band
-                    && s.keys
-                        .iter()
-                        .all(|k| self.store.get_stroke_ref(*k).is_some())
+                    && self.math_keys_alive(&s.keys)
             })
             .map(|s| KnownSymbol {
                 latex: s.latex.clone(),
@@ -552,7 +595,9 @@ impl Engine {
         self.math
             .symbols
             .iter()
-            .filter(|b| b.id != symbol_id && gap(&b.bounds) < 3.0 * size)
+            .filter(|b| {
+                b.id != symbol_id && gap(&b.bounds) < 3.0 * size && self.math_keys_alive(&b.keys)
+            })
             .min_by(|x, y| gap(&x.bounds).total_cmp(&gap(&y.bounds)))
             .map(|b| b.id)
     }
@@ -746,7 +791,7 @@ impl Engine {
         }
         let options = self.math_options();
         let mut modified = false;
-        let mut equals_box: Option<Aabb> = None;
+        let mut equals_box: Option<(Aabb, Vec<StrokeKey>)> = None;
         for sym in resp.symbols {
             let sym_keys = sym
                 .strokes
@@ -787,7 +832,7 @@ impl Engine {
                 }
             }
             if latex == "=" {
-                equals_box = Some(bounds);
+                equals_box = Some((bounds, current_keys.clone()));
             }
             self.math.next_id += 1;
             self.math.symbols.push(MathSymbol {
@@ -801,7 +846,7 @@ impl Engine {
             });
         }
         if options.equals
-            && let (Some(result), Some(eq)) = (resp.result, equals_box)
+            && let (Some(result), Some((eq, eq_keys))) = (resp.result, equals_box)
         {
             let anchor = Vector2::new(eq.maxs.x + 0.3 * eq.extents().x.max(8.0), eq.center().y);
             // one result per "="
@@ -813,6 +858,7 @@ impl Engine {
                 height: eq.extents().x.max(eq.extents().y) * 1.2,
                 text: result.text,
                 latex: result.latex,
+                keys: eq_keys,
             });
             widget_flags.redraw = true;
         }
@@ -929,6 +975,7 @@ impl Engine {
                 if s.keys
                     .iter()
                     .any(|k| self.store.get_stroke_ref(*k).is_none())
+                    || !self.math_keys_alive(&s.keys)
                 {
                     return None;
                 }
@@ -958,11 +1005,13 @@ impl Engine {
             .math
             .overlays
             .iter()
+            .filter(|o| o.keys.is_empty() || self.math_keys_alive(&o.keys))
             .map(|o| SidecarOverlay {
                 anchor: [o.anchor.x, o.anchor.y],
                 height: o.height,
                 text: o.text.clone(),
                 latex: o.latex.clone(),
+                keys: o.keys.clone(),
             })
             .collect();
         let times = self
@@ -1042,6 +1091,7 @@ impl Engine {
                 height: o.height,
                 text: o.text,
                 latex: o.latex,
+                keys: o.keys,
             })
             .collect();
         restored
@@ -1075,7 +1125,14 @@ impl Engine {
         use piet::RenderContext;
         use rnote_compose::ext::DAffine2Ext;
 
-        if !self.math.mode && self.math.overlays.is_empty() {
+        let overlays = self
+            .math
+            .overlays
+            .iter()
+            .filter(|o| o.keys.is_empty() || self.math_keys_alive(&o.keys))
+            .cloned()
+            .collect::<Vec<_>>();
+        if !self.math.mode && overlays.is_empty() {
             return Ok(());
         }
         let size = self.camera.size();
@@ -1087,7 +1144,7 @@ impl Engine {
             draw_math_mode_border(&mut piet_cx, size)?;
         }
         piet_cx.transform(self.camera.transform().to_kurbo());
-        draw_math_overlays(&mut piet_cx, &self.math.overlays)?;
+        draw_math_overlays(&mut piet_cx, &overlays)?;
         piet_cx.finish().map_err(|e| anyhow::anyhow!("{e:?}"))?;
         snapshot.restore();
         Ok(())
@@ -1348,6 +1405,77 @@ mod tests {
     }
 
     #[test]
+    fn a_stroke_that_starts_on_a_symbol_is_drawn_whole() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let before = n_strokes(&engine);
+        // starts on the ink of the "1" and goes away: an exponent written from the symbol
+        let flags = draw(&mut engine, &line(101.0, 120.0, 140.0, 80.0));
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before + 1);
+        let key = *engine.store.stroke_keys_as_rendered().last().unwrap();
+        let bounds = engine.store.get_stroke_ref(key).unwrap().bounds();
+        // from its first point
+        assert!(bounds.mins.x < 102.0 && bounds.maxs.x > 139.0);
+        assert!(flags.math_pending);
+    }
+
+    #[test]
+    fn a_dot_next_to_the_ink_is_not_a_tap() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        // at 400 % the pen tip tolerance is 1 unit of the page
+        let _ = engine.camera.zoom_to(4.0);
+        let before = n_strokes(&engine);
+        // inside the box of the "=" (120..140 × 115..125) but between its bars, away from the ink
+        assert!(engine.math_symbol_at(Vector2::new(130.0, 120.0)).is_none());
+        let flags = draw(&mut engine, &[(130.0, 120.0), (130.5, 120.5)]);
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before + 1);
+    }
+
+    #[test]
+    fn erased_symbols_do_not_count() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let one = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "1")
+            .unwrap()
+            .keys
+            .clone();
+        let eq = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "=")
+            .unwrap()
+            .keys
+            .clone();
+        engine.store.set_trashed_keys(&one, true);
+        engine.store.set_trashed_keys(&eq, true);
+        let _ = engine.record(Instant::now());
+        let before = n_strokes(&engine);
+        // drawing where the "1" was draws, it is not a tap
+        let flags = draw(&mut engine, &line(101.0, 105.0, 101.0, 135.0));
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before + 1);
+        // the erased symbols are not sent as context, and the result of the erased "=" is not kept
+        let req = engine.math_take_request(None).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&req).unwrap();
+        assert!(v["known"].as_array().unwrap().is_empty());
+        let json = engine.math_sidecar_json().unwrap();
+        let file: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert!(file["symbols"].as_array().unwrap().is_empty());
+        assert!(file["overlays"].as_array().unwrap().is_empty());
+        // undo brings the erased symbols back
+        engine.store.set_trashed_keys(&one, false);
+        assert!(engine.math_symbol_at(Vector2::new(101.0, 120.0)).is_some());
+    }
+
+    #[test]
     fn writing_elsewhere_still_draws_in_math_mode() {
         let mut engine = Engine::default();
         let _ = write_one_equals(&mut engine);
@@ -1386,6 +1514,7 @@ mod render_tests {
                 height: 30.0,
                 text: "x = 3".into(),
                 latex: "x = 3".into(),
+                keys: vec![],
             }];
             draw_math_overlays(&mut piet_cx, &overlays).unwrap();
             piet::RenderContext::finish(&mut piet_cx).unwrap();

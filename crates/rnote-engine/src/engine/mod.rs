@@ -515,19 +515,29 @@ impl Engine {
             widget_flags.redraw = true;
             return (EventPropagation::Stop, widget_flags);
         };
-        // OnePepe: math mode: taps on recognized symbols, and queueing of finished strokes
-        let Some(event) = self.math_filter_pen_event(event, &mut widget_flags) else {
+        // OnePepe: math mode: taps on recognized symbols (the events are held back until it is clear whether it is
+        // a tap or a stroke), and queueing of finished strokes
+        let events = self.math_filter_pen_event(event, &mut widget_flags);
+        if events.is_empty() {
             widget_flags.redraw = true;
             return (EventPropagation::Stop, widget_flags);
-        };
-        let is_up = matches!(event, PenEvent::Up { .. });
-        let (propagation, wf) =
-            self.penholder
-                .handle_pen_event(event.clone(), None, now, &mut engine_view_mut!(self));
-        if is_up {
-            widget_flags |= self.math_after_pen_event(&event);
         }
-        (propagation, widget_flags | wf)
+        let mut propagation = EventPropagation::Proceed;
+        for event in events {
+            let is_up = matches!(event, PenEvent::Up { .. });
+            let (p, wf) = self.penholder.handle_pen_event(
+                event.clone(),
+                None,
+                now,
+                &mut engine_view_mut!(self),
+            );
+            propagation = p;
+            widget_flags |= wf;
+            if is_up {
+                widget_flags |= self.math_after_pen_event(&event);
+            }
+        }
+        (propagation, widget_flags)
     }
 
     /// Handle a pressed shortcut key.
