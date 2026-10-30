@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-29 (diseño nuevo según tu guía; detalle y capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
+Actualizado: 2026-10-30 (arreglos del modo matemáticas y plan tipo MyScript; antes, el diseño nuevo según tu guía, con capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
@@ -52,6 +52,19 @@ Leyenda de cómo se probó cada cosa:
 | Diseño | Ajustes en pestañas con logo y barra Revertir/Aplicar | `feat/diseno-ajustes` | sí | ejecutada ✔ (Revertir probado con interruptores y tema) | pendiente |
 | — | Regla: ángulo libre (también infinita) y ángulo exacto | `feat/regla-angulo` | sí | sí (2) + ejecutada ✔ (girada a mano a 152°, puesta a 30°) | pendiente |
 | — | Zoom del 5 % al 1600 %, «Zoom vectorial» hasta 100 000 %, herramienta Mano (Alt+7) | `feat/zoom-amplio` | sí | sí (1) + ejecutada ✔ (5 % y 91 710 % sin errores; la mano mueve la vista) | pendiente |
+| Mat. | **Escribir junto a un símbolo y donde has borrado** (fallo 1): el trazo que empieza sobre un símbolo se dibuja entero si te mueves; el toque cuenta sobre la tinta; lo borrado no cuenta | `feat/matematicas-arreglos` | sí | sí (3) | pendiente |
+| Mat. | **Zoom** (fallo 2): el final del trazo ya no se recorta con zoom ≥ 5000 %; lo escrito pequeño con mucho zoom no se mezcla con la letra grande de al lado (era «2+3=3») | `feat/matematicas-arreglos` | sí | sí (2) + ejecutada: al 1600 % «2+3=» bien 3 de 4 veces (al 100 %, 2 de 2); ver PLAN-PENDIENTE §2, punto 2 | pendiente |
+| Mat. | **Reconocer selección** (fallo 3): lo escrito fuera del modo, un renglón por petición | `feat/matematicas-arreglos` | sí | sí (1) + ejecutada ✔ | pendiente |
+| Mat. | **i y j** (fallo 4): se une el punto cortado aparte. Medido: i bien 141 → 147 de 358, lo demás igual | `feat/matematicas-arreglos` | — | sí (2) + medido con MathWriting | pendiente |
+| Mat. | **«Otro…»** (fallo 5): buscar el símbolo por nombre, carácter, LaTeX o atajo; rejilla con todos | `feat/matematicas-arreglos` | sí | sí (4) + ejecutada ✔ («menor o», «x», «y») | pendiente |
+| Mat. | **Resultado del «=»** (fallo 6): se recalcula al corregir, borrar, deshacer y al activar la opción; «?» que explica lo leído | `feat/matematicas-arreglos` | sí | sí + ejecutada ✔ | pendiente |
+| Mat. | **Funciones** (fallo 7): `sin x`, `ln 2` (ahora «ln»), `log₂ 8 = 3`, «1n» → ln, sen/tg/arcsen/arctg, ∛ | `feat/matematicas-arreglos` | — | sí (9, Python) | pendiente |
+| MyScript 1 | **Tachar con zigzag** (solo en modo matemáticas por defecto; un deshacer) y la tinta a formas espera en modo matemáticas | `feat/matematicas-arreglos` | sí | sí (3 + 3 + 1) + ejecutada ✔ | pendiente |
+| MyScript 2 | **Diccionario de símbolos** (`nombres.py`, orden `names`) | `feat/matematicas-arreglos` | — | sí (4) | no aplica |
+| MyScript 3 | **Variables** (`x = 3`, `m = 70 kg`; lo que las usa muestra su valor en morado) | `feat/matematicas-arreglos` | sí | sí (4) + ejecutada ✔ («x+1» → «= 4») | pendiente |
+| MyScript 4 | **Revisar pasos** (rojo con explicación de errores típicos) | `feat/matematicas-arreglos` | sí | sí (9) + ejecutada (sin falsos avisos) | pendiente |
+| MyScript 5 | **Copiar como LaTeX** | `feat/matematicas-arreglos` | sí | sí + ejecutada ✔ (aviso «LaTeX copiado») | pendiente |
+| MyScript 6 | **Fracciones** (tocar: fracción → decimal → mixta) y **gráficas** de y = f(x) | `feat/matematicas-arreglos` | sí | sí (2 + 6) + gráfica ejecutada (en la nube los trazos salen como cajas rosas) | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
@@ -84,6 +97,16 @@ Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas e
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
 
 ## Qué necesito de ti
+
+**De los arreglos de matemáticas y el plan tipo MyScript (30/10/2026):** no me hace falta ningún permiso nuevo. Cuando
+lo instales:
+
+- Prueba con el lápiz lo de `CAMBIOS-ONEPEPE.md` → «Matemáticas: arreglos y plan tipo MyScript (30/10/2026)».
+- El programa de matemáticas se actualiza solo con `git pull` (la orden `onepepe-math` es un enlace a la carpeta
+  del repositorio y no hay librerías nuevas). No hace falta reentrenar: tu modelo y tus correcciones se quedan.
+- Dime si el zigzag para tachar te borra algo que no querías o no te borra cuando sí (ajustes: pestaña Matemáticas →
+  Tachar).
+- Sigue pendiente tu lista de asignaturas para preparar las ~80 expresiones de entrenamiento.
 
 **De `main` = OnePepe (29/10/2026):**
 

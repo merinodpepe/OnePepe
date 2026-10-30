@@ -470,7 +470,13 @@ fn other_symbol_box(
         group_check,
         move |latex: String| {
             popover.popdown();
-            correct_symbol(&appwindow, &canvas, symbol_id, &latex, group_check.is_active());
+            correct_symbol(
+                &appwindow,
+                &canvas,
+                symbol_id,
+                &latex,
+                group_check.is_active(),
+            );
         }
     ));
     let symbol_button = {
@@ -757,7 +763,13 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
             group_check,
             move |_| {
                 popover.popdown();
-                correct_symbol(&appwindow, &canvas, symbol_id, &latex, group_check.is_active());
+                correct_symbol(
+                    &appwindow,
+                    &canvas,
+                    symbol_id,
+                    &latex,
+                    group_check.is_active(),
+                );
             }
         ));
         flow.append(&button);
