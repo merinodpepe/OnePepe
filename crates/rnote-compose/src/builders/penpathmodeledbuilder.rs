@@ -132,7 +132,9 @@ impl Buildable for PenPathModeledBuilder {
 
 static MODELER_PARAMS: Lazy<ModelerParams> = Lazy::new(|| ModelerParams {
     sampling_min_output_rate: 120.0,
-    sampling_end_of_stroke_stopping_distance: 0.01,
+    // OnePepe: in document units, so it must be tiny: with a big zoom a whole symbol is a few units (0.01 cut the
+    // end of the strokes at 5000 % and more)
+    sampling_end_of_stroke_stopping_distance: 0.0001,
     sampling_end_of_stroke_max_iterations: 20,
     sampling_max_outputs_per_call: 200,
     stylus_state_modeler_max_input_samples: 20,
@@ -265,6 +267,72 @@ impl PenPathModeledBuilder {
             Err(e) => {
                 error!("Updating stroke modeler failed while restarting, Err: {e:?}")
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod onepepe_zoom_tests {
+    use super::*;
+    use crate::builders::buildable::{Buildable, BuilderCreator, BuilderProgress};
+    use std::time::Duration;
+
+    /// A "7" written in 0.3 s, scaled by `s` (as if written with a zoom of 1/s): the path that comes out, divided
+    /// by `s`.
+    fn seven(s: f64) -> Vec<Vector2> {
+        let pts: Vec<(f64, f64)> = (0..=30)
+            .map(|i| {
+                let t = i as f64 / 30.0;
+                if t < 0.4 {
+                    (t / 0.4 * 30.0, 0.0)
+                } else {
+                    (30.0 - (t - 0.4) / 0.6 * 15.0, (t - 0.4) / 0.6 * 45.0)
+                }
+            })
+            .collect();
+        let t0 = Instant::now();
+        let el = |p: (f64, f64)| Element::new(Vector2::new(p.0 * s, p.1 * s), 0.5);
+        let mut b = PenPathModeledBuilder::start(el(pts[0]), t0);
+        let mut out = vec![];
+        for (i, p) in pts.iter().enumerate().skip(1) {
+            let now = t0 + Duration::from_millis(10 * i as u64);
+            let modifier_keys = Default::default();
+            let event = if i == pts.len() - 1 {
+                PenEvent::Up {
+                    element: el(*p),
+                    modifier_keys,
+                }
+            } else {
+                PenEvent::Down {
+                    element: el(*p),
+                    modifier_keys,
+                }
+            };
+            if let BuilderProgress::EmitContinue(segs) | BuilderProgress::Finished(segs) =
+                b.handle_event(event, now, Constraints::default()).progress
+            {
+                out.extend(segs.into_iter().map(|seg| seg.end().pos / s));
+            }
+        }
+        out
+    }
+
+    /// The math mode with a big zoom: the same gesture gives the same shape, whatever the zoom.
+    #[test]
+    fn same_shape_with_any_zoom() {
+        let reference = seven(1.0);
+        for s in [0.1, 0.05, 0.01, 0.001] {
+            let p = seven(s);
+            let end = *p.last().unwrap();
+            assert!(
+                (end - *reference.last().unwrap()).length() < 0.5,
+                "scale {s}: the end of the stroke moved to {end:?}"
+            );
+            let corner = p
+                .iter()
+                .map(|q| (*q - Vector2::new(30.0, 0.0)).length())
+                .fold(f64::MAX, f64::min);
+            assert!(corner < 3.5, "scale {s}: the corner is rounded off ({corner})");
         }
     }
 }
