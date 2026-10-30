@@ -400,7 +400,7 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None):
             if result is None and units:
                 result = answer(tree, glossary=plain)
             if result is None:
-                marks.append(_mark("unknown", "?", to_latex(tree), anchor, height))
+                marks.append(_mark("unknown", "?", to_latex(tree), anchor, height, at=syms.index(eq)))
             else:
                 formats = []
                 if result["kind"] == "value":
@@ -408,7 +408,8 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None):
                         formats = number_formats(sp.sympify(result["text"]))
                     except (sp.SympifyError, TypeError, ValueError):
                         formats = []
-                marks.append(_mark(result["kind"], result["text"], result["latex"], anchor, height, formats=formats))
+                marks.append(_mark(result["kind"], result["text"], result["latex"], anchor, height, formats=formats,
+                                   at=syms.index(eq)))
         # 2. variables: una expresión que las usa muestra su valor
         elif variables and env and not is_definition and len(tokens) >= 2:
             parts = _split(tokens, RELATIONS | {","} | STEP_SEPARATORS)
