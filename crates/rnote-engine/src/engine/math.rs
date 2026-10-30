@@ -566,8 +566,15 @@ impl Engine {
             .iter()
             .map(|k| self.math.stroke_times.get(k).copied())
             .collect::<Option<Vec<[f64; 2]>>>();
-        // the already recognized symbols of the same line give context
-        let band = bounds.extents().y.max(1.0);
+        // the already recognized symbols of the same line give context: at the same height, near, and of a similar
+        // size (writing small with a big zoom next to bigger writing must not mix both)
+        let size = Self::math_typical_size(
+            &keys
+                .iter()
+                .filter_map(|k| self.store.get_stroke_ref(*k).map(|s| s.bounds()))
+                .collect::<Vec<_>>(),
+        );
+        let band = bounds.extents().y.max(size);
         let known = self
             .math
             .symbols
@@ -575,6 +582,9 @@ impl Engine {
             .filter(|s| {
                 s.bounds.maxs.y > bounds.mins.y - 0.5 * band
                     && s.bounds.mins.y < bounds.maxs.y + 0.5 * band
+                    && Self::math_similar_size(Self::math_box_size(&s.bounds), size)
+                    && s.bounds.mins.x < bounds.maxs.x + 12.0 * size
+                    && s.bounds.maxs.x > bounds.mins.x - 12.0 * size
                     && self.math_keys_alive(&s.keys)
             })
             .map(|s| s.known())
@@ -1185,33 +1195,77 @@ impl Engine {
             .collect()
     }
 
-    /// Groups boxes into lines, from top to bottom: boxes whose heights (a bit enlarged) overlap are in the same
-    /// line, so fractions, exponents and subscripts stay with their line.
-    fn math_lines_of(boxes: &[(usize, Aabb)]) -> Vec<Vec<usize>> {
-        if boxes.is_empty() {
-            return vec![];
+    /// The size of a box for comparing symbols: its height, or half its width for flat ones ("-", "=").
+    fn math_box_size(b: &Aabb) -> f64 {
+        b.extents().y.max(0.5 * b.extents().x)
+    }
+
+    /// The typical size of some boxes (their median size).
+    fn math_typical_size(boxes: &[Aabb]) -> f64 {
+        let mut sizes = boxes.iter().map(Self::math_box_size).collect::<Vec<f64>>();
+        if sizes.is_empty() {
+            return 1.0;
         }
-        let mut heights = boxes
-            .iter()
-            .map(|(_, b)| b.extents().y.max(0.5 * b.extents().x))
-            .collect::<Vec<f64>>();
-        heights.sort_by(f64::total_cmp);
-        let margin = 0.3 * heights[heights.len() / 2];
+        sizes.sort_by(f64::total_cmp);
+        sizes[sizes.len() / 2].max(1e-6)
+    }
+
+    /// Whether a symbol of size `a` can be on a line written with size `b` (exponents and fraction bars included,
+    /// not writing ten times smaller with a big zoom).
+    fn math_similar_size(a: f64, b: f64) -> bool {
+        a <= 4.0 * b && b <= 4.0 * a
+    }
+
+    /// Groups boxes into lines, from top to bottom: boxes whose heights (a bit enlarged) overlap are in the same
+    /// line, so fractions, exponents and subscripts stay with their line. Boxes of very different size (written
+    /// with a very different zoom) are not mixed, and neither are boxes far apart sideways.
+    fn math_lines_of(boxes: &[(usize, Aabb)]) -> Vec<Vec<usize>> {
+        struct Line {
+            top: f64,
+            bottom: f64,
+            left: f64,
+            right: f64,
+            size: f64,
+            items: Vec<(usize, Aabb)>,
+        }
         let mut sorted = boxes.to_vec();
         sorted.sort_by(|a, b| a.1.mins.y.total_cmp(&b.1.mins.y));
-        let mut lines: Vec<(f64, f64, Vec<(usize, Aabb)>)> = vec![];
+        let mut lines: Vec<Line> = vec![];
         for (i, b) in sorted {
-            match lines.last_mut() {
-                Some((_, bottom, items)) if b.mins.y - margin <= *bottom => {
-                    *bottom = bottom.max(b.maxs.y + margin);
-                    items.push((i, b));
+            let size = Self::math_box_size(&b);
+            let found = lines.iter_mut().rev().find(|l| {
+                let margin = 0.3 * l.size;
+                Self::math_similar_size(size, l.size)
+                    && b.mins.y - margin <= l.bottom
+                    && b.maxs.y + margin >= l.top
+                    && b.mins.x < l.right + 12.0 * l.size
+                    && b.maxs.x > l.left - 12.0 * l.size
+            });
+            match found {
+                Some(l) => {
+                    l.items.push((i, b));
+                    l.top = l.top.min(b.mins.y);
+                    l.bottom = l.bottom.max(b.maxs.y);
+                    l.left = l.left.min(b.mins.x);
+                    l.right = l.right.max(b.maxs.x);
+                    l.size =
+                        Self::math_typical_size(&l.items.iter().map(|x| x.1).collect::<Vec<_>>());
                 }
-                _ => lines.push((b.mins.y - margin, b.maxs.y + margin, vec![(i, b)])),
+                None => lines.push(Line {
+                    top: b.mins.y,
+                    bottom: b.maxs.y,
+                    left: b.mins.x,
+                    right: b.maxs.x,
+                    size,
+                    items: vec![(i, b)],
+                }),
             }
         }
+        lines.sort_by(|a, b| a.top.total_cmp(&b.top));
         lines
             .into_iter()
-            .map(|(_, _, mut items)| {
+            .map(|l| {
+                let mut items = l.items;
                 items.sort_by(|a, b| a.1.mins.x.total_cmp(&b.1.mins.x));
                 items.into_iter().map(|(i, _)| i).collect()
             })
@@ -1889,6 +1943,44 @@ mod tests {
             second["id"]
         ));
         assert_eq!(engine.math_queue_strokes(&keys), 1);
+    }
+
+    #[test]
+    fn small_writing_with_a_big_zoom_is_not_mixed_with_big_writing() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        // at 1600 %, a tiny "1" just under the big "1 =" (100..140 tall 40), touching its band
+        let _ = engine.camera.zoom_to(16.0);
+        let _ = draw(&mut engine, &line(110.0, 141.0, 110.1, 143.5));
+        let req: serde_json::Value =
+            serde_json::from_str(&engine.math_take_request(None).unwrap()).unwrap();
+        assert!(req["known"].as_array().unwrap().is_empty());
+        let _ = engine.math_apply_response(&format!(
+            r#"{{"id": {}, "symbols": [{{"strokes": [0], "candidates": [{{"latex": "1", "p": 0.9}}]}}]}}"#,
+            req["id"]
+        ));
+        // and it is a line of its own
+        let page: serde_json::Value =
+            serde_json::from_str(&engine.math_page_request(None).unwrap()).unwrap();
+        assert_eq!(page["rows"].as_array().unwrap().len(), 2);
+        // a big exponent-sized or fraction-sized symbol still joins its line
+        assert_eq!(
+            Engine::math_lines_of(&[
+                (
+                    0,
+                    Aabb::new(Vector2::new(0.0, 10.0), Vector2::new(10.0, 30.0))
+                ),
+                (
+                    1,
+                    Aabb::new(Vector2::new(11.0, 2.0), Vector2::new(16.0, 12.0))
+                ),
+                (
+                    2,
+                    Aabb::new(Vector2::new(20.0, 19.0), Vector2::new(60.0, 21.0))
+                ),
+            ]),
+            vec![vec![0, 1, 2]]
+        );
     }
 
     #[test]
