@@ -17,7 +17,7 @@ use crate::pens::PenStyle;
 use crate::store::StrokeKey;
 use crate::strokes::{BrushStroke, Stroke};
 use p2d::bounding_volume::{Aabb, BoundingVolume};
-use p2d::math::Vector2;
+pub use p2d::math::Vector2;
 use rnote_compose::penevent::PenEvent;
 use rnote_compose::penpath::{Element, PenPath};
 use rnote_compose::shapes::Shapeable;

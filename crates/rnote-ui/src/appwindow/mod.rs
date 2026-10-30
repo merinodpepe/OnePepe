@@ -376,6 +376,14 @@ impl RnAppWindow {
         if widget_flags.math_tap {
             crate::mathhelper::show_candidates(self, canvas);
         }
+        // the lines changed (recognized, corrected, erased, undone): ask again what goes next to them
+        if widget_flags.math_page
+            || (widget_flags.store_modified
+                && canvas.engine_ref().math_options().annotates()
+                && canvas.engine_ref().math_has_symbols())
+        {
+            crate::mathhelper::schedule_page(self, canvas);
+        }
         if widget_flags.deselect_color_setters {
             self.overlays().colorpicker().deselect_setters();
         }

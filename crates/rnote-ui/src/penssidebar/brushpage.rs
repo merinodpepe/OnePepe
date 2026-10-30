@@ -491,6 +491,10 @@ impl RnBrushPage {
                     .brush_config
                     .math
                     .equals = row.is_active();
+                // OnePepe: the results of what was already written appear (or go) now
+                if let Some(canvas) = appwindow.active_tab_canvas() {
+                    crate::mathhelper::schedule_page(&appwindow, &canvas);
+                }
             }
         ));
 
