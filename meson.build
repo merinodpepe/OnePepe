@@ -1,4 +1,5 @@
-project('rnote', ['rust', 'cpp'], version: '0.15.0', meson_version: '>= 1.0')
+# OnePepe: the version of OnePepe (not of Rnote). Each version's changes: VERSIONES.md
+project('rnote', ['rust', 'cpp'], version: '1.1.0', meson_version: '>= 1.0')
 # add a patch suffix for alpha or beta versions in format '-<alpha|beta>.<x>'.
 patch = ''
 

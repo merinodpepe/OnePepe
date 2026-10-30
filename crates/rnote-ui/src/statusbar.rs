@@ -67,6 +67,13 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     bar.append(&spacer);
     bar.append(&saved);
     bar.append(&zoom);
+    // OnePepe: the version, to know which one is installed when something fails
+    let version = gtk4::Label::new(Some(&format!(
+        "OnePepe {}",
+        crate::globals::onepepe_version()
+    )));
+    version.add_css_class("dim-label");
+    bar.append(&version);
     match appwindow
         .imp()
         .tabbar
