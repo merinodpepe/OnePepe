@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-30. **Versión 1.2** (modo entreno; qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Antes, en el mismo día: arreglos del modo matemáticas y plan tipo MyScript; antes, el diseño nuevo según tu guía, con capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
+Actualizado: 2026-10-30. **Versión 1.3** (set de tus asignaturas y símbolos de estadística; antes, 1.2: modo entreno; qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Antes, en el mismo día: arreglos del modo matemáticas y plan tipo MyScript; antes, el diseño nuevo según tu guía, con capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
@@ -67,6 +67,9 @@ Leyenda de cómo se probó cada cosa:
 | MyScript 6 | **Fracciones** (tocar: fracción → decimal → mixta) y **gráficas** de y = f(x) | `feat/matematicas-arreglos` | sí | sí (2 + 6) + gráfica ejecutada (en la nube los trazos salen como cajas rosas) | pendiente |
 | 1.1 | **Versión visible** (barra de estado y «Acerca de», con el commit) y `VERSIONES.md` | `feat/version` | sí | ejecutada ✔ | no aplica |
 | 1.2 | **Modo entreno**: ventana con la expresión y un recuadro; archivo `*.entreno.json`; set de 200; «Usar para entrenar» | `feat/modo-entreno` | sí | sí (7, Python) + medido (200 de 200 encajan; 93,7 % de símbolos exactos con letra ajena) + ejecutada ✔ (crear, escribir, siguiente, saltar, anterior, importar, cálculo de 3 renglones) | pendiente |
+| 1.3 | **Set «Tus asignaturas»** (genética de poblaciones, biofísica, aprendizaje estadístico; 200) y **elegir el set** | `feat/entreno-asignaturas` | sí | sí (se dibujan las 200, todo en el vocabulario) + medido (199 de 200 encajan; 88 % de símbolos exactos con letra ajena) + ejecutada ✔ (elegir set, Nernst dibujado) | pendiente |
+| 1.3 | **Símbolos de estadística** (ŷ, x̄, x̃, 𝔼, ℙ, ℝ, ⊤, ⟨ ⟩, ∩, ∪, ⇌) y acentos en la estructura | `feat/entreno-asignaturas` | — | sí (4) + medido (el resto igual: 1725 de 2641) | pendiente |
+| 1.3 | **Glosario de biofísica** (k_B, R, F, N_A, h, c, q_e) | `feat/entreno-asignaturas` | — | comprobado: RT/F a 310 K = 26,71 mV | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
@@ -99,6 +102,12 @@ Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas e
 (`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
 
 ## Qué necesito de ti
+
+**De la 1.3:**
+
+- Para Biofísica, copia el glosario a la carpeta de esa asignatura (cambia la ruta por la tuya):
+  `cp tools/onepepe-math/glosarios/biofisica.txt "/ruta/a/Biofisica/.onepepe-glosario.txt"`
+- Al crear un entreno, elige **Tus asignaturas**.
 
 **Del modo entreno (1.2):**
 

@@ -138,12 +138,11 @@ pub(crate) fn new_training(appwindow: &RnAppWindow) {
         #[weak]
         appwindow,
         async move {
-            let Some(resp) = crate::mathhelper::ask(
-                &appwindow,
-                r#"{"id": 0, "cmd": "training_new", "set": "general-200"}"#.to_string(),
-            )
-            .await
-            else {
+            let Some(set) = choose_set(&appwindow).await else {
+                return;
+            };
+            let request = serde_json::json!({"id": 0, "cmd": "training_new", "set": set});
+            let Some(resp) = crate::mathhelper::ask(&appwindow, request.to_string()).await else {
                 return;
             };
             let session = serde_json::from_str::<serde_json::Value>(&resp)
@@ -203,6 +202,50 @@ pub(crate) fn new_training(appwindow: &RnAppWindow) {
             open_window(&appwindow, state);
         }
     ));
+}
+
+/// Asks which set of expressions to write (when there is more than one).
+async fn choose_set(appwindow: &RnAppWindow) -> Option<String> {
+    let resp = crate::mathhelper::ask(
+        appwindow,
+        r#"{"id": 0, "cmd": "training_sets"}"#.to_string(),
+    )
+    .await?;
+    let v = serde_json::from_str::<serde_json::Value>(&resp).ok()?;
+    let sets = v["sets"].as_array()?.clone();
+    match sets.len() {
+        0 => None,
+        1 => sets[0]["name"].as_str().map(String::from),
+        _ => {
+            let dialog = adw::AlertDialog::new(
+                Some(&gettext("New training")),
+                Some(&gettext("Which expressions do you want to write?")),
+            );
+            let body = gtk4::Box::new(gtk4::Orientation::Vertical, 8);
+            for set in &sets {
+                let label = gtk4::Label::new(Some(&format!(
+                    "{} ({}): {}",
+                    set["title"].as_str().unwrap_or_default(),
+                    set["count"].as_u64().unwrap_or(0),
+                    set["description"].as_str().unwrap_or_default()
+                )));
+                label.set_wrap(true);
+                label.set_xalign(0.0);
+                label.add_css_class("dim-label");
+                body.append(&label);
+            }
+            dialog.set_extra_child(Some(&body));
+            dialog.add_response("cancel", &gettext("Cancel"));
+            for set in &sets {
+                if let (Some(name), Some(title)) = (set["name"].as_str(), set["title"].as_str()) {
+                    dialog.add_response(name, title);
+                }
+            }
+            dialog.set_close_response("cancel");
+            let answer = dialog.choose_future(Some(appwindow)).await;
+            (answer.as_str() != "cancel").then(|| answer.to_string())
+        }
+    }
 }
 
 /// «Open training»: goes on with a training file.
@@ -655,6 +698,10 @@ fn show_item(appwindow: &RnAppWindow, state: &Rc<RefCell<State>>, widgets: &Rc<W
         "steps" => gettext("One step on each line, as in class"),
         _ => gettext("Write it as you would in class"),
     };
+    // the subject, when the set says it (it is written in Spanish in the set)
+    if let Some(subject) = item.hint.as_ref().filter(|_| item.kind == "expr") {
+        hint = format!("{subject} · {hint}");
+    }
     if answer.skipped {
         hint = format!("{hint} · {}", gettext("skipped"));
     } else if answer.imported {

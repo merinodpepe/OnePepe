@@ -101,13 +101,26 @@ _TABLE = [
     (";", ";", "signos", "punto y coma", ""),
     (":", ":", "signos", "dos puntos", ""),
     ("'", "′", "signos", "prima|derivada", ""),
+    # estadística y biofísica (2026-10-30)
+    (r"\hat", "^", "estadística", "sombrero|gorro|estimación|hat", "^"),
+    (r"\overline", "‾", "estadística", "barra|media|raya encima|bar|overline", ""),
+    (r"\tilde", "~", "estadística", "virgulilla encima|tilde", ""),
+    (r"\mathbb{E}", "𝔼", "estadística", "esperanza|valor esperado|E doble", ""),
+    (r"\mathbb{P}", "ℙ", "estadística", "probabilidad|P doble", ""),
+    (r"\mathbb{R}", "ℝ", "estadística", "reales|R doble", ""),
+    (r"\top", "⊤", "estadística", "traspuesta|transpuesta|top", ""),
+    (r"\langle", "⟨", "estadística", "media de ensemble abre|ángulo abre|langle", ""),
+    (r"\rangle", "⟩", "estadística", "media de ensemble cierra|ángulo cierra|rangle", ""),
+    (r"\cap", "∩", "estadística", "intersección", ""),
+    (r"\cup", "∪", "estadística", "unión", ""),
+    (r"\rightleftharpoons", "⇌", "flechas", "equilibrio|reacción reversible", ""),
 ]
 
 ENTRIES = [
     {"latex": latex, "char": char, "group": group, "names": names.split("|"), "shortcut": shortcut}
     for latex, char, group, names, shortcut in _TABLE
 ]
-GROUPS = ["griego", "operadores", "relaciones", "flechas", "cálculo", "signos"]
+GROUPS = ["griego", "operadores", "relaciones", "flechas", "cálculo", "estadística", "signos"]
 
 _BY_LATEX = {e["latex"]: e for e in ENTRIES}
 _BY_CHAR = {e["char"]: e for e in ENTRIES}

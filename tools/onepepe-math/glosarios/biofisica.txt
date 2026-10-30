@@ -1,0 +1,15 @@
+# Glosario de biofísica para OnePepe (constantes con unidades).
+# Cópialo a la carpeta de tu cuaderno o sección de Biofísica con el nombre ".onepepe-glosario.txt":
+#   cp tools/onepepe-math/glosarios/biofisica.txt "<tu carpeta de Biofísica>/.onepepe-glosario.txt"
+# Con él, el «=» y las variables calculan con unidades (k_B T = …, RT/F = …) y estos símbolos se reconocen mejor.
+# Ojo: no pongas aquí «e» (la carga del electrón) ni «R» si en esa carpeta también usas e^x o R²: valdrían esto.
+k_B = 1.380649e-23 J/K           # constante de Boltzmann
+R = 8.314 J/(mol*K)              # constante de los gases
+F = 96485 C/mol                  # constante de Faraday
+N_A = 6.02214076e23 1/mol        # número de Avogadro
+h = 6.62607015e-34 J*s           # constante de Planck
+c = 299792458 m/s                # velocidad de la luz
+q_e = 1.602176634e-19 C          # carga del electrón
+# Ejemplos tuyos (quita la # para usarlos):
+# T = 310 K                      # temperatura del cuerpo
+# eta = 1e-3 Pa*s                # viscosidad del agua

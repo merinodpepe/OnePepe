@@ -25,6 +25,8 @@ from .symbols import normalize_label
 
 SETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entrenos")
 SESSION_VERSION = 1
+# etiquetas con las que se guardan tus ejemplos cuando el modelo usa otro nombre para el mismo símbolo escrito
+TRAINING_LABELS = {r"\varepsilon": r"\epsilon"}
 
 
 # ---------- lo que se escribe ----------
@@ -35,14 +37,19 @@ def expected_symbols(latex):
     latex = re.sub(r"\\(begin|end)\{[a-z]*\}", " ", latex)
     latex = latex.replace(r"\mathrm", "").replace(r"\,", " ").replace(r"\quad", " ").replace(r"\ ", " ")
     out = []
-    for t in _TOKEN.findall(latex):
+    # 𝔼, ℙ, ℝ son un solo símbolo
+    tokens = []
+    for part in re.split(r"(\\mathbb\{[A-Z]\})", latex):
+        tokens += [part] if part.startswith(r"\mathbb") else _TOKEN.findall(part)
+    for t in tokens:
         if t in _INVISIBLE or t in "{}":
             continue
         name = t[1:] if t.startswith("\\") else None
         if name and (name in FUNCTIONS or name in FUNCTION_ALIASES):
             out += list(name)
             continue
-        out.append(normalize_label(t))
+        # a mano ε y ϵ son lo mismo, y el modelo solo tiene \epsilon
+        out.append(TRAINING_LABELS.get(normalize_label(t), normalize_label(t)))
     return out
 
 

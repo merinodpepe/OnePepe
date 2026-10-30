@@ -158,7 +158,7 @@ class _Parser:
         return self.atom()
 
     def _starts_atom(self, tok):
-        if tok[0] in ("num", "frac", "sqrt", "root"):
+        if tok[0] in ("num", "frac", "sqrt", "root", "accent"):
             return True
         if tok[0] != "sym":
             return False
@@ -206,6 +206,8 @@ class _Parser:
             return self._apply_scripts(value, tok)
         if kind == "sqrt":
             return self._apply_scripts(sp.sqrt(sub_expr(tok[1][1], self.glossary)), tok)
+        if kind == "accent":
+            return self._apply_scripts(self._symbol(accent_token(tok)), tok)
         if kind == "root":
             index = sub_expr(tok[1][1], self.glossary)
             radicand = sub_expr(tok[1][2], self.glossary)
@@ -314,6 +316,21 @@ class _Parser:
         if self.peek() is not None:
             raise ParseError(f"sobra {self.peek()[1]}")
         return value
+
+
+ACCENT_NAMES = {r"\hat": "hat", r"\overline": "bar", r"\tilde": "tilde"}
+
+
+def accent_token(tok):
+    """La ficha de un símbolo con acento como un símbolo con nombre propio: ŷ → «y_hat», x̄ → «x_bar» (otra variable
+    distinta de y o de x). Conserva su subíndice."""
+    _, kind, base = tok[1]
+    if base[0] != "sym":
+        raise ParseError("acento sobre algo compuesto")
+    name = GREEK_NAMES.get(base[1], base[1])
+    if not name.isalpha():
+        raise ParseError(f"acento sobre {base[1]}")
+    return ["sym", f"{name}{ACCENT_NAMES[kind]}", tok[2], tok[3]]
 
 
 def _plain(row):

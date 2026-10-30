@@ -8,7 +8,12 @@ ALIASES = {
     # flechas de "paso siguiente": la larga es la misma flecha
     r"\longrightarrow": r"\rightarrow", r"\implies": r"\Rightarrow", r"\Longrightarrow": r"\Rightarrow",
     r"\iff": r"\Leftrightarrow",
+    # acentos: la barra de la media es la misma raya
+    r"\bar": r"\overline", r"\widehat": r"\hat", r"\widetilde": r"\tilde",
 }
+
+# Acentos encima de un símbolo (ŷ, x̄, x̃): sombrero de una estimación, barra de una media.
+ACCENTS = {r"\hat", r"\overline", r"\tilde"}
 
 # Separan los pasos de un desarrollo ("2x+4=10 → 2x=6 → x=3") o expresiones en una línea ("x=1; y=2"): no son "=".
 STEP_SEPARATORS = {";", r"\rightarrow", r"\Rightarrow", r"\Leftrightarrow"}
@@ -21,7 +26,8 @@ GREEK = {
 }
 BINARY_OPS = {"+", "-", r"\pm", r"\mp", r"\times", r"\cdot", r"\div", "*", "/"}
 RELATIONS = {"=", r"\neq", "<", ">", r"\leq", r"\geq", r"\approx", r"\sim", r"\simeq", r"\equiv", r"\propto",
-             r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\Leftrightarrow", r"\in", r"\subset", r"\supset"}
+             r"\rightarrow", r"\leftarrow", r"\Rightarrow", r"\Leftrightarrow", r"\in", r"\subset", r"\supset",
+             r"\rightleftharpoons"}
 OPEN = {"(", "[", r"\{", r"\langle", r"\lfloor", r"\lceil"}
 CLOSE = {")", "]", r"\}", r"\rangle", r"\rfloor", r"\rceil"}
 BIG_OPS = {r"\sum", r"\prod", r"\int", r"\oint", r"\iint", r"\bigcup", r"\bigcap"}
@@ -55,6 +61,8 @@ def category(latex):
         return "bigop"
     if latex in {r"\sqrt"}:
         return "sqrt"
+    if latex in ACCENTS:
+        return "accent"
     if latex in {".", ",", "'", "!", ";", ":"}:
         return "punct"
     return "other"
@@ -76,6 +84,9 @@ CORE = (
        r"\approx", r"\sim", r"\equiv", r"\propto", "(", ")", "[", "]", r"\{", r"\}", "|", ",", ".", "'", "!",
        r"\frac", r"\sqrt", r"\int", r"\sum", r"\prod", r"\partial", r"\nabla", r"\infty", r"\rightarrow",
        r"\leftarrow", r"\in", "%", r"\circ", r"\lim", "*", ";", ":", r"\Rightarrow", r"\Leftrightarrow"}
+    # estadística, probabilidad y biofísica (2026-10-30; medido: no empeora el resto)
+    | {r"\hat", r"\overline", r"\tilde", r"\mathbb{E}", r"\mathbb{P}", r"\mathbb{R}", r"\top", r"\langle",
+       r"\rangle", r"\cap", r"\cup", r"\rightleftharpoons"}
 )
 
 # Símbolos que, colocados en la caja del símbolo escrito, se dibujan igual: confundirlos no cambia el resultado

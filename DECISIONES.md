@@ -339,6 +339,23 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## Tus asignaturas y estadística (versión 1.3, 2026-10-30)
+
+- **Vocabulario:** se añaden a `CORE` los símbolos de estadística que el modelo ya tenía y no se usaban (\hat,
+  \overline, \tilde, 𝔼, ℙ, ℝ, ⊤, ⟨ ⟩, ∩, ∪, ⇌). Medido con 400 fórmulas de MathWriting: el resto se reconoce igual
+  (1725 de 2641 en los dos casos; sustituciones correctas 84,8 % → 84,6 %). Se quedan.
+- **Acentos en la estructura:** un sombrero, raya o virgulilla pequeños justo encima de **un** símbolo es su acento
+  (nodo `accent`). Una raya es acento solo si es corta como su letra y no hay nada encima (si no, es fracción o «=»).
+  ŷ y x̄ son variables distintas de y y x (nombres `yhat`, `xbar`).
+- **ε:** el modelo solo tiene `\epsilon`; en el entreno, `\varepsilon` se guarda como `\epsilon` (a mano es igual).
+  `\ell` no está en el modelo: en el set se escribe `l`.
+- **Set de asignaturas:** 200 = 40 genética de poblaciones + 40 biofísica + 45 aprendizaje estadístico + 15 cálculo
+  y álgebra + 30 símbolos sueltos + 30 desarrollos de varios pasos. Medido con letra ajena: 199 de 200 encajan y el
+  88 % de los símbolos sale exacto (más bajo que el general, 93,7 %: fórmulas más largas). Los ids empiezan por «a»
+  (los del general por «g»): no se mezclan.
+- **Glosario de biofísica** como plantilla para copiar, no activado solo: los nombres del glosario valen en toda la
+  carpeta y `e` o `R` chocarían con e^x o R² en estadística. Por eso la carga del electrón es `q_e`.
+
 ## Modo entreno y versiones (2026-10-30)
 
 - **Versión de OnePepe**: se empezó en **1.1** (lo hecho hasta el 30/10) y el modo entreno es la **1.2**. El número

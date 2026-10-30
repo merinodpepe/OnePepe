@@ -71,6 +71,13 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.3.0" date="2026-10-30">
+      <description>
+        <p>A training set with population genetics, biophysics and statistical learning; choose the set when a
+          training starts. Statistics symbols: hats, bars, expectation, probability, transpose. A biophysics
+          glossary with constants and units.</p>
+      </description>
+    </release>
     <release version="1.2.0" date="2026-10-30">
       <description>
         <p>Training mode: write 200 known expressions in a box to teach your handwriting to the math recognizer.

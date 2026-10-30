@@ -7,6 +7,20 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.3 (2026-10-30)
+
+- **Set «Tus asignaturas» (200)**: genética de poblaciones (Hardy-Weinberg, F, F_ST, N_e, deriva, selección,
+  migración, desequilibrio de ligamiento, D de Tajima, heredabilidad), biofísica (Nernst, Goldman, Fick,
+  Stokes-Einstein, Boltzmann, Gibbs, Poiseuille, Michaelis-Menten, Hill, Beer-Lambert, cinética, membrana) y
+  aprendizaje estadístico (regresión, logística, verosimilitud, ridge/lasso, descenso de gradiente, softmax, Bayes,
+  esperanza y varianza, normal, contrastes, métricas, AIC/BIC), con cálculo y álgebra, 30 de símbolos sueltos y 30
+  desarrollos de varios pasos.
+- **Elegir el set** al crear un entreno (General o Tus asignaturas).
+- **Símbolos de estadística** en el reconocedor: ŷ, x̄, x̃ (acentos encima de una letra), 𝔼, ℙ, ℝ, ⊤, ⟨ ⟩, ∩, ∪, ⇌.
+  ŷ y x̄ son variables propias (x̄ = 5 no cambia x). Medido: lo demás se reconoce igual.
+- **Glosario de biofísica** (`tools/onepepe-math/glosarios/biofisica.txt`): k_B, R, F, N_A, h, c, q_e con
+  unidades. Se copia a la carpeta de la asignatura como `.onepepe-glosario.txt`.
+
 ## 1.2 (2026-10-30)
 
 - **Modo entreno** (pestaña Matemáticas → Tu letra → **Nuevo entreno** / **Abrir entreno**). Se ve la expresión

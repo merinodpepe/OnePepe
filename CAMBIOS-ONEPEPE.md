@@ -576,6 +576,17 @@ Todo en la pestaña **Matemáticas** de la cinta. Lo nuevo de «Calcular» viene
     números y la curva a la derecha, como trazos normales (se mueven, se borran, Ctrl+Z). Para otro intervalo,
     escribe debajo `x ∈ [0; 5]` y selecciona los dos renglones.
 
+## Tus asignaturas y estadística (versión 1.3, 30/10/2026)
+
+1. **Nuevo entreno** pregunta qué set quieres: **General** o **Tus asignaturas** (genética de poblaciones, biofísica,
+   aprendizaje estadístico, con cálculo y álgebra). Arriba pone de qué asignatura es cada fórmula.
+2. **Estadística en el modo matemáticas:** escribe `ŷ` (una y con un sombrero encima), `x̄` (una raya corta encima),
+   `𝔼[X]`, `P(A|B)`, `X^⊤`, `A ∩ B`, `A ⇌ B`. Con «Variables», `x̄ = 5` y debajo `x̄ + 1` da `= 6` (y no cambia x).
+   Si no los reconoce bien al principio, corrígelos con «Otro…» (`sombrero`, `media`, `esperanza`, `traspuesta`) o
+   entrena con el set de tus asignaturas.
+3. **Glosario de biofísica:** cópialo a tu carpeta de Biofísica como `.onepepe-glosario.txt` (ver ESTADO.md). Con
+   «Resultado del =» y «Variables»: escribe `T = 310 K` y debajo `RT/F =` → 26,71 mJ/C (= 26,71 mV).
+
 ## Modo entreno (versión 1.2, 30/10/2026)
 
 Para enseñarle tu letra al modo matemáticas sabiendo exactamente qué escribes.
