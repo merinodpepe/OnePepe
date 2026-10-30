@@ -336,6 +336,11 @@ impl Engine {
         widget_flags
     }
 
+    /// The stroke in progress was not kept (e.g. it was a scratch-out).
+    pub(crate) fn math_forget_stroke_in_progress(&mut self) {
+        self.math.stroke_down = None;
+    }
+
     /// In math mode, a tap with the brush on the ink of a recognized symbol opens its candidates instead of drawing.
     ///
     /// The events that start on a symbol are held back until it is clear what they are: if the pen moves away they

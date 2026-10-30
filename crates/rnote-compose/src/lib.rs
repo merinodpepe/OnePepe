@@ -23,6 +23,8 @@ pub mod penevent;
 pub mod penpath;
 /// OnePepe: virtual ruler
 pub mod ruler;
+/// OnePepe: the scratch-out gesture (a zigzag erases)
+pub mod scratchout;
 /// utilities for serializing / deserializing
 pub mod serialize;
 /// OnePepe: recognition of hand drawn shapes

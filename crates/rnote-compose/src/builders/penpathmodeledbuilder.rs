@@ -332,7 +332,10 @@ mod onepepe_zoom_tests {
                 .iter()
                 .map(|q| (*q - Vector2::new(30.0, 0.0)).length())
                 .fold(f64::MAX, f64::min);
-            assert!(corner < 3.5, "scale {s}: the corner is rounded off ({corner})");
+            assert!(
+                corner < 3.5,
+                "scale {s}: the corner is rounded off ({corner})"
+            );
         }
     }
 }
