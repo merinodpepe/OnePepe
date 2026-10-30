@@ -119,6 +119,12 @@ pub struct BrushConfig {
     /// OnePepe: options of the math recognition.
     #[serde(rename = "math")]
     pub math: crate::engine::math::MathOptions,
+    /// OnePepe: when a zigzag over ink erases it.
+    #[serde(rename = "scratch_out")]
+    pub scratch_out: crate::engine::scratch::ScratchOutMode,
+    /// OnePepe: how permissive the scratch-out is, from 0.0 (strict) to 1.0 (permissive).
+    #[serde(rename = "scratch_out_sensitivity")]
+    pub scratch_out_sensitivity: f64,
 }
 
 impl Default for BrushConfig {
@@ -132,6 +138,8 @@ impl Default for BrushConfig {
             shape_recognition: false,
             shape_recognition_sensitivity: 0.5,
             math: crate::engine::math::MathOptions::default(),
+            scratch_out: crate::engine::scratch::ScratchOutMode::default(),
+            scratch_out_sensitivity: 0.5,
         }
     }
 }

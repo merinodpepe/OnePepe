@@ -539,3 +539,39 @@ nada.
 
 Más ejemplos en `MATEMATICAS-INFORME.md`, sección 0.7. Si el `;` sale como «j», corrígelo: aprende de tus
 correcciones.
+
+## Matemáticas: arreglos y plan tipo MyScript (30/10/2026)
+
+Todo en la pestaña **Matemáticas** de la cinta. Lo nuevo de «Calcular» viene apagado: actívalo allí.
+
+1. **Escribir junto a lo reconocido (fallo 1).** Con el modo matemáticas (Ctrl+Alt+M), escribe `x` y espera a que
+   se reconozca. Escribe un exponente empezando el trazo **encima** de la x: se dibuja entero. Un toque **sin
+   moverte** sobre la tinta de un símbolo sigue abriendo sus candidatas; un toque al lado (en el hueco del «=») ya no.
+   Borra un símbolo y escribe en su sitio: se dibuja normal.
+2. **Zoom (fallo 2).** Escribe a 100 % y luego, al 800–1600 %, escribe pequeño justo al lado o debajo: cada cosa se
+   reconoce por su cuenta (antes la letra grande de al lado se colaba en el renglón pequeño).
+3. **Reconocer selección (fallo 3).** Sin el modo, escribe `2+3=`. Selecciona con el lazo y pulsa **Reconocer
+   selección**: se activa el modo y se reconoce, como si lo hubieras escrito en él.
+4. **i y j (fallo 4).** Escribe `x_i` y `j`. El punto cortado aparte ahora se une a su palo. Si aun así falla,
+   corrígelo 3–4 veces: aprende tu letra.
+5. **«Otro…» (fallo 5).** Toca un símbolo mal leído. Debajo de las candidatas, escribe en «Otro…»: `delta`, `alfa`,
+   `menor o igual`, `δ`, `\delta`, `\d`, `<=`, `->`, `inf`… y elige una sugerencia o pulsa Intro. **Todos los
+   símbolos** abre una rejilla por grupos para elegir con el lápiz.
+6. **Resultado del «=» (fallo 6).** Activa **Resultado del «=»**. Lo ya escrito se calcula al momento. Corrige un
+   símbolo: el resultado cambia. Si no se puede calcular sale un **«?»** gris: tócalo y te dice qué ha leído.
+   Si el resultado es una fracción, **tócalo**: pasa a decimal y a número mixto (7/2 → 3.5 → 3 1/2).
+7. **Funciones (fallo 7).** Con el «=»: `ln 2 =` (ahora pone ln), `sin x` sin paréntesis, `log₂ 8 =` → 3,
+   `sen(0) =`, `tg(0) =`, `∛27 =` → 3, `3 x 4 =` → 12.
+8. **Tachar (fase 1).** En modo matemáticas, haz un zigzag (4 idas y vueltas o más) encima de algo: se borra. Ctrl+Z
+   lo devuelve en un paso. Un zigzag sobre nada se queda como tinta. **Tachar → Zigzag borra**: nunca, solo en modo
+   matemáticas (por defecto) o siempre. En modo matemáticas la tinta a formas ya no convierte tus «0» en círculos.
+9. **Variables (fase 3).** Activa **Variables**. Escribe `x = 3` y debajo `2x + 1`: al lado sale `= 7` en morado.
+   Cambia el 3 (tacha y escribe otro): se recalcula. Con unidades: `m = 70 kg`, `g = 10`, `mg =` → 700 kg.
+10. **Revisar pasos (fase 4).** Activa **Revisar pasos**. Escribe `2x + 4 = 10` y debajo `2x = 10 + 4`: sale en rojo
+    «Has pasado un término al otro lado sin cambiarle el signo». Otros: `3(x+1)` / `= 3x + 1` (falta multiplicar),
+    `(a+b)²` / `= a² + b²`, `2x = 6` / `x = 4` (resta en vez de dividir). Toca el aviso para leerlo entero.
+11. **Copiar como LaTeX (fase 5).** Selecciona con el lazo lo reconocido y pulsa **Copiar como LaTeX**; pégalo donde
+    quieras.
+12. **Gráfica (fase 6).** Escribe `y = x²` (o `f(x) = sin(x)`), selecciónalo y pulsa **Gráfica**: aparecen ejes,
+    números y la curva a la derecha, como trazos normales (se mueven, se borran, Ctrl+Z). Para otro intervalo,
+    escribe debajo `x ∈ [0; 5]` y selecciona los dos renglones.

@@ -4,29 +4,24 @@
 > **todo** el proyecto sin haber visto las conversaciones anteriores. Está escrito en español porque el usuario y el
 > resto de documentos del repositorio lo están; los nombres de código, rutas y comandos van tal cual.
 >
-> Actualizado: 2026-10-30. Rama de trabajo: `onepepe` (y `main`, que avanza igual). Si algo de aquí contradice al código, manda el código; si
+> Actualizado: 2026-10-30 (tarde). Rama de trabajo: `onepepe` (y `main`, que avanza igual). Si algo de aquí contradice al código, manda el código; si
 > contradice una petición nueva del usuario, manda el usuario (y actualiza este documento).
 
-> **Lo último (2026-10-29/30), por si solo lees esto:**
+> **Lo último (2026-10-30, tarde), por si solo lees esto:**
 >
-> - **`main` ya es OnePepe.** El Rnote original está en la rama `rnote-original`. Se quitó lo visible de Rnote:
->   - borrados `CONTRIBUTING.md`, `MAINTAINING.md`, `docs/`, `.github/` (también el CI), las capturas de Rnote y
->     «Donar»;
->   - reescritos `BUILDING.md`, los metadatos de tienda, el `.desktop` y el icono monocromo.
->   - Ver §12, «Sin Rnote a la vista».
-> - El usuario **probó el modo matemáticas** y encontró fallos. **Están apuntados, no arreglados**, en
->   `PLAN-PENDIENTE.md` §2, puntos 1–8, con causa y arreglo propuesto. Ver aquí §13.1:
->   - no deja escribir cerca de símbolos reconocidos ni donde has borrado;
->   - va peor con mucho zoom;
->   - no reconoce lo ya escrito;
->   - i y j;
->   - escribir tú el símbolo;
->   - el resultado del «=» en algunos casos;
->   - funciones `sin x` y `log_b`.
-> - El usuario mandó su **plan tipo MyScript Math** (`PLAN-MYSCRIPT.md`): tachar, diccionario, variables, revisión
->   de álgebra, LaTeX, fracciones y gráficos. Está en `PLAN-PENDIENTE.md` §7 y aquí en §13.2.
-> - **Últimamente pide «apúntalo, no lo hagas»:** documentar en `PLAN-PENDIENTE.md` sin tocar código. Respétalo:
->   no implementes nada de §13 sin que lo pida.
+> - **Hechos los 7 fallos del modo matemáticas y una primera versión de las 6 fases del plan MyScript** (rama
+>   `feat/matematicas-arreglos`, fusionada en `onepepe` y `main`). Resumen en §13; detalle en `DECISIONES.md`
+>   («Arreglos del modo matemáticas…»), cómo probar en `CAMBIOS-ONEPEPE.md` y lo que queda en `PLAN-PENDIENTE.md`.
+>   - Nuevo en Python: `dots.py` (i/j), `nombres.py` (diccionario, orden `names`), `pagina.py` (orden `page`: «=»,
+>     «?», variables, revisión de pasos, formas de fracción; orden `latex`), `grafica.py` (orden `plot`).
+>   - Nuevo en Rust: `rnote-compose/src/scratchout.rs` y `engine/scratch.rs` (tachar), página/anotaciones en
+>     `engine/math.rs`, cinta y ventanita «Otro…» en `ribbon.rs` y `mathhelper.rs`.
+>   - **El «=» ya no se calcula en `recognize`**: lo calcula la orden `page`, que la app envía tras cada cambio.
+> - Todo **ejecutado en la app de la nube** con un modelo entrenado allí (MathWriting en la carpeta temporal, nunca en
+>   git). **Nada probado con el lápiz real.**
+> - Antes (29/10): `main` = OnePepe y el Rnote original en `rnote-original` (§12, «Sin Rnote a la vista»).
+> - El usuario suele pedir «apúntalo, no lo hagas»: respétalo. Esta vez pidió hacerlo («corrige los fallos y aplica
+>   lo que puedas del plan»).
 
 ---
 
@@ -65,8 +60,8 @@
   rama **`rnote-original`** (`6bbc9b2`). Cada función va en una rama `feat/*` fusionada con `--no-ff`.
 - Unos **156 archivos cambiados**, **~21 700 líneas añadidas** respecto a `rnote-original`.
 - **Estado:**
-  - Todo compila y los tests pasan: motor de Rust 64 + 4 + 2 (+1 ignorado), `rnote-compose` 19 (+1 ignorado) y
-    Python 34 (+1 saltado sin modelo).
+  - Todo compila y los tests pasan: motor de Rust 77 + 4 + 2 (+1 ignorado), `rnote-compose` 23 (+1 ignorado) y
+    Python 72 (+1 saltado sin modelo).
   - Casi todo se ha **ejecutado en una app de prueba en la nube** (GTK 4.14 sobre Xvfb, manejada con xdotool).
   - **Nada está probado todavía con el lápiz real** del usuario ni con GTK 4.22.
 - **El formato `.rnote` no se ha cambiado**: lo nuevo que no cabe va a un **archivo oculto** por página, a un índice
@@ -227,6 +222,7 @@ OnePepe/
 | `palette.rs` (A) | paleta de 48 colores |
 | `ruler.rs` (A) | geometría de la regla: `Ruler` (center, angle, length, width, `infinite`, `snap_to_steps` con skip), `RulerInteraction`, `visible_part`, `anchor_near`, `TICK_STEP` = 8, `NUMBER_STEP` = 80 |
 | `shaperecognition.rs` (A) y `shaperecognition/tests.rs` (A) | tinta a formas |
+| `scratchout.rs` (A) | gesto de tachar (zigzag: 4+ vueltas en alguna dirección) |
 | `color.rs` (M) | `ONEPEPE_BRAND`, `ONEPEPE_BRAND_TINT`, `ONEPEPE_FG_3` |
 | `style/indicators.rs` (M) | asas en el color de marca |
 
@@ -238,6 +234,7 @@ OnePepe/
 | `onepepe_index.rs` (A) | índice oculto por carpeta (orden y subpáginas) |
 | `engine/math.rs` (A) | estado del modo matemáticas, peticiones y respuestas, archivo oculto |
 | `engine/ruler.rs` (A) | regla en el motor: interceptar eventos, dibujar, ángulo |
+| `engine/scratch.rs` (A) | tachar: `ScratchOutMode`, `scratch_out_after_stroke` (un deshacer con `update_latest_history_entry`) |
 | `engine/onepepe_insert.rs` (A) | tamaño de hoja, tabla, plantillas, título y fecha, PDF ajustado, `DocStatus` |
 | `engine/onepepe_lines.rs` (A) | «Fondo y renglones» y reescritura de páginas cerradas |
 | `engine/onepepe_notebook.rs` (A) | exportar varias páginas en un PDF |
@@ -745,8 +742,8 @@ La guía pedía: jerarquía por tono, un solo acento morado, poco marco, escala 
 - Tras unas 50 correcciones la app sugiere **Reentrenar** (pestaña Matemáticas → Tu letra).
 
 **Rust, motor** (`rnote-engine/src/engine/math.rs`):
-- `MathOptions { replace: true, threshold: 0.95, equals: false }` vive en `brush_config.math`, es decir, en los
-  ajustes de la app.
+- `MathOptions { replace: true, threshold: 0.95, equals: false, variables: false, check: false }` vive en
+  `brush_config.math`, es decir, en los ajustes de la app.
 - `MathState`:
   - `mode`;
   - cola `pending` de `StrokeKey`;
@@ -792,12 +789,16 @@ programa nunca se cae.
 | `cmd` | Petición | Respuesta |
 |---|---|---|
 | `ping` | — | `{ok, personal_examples}` |
-| `recognize` | `strokes` [[[x,y]…]…], `known` [{latex, box}], `notebook_dir`, `threshold`, `clean`, `equals`, `times` [[t0,t1]…] | `{symbols:[{strokes:[índices], box, candidates:[{latex,p}], confidence, group, clean:[[[x,y]…]] o null}], latex, result:{latex,text,kind} o null, confidence}` |
+| `recognize` | `strokes` [[[x,y]…]…], `known` [{latex, box, alts}], `notebook_dir`, `threshold`, `clean`, `equals`, `times` [[t0,t1]…] | `{symbols:[{strokes:[índices], box, candidates:[{latex,p}], confidence, group, clean:[[[x,y]…]] o null}], latex, result:{latex,text,kind} o null, confidence}`. **La app ya no usa `result`**: el «=» sale de `page` |
 | `correct` | `strokes`, `latex`, `predicted`, `notebook_dir`, `add_to_glossary` | `{ok, clean}`; guarda el ejemplo y lo añade al glosario del cuaderno |
 | `glyph` | `latex`, `box` | `{clean}` |
 | `recognize_group` | `strokes` | igual que un símbolo: reconoce ese grupo sin cortarlo (para unir/separar) |
 | `segment_fix` | `junk` [[trazos]…], `notebook_dir` | `{ok, saved}`; guarda los cortes malos como «trozo» |
 | `examples` / `forget` / `relabel` | id de ejemplo | gestión del almacén personal (aún no hay pantalla en la app) |
+| `names` | `query` (opcional) | `{entries:[{latex,char,group,names,shortcut}], exact}`; sin `query`, todo y `groups` (`nombres.py`) |
+| `page` | `rows:[{symbols:[{latex,box,alts}]}]`, `equals`, `variables`, `check`, `notebook_dir` | `{rows:[{latex, marks:[{kind,text,latex,anchor,height,at?,formats?}]}]}`; `kind`: value/solve/…, `unknown` («?»), `variable`, `error` (`pagina.py`) |
+| `latex` | `rows` | `{latex:[…]}` |
+| `plot` | `rows`, `size:[w,h]` | `{axes, labels, curves, x_range, y_range, functions}` como líneas en la caja, o `{error}` (`grafica.py`) |
 
 **Lanzador `tools/onepepe-math/onepepe-math`** (bash):
 - Usa `~/.local/share/onepepe/venv/bin/python` si existe; si no, `ONEPEPE_PYTHON` o `python3`.
@@ -821,6 +822,10 @@ programa nunca se cae.
 | `symbols.py` | vocabulario, alias, categorías, `same_shape` |
 | `latex_tokens.py`, `inkml.py`, `synth.py` | utilidades y fórmulas sintéticas para medir |
 | `recognizer.py` | une todo (orden abajo) |
+| `dots.py` | i/j: une el punto cortado aparte con su palo (medido: i 141 → 147 de 358) |
+| `nombres.py` | diccionario de símbolos (nombre es/en, LaTeX, carácter, grupo, atajo), `resolve`, `search` |
+| `pagina.py` | orden `page`: «=», «?», variables, revisión de pasos (errores típicos), formas de fracción; `latex_rows` |
+| `grafica.py` | orden `plot`: y = f(x) con numpy, cortes en asíntotas, ejes y números con glifos Hershey |
 | `server.py` | el servidor del protocolo |
 
 **`classifier.py`:**
@@ -896,7 +901,7 @@ esperados; de ahí salen ejemplos de símbolos y de «trozos».
   `same_shape()`.
 
 **`recognizer.py`**, en este orden:
-1. `segment`;
+1. `segment` y `fix_dotted_letters` (i/j);
 2. kNN personal;
 3. glosario;
 4. grupos parecidos;
@@ -941,7 +946,10 @@ entrenar (más scikit-learn).
   | cualquier cosa ambigua | `None`: no se muestra nada |
 
 - La coma decimal se une a las cifras **antes** de partir por comas (`decimal_comma=True`).
-- **No** comprueba todavía si cada paso de un desarrollo se sigue del anterior (idea en el plan).
+- Funciones: tras una función lo que sigue es su argumento (`sin x`, `sin 2x` = sin(2x)); `log₂ 8` usa la base;
+  el resultado dice `ln` (no `log`); `sen`, `tg`, `arcsen`, `arctg`, `cotg`; «1n» → ln si «l» era candidata; `∛`.
+- Una «x» entre dos números es «por».
+- La revisión de pasos y las variables están en `pagina.py` (orden `page`), no aquí.
 
 ### 7.6 Medidas (lo que se sabe)
 
@@ -1013,7 +1021,7 @@ Va en la misma carpeta que la página (`math_sidecar_path`). JSON con `version: 
   "version": 2,
   "symbols":  [{"id", "keys": [StrokeKey], "keys_bounds": [x0,y0,x1,y1], "latex", "bounds", "candidates",
                 "group", "original"}],
-  "overlays": [{"anchor": [x,y], "height", "text", "latex"}],
+  "overlays": [{"anchor": [x,y], "height", "text", "latex", "keys", "kind", "formats", "format"}],
   "times":    [[StrokeKey, [t0, t1]]],
   "ruler":    {"center", "angle", "length", "width", "infinite"} | null,
   "line_width": 1.5 | null,
@@ -1022,6 +1030,9 @@ Va en la misma carpeta que la página (`math_sidecar_path`). JSON con `version: 
 ```
 
 - Se escribe **al guardar** (también con el autoguardado) y se borra si no hay nada que guardar. Se lee **al abrir**.
+- Desde el 2026-10-30 cada anotación lleva `keys` (los trazos de su «=» o renglón: si se borran, se oculta), `kind`
+  (value, unknown, variable, error…), `formats` (fracción/decimal/mixta) y `format` (la elegida). Todos con valor
+  por defecto: los archivos de antes se leen igual.
 - Un símbolo se restaura solo si sus trazos existen y la caja coincide (±0,5): un archivo oculto desfasado nunca cambia
   la página.
 - Sigue a la página al renombrar, mover, duplicar o borrar **desde el explorador de OnePepe**.
@@ -1059,7 +1070,8 @@ Va en la misma carpeta que la página (`math_sidecar_path`). JSON con `version: 
 **Otros archivos de `~/.config/onepepe/`:** `boligrafos.json` (`PenPresets`) y `boligrafos.anterior.json`.
 
 **GSettings de Rnote** (esquema `com.github.flxzt.rnote`): `engine-config` (JSON de `EngineConfig`, incluidas las
-opciones de matemáticas y de tinta a formas), `color-scheme`, `righthanded`, áreas de trabajo, etc. OnePepe **no
+opciones de matemáticas `math: {replace, threshold, equals, variables, check}`, la tinta a formas y tachar
+`scratch_out` (off/math_mode/always) y `scratch_out_sensitivity`), `color-scheme`, `righthanded`, áreas de trabajo, etc. OnePepe **no
 añade claves** al esquema: si falta una clave, la app se cierra al arrancar.
 
 ### 8.5 Datos locales: `~/.local/share/onepepe/`
@@ -1142,10 +1154,10 @@ cd tools/onepepe-math && ./instalar.sh --entrenar
 ### 10.2 Tests (en cualquier sitio)
 
 ```bash
-cargo test -p rnote-compose -p rnote-engine        # 19 (+1 ign.) y 64 + 4 + 2 (+1 ign.)
+cargo test -p rnote-compose -p rnote-engine        # 23 (+1 ign.) y 77 + 4 + 2 (+1 ign.)
 cd tools/onepepe-math
 python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -r requirements-train.txt
-/tmp/venv/bin/python -m unittest discover -s tests   # 34 (1 saltado sin modelo)
+/tmp/venv/bin/python -m unittest discover -s tests   # 72 (1 saltado sin modelo)
 msgfmt -c -o /dev/null crates/rnote-ui/po/es.po      # traducción
 ```
 
@@ -1238,6 +1250,15 @@ Los scripts de la nube se pierden en cada sesión; este es el esencial.
    ```
 
    Es la misma orden que se le dio al usuario para comprobar su instalación.
+5. **Trucos (2026-10-30):**
+   - El lanzador puede guardar lo que entra y sale (`tee -a entrada.log | onepepe-math | tee -a salida.log`): así se
+     ve qué se envía y qué responde.
+   - Con símbolos al azar de MathWriting la red falla a menudo (63 % top-1): para probar la interfaz, busca antes sin
+     la app qué muestras (`k`) se leen bien, o corrige con «Otro…».
+   - Para el «=» y las variables, activa los botones de la pestaña Matemáticas (Calcular).
+   - Instalar en la nube: `apt-get install libgtk-4-dev libadwaita-1-dev libpoppler-glib-dev libasound2-dev libxml2-dev
+     xdotool dbus-x11 imagemagick` y `locale-gen es_ES.UTF-8`; el esquema de GSettings se compila desde
+     `crates/rnote-ui/data/app.gschema.xml.in` cambiando `@APP_ID@` y `@APP_IDPATH@`.
 
 ---
 
@@ -1245,6 +1266,7 @@ Los scripts de la nube se pierden en cada sesión; este es el esencial.
 
 **Ramas fusionadas en `onepepe`**, de la más reciente a la más antigua:
 
+- **Arreglos de matemáticas y plan MyScript (2026-10-30, tarde):** `feat/matematicas-arreglos`.
 - **Solo documentación (2026-10-30):** `feat/contexto-ia-2`, `feat/pendiente-myscript`, `feat/pendiente-funciones`,
   `feat/pendiente-resultado`, `feat/pendiente-matematicas-2`, `feat/pendiente-reconocer-seleccion`,
   `feat/pendiente-matematicas`.
@@ -1272,8 +1294,9 @@ La tabla detallada de qué se probó en cada una está en `ESTADO.md` → «Hech
 - **Arrastrar** en el árbol y en los favoritos.
 - El **recorte de pantalla** con portal.
 - Que los trazos sigan nítidos con el zoom vectorial.
-- El reconocimiento matemático **dentro de la app con la letra del usuario**. El programa auxiliar sí se probó de
-  punta a punta en la nube, y unir/separar se probó con un «=».
+- El reconocimiento matemático **dentro de la app con la letra del usuario**. En la nube sí se probó de punta a punta
+  con símbolos de MathWriting dibujados con xdotool: «=», variables, «?», «Otro…», tachar, reconocer selección,
+  copiar LaTeX, gráfica y zoom al 1600 %.
 
 **Cosas que el usuario tiene que hacer:**
 - Probar con el lápiz siguiendo `CAMBIOS-ONEPEPE.md`.
@@ -1344,8 +1367,16 @@ Resumen de `DECISIONES.md`; allí está todo.
 
 ## 13. Pendiente y prioridades
 
-Todo está en `PLAN-PENDIENTE.md` (manda ese archivo: si cambia, actualiza esto). **Nada de esta sección está
-implementado.** El usuario pidió apuntarlo; no lo hagas sin que lo pida.
+Todo está en `PLAN-PENDIENTE.md` (manda ese archivo: si cambia, actualiza esto).
+
+**Estado el 2026-10-30 (tarde):** los puntos 1–7 de §13.1 están **hechos** y las 6 fases de §13.2 tienen una
+**primera versión** (lo que queda de cada una, en `PLAN-PENDIENTE.md` §2 y §7). Lo de abajo es el análisis de antes
+de hacerlo, que se conserva porque explica las causas. Diferencias con lo propuesto:
+- Fallo 2 (zoom): se encontraron y arreglaron dos causas (final del trazo con zoom ≥ 5000 % y letra grande colándose
+  como contexto); queda una diferencia de ~12 % en la tinta capturada sin explicar.
+- Fallo 4 (i/j): la regla de la línea base empeoraba la i y **se quitó**; solo se une el punto.
+- Fallo 6: el «=» se calcula con la orden `page` (todos los renglones tras cada cambio), no con una orden `evaluate`.
+- Fallo 3: el botón está en la cinta; falta en el menú de la selección.
 
 **Orden de prioridad del usuario:**
 
@@ -1482,7 +1513,7 @@ arctan, ln, log, exp, lim, max, min, det).
 - **Después:** importar (`importar_mi_letra.py`), reentrenar y medir con una parte reservada.
 - **Sus `.rnote`, por el chat o por Drive, nunca por git.**
 
-### 13.2 Plan tipo MyScript Math (documento del usuario, `PLAN-MYSCRIPT.md`)
+### 13.2 Plan tipo MyScript Math (documento del usuario, `PLAN-MYSCRIPT.md`) — primera versión hecha el 2026-10-30
 
 Todo en local, sin IA en la nube. Cada fase se usa sola, se prueba antes de la siguiente y se activa desde ajustes;
 lo matemático va en un módulo propio.
@@ -1506,7 +1537,7 @@ Aplazado por el usuario: resolver desde una foto o un PDF.
    - `mis_simbolos.rnote`;
    - una pantalla para ver y borrar sus ejemplos (`examples`, `forget`, `relabel` ya existen);
    - el modo matemáticas mientras se mantiene un botón del lápiz;
-   - **que el modo matemáticas ignore la tinta a formas**;
+   - ~~que el modo matemáticas ignore la tinta a formas~~ (hecho el 2026-10-30);
    - **búsqueda en haz** (`beam.py`).
 3. **Nombre interno OnePepe:** id, migración de ajustes, instalable junto a Rnote.
 4. **Diseño:** color del cuaderno en el árbol, curvas de animación, ajustes en una ventana aparte.

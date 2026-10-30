@@ -28,6 +28,8 @@ pub struct WidgetFlags {
     pub math_pending: bool,
     /// OnePepe: a recognized math symbol was tapped (position in `Engine::math.last_tap`).
     pub math_tap: bool,
+    /// OnePepe: the recognized lines changed: what is written next to them must be asked again.
+    pub math_page: bool,
 }
 
 impl Default for WidgetFlags {
@@ -46,6 +48,7 @@ impl Default for WidgetFlags {
             enable_text_input: None,
             math_pending: false,
             math_tap: false,
+            math_page: false,
         }
     }
 }
@@ -63,6 +66,7 @@ impl std::ops::BitOrAssign for WidgetFlags {
     fn bitor_assign(&mut self, rhs: Self) {
         self.math_pending |= rhs.math_pending;
         self.math_tap |= rhs.math_tap;
+        self.math_page |= rhs.math_page;
         self.redraw |= rhs.redraw;
         self.resize |= rhs.resize;
         self.refresh_ui |= rhs.refresh_ui;

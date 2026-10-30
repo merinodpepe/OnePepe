@@ -297,3 +297,44 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - **Se queda (lo necesita meson):** `build-aux/inno_build.py` y `rnote_inno.iss.in` (meson los pide aunque solo
   se usan en Windows) y `dist-vendor.sh`.
 
+
+## Arreglos del modo matemáticas y plan tipo MyScript (2026-10-30)
+
+- **Toque o trazo (fallo 1):** los eventos que empiezan sobre un símbolo se guardan hasta saber qué son; si el lápiz
+  se mueve más de 6 px de pantalla se dan al pincel todos juntos (el trazo sale entero desde su primer punto). El
+  toque cuenta sobre la tinta (las cajas de los trazos), no sobre la caja del símbolo. Un símbolo con todos sus
+  trazos en la papelera no cuenta (toque, contexto, archivo oculto) y vuelve con deshacer.
+- **Zoom (fallo 2):** medido con un test, el suavizado del pincel da la misma forma a cualquier zoom salvo el final
+  del trazo con zoom ≥ 5000 % (umbral fijo de 0,01 unidades → 0,0001). En la app de la nube, al 1600 %, el
+  reconocimiento leía bien los símbolos, pero un renglón pequeño junto a letra grande recibía de contexto los
+  símbolos grandes («2+3=3»). Ahora el contexto y los renglones solo juntan símbolos de tamaño parecido (hasta 4
+  veces, así entran exponentes y rayas de fracción) y cercanos de lado. Después, al 1600 % «2+3=» salió bien 3 de
+  4 veces (una vez el «3» como «y»). Queda una diferencia pequeña en la tinta que llega: el mismo gesto al 100 % y al
+  1600 % difiere un ~12 % de la altura del símbolo (dos veces al mismo zoom, un 2–5 %). No viene de Python (da lo
+  mismo a cualquier escala) ni del suavizado (medido); no se encontró la causa sin datos de un lápiz real.
+- **i y j (fallo 4), «si no mejora, no se queda»:** con 400 fórmulas de MathWriting con i o j, unir el punto cortado
+  aparte mejora la i (141 → 147 de 358) y no cambia lo demás: se queda. La regla «la j baja de la línea base» empeoró
+  la i (147 → 88 con la línea del renglón; 147 → 123 con la de los vecinos, porque la i de un subíndice también baja)
+  y se quitó.
+- **Funciones (fallo 7):** tras una función, solo es subíndice lo que queda por debajo de la línea base de la palabra
+  (sin contar la «g» de log). Los nombres en español (sen, tg…) se guardan con el nombre de LaTeX (\sin, \tan). La
+  unión tolerante («1n» → ln) solo si la letra estaba entre las candidatas; con símbolos que vienen de la app sin
+  candidatas, la app ahora las envía.
+- **Una sola orden «page»** para el «=», el «?», las variables y la revisión de pasos: la app envía todos los
+  renglones reconocidos tras cada cambio (400 ms después) y sustituye las anotaciones. Así se recalcula al corregir,
+  borrar, deshacer o cambiar opciones, sin estado en Python. El «=» ya no se calcula en `recognize`.
+- **Renglones:** se agrupan por altura en el motor (cajas que se solapan, con un margen del 30 % del tamaño típico).
+- **Variables:** valen en toda la página; cada renglón usa la última definición de encima y, si no hay, la primera
+  de la página. Con unidades vía pint (un solo registro de unidades). Una «x» entre dos números es «por».
+- **Revisar pasos:** equivalencia con valores al azar (expresiones) o mismas soluciones (ecuaciones de una variable;
+  si no, proporcionales). Errores típicos probados sobre el paso anterior: signo, distribuir, pasar sin cambiar el
+  signo, dividir mal, potencia o raíz de una suma, sumar fracciones. Solo se marca lo que no es equivalente.
+- **Tachar:** zigzag = 4 o más vueltas en alguna dirección (una «w» da 3, una «z» 2), y tiene que cubrir la mayor
+  parte de trazos anteriores y tocar su tinta. Por defecto solo en modo matemáticas. Un solo deshacer: se reemplaza
+  la entrada del historial del zigzag (`update_latest_history_entry`).
+- **Gráficas y fracciones:** la gráfica son trazos normales (no cambia el `.rnote`, se ve en Rnote); 10 veces la
+  altura de los símbolos. La forma elegida de una fracción se guarda en el archivo oculto (campos nuevos con valor
+  por defecto: los archivos de antes se siguen leyendo).
+- **Formato `.rnote`: sin cambios.** Lo nuevo va a los ajustes de la app (`variables`, `check`, `scratch_out`,
+  `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
+  anotación).

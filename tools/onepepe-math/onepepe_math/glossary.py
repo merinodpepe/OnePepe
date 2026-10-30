@@ -65,13 +65,24 @@ def add_name(path, name):
         f.write(name + "\n")
 
 
+_UREG = None
+
+
+def registry():
+    """Un solo registro de unidades de pint: las cantidades de registros distintos no se pueden sumar."""
+    global _UREG
+    if _UREG is None:
+        import pint
+
+        _UREG = pint.UnitRegistry()
+    return _UREG
+
+
 def units(values):
     """{nombre: cantidad de pint} a partir de los valores del glosario."""
     if not values:
         return {}
-    import pint
-
-    ureg = pint.UnitRegistry()
+    ureg = registry()
     out = {}
     for name, text in values.items():
         try:

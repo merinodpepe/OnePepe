@@ -4062,3 +4062,71 @@ msgstr "Zoom vectorial"
 
 msgid "Zoom in up to 100 000 % (normally up to 1600 %). Only on screen: the exports do not change."
 msgstr "Acercarse hasta el 100 000 % (normalmente hasta el 1600 %). Solo en pantalla: lo que exportas no cambia."
+
+#: crates/rnote-ui/src/mathhelper.rs
+msgid "All symbols"
+msgstr "Todos los símbolos"
+
+msgid "Always, with the pen"
+msgstr "Siempre, con el bolígrafo"
+
+msgid "Calculate"
+msgstr "Calcular"
+
+msgid "Check steps"
+msgstr "Revisar pasos"
+
+msgid "Copy as LaTeX"
+msgstr "Copiar como LaTeX"
+
+msgid "LaTeX copied"
+msgstr "LaTeX copiado"
+
+msgid "Never"
+msgstr "Nunca"
+
+msgid "Nothing to plot"
+msgstr "Nada que dibujar"
+
+msgid "Only in math mode"
+msgstr "Solo en modo matemáticas"
+
+msgid "Other… (delta, \\d, δ, <=)"
+msgstr "Otro… (delta, \\d, δ, <=)"
+
+msgid "Plot"
+msgstr "Gráfica"
+
+msgid "Recognize selection"
+msgstr "Reconocer selección"
+
+msgid "Result of \"=\""
+msgstr "Resultado del «=»"
+
+msgid "Scratch out"
+msgstr "Tachar"
+
+msgid "Select a recognized function with the lasso first, like y = x²"
+msgstr "Selecciona antes con el lazo una función reconocida, como y = x²"
+
+msgid "Select handwriting with the lasso first"
+msgstr "Selecciona antes con el lazo lo escrito a mano"
+
+msgid "Select recognized math with the lasso first"
+msgstr "Selecciona antes con el lazo matemáticas reconocidas"
+
+msgid "The step is compared with the one before, with random values."
+msgstr "El paso se compara con el anterior dando valores al azar."
+
+msgid "Variables"
+msgstr "Variables"
+
+msgid "Zigzag erases"
+msgstr "Zigzag borra"
+
+msgid ""
+"It can't be calculated. I read: {latex}\n"
+"Tap the symbol that was read wrongly to correct it."
+msgstr ""
+"No se puede calcular. He leído: {latex}\n"
+"Toca el símbolo mal leído para corregirlo."

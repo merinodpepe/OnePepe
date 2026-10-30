@@ -84,6 +84,19 @@ def _tokens(row, decimal_comma=True):
             final.append(["sym", t[4] if len(t) > 4 else ".", t[2], t[3]])
         else:
             final.append(t)
+    # una «x» entre dos números es el signo de multiplicar (3 x 4), no una variable
+    for i in range(1, len(final) - 1):
+        t = final[i]
+        if (
+            t[0] == "sym"
+            and t[1] in ("x", "X")
+            and t[2] is None
+            and t[3] is None
+            and final[i - 1][0] == "num"
+            and final[i - 1][2] is None
+            and final[i + 1][0] == "num"
+        ):
+            final[i] = ["sym", r"\times", None, None]
     return final
 
 
@@ -145,7 +158,7 @@ class _Parser:
         return self.atom()
 
     def _starts_atom(self, tok):
-        if tok[0] in ("num", "frac", "sqrt"):
+        if tok[0] in ("num", "frac", "sqrt", "root"):
             return True
         if tok[0] != "sym":
             return False
@@ -193,6 +206,15 @@ class _Parser:
             return self._apply_scripts(value, tok)
         if kind == "sqrt":
             return self._apply_scripts(sp.sqrt(sub_expr(tok[1][1], self.glossary)), tok)
+        if kind == "root":
+            index = sub_expr(tok[1][1], self.glossary)
+            radicand = sub_expr(tok[1][2], self.glossary)
+            # ∛-8 = -2 (la raíz real), como en clase
+            if index.is_integer and index.is_odd:
+                value = sp.real_root(radicand, index)
+            else:
+                value = sp.root(radicand, index)
+            return self._apply_scripts(value, tok)
         if kind != "sym":
             raise ParseError(f"no sé leer {kind}")
         v = tok[1]
@@ -204,8 +226,12 @@ class _Parser:
                 raise ParseError("paréntesis sin cerrar")
             return self._apply_scripts(inner, end)
         if v in FUNCS:
-            arg = self.unary() if not self.is_sym(self.peek(), "(") else self.atom()
-            value = FUNCS[v](arg)
+            arg = self.atom() if self.is_sym(self.peek(), "(") else self._bare_argument()
+            if v == r"\log" and tok[3] is not None:
+                # log₂(8): la base va de subíndice
+                value = sp.log(arg, sub_expr(tok[3], self.glossary))
+            else:
+                value = FUNCS[v](arg)
             return self._apply_scripts(value, tok)
         if v == r"\int":
             return self._integral(tok)
@@ -216,6 +242,17 @@ class _Parser:
         if v == r"\infty":
             return sp.oo
         return self._apply_scripts(self._symbol(tok), tok)
+
+    def _bare_argument(self):
+        """Argumento sin paréntesis: sin 2x = sin(2x), pero sin x cos x = sin(x)·cos(x)."""
+        node = self.unary()
+        while True:
+            tok = self.peek()
+            if tok is None or not self._starts_atom(tok):
+                return node
+            if tok[0] == "sym" and (tok[1] in FUNCS or tok[1] in (r"\int", r"\sum", r"\prod", r"\lim")):
+                return node
+            node = node * self.unary()
 
     def _symbol(self, tok):
         v = tok[1]
@@ -315,6 +352,16 @@ def _format_number(value):
     return sp.Float(sp.N(value, 4), 4)
 
 
+def _natural_log_names(result):
+    """SymPy escribe log para el logaritmo neperiano; en clase es ln (log sin base es log₁₀)."""
+    if result is None:
+        return None
+    result = dict(result)
+    result["text"] = result["text"].replace("log(", "ln(")
+    result["latex"] = result["latex"].replace(r"\log", r"\ln")
+    return result
+
+
 def answer(tree, glossary=None, units=None):
     """Resultado del "=" de una fila. Devuelve dict {"latex", "text", "kind"} o None.
 
@@ -322,7 +369,7 @@ def answer(tree, glossary=None, units=None):
     unidades y comprobar dimensiones.
     """
     try:
-        return _answer(tree, glossary or {}, units or {})
+        return _natural_log_names(_answer(tree, glossary or {}, units or {}))
     except (ParseError, ValueError, TypeError, ZeroDivisionError, NotImplementedError, AttributeError):
         return None
     except Exception as e:  # SymPy puede lanzar errores variados con entradas raras

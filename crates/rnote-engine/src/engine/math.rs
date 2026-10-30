@@ -17,9 +17,10 @@ use crate::pens::PenStyle;
 use crate::store::StrokeKey;
 use crate::strokes::{BrushStroke, Stroke};
 use p2d::bounding_volume::{Aabb, BoundingVolume};
-use p2d::math::Vector2;
+pub use p2d::math::Vector2;
 use rnote_compose::penevent::PenEvent;
 use rnote_compose::penpath::{Element, PenPath};
+use rnote_compose::shapes::Shapeable;
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
@@ -36,6 +37,12 @@ pub struct MathOptions {
     /// Show the result of a trailing "=" in gray.
     #[serde(rename = "equals")]
     pub equals: bool,
+    /// Variables: `x = 3` defines x in the page and the lines that use it show their value.
+    #[serde(rename = "variables")]
+    pub variables: bool,
+    /// Check each step against the one before and explain the mistake.
+    #[serde(rename = "check")]
+    pub check: bool,
 }
 
 impl Default for MathOptions {
@@ -44,7 +51,16 @@ impl Default for MathOptions {
             replace: true,
             threshold: 0.95,
             equals: false,
+            variables: false,
+            check: false,
         }
+    }
+}
+
+impl MathOptions {
+    /// Whether anything is written next to the lines (then the page is sent to the helper after each change).
+    pub fn annotates(&self) -> bool {
+        self.equals || self.variables || self.check
     }
 }
 
@@ -63,6 +79,21 @@ pub struct MathSymbol {
     pub original: Vec<Vec<[f64; 2]>>,
 }
 
+impl MathSymbol {
+    fn known(&self) -> KnownSymbol {
+        KnownSymbol {
+            latex: self.latex.clone(),
+            r#box: aabb_to_array(self.bounds),
+            alts: self
+                .candidates
+                .iter()
+                .take(5)
+                .map(|c| c.0.clone())
+                .collect(),
+        }
+    }
+}
+
 /// A result shown next to an "=".
 #[derive(Debug, Clone)]
 pub struct MathOverlay {
@@ -70,6 +101,40 @@ pub struct MathOverlay {
     pub height: f64,
     pub text: String,
     pub latex: String,
+    /// The strokes of the "=" (or of the line) the result belongs to: erasing them hides the result.
+    pub keys: Vec<StrokeKey>,
+    /// What it is: "value", "solve", ... (a result), "unknown" (the "?"), "variable" or "error" (a wrong step).
+    pub kind: String,
+    /// Other ways to show the number (fraction, decimal, mixed): a tap goes to the next one. (text, latex)
+    pub formats: Vec<(String, String)>,
+    pub format: usize,
+}
+
+impl MathOverlay {
+    /// The text shown now.
+    pub fn shown_text(&self) -> &str {
+        self.formats
+            .get(self.format)
+            .map(|f| f.0.as_str())
+            .unwrap_or(&self.text)
+    }
+
+    pub fn shown_latex(&self) -> &str {
+        self.formats
+            .get(self.format)
+            .map(|f| f.1.as_str())
+            .unwrap_or(&self.latex)
+    }
+
+    /// The box of the text, roughly (for taps).
+    pub fn bounds(&self) -> Aabb {
+        let font = self.height.max(6.0);
+        let width = 0.62 * font * self.shown_text().chars().count().max(1) as f64;
+        Aabb::new(
+            Vector2::new(self.anchor.x, self.anchor.y - 0.65 * font),
+            Vector2::new(self.anchor.x + width, self.anchor.y + 0.65 * font),
+        )
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -81,7 +146,8 @@ pub struct MathState {
     pub overlays: Vec<MathOverlay>,
     next_id: u64,
     tap_start: Option<Vector2>,
-    tap_moved: bool,
+    /// The events of a possible tap, held back until it is clear whether the pen moves (then they are a stroke).
+    tap_events: Vec<PenEvent>,
     /// Where the last tap on a symbol happened, for the UI to show the candidates.
     pub last_tap: Option<Vector2>,
     /// Correction requests sent, by request id: (symbol ids, latex).
@@ -93,6 +159,12 @@ pub struct MathState {
     /// Start and end time of the strokes written in math mode: short pauses join strokes into one symbol.
     /// Kept in the hidden file next to the page, never in the .rnote.
     pub stroke_times: std::collections::HashMap<StrokeKey, [f64; 2]>,
+    /// Lines of strokes written before (e.g. outside math mode) waiting to be recognized, one request each.
+    queued_lines: Vec<Vec<StrokeKey>>,
+    /// The page request sent: its id and the symbols of each line.
+    page_in_flight: Option<(u64, Vec<Vec<u64>>)>,
+    /// The plot request sent: its id and where the plot goes.
+    plot_in_flight: Option<(u64, Aabb)>,
 }
 
 /// Seconds since 1970, for the stroke times.
@@ -153,6 +225,14 @@ struct SidecarOverlay {
     height: f64,
     text: String,
     latex: String,
+    #[serde(default)]
+    keys: Vec<StrokeKey>,
+    #[serde(default)]
+    kind: String,
+    #[serde(default)]
+    formats: Vec<(String, String)>,
+    #[serde(default)]
+    format: usize,
 }
 
 fn aabb_to_array(b: Aabb) -> [f64; 4] {
@@ -184,6 +264,8 @@ struct RecognizeRequest<'a> {
 struct KnownSymbol {
     latex: String,
     r#box: [f64; 4],
+    /// Its other candidates (to join functions read wrongly, «1n» → ln).
+    alts: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -214,18 +296,10 @@ struct RecognizedSymbol {
 }
 
 #[derive(Debug, Deserialize)]
-struct MathResult {
-    text: String,
-    latex: String,
-}
-
-#[derive(Debug, Deserialize)]
 struct RecognizeResponse {
     id: u64,
     #[serde(default)]
     symbols: Vec<RecognizedSymbol>,
-    #[serde(default)]
-    result: Option<MathResult>,
     #[serde(default)]
     error: Option<String>,
 }
@@ -330,68 +404,120 @@ impl Engine {
         widget_flags
     }
 
-    /// In math mode, a tap with the brush on a recognized symbol opens its candidates instead of drawing.
+    /// The stroke in progress was not kept (e.g. it was a scratch-out).
+    pub(crate) fn math_forget_stroke_in_progress(&mut self) {
+        self.math.stroke_down = None;
+    }
+
+    /// In math mode, a tap with the brush on the ink of a recognized symbol opens its candidates instead of drawing.
     ///
-    /// Returns None when the event was used for the tap.
+    /// The events that start on a symbol are held back until it is clear what they are: if the pen moves away they
+    /// are given back all together (a normal stroke, from its first point), if it is lifted without moving it was a
+    /// tap. Returns the events for the pen (none while waiting, or when it was a tap).
     pub(crate) fn math_filter_pen_event(
         &mut self,
         event: PenEvent,
         widget_flags: &mut WidgetFlags,
-    ) -> Option<PenEvent> {
+    ) -> Vec<PenEvent> {
         if !self.math.mode
             || self
                 .penholder
                 .current_pen_style_w_override(&crate::engine_view!(self))
                 != PenStyle::Brush
         {
-            return Some(event);
+            self.math.tap_start = None;
+            self.math.tap_events.clear();
+            return vec![event];
         }
         let tolerance = Self::MATH_TAP_TOLERANCE / self.camera.total_zoom();
         match &event {
             PenEvent::Down { element, .. } => {
                 if let Some(start) = self.math.tap_start {
+                    self.math.tap_events.push(event.clone());
                     if (element.pos - start).length() > tolerance {
-                        self.math.tap_moved = true;
+                        // it is a stroke: draw it from its first point
+                        self.math.tap_start = None;
+                        if self.math.stroke_down.is_none() {
+                            self.math.stroke_down = Some(now_seconds());
+                        }
+                        return std::mem::take(&mut self.math.tap_events);
                     }
-                    return None;
+                    return vec![];
                 }
-                if self.math_symbol_index_at(element.pos).is_some()
-                    && self.penholder.current_pen_progress()
-                        != rnote_compose::penevent::PenProgress::InProgress
+                if self.penholder.current_pen_progress()
+                    != rnote_compose::penevent::PenProgress::InProgress
+                    && (self.math_symbol_index_at(element.pos).is_some()
+                        || self.math_overlay_index_at(element.pos).is_some())
                 {
                     self.math.tap_start = Some(element.pos);
-                    self.math.tap_moved = false;
-                    return None;
+                    self.math.tap_events = vec![event];
+                    self.math.stroke_down = Some(now_seconds());
+                    return vec![];
                 }
                 if self.math.stroke_down.is_none() {
                     self.math.stroke_down = Some(now_seconds());
                 }
-                Some(event)
+                vec![event]
             }
             PenEvent::Up { element, .. } => {
                 if let Some(start) = self.math.tap_start.take() {
-                    if !self.math.tap_moved && (element.pos - start).length() <= tolerance {
+                    if (element.pos - start).length() <= tolerance {
+                        self.math.tap_events.clear();
+                        self.math.stroke_down = None;
+                        // a number next to a line changes its form; anything else shows the candidates or explains
+                        if let Some(i) = self.math_overlay_index_at(start)
+                            && self.math_tap_overlay(i)
+                        {
+                            widget_flags.redraw = true;
+                            return vec![];
+                        }
                         self.math.last_tap = Some(start);
                         widget_flags.math_tap = true;
+                        return vec![];
                     }
-                    return None;
+                    let mut events = std::mem::take(&mut self.math.tap_events);
+                    events.push(event);
+                    return events;
                 }
-                Some(event)
+                vec![event]
             }
             PenEvent::Cancel => {
                 self.math.tap_start = None;
-                Some(event)
+                self.math.tap_events.clear();
+                vec![event]
             }
-            _ => Some(event),
+            _ => {
+                if self.math.tap_start.is_some() {
+                    return vec![];
+                }
+                vec![event]
+            }
         }
     }
 
+    /// A symbol counts while some of its strokes are in the page (not erased: erased strokes stay in the store, in
+    /// the trash, and come back with undo).
+    fn math_keys_alive(&self, keys: &[StrokeKey]) -> bool {
+        keys.iter().any(|k| {
+            self.store.get_stroke_ref(*k).is_some() && !self.store.trashed(*k).unwrap_or(false)
+        })
+    }
+
     fn math_symbol_index_at(&self, pos: Vector2) -> Option<usize> {
+        // the ink of the symbol, not its box: writing next to it (an exponent, the next symbol) must draw
         let loosen = 4.0 / self.camera.total_zoom();
-        self.math
-            .symbols
-            .iter()
-            .position(|s| s.bounds.loosened(loosen).contains_local_point(pos))
+        self.math.symbols.iter().position(|s| {
+            s.bounds.loosened(loosen).contains_local_point(pos)
+                && self.math_keys_alive(&s.keys)
+                && s.keys.iter().any(|k| {
+                    self.store.get_stroke_ref(*k).is_some_and(|stroke| {
+                        stroke
+                            .hitboxes()
+                            .iter()
+                            .any(|h| h.loosened(loosen).contains_local_point(pos))
+                    })
+                })
+        })
     }
 
     /// The symbol at the position: (symbol id, candidates).
@@ -420,7 +546,11 @@ impl Engine {
 
     /// Takes the queued strokes and builds a recognition request (one JSON line), or None if there is nothing to do.
     pub fn math_take_request(&mut self, notebook_dir: Option<String>) -> Option<String> {
-        let keys = std::mem::take(&mut self.math.pending)
+        let mut pending = std::mem::take(&mut self.math.pending);
+        if pending.is_empty() && !self.math.queued_lines.is_empty() {
+            pending = self.math.queued_lines.remove(0);
+        }
+        let keys = pending
             .into_iter()
             .filter(|k| self.brush_points(*k).is_some())
             .collect::<Vec<StrokeKey>>();
@@ -436,8 +566,15 @@ impl Engine {
             .iter()
             .map(|k| self.math.stroke_times.get(k).copied())
             .collect::<Option<Vec<[f64; 2]>>>();
-        // the already recognized symbols of the same line give context
-        let band = bounds.extents().y.max(1.0);
+        // the already recognized symbols of the same line give context: at the same height, near, and of a similar
+        // size (writing small with a big zoom next to bigger writing must not mix both)
+        let size = Self::math_typical_size(
+            &keys
+                .iter()
+                .filter_map(|k| self.store.get_stroke_ref(*k).map(|s| s.bounds()))
+                .collect::<Vec<_>>(),
+        );
+        let band = bounds.extents().y.max(size);
         let known = self
             .math
             .symbols
@@ -445,19 +582,12 @@ impl Engine {
             .filter(|s| {
                 s.bounds.maxs.y > bounds.mins.y - 0.5 * band
                     && s.bounds.mins.y < bounds.maxs.y + 0.5 * band
-                    && s.keys
-                        .iter()
-                        .all(|k| self.store.get_stroke_ref(*k).is_some())
+                    && Self::math_similar_size(Self::math_box_size(&s.bounds), size)
+                    && s.bounds.mins.x < bounds.maxs.x + 12.0 * size
+                    && s.bounds.maxs.x > bounds.mins.x - 12.0 * size
+                    && self.math_keys_alive(&s.keys)
             })
-            .map(|s| KnownSymbol {
-                latex: s.latex.clone(),
-                r#box: [
-                    s.bounds.mins.x,
-                    s.bounds.mins.y,
-                    s.bounds.maxs.x,
-                    s.bounds.maxs.y,
-                ],
-            })
+            .map(|s| s.known())
             .collect();
         let options = self.math_options();
         self.math.next_id += 1;
@@ -552,7 +682,9 @@ impl Engine {
         self.math
             .symbols
             .iter()
-            .filter(|b| b.id != symbol_id && gap(&b.bounds) < 3.0 * size)
+            .filter(|b| {
+                b.id != symbol_id && gap(&b.bounds) < 3.0 * size && self.math_keys_alive(&b.keys)
+            })
             .min_by(|x, y| gap(&x.bounds).total_cmp(&gap(&y.bounds)))
             .map(|b| b.id)
     }
@@ -721,6 +853,7 @@ impl Engine {
         widget_flags |= self.record(Instant::now());
         widget_flags.store_modified = true;
         widget_flags.redraw = true;
+        widget_flags.math_page = options.annotates();
         widget_flags
     }
 
@@ -746,7 +879,6 @@ impl Engine {
         }
         let options = self.math_options();
         let mut modified = false;
-        let mut equals_box: Option<Aabb> = None;
         for sym in resp.symbols {
             let sym_keys = sym
                 .strokes
@@ -786,9 +918,6 @@ impl Engine {
                     modified = true;
                 }
             }
-            if latex == "=" {
-                equals_box = Some(bounds);
-            }
             self.math.next_id += 1;
             self.math.symbols.push(MathSymbol {
                 id: self.math.next_id,
@@ -800,22 +929,8 @@ impl Engine {
                 original,
             });
         }
-        if options.equals
-            && let (Some(result), Some(eq)) = (resp.result, equals_box)
-        {
-            let anchor = Vector2::new(eq.maxs.x + 0.3 * eq.extents().x.max(8.0), eq.center().y);
-            // one result per "="
-            self.math
-                .overlays
-                .retain(|o| (o.anchor - anchor).length() > eq.extents().x.max(8.0));
-            self.math.overlays.push(MathOverlay {
-                anchor,
-                height: eq.extents().x.max(eq.extents().y) * 1.2,
-                text: result.text,
-                latex: result.latex,
-            });
-            widget_flags.redraw = true;
-        }
+        // what goes next to the lines (the result of "=", variables, steps) comes from the page request
+        widget_flags.math_page = options.annotates();
         if modified {
             widget_flags |= self.record(Instant::now());
             widget_flags.store_modified = true;
@@ -914,6 +1029,7 @@ impl Engine {
             widget_flags |= self.record(Instant::now());
             widget_flags.redraw = true;
         }
+        widget_flags.math_page = self.math_options().annotates();
         widget_flags
     }
 
@@ -929,6 +1045,7 @@ impl Engine {
                 if s.keys
                     .iter()
                     .any(|k| self.store.get_stroke_ref(*k).is_none())
+                    || !self.math_keys_alive(&s.keys)
                 {
                     return None;
                 }
@@ -958,11 +1075,16 @@ impl Engine {
             .math
             .overlays
             .iter()
+            .filter(|o| o.keys.is_empty() || self.math_keys_alive(&o.keys))
             .map(|o| SidecarOverlay {
                 anchor: [o.anchor.x, o.anchor.y],
                 height: o.height,
                 text: o.text.clone(),
                 latex: o.latex.clone(),
+                keys: o.keys.clone(),
+                kind: o.kind.clone(),
+                formats: o.formats.clone(),
+                format: o.format,
             })
             .collect();
         let times = self
@@ -1042,9 +1164,478 @@ impl Engine {
                 height: o.height,
                 text: o.text,
                 latex: o.latex,
+                keys: o.keys,
+                kind: o.kind,
+                formats: o.formats,
+                format: o.format,
             })
             .collect();
         restored
+    }
+
+    // ---------- the page: results, "?", variables, step check (sent after every change) ----------
+
+    /// Whether the page has recognized symbols.
+    pub fn math_has_symbols(&self) -> bool {
+        self.math
+            .symbols
+            .iter()
+            .any(|s| self.math_keys_alive(&s.keys))
+    }
+
+    /// The symbols that are in the page (not erased), optionally only those with some stroke in `only`.
+    fn math_alive_symbols(&self, only: Option<&[StrokeKey]>) -> Vec<usize> {
+        self.math
+            .symbols
+            .iter()
+            .enumerate()
+            .filter(|(_, s)| self.math_keys_alive(&s.keys))
+            .filter(|(_, s)| only.is_none_or(|keys| s.keys.iter().any(|k| keys.contains(k))))
+            .map(|(i, _)| i)
+            .collect()
+    }
+
+    /// The size of a box for comparing symbols: its height, or half its width for flat ones ("-", "=").
+    fn math_box_size(b: &Aabb) -> f64 {
+        b.extents().y.max(0.5 * b.extents().x)
+    }
+
+    /// The typical size of some boxes (their median size).
+    fn math_typical_size(boxes: &[Aabb]) -> f64 {
+        let mut sizes = boxes.iter().map(Self::math_box_size).collect::<Vec<f64>>();
+        if sizes.is_empty() {
+            return 1.0;
+        }
+        sizes.sort_by(f64::total_cmp);
+        sizes[sizes.len() / 2].max(1e-6)
+    }
+
+    /// Whether a symbol of size `a` can be on a line written with size `b` (exponents and fraction bars included,
+    /// not writing ten times smaller with a big zoom).
+    fn math_similar_size(a: f64, b: f64) -> bool {
+        a <= 4.0 * b && b <= 4.0 * a
+    }
+
+    /// Groups boxes into lines, from top to bottom: boxes whose heights (a bit enlarged) overlap are in the same
+    /// line, so fractions, exponents and subscripts stay with their line. Boxes of very different size (written
+    /// with a very different zoom) are not mixed, and neither are boxes far apart sideways.
+    fn math_lines_of(boxes: &[(usize, Aabb)]) -> Vec<Vec<usize>> {
+        struct Line {
+            top: f64,
+            bottom: f64,
+            left: f64,
+            right: f64,
+            size: f64,
+            items: Vec<(usize, Aabb)>,
+        }
+        let mut sorted = boxes.to_vec();
+        sorted.sort_by(|a, b| a.1.mins.y.total_cmp(&b.1.mins.y));
+        let mut lines: Vec<Line> = vec![];
+        for (i, b) in sorted {
+            let size = Self::math_box_size(&b);
+            let found = lines.iter_mut().rev().find(|l| {
+                let margin = 0.3 * l.size;
+                Self::math_similar_size(size, l.size)
+                    && b.mins.y - margin <= l.bottom
+                    && b.maxs.y + margin >= l.top
+                    && b.mins.x < l.right + 12.0 * l.size
+                    && b.maxs.x > l.left - 12.0 * l.size
+            });
+            match found {
+                Some(l) => {
+                    l.items.push((i, b));
+                    l.top = l.top.min(b.mins.y);
+                    l.bottom = l.bottom.max(b.maxs.y);
+                    l.left = l.left.min(b.mins.x);
+                    l.right = l.right.max(b.maxs.x);
+                    l.size =
+                        Self::math_typical_size(&l.items.iter().map(|x| x.1).collect::<Vec<_>>());
+                }
+                None => lines.push(Line {
+                    top: b.mins.y,
+                    bottom: b.maxs.y,
+                    left: b.mins.x,
+                    right: b.maxs.x,
+                    size,
+                    items: vec![(i, b)],
+                }),
+            }
+        }
+        lines.sort_by(|a, b| a.top.total_cmp(&b.top));
+        lines
+            .into_iter()
+            .map(|l| {
+                let mut items = l.items;
+                items.sort_by(|a, b| a.1.mins.x.total_cmp(&b.1.mins.x));
+                items.into_iter().map(|(i, _)| i).collect()
+            })
+            .collect()
+    }
+
+    /// The lines of symbols (indices into `math.symbols`), from top to bottom.
+    fn math_symbol_lines(&self, only: Option<&[StrokeKey]>) -> Vec<Vec<usize>> {
+        let boxes = self
+            .math_alive_symbols(only)
+            .into_iter()
+            .map(|i| (i, self.math.symbols[i].bounds))
+            .collect::<Vec<_>>();
+        Self::math_lines_of(&boxes)
+    }
+
+    fn math_lines_json(&self, lines: &[Vec<usize>]) -> Vec<serde_json::Value> {
+        lines
+            .iter()
+            .map(|line| {
+                serde_json::json!({
+                    "symbols": line.iter().map(|&i| self.math.symbols[i].known()).collect::<Vec<_>>()
+                })
+            })
+            .collect()
+    }
+
+    /// The request for what is written next to each line (results, "?", variables, wrong steps), or None if none
+    /// of those options is on (then the old annotations go away).
+    pub fn math_page_request(&mut self, notebook_dir: Option<String>) -> Option<String> {
+        let options = self.math_options();
+        if !options.annotates() {
+            self.math.overlays.clear();
+            return None;
+        }
+        let lines = self.math_symbol_lines(None);
+        self.math.next_id += 1;
+        let id = self.math.next_id;
+        let rows = self.math_lines_json(&lines);
+        self.math.page_in_flight = Some((
+            id,
+            lines
+                .iter()
+                .map(|l| l.iter().map(|&i| self.math.symbols[i].id).collect())
+                .collect(),
+        ));
+        serde_json::to_string(&serde_json::json!({
+            "id": id,
+            "cmd": "page",
+            "rows": rows,
+            "notebook_dir": notebook_dir,
+            "equals": options.equals,
+            "variables": options.variables,
+            "check": options.check,
+        }))
+        .ok()
+    }
+
+    /// Applies the answer to the page request: the annotations of all lines are replaced.
+    pub fn math_apply_page(&mut self, line: &str) -> WidgetFlags {
+        #[derive(Deserialize)]
+        struct Mark {
+            kind: String,
+            text: String,
+            latex: String,
+            anchor: [f64; 2],
+            height: f64,
+            #[serde(default)]
+            at: Option<usize>,
+            #[serde(default)]
+            formats: Vec<Format>,
+        }
+        #[derive(Deserialize)]
+        struct Format {
+            text: String,
+            latex: String,
+        }
+        #[derive(Deserialize)]
+        struct Row {
+            #[serde(default)]
+            marks: Vec<Mark>,
+        }
+        #[derive(Deserialize)]
+        struct PageResponse {
+            id: u64,
+            #[serde(default)]
+            rows: Vec<Row>,
+            #[serde(default)]
+            error: Option<String>,
+        }
+        let mut widget_flags = WidgetFlags::default();
+        let Ok(resp) = serde_json::from_str::<PageResponse>(line) else {
+            return widget_flags;
+        };
+        let Some((id, lines)) = self.math.page_in_flight.take() else {
+            return widget_flags;
+        };
+        if id != resp.id {
+            // an older answer: wait for the newest
+            self.math.page_in_flight = Some((id, lines));
+            return widget_flags;
+        }
+        if let Some(e) = resp.error {
+            tracing::warn!("Math helper error: {e}");
+            return widget_flags;
+        }
+        let keys_of = |ids: &[u64]| -> Vec<StrokeKey> {
+            ids.iter()
+                .filter_map(|id| self.math.symbols.iter().find(|s| s.id == *id))
+                .flat_map(|s| s.keys.clone())
+                .collect()
+        };
+        let mut overlays = vec![];
+        for (row, ids) in resp.rows.into_iter().zip(lines.iter()) {
+            for mark in row.marks {
+                let keys = match mark.at.and_then(|i| ids.get(i)) {
+                    Some(id) => keys_of(&[*id]),
+                    None => keys_of(ids),
+                };
+                // the format chosen before (fraction, decimal...) is kept
+                let format = self
+                    .math
+                    .overlays
+                    .iter()
+                    .find(|o| {
+                        o.kind == mark.kind
+                            && (o.anchor - Vector2::from(mark.anchor)).length() < 1.0
+                    })
+                    .map(|o| o.format)
+                    .filter(|f| *f < mark.formats.len())
+                    .unwrap_or(0);
+                overlays.push(MathOverlay {
+                    anchor: Vector2::from(mark.anchor),
+                    height: mark.height,
+                    text: mark.text,
+                    latex: mark.latex,
+                    keys,
+                    kind: mark.kind,
+                    formats: mark
+                        .formats
+                        .into_iter()
+                        .map(|f| (f.text, f.latex))
+                        .collect(),
+                    format,
+                });
+            }
+        }
+        self.math.overlays = overlays;
+        widget_flags.redraw = true;
+        widget_flags
+    }
+
+    fn math_overlay_index_at(&self, pos: Vector2) -> Option<usize> {
+        let loosen = 4.0 / self.camera.total_zoom();
+        self.math.overlays.iter().position(|o| {
+            (o.keys.is_empty() || self.math_keys_alive(&o.keys))
+                && o.bounds().loosened(loosen).contains_local_point(pos)
+        })
+    }
+
+    /// The annotation at the position: (kind, text shown, LaTeX read or of the result).
+    pub fn math_overlay_at(&self, pos: Vector2) -> Option<(String, String, String)> {
+        self.math_overlay_index_at(pos).map(|i| {
+            let o = &self.math.overlays[i];
+            (o.kind.clone(), o.shown_text().to_string(), o.latex.clone())
+        })
+    }
+
+    /// A tap on an annotation: a number goes to its next form (fraction → decimal → mixed). Returns false when it
+    /// has only one form (then the UI explains it).
+    fn math_tap_overlay(&mut self, i: usize) -> bool {
+        let o = &mut self.math.overlays[i];
+        if o.formats.len() < 2 {
+            return false;
+        }
+        o.format = (o.format + 1) % o.formats.len();
+        true
+    }
+
+    // ---------- recognize what was written before ----------
+
+    /// Queues brush strokes to be recognized (e.g. written outside math mode), one request per line. Strokes that
+    /// are already symbols or waiting are skipped. Returns how many lines were queued.
+    pub fn math_queue_strokes(&mut self, keys: &[StrokeKey]) -> usize {
+        let taken = self
+            .math
+            .symbols
+            .iter()
+            .filter(|s| self.math_keys_alive(&s.keys))
+            .flat_map(|s| s.keys.iter().copied())
+            .chain(self.math.pending.iter().copied())
+            .chain(self.math.queued_lines.iter().flatten().copied())
+            .collect::<std::collections::HashSet<StrokeKey>>();
+        // in writing order: the cut into symbols needs it
+        let order = self.store.keys_sorted_chrono();
+        let boxes = keys
+            .iter()
+            .filter(|k| !taken.contains(k) && !self.store.trashed(**k).unwrap_or(true))
+            .filter(|k| matches!(self.store.get_stroke_ref(**k), Some(Stroke::BrushStroke(_))))
+            .filter_map(|k| {
+                let pos = order.iter().position(|o| o == k)?;
+                Some((pos, self.store.get_stroke_ref(*k)?.bounds()))
+            })
+            .collect::<Vec<_>>();
+        let lines = Self::math_lines_of(&boxes);
+        let n = lines.len();
+        for mut line in lines {
+            line.sort();
+            self.math
+                .queued_lines
+                .push(line.into_iter().map(|pos| order[pos]).collect());
+        }
+        n
+    }
+
+    /// Queues the selected strokes to be recognized. Returns how many lines.
+    pub fn math_queue_selection(&mut self) -> usize {
+        let keys = self.store.selection_keys_as_rendered();
+        self.math_queue_strokes(&keys)
+    }
+
+    /// Whether there is something waiting to be recognized.
+    pub fn math_has_queued(&self) -> bool {
+        !self.math.pending.is_empty() || !self.math.queued_lines.is_empty()
+    }
+
+    // ---------- copy as LaTeX, plot ----------
+
+    /// The selected recognized lines, or None if the selection has no recognized symbol.
+    fn math_selected_lines(&self) -> Option<Vec<Vec<usize>>> {
+        let keys = self.store.selection_keys_as_rendered();
+        let lines = self.math_symbol_lines(Some(&keys));
+        if lines.is_empty() { None } else { Some(lines) }
+    }
+
+    /// The request for the LaTeX of the selected lines.
+    pub fn math_latex_request(&mut self) -> Option<String> {
+        let lines = self.math_selected_lines()?;
+        self.math.next_id += 1;
+        serde_json::to_string(&serde_json::json!({
+            "id": self.math.next_id,
+            "cmd": "latex",
+            "rows": self.math_lines_json(&lines),
+        }))
+        .ok()
+    }
+
+    /// The LaTeX of the answer to [`Engine::math_latex_request`], one line each.
+    pub fn math_latex_from_response(line: &str) -> Option<String> {
+        let v = serde_json::from_str::<serde_json::Value>(line).ok()?;
+        let lines = v["latex"]
+            .as_array()?
+            .iter()
+            .filter_map(|l| l.as_str())
+            .collect::<Vec<_>>();
+        if lines.is_empty() {
+            None
+        } else {
+            Some(lines.join("\n"))
+        }
+    }
+
+    /// The request for a plot of the functions in the selected lines. The plot goes to the right of them.
+    pub fn math_plot_request(&mut self) -> Option<String> {
+        let lines = self.math_selected_lines()?;
+        let all = lines.iter().flatten().copied().collect::<Vec<_>>();
+        let mut bounds = self.math.symbols[all[0]].bounds;
+        let mut heights = vec![];
+        for &i in &all {
+            bounds.merge(&self.math.symbols[i].bounds);
+            heights.push(self.math.symbols[i].bounds.extents().y);
+        }
+        heights.sort_by(f64::total_cmp);
+        let h = heights[heights.len() / 2].max(1.0);
+        let width = (10.0 * h).max(160.0 / self.camera.total_zoom());
+        let size = Vector2::new(width, width * 2.0 / 3.0);
+        let origin = Vector2::new(bounds.maxs.x + 2.0 * h, bounds.mins.y);
+        self.math.next_id += 1;
+        let id = self.math.next_id;
+        self.math.plot_in_flight = Some((id, Aabb::new(origin, origin + size)));
+        serde_json::to_string(&serde_json::json!({
+            "id": id,
+            "cmd": "plot",
+            "rows": self.math_lines_json(&lines),
+            "size": [size.x, size.y],
+        }))
+        .ok()
+    }
+
+    /// Draws the plot (axes, numbers and curves) as normal strokes, with one undo step. Returns the error of the
+    /// helper (e.g. nothing to plot) as Err.
+    pub fn math_apply_plot(&mut self, line: &str) -> Result<WidgetFlags, String> {
+        #[derive(Deserialize)]
+        struct PlotResponse {
+            id: u64,
+            #[serde(default)]
+            axes: Vec<Vec<[f64; 2]>>,
+            #[serde(default)]
+            labels: Vec<Vec<[f64; 2]>>,
+            #[serde(default)]
+            curves: Vec<Vec<Vec<[f64; 2]>>>,
+            #[serde(default)]
+            error: Option<String>,
+        }
+        let resp = serde_json::from_str::<PlotResponse>(line).map_err(|e| e.to_string())?;
+        let Some((id, place)) = self.math.plot_in_flight.take() else {
+            return Ok(WidgetFlags::default());
+        };
+        if id != resp.id {
+            return Ok(WidgetFlags::default());
+        }
+        if let Some(e) = resp.error {
+            return Err(e);
+        }
+        let style_of = |engine: &Self| {
+            engine.math.symbols.iter().find_map(|s| {
+                s.keys
+                    .iter()
+                    .find_map(|k| match engine.store.get_stroke_ref(*k) {
+                        Some(Stroke::BrushStroke(b)) => {
+                            Some((b.style.clone(), engine.store.stroke_layer(*k)))
+                        }
+                        _ => None,
+                    })
+            })
+        };
+        let Some((style, layer)) = style_of(self) else {
+            return Ok(WidgetFlags::default());
+        };
+        let shift = |lines: Vec<Vec<[f64; 2]>>| -> Vec<Vec<[f64; 2]>> {
+            lines
+                .into_iter()
+                .map(|l| {
+                    l.into_iter()
+                        .map(|p| [p[0] + place.mins.x, p[1] + place.mins.y])
+                        .collect()
+                })
+                .collect()
+        };
+        let thin = |color: piet::Color, factor: f64| {
+            let mut s = style.clone();
+            s.set_stroke_width(style.stroke_width() * factor);
+            s.set_stroke_color(rnote_compose::Color::from(color));
+            s
+        };
+        let gray = rnote_compose::color::GNOME_DARKS[2];
+        let mut keys = self.math_insert_lines(&shift(resp.axes), &thin(gray, 0.6), 0.5, layer);
+        keys.extend(self.math_insert_lines(&shift(resp.labels), &thin(gray, 0.4), 0.5, layer));
+        let colors = [
+            rnote_compose::color::ONEPEPE_BRAND,
+            rnote_compose::color::GNOME_BLUES[3],
+            rnote_compose::color::GNOME_GREENS[4],
+            rnote_compose::color::GNOME_ORANGES[3],
+        ];
+        for (i, curve) in resp.curves.into_iter().enumerate() {
+            keys.extend(self.math_insert_lines(
+                &shift(curve),
+                &thin(colors[i % colors.len()], 1.0),
+                0.5,
+                layer,
+            ));
+        }
+        let mut widget_flags = WidgetFlags::default();
+        if !keys.is_empty() {
+            widget_flags |= self.record(Instant::now());
+            widget_flags.store_modified = true;
+            widget_flags.redraw = true;
+            widget_flags.resize = true;
+        }
+        Ok(widget_flags)
     }
 
     /// Forgets all recognized symbols and results (e.g. when another document is loaded).
@@ -1075,7 +1666,14 @@ impl Engine {
         use piet::RenderContext;
         use rnote_compose::ext::DAffine2Ext;
 
-        if !self.math.mode && self.math.overlays.is_empty() {
+        let overlays = self
+            .math
+            .overlays
+            .iter()
+            .filter(|o| o.keys.is_empty() || self.math_keys_alive(&o.keys))
+            .cloned()
+            .collect::<Vec<_>>();
+        if !self.math.mode && overlays.is_empty() {
             return Ok(());
         }
         let size = self.camera.size();
@@ -1087,7 +1685,7 @@ impl Engine {
             draw_math_mode_border(&mut piet_cx, size)?;
         }
         piet_cx.transform(self.camera.transform().to_kurbo());
-        draw_math_overlays(&mut piet_cx, &self.math.overlays)?;
+        draw_math_overlays(&mut piet_cx, &overlays)?;
         piet_cx.finish().map_err(|e| anyhow::anyhow!("{e:?}"))?;
         snapshot.restore();
         Ok(())
@@ -1115,10 +1713,16 @@ pub fn draw_math_overlays(
     use rnote_compose::color;
     for o in overlays {
         let font_size = o.height.max(6.0);
+        // results in gray, variables in a soft purple, wrong steps in red
+        let text_color = match o.kind.as_str() {
+            "variable" => color::ONEPEPE_BRAND.with_a8(170),
+            "error" => color::GNOME_REDS[3].with_a8(230),
+            _ => color::GNOME_DARKS[0].with_a8(150),
+        };
         if let Ok(layout) = piet_cx
             .text()
-            .new_text_layout(o.text.clone())
-            .text_color(color::GNOME_DARKS[0].with_a8(150))
+            .new_text_layout(o.shown_text().to_string())
+            .text_color(text_color)
             .font(piet::FontFamily::SANS_SERIF, font_size)
             .build()
         {
@@ -1127,12 +1731,14 @@ pub fn draw_math_overlays(
                 kurbo::Point::new(o.anchor.x, o.anchor.y - font_size * 0.6),
             );
         }
-        if let Ok(layout) = piet_cx
-            .text()
-            .new_text_layout(format!("LaTeX: {}", o.latex))
-            .text_color(color::GNOME_DARKS[0].with_a8(110))
-            .font(piet::FontFamily::MONOSPACE, font_size * 0.35)
-            .build()
+        // the LaTeX under the results (not under the "?", the variables or the explanations)
+        if !matches!(o.kind.as_str(), "unknown" | "variable" | "error")
+            && let Ok(layout) = piet_cx
+                .text()
+                .new_text_layout(format!("LaTeX: {}", o.shown_latex()))
+                .text_color(color::GNOME_DARKS[0].with_a8(110))
+                .font(piet::FontFamily::MONOSPACE, font_size * 0.35)
+                .build()
         {
             piet_cx.draw_text(
                 &layout,
@@ -1214,7 +1820,250 @@ mod tests {
               ],
               "latex": "1=", "result": {{"text": "1", "latex": "1"}}}}"#
         );
-        engine.math_apply_response(&resp)
+        let flags = engine.math_apply_response(&resp);
+        assert!(flags.math_page);
+        flags
+            | answer_page(
+                engine,
+                r#"[{"marks": [{"kind": "value", "text": "1", "latex": "1",
+            "anchor": [150, 120], "height": 20, "at": 1}]}]"#,
+            )
+    }
+
+    /// Sends the page request and answers it with these rows.
+    fn answer_page(engine: &mut Engine, rows: &str) -> WidgetFlags {
+        let req = engine.math_page_request(None).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&req).unwrap();
+        assert_eq!(v["cmd"], "page");
+        engine.math_apply_page(&format!(r#"{{"id": {}, "rows": {rows}}}"#, v["id"]))
+    }
+
+    #[test]
+    fn the_page_is_sent_by_lines_and_results_follow_their_equals() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let req = engine.math_page_request(None).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&req).unwrap();
+        let rows = v["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 1);
+        let latex = rows[0]["symbols"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|s| s["latex"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(latex, ["1", "="]);
+        assert_eq!(rows[0]["symbols"][0]["alts"][1], "l");
+        // a second line, lower down
+        let _ = draw(&mut engine, &line(100.0, 200.0, 103.0, 240.0));
+        let req = engine.math_take_request(None).unwrap();
+        let id = serde_json::from_str::<serde_json::Value>(&req).unwrap()["id"].clone();
+        let _ = engine.math_apply_response(&format!(
+            r#"{{"id": {id}, "symbols": [{{"strokes": [0], "candidates": [{{"latex": "7", "p": 0.5}}], "clean": null}}]}}"#
+        ));
+        let req = engine.math_page_request(None).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&req).unwrap();
+        assert_eq!(v["rows"].as_array().unwrap().len(), 2);
+        let _ = engine.math_apply_page(&format!(r#"{{"id": {}, "rows": [
+            {{"marks": [{{"kind": "value", "text": "1", "latex": "1", "anchor": [150, 120], "height": 20, "at": 1}}]}},
+            {{"marks": [{{"kind": "variable", "text": "= 7", "latex": "= 7", "anchor": [120, 220], "height": 20}}]}}
+        ]}}"#, v["id"]));
+        assert_eq!(engine.math.overlays.len(), 2);
+        // an old answer is ignored
+        let _ = engine.math_page_request(None).unwrap();
+        let _ = engine.math_apply_page(&format!(r#"{{"id": {}, "rows": []}}"#, v["id"]));
+        assert_eq!(engine.math.overlays.len(), 2);
+        // all options off: nothing to ask, the annotations go
+        engine.config.write().pens_config.brush_config.math.equals = false;
+        assert!(engine.math_page_request(None).is_none());
+        assert!(engine.math.overlays.is_empty());
+    }
+
+    #[test]
+    fn a_tap_on_a_fraction_changes_its_form() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let _ = answer_page(
+            &mut engine,
+            r#"[{"marks": [{"kind": "value", "text": "7/2", "latex": "\frac{7}{2}",
+            "anchor": [150, 120], "height": 20, "at": 1,
+            "formats": [{"text": "7/2", "latex": "\frac{7}{2}"}, {"text": "3.5", "latex": "3.5"},
+                        {"text": "3 1/2", "latex": "3\tfrac{1}{2}"}]}]}]"#,
+        );
+        let before = n_strokes(&engine);
+        let flags = draw(&mut engine, &[(155.0, 120.0), (155.5, 120.5)]);
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before);
+        assert_eq!(engine.math.overlays[0].shown_text(), "3.5");
+        // the form chosen is kept when the page is asked again
+        let _ = answer_page(
+            &mut engine,
+            r#"[{"marks": [{"kind": "value", "text": "7/2", "latex": "", "anchor": [150, 120],
+            "height": 20, "at": 1, "formats": [{"text": "7/2", "latex": ""}, {"text": "3.5", "latex": ""}]}]}]"#,
+        );
+        assert_eq!(engine.math.overlays[0].shown_text(), "3.5");
+        // a "?" is explained by the UI
+        let _ = answer_page(
+            &mut engine,
+            r#"[{"marks": [{"kind": "unknown", "text": "?", "latex": "1=",
+            "anchor": [150, 120], "height": 20, "at": 1}]}]"#,
+        );
+        let flags = draw(&mut engine, &[(152.0, 120.0), (152.5, 120.5)]);
+        assert!(flags.math_tap);
+        let (kind, _, latex) = engine
+            .math_overlay_at(engine.math.last_tap.unwrap())
+            .unwrap();
+        assert_eq!((kind.as_str(), latex.as_str()), ("unknown", "1="));
+    }
+
+    #[test]
+    fn recognize_what_was_written_outside_math_mode() {
+        let mut engine = Engine::default();
+        // two lines written without math mode
+        let _ = draw(&mut engine, &line(100.0, 100.0, 103.0, 140.0));
+        let _ = draw(&mut engine, &line(120.0, 120.0, 140.0, 120.0));
+        let _ = draw(&mut engine, &line(100.0, 300.0, 103.0, 340.0));
+        assert!(engine.math_take_request(None).is_none());
+        let keys = engine.store.stroke_keys_as_rendered();
+        assert_eq!(engine.math_queue_strokes(&keys), 2);
+        // again: they are already waiting
+        assert_eq!(engine.math_queue_strokes(&keys), 0);
+        let first: serde_json::Value =
+            serde_json::from_str(&engine.math_take_request(None).unwrap()).unwrap();
+        assert_eq!(first["strokes"].as_array().unwrap().len(), 2);
+        // no times for strokes written before
+        assert!(first.get("times").is_none());
+        let second: serde_json::Value =
+            serde_json::from_str(&engine.math_take_request(None).unwrap()).unwrap();
+        assert_eq!(second["strokes"].as_array().unwrap().len(), 1);
+        assert!(!engine.math_has_queued());
+        // recognized strokes are not queued again
+        let _ = engine.math_apply_response(&format!(
+            r#"{{"id": {}, "symbols": [{{"strokes": [0], "candidates": [{{"latex": "1", "p": 0.5}}]}}]}}"#,
+            second["id"]
+        ));
+        assert_eq!(engine.math_queue_strokes(&keys), 1);
+    }
+
+    #[test]
+    fn small_writing_with_a_big_zoom_is_not_mixed_with_big_writing() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        // at 1600 %, a tiny "1" just under the big "1 =" (100..140 tall 40), touching its band
+        let _ = engine.camera.zoom_to(16.0);
+        let _ = draw(&mut engine, &line(110.0, 141.0, 110.1, 143.5));
+        let req: serde_json::Value =
+            serde_json::from_str(&engine.math_take_request(None).unwrap()).unwrap();
+        assert!(req["known"].as_array().unwrap().is_empty());
+        let _ = engine.math_apply_response(&format!(
+            r#"{{"id": {}, "symbols": [{{"strokes": [0], "candidates": [{{"latex": "1", "p": 0.9}}]}}]}}"#,
+            req["id"]
+        ));
+        // and it is a line of its own
+        let page: serde_json::Value =
+            serde_json::from_str(&engine.math_page_request(None).unwrap()).unwrap();
+        assert_eq!(page["rows"].as_array().unwrap().len(), 2);
+        // a big exponent-sized or fraction-sized symbol still joins its line
+        assert_eq!(
+            Engine::math_lines_of(&[
+                (
+                    0,
+                    Aabb::new(Vector2::new(0.0, 10.0), Vector2::new(10.0, 30.0))
+                ),
+                (
+                    1,
+                    Aabb::new(Vector2::new(11.0, 2.0), Vector2::new(16.0, 12.0))
+                ),
+                (
+                    2,
+                    Aabb::new(Vector2::new(20.0, 19.0), Vector2::new(60.0, 21.0))
+                ),
+            ]),
+            vec![vec![0, 1, 2]]
+        );
+    }
+
+    #[test]
+    fn copy_as_latex_and_plot_the_selection() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        // nothing selected
+        assert!(engine.math_latex_request().is_none());
+        let keys = engine.store.stroke_keys_as_rendered();
+        engine.store.set_selected_keys(&keys, true);
+        let req: serde_json::Value =
+            serde_json::from_str(&engine.math_latex_request().unwrap()).unwrap();
+        assert_eq!(req["cmd"], "latex");
+        assert_eq!(req["rows"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            Engine::math_latex_from_response(r#"{"id": 1, "latex": ["x+1", "y"]}"#).unwrap(),
+            "x+1\ny"
+        );
+        // the plot: strokes to the right of the selection, one undo step
+        let req: serde_json::Value =
+            serde_json::from_str(&engine.math_plot_request().unwrap()).unwrap();
+        assert_eq!(req["cmd"], "plot");
+        let before = n_strokes(&engine);
+        let flags = engine
+            .math_apply_plot(&format!(
+                r#"{{"id": {}, "axes": [[[0, 50], [100, 50]], [[50, 0], [50, 100]]], "labels": [],
+                    "curves": [[[[0, 100], [50, 50], [100, 0]]]]}}"#,
+                req["id"]
+            ))
+            .unwrap();
+        assert!(flags.store_modified);
+        assert_eq!(n_strokes(&engine), before + 3);
+        let added = engine.store.stroke_keys_as_rendered();
+        let curve = engine
+            .store
+            .get_stroke_ref(*added.last().unwrap())
+            .unwrap()
+            .bounds();
+        assert!(curve.mins.x > 140.0);
+        let _ = engine.undo(Instant::now());
+        assert_eq!(n_strokes(&engine), before);
+        // nothing to plot: the helper's message
+        engine.store.set_selected_keys(&keys, true);
+        let req: serde_json::Value =
+            serde_json::from_str(&engine.math_plot_request().unwrap()).unwrap();
+        assert!(
+            engine
+                .math_apply_plot(&format!(r#"{{"id": {}, "error": "nada"}}"#, req["id"]))
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn math_mode_waits_with_the_ink_to_shape() {
+        let mut engine = Engine::default();
+        engine
+            .config
+            .write()
+            .pens_config
+            .brush_config
+            .shape_recognition = true;
+        let _ = engine.set_math_mode(true);
+        // a big "0", round enough to be a circle
+        let circle = (0..=40)
+            .map(|i| {
+                let a = i as f64 / 40.0 * std::f64::consts::TAU;
+                (300.0 + 60.0 * a.cos(), 300.0 + 60.0 * a.sin())
+            })
+            .collect::<Vec<_>>();
+        let _ = draw(&mut engine, &circle);
+        let key = engine.store.stroke_keys_as_rendered()[0];
+        assert!(matches!(
+            engine.store.get_stroke_ref(key),
+            Some(Stroke::BrushStroke(_))
+        ));
+        assert!(
+            engine
+                .config
+                .read()
+                .pens_config
+                .brush_config
+                .shape_recognition
+        );
     }
 
     #[test]
@@ -1348,6 +2197,77 @@ mod tests {
     }
 
     #[test]
+    fn a_stroke_that_starts_on_a_symbol_is_drawn_whole() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let before = n_strokes(&engine);
+        // starts on the ink of the "1" and goes away: an exponent written from the symbol
+        let flags = draw(&mut engine, &line(101.0, 120.0, 140.0, 80.0));
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before + 1);
+        let key = *engine.store.stroke_keys_as_rendered().last().unwrap();
+        let bounds = engine.store.get_stroke_ref(key).unwrap().bounds();
+        // from its first point
+        assert!(bounds.mins.x < 102.0 && bounds.maxs.x > 139.0);
+        assert!(flags.math_pending);
+    }
+
+    #[test]
+    fn a_dot_next_to_the_ink_is_not_a_tap() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        // at 400 % the pen tip tolerance is 1 unit of the page
+        let _ = engine.camera.zoom_to(4.0);
+        let before = n_strokes(&engine);
+        // inside the box of the "=" (120..140 × 115..125) but between its bars, away from the ink
+        assert!(engine.math_symbol_at(Vector2::new(130.0, 120.0)).is_none());
+        let flags = draw(&mut engine, &[(130.0, 120.0), (130.5, 120.5)]);
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before + 1);
+    }
+
+    #[test]
+    fn erased_symbols_do_not_count() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let one = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "1")
+            .unwrap()
+            .keys
+            .clone();
+        let eq = engine
+            .math
+            .symbols
+            .iter()
+            .find(|s| s.latex == "=")
+            .unwrap()
+            .keys
+            .clone();
+        engine.store.set_trashed_keys(&one, true);
+        engine.store.set_trashed_keys(&eq, true);
+        let _ = engine.record(Instant::now());
+        let before = n_strokes(&engine);
+        // drawing where the "1" was draws, it is not a tap
+        let flags = draw(&mut engine, &line(101.0, 105.0, 101.0, 135.0));
+        assert!(!flags.math_tap);
+        assert_eq!(n_strokes(&engine), before + 1);
+        // the erased symbols are not sent as context, and the result of the erased "=" is not kept
+        let req = engine.math_take_request(None).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&req).unwrap();
+        assert!(v["known"].as_array().unwrap().is_empty());
+        let json = engine.math_sidecar_json().unwrap();
+        let file: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert!(file["symbols"].as_array().unwrap().is_empty());
+        assert!(file["overlays"].as_array().unwrap().is_empty());
+        // undo brings the erased symbols back
+        engine.store.set_trashed_keys(&one, false);
+        assert!(engine.math_symbol_at(Vector2::new(101.0, 120.0)).is_some());
+    }
+
+    #[test]
     fn writing_elsewhere_still_draws_in_math_mode() {
         let mut engine = Engine::default();
         let _ = write_one_equals(&mut engine);
@@ -1386,6 +2306,10 @@ mod render_tests {
                 height: 30.0,
                 text: "x = 3".into(),
                 latex: "x = 3".into(),
+                keys: vec![],
+                kind: "value".into(),
+                formats: vec![],
+                format: 0,
             }];
             draw_math_overlays(&mut piet_cx, &overlays).unwrap();
             piet::RenderContext::finish(&mut piet_cx).unwrap();
@@ -1475,6 +2399,12 @@ mod sidecar_tests {
               ], "result": {{"text": "1", "latex": "1"}}}}"#
         );
         let _ = engine.math_apply_response(&resp);
+        let req = engine.math_page_request(None).unwrap();
+        let id = serde_json::from_str::<serde_json::Value>(&req).unwrap()["id"].clone();
+        let _ = engine.math_apply_page(&format!(
+            r#"{{"id": {id}, "rows": [{{"marks": [{{"kind": "value", "text": "1", "latex": "1",
+                "anchor": [150, 120], "height": 20, "at": 1}}]}}]}}"#
+        ));
         engine
     }
 

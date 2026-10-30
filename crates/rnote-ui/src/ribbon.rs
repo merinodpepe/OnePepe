@@ -132,6 +132,33 @@ pub(crate) fn refresh(appwindow: &RnAppWindow) {
     {
         action.set_state(&shape_recognition.to_variant());
     }
+    let (mut math, scratch_out) = {
+        let config = appwindow.engine_config().read();
+        (
+            config.pens_config.brush_config.math,
+            config.pens_config.brush_config.scratch_out,
+        )
+    };
+    for (name, get) in MATH_TOGGLES {
+        if let Some(action) = appwindow
+            .lookup_action(name)
+            .and_then(|a| a.downcast::<gio::SimpleAction>().ok())
+        {
+            action.set_state(&(*get(&mut math)).to_variant());
+        }
+    }
+    if let Some(action) = appwindow
+        .lookup_action("scratch-out")
+        .and_then(|a| a.downcast::<gio::SimpleAction>().ok())
+    {
+        use rnote_engine::engine::scratch::ScratchOutMode;
+        let target = match scratch_out {
+            ScratchOutMode::Off => "off",
+            ScratchOutMode::MathMode => "math_mode",
+            ScratchOutMode::Always => "always",
+        };
+        action.set_state(&target.to_variant());
+    }
     if let (Some(canvas), Some(action)) = (
         appwindow.active_tab_canvas(),
         appwindow
@@ -852,14 +879,85 @@ fn draw_page(appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
 }
 
 fn math_page(_appwindow: &RnAppWindow) -> gtk4::ScrolledWindow {
+    let scratch_popover = list_popover(
+        "win.scratch-out",
+        &[
+            (gettext("Never"), "off"),
+            (gettext("Only in math mode"), "math_mode"),
+            (gettext("Always, with the pen"), "always"),
+        ],
+    );
     page(&[
         group(
             &gettext("Math Mode"),
-            &[big_toggle(
-                "onepepe-math-symbolic",
-                &gettext("Math Mode"),
-                "win.math-mode",
-                None,
+            &[
+                big_toggle(
+                    "onepepe-math-symbolic",
+                    &gettext("Math Mode"),
+                    "win.math-mode",
+                    None,
+                )
+                .upcast(),
+                big_button(
+                    "edit-select-all-symbolic",
+                    &gettext("Recognize selection"),
+                    "win.math-recognize-selection",
+                    None,
+                )
+                .upcast(),
+            ],
+        ),
+        group(
+            &gettext("Calculate"),
+            &[
+                big_toggle(
+                    "accessories-calculator-symbolic",
+                    &gettext("Result of \"=\""),
+                    "win.math-equals",
+                    None,
+                )
+                .upcast(),
+                big_toggle(
+                    "format-text-italic-symbolic",
+                    &gettext("Variables"),
+                    "win.math-variables",
+                    None,
+                )
+                .upcast(),
+                big_toggle(
+                    "object-select-symbolic",
+                    &gettext("Check steps"),
+                    "win.math-check",
+                    None,
+                )
+                .upcast(),
+            ],
+        ),
+        group(
+            &gettext("Selection"),
+            &[
+                big_button(
+                    "edit-copy-symbolic",
+                    &gettext("Copy as LaTeX"),
+                    "win.math-copy-latex",
+                    None,
+                )
+                .upcast(),
+                big_button(
+                    "media-playlist-shuffle-symbolic",
+                    &gettext("Plot"),
+                    "win.math-plot",
+                    None,
+                )
+                .upcast(),
+            ],
+        ),
+        group(
+            &gettext("Scratch out"),
+            &[big_menu(
+                "edit-clear-symbolic",
+                &gettext("Zigzag erases"),
+                &scratch_popover,
             )
             .upcast()],
         ),
@@ -1261,6 +1359,17 @@ fn give_focus_back(canvas: &crate::RnCanvas) {
     ));
 }
 
+/// The math options with a toggle in the ribbon: (action, option).
+type MathToggle = (
+    &'static str,
+    fn(&mut rnote_engine::engine::math::MathOptions) -> &mut bool,
+);
+const MATH_TOGGLES: [MathToggle; 3] = [
+    ("math-equals", |o| &mut o.equals),
+    ("math-variables", |o| &mut o.variables),
+    ("math-check", |o| &mut o.check),
+];
+
 fn setup_actions(appwindow: &RnAppWindow) {
     // show or hide the ribbon
     let action_ribbon = gio::SimpleAction::new_stateful("ribbon", None, &true.to_variant());
@@ -1283,6 +1392,58 @@ fn setup_actions(appwindow: &RnAppWindow) {
         }
     ));
     appwindow.add_action(&action_shape_recognition);
+    // OnePepe: what the math mode writes next to the lines (result of "=", variables, step check)
+    for (name, get) in MATH_TOGGLES {
+        let action = gio::SimpleAction::new_stateful(name, None, &false.to_variant());
+        action.connect_activate(clone!(
+            #[weak]
+            appwindow,
+            move |action, _| {
+                let enabled = {
+                    let mut config = appwindow.engine_config().write();
+                    let option = get(&mut config.pens_config.brush_config.math);
+                    *option = !*option;
+                    *option
+                };
+                action.set_state(&enabled.to_variant());
+                if let Some(canvas) = appwindow.active_tab_canvas() {
+                    crate::mathhelper::schedule_page(&appwindow, &canvas);
+                }
+                appwindow.refresh_ui();
+            }
+        ));
+        appwindow.add_action(&action);
+    }
+    // OnePepe: when a zigzag erases
+    let action_scratch_out = gio::SimpleAction::new_stateful(
+        "scratch-out",
+        Some(&String::static_variant_type()),
+        &String::from("math_mode").to_variant(),
+    );
+    action_scratch_out.connect_activate(clone!(
+        #[weak]
+        appwindow,
+        move |action, target| {
+            let Some(target) = target.and_then(|t| t.get::<String>()) else {
+                return;
+            };
+            use rnote_engine::engine::scratch::ScratchOutMode;
+            let mode = match target.as_str() {
+                "off" => ScratchOutMode::Off,
+                "always" => ScratchOutMode::Always,
+                _ => ScratchOutMode::MathMode,
+            };
+            appwindow
+                .engine_config()
+                .write()
+                .pens_config
+                .brush_config
+                .scratch_out = mode;
+            action.set_state(&target.to_variant());
+            appwindow.refresh_ui();
+        }
+    ));
+    appwindow.add_action(&action_scratch_out);
     // dark canvas in the dark theme (only on screen), on by default
     let action_dark_canvas = gio::SimpleAction::new_stateful(
         "dark-canvas",
@@ -1478,6 +1639,15 @@ fn setup_actions(appwindow: &RnAppWindow) {
     });
     plain_action(appwindow, "math-retrain", |appwindow| {
         crate::mathhelper::retrain(appwindow);
+    });
+    plain_action(appwindow, "math-recognize-selection", |appwindow| {
+        crate::mathhelper::recognize_selection(appwindow);
+    });
+    plain_action(appwindow, "math-copy-latex", |appwindow| {
+        crate::mathhelper::copy_latex(appwindow);
+    });
+    plain_action(appwindow, "math-plot", |appwindow| {
+        crate::mathhelper::plot_selection(appwindow);
     });
     plain_action(appwindow, "export-section", |appwindow| {
         glib::spawn_future_local(clone!(

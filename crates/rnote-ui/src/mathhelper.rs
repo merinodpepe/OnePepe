@@ -23,10 +23,25 @@ pub(crate) struct MathHelper {
     lock: Mutex<()>,
 }
 
+/// Pause after the last change before the page (results, variables, steps) is asked again.
+const PAGE_DELAY: Duration = Duration::from_millis(400);
+
 thread_local! {
     static HELPER: RefCell<Option<Rc<MathHelper>>> = const { RefCell::new(None) };
     static SPAWN_FAILED: Cell<bool> = const { Cell::new(false) };
     static TIMER: RefCell<Option<glib::SourceId>> = const { RefCell::new(None) };
+    static PAGE_TIMER: RefCell<Option<glib::SourceId>> = const { RefCell::new(None) };
+    /// The dictionary of symbols (`names` of the helper), asked once: (latex, character, group, first name).
+    static NAMES: RefCell<Option<Rc<Vec<NameEntry>>>> = const { RefCell::new(None) };
+}
+
+#[derive(Debug, Clone)]
+struct NameEntry {
+    latex: String,
+    char: String,
+    group: String,
+    name: String,
+    shortcut: String,
 }
 
 /// The command that starts the helper: `ONEPEPE_MATH_CMD`, or `onepepe-math` (through `flatpak-spawn --host` inside
@@ -153,8 +168,66 @@ pub(crate) fn schedule_recognition(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     TIMER.with(|t| *t.borrow_mut() = Some(id));
 }
 
+/// Recognizes what is waiting: the strokes just written and the lines queued with «Recognize selection».
 async fn recognize_now(appwindow: &RnAppWindow, canvas: &RnCanvas) {
-    let Some(request) = canvas.engine_mut().math_take_request(notebook_dir(canvas)) else {
+    loop {
+        // (the engine is borrowed only for this statement)
+        let request = canvas.engine_mut().math_take_request(notebook_dir(canvas));
+        let Some(request) = request else {
+            return;
+        };
+        let Some(helper) = helper(appwindow) else {
+            return;
+        };
+        match helper.request(request).await {
+            Ok(resp) => {
+                let widget_flags = canvas.engine_mut().math_apply_response(&resp);
+                appwindow.handle_widget_flags(widget_flags, canvas);
+            }
+            Err(e) => {
+                tracing::error!("Math recognition failed, Err: {e:?}");
+                reset_helper();
+                return;
+            }
+        }
+    }
+}
+
+/// Asks again, after a short pause, what goes next to the recognized lines (results, "?", variables, wrong steps).
+pub(crate) fn schedule_page(appwindow: &RnAppWindow, canvas: &RnCanvas) {
+    PAGE_TIMER.with(|t| {
+        if let Some(id) = t.borrow_mut().take() {
+            id.remove();
+        }
+    });
+    let id = glib::timeout_add_local_once(
+        PAGE_DELAY,
+        clone!(
+            #[weak]
+            appwindow,
+            #[weak]
+            canvas,
+            move || {
+                PAGE_TIMER.with(|t| t.borrow_mut().take());
+                glib::spawn_future_local(clone!(
+                    #[weak]
+                    appwindow,
+                    #[weak]
+                    canvas,
+                    async move {
+                        page_now(&appwindow, &canvas).await;
+                    }
+                ));
+            }
+        ),
+    );
+    PAGE_TIMER.with(|t| *t.borrow_mut() = Some(id));
+}
+
+async fn page_now(appwindow: &RnAppWindow, canvas: &RnCanvas) {
+    let Some(request) = canvas.engine_mut().math_page_request(notebook_dir(canvas)) else {
+        // nothing is written next to the lines any more
+        canvas.queue_draw();
         return;
     };
     let Some(helper) = helper(appwindow) else {
@@ -162,18 +235,427 @@ async fn recognize_now(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     };
     match helper.request(request).await {
         Ok(resp) => {
-            let widget_flags = canvas.engine_mut().math_apply_response(&resp);
+            let widget_flags = canvas.engine_mut().math_apply_page(&resp);
             appwindow.handle_widget_flags(widget_flags, canvas);
         }
         Err(e) => {
-            tracing::error!("Math recognition failed, Err: {e:?}");
+            tracing::error!("Asking the math helper for the page failed, Err: {e:?}");
             reset_helper();
         }
     }
 }
 
+/// «Recognize selection»: recognizes the selected handwriting (e.g. written before math mode was on).
+pub(crate) fn recognize_selection(appwindow: &RnAppWindow) {
+    let Some(canvas) = appwindow.active_tab_canvas() else {
+        return;
+    };
+    let lines = canvas.engine_mut().math_queue_selection();
+    if lines == 0 {
+        appwindow.overlays().dispatch_toast_text(
+            &gettext("Select handwriting with the lasso first"),
+            crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+        );
+        return;
+    }
+    // math mode on, so the border and the taps on the symbols work
+    if !canvas.engine_ref().math_mode() {
+        let _ = gtk4::prelude::WidgetExt::activate_action(appwindow, "win.math-mode", None);
+    }
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        canvas,
+        async move {
+            recognize_now(&appwindow, &canvas).await;
+        }
+    ));
+}
+
+/// «Copy as LaTeX»: the selected recognized lines go to the clipboard as LaTeX, one line each.
+pub(crate) fn copy_latex(appwindow: &RnAppWindow) {
+    let Some(canvas) = appwindow.active_tab_canvas() else {
+        return;
+    };
+    let Some(request) = canvas.engine_mut().math_latex_request() else {
+        appwindow.overlays().dispatch_toast_text(
+            &gettext("Select recognized math with the lasso first"),
+            crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+        );
+        return;
+    };
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        async move {
+            let Some(helper) = helper(&appwindow) else {
+                return;
+            };
+            match helper.request(request).await {
+                Ok(resp) => {
+                    if let Some(latex) = rnote_engine::Engine::math_latex_from_response(&resp) {
+                        appwindow.clipboard().set_text(&latex);
+                        appwindow.overlays().dispatch_toast_text(
+                            &gettext("LaTeX copied"),
+                            crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+                        );
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("Asking the math helper for LaTeX failed, Err: {e:?}");
+                    reset_helper();
+                }
+            }
+        }
+    ));
+}
+
+/// «Plot»: draws the functions of the selected lines (y = f(x)) next to them, as normal strokes.
+pub(crate) fn plot_selection(appwindow: &RnAppWindow) {
+    let Some(canvas) = appwindow.active_tab_canvas() else {
+        return;
+    };
+    let Some(request) = canvas.engine_mut().math_plot_request() else {
+        appwindow.overlays().dispatch_toast_text(
+            &gettext("Select a recognized function with the lasso first, like y = x²"),
+            crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+        );
+        return;
+    };
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        canvas,
+        async move {
+            let Some(helper) = helper(&appwindow) else {
+                return;
+            };
+            match helper.request(request).await {
+                Ok(resp) => {
+                    let result = canvas.engine_mut().math_apply_plot(&resp);
+                    match result {
+                        Ok(widget_flags) => appwindow.handle_widget_flags(widget_flags, &canvas),
+                        Err(e) => {
+                            appwindow.overlays().dispatch_toast_text(
+                                &format!("{}: {e}", gettext("Nothing to plot")),
+                                crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT,
+                            );
+                        }
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("Asking the math helper for a plot failed, Err: {e:?}");
+                    reset_helper();
+                }
+            }
+        }
+    ));
+}
+
+/// The dictionary of symbols, asked to the helper the first time.
+async fn names(appwindow: &RnAppWindow) -> Option<Rc<Vec<NameEntry>>> {
+    if let Some(names) = NAMES.with(|n| n.borrow().clone()) {
+        return Some(names);
+    }
+    let helper = helper(appwindow)?;
+    let resp = helper
+        .request(r#"{"id": 0, "cmd": "names"}"#.to_string())
+        .await
+        .ok()?;
+    let entries = parse_names(&resp);
+    if entries.is_empty() {
+        return None;
+    }
+    let entries = Rc::new(entries);
+    NAMES.with(|n| *n.borrow_mut() = Some(entries.clone()));
+    Some(entries)
+}
+
+fn parse_names(resp: &str) -> Vec<NameEntry> {
+    let Ok(v) = serde_json::from_str::<serde_json::Value>(resp) else {
+        return vec![];
+    };
+    v["entries"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .map(|e| NameEntry {
+                    latex: e["latex"].as_str().unwrap_or_default().to_string(),
+                    char: e["char"].as_str().unwrap_or_default().to_string(),
+                    group: e["group"].as_str().unwrap_or_default().to_string(),
+                    name: e["names"][0].as_str().unwrap_or_default().to_string(),
+                    shortcut: e["shortcut"].as_str().unwrap_or_default().to_string(),
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// Corrects the symbol (or its whole group) to `latex`: the helper learns it and draws it clean.
+fn correct_symbol(
+    appwindow: &RnAppWindow,
+    canvas: &RnCanvas,
+    symbol_id: u64,
+    latex: &str,
+    whole_group: bool,
+) {
+    let requests = canvas.engine_mut().math_correction_requests(
+        symbol_id,
+        latex,
+        whole_group,
+        notebook_dir(canvas),
+    );
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        canvas,
+        async move {
+            let Some(helper) = helper(&appwindow) else {
+                return;
+            };
+            for request in requests {
+                match helper.request(request).await {
+                    Ok(resp) => {
+                        let widget_flags = canvas.engine_mut().math_apply_correction(&resp);
+                        appwindow.handle_widget_flags(widget_flags, &canvas);
+                        note_correction(&appwindow);
+                    }
+                    Err(e) => {
+                        tracing::error!("Math correction failed, Err: {e:?}");
+                        reset_helper();
+                        return;
+                    }
+                }
+            }
+        }
+    ));
+}
+
+/// «Other…»: write which symbol it is when it is not among the candidates. By name in Spanish or English («delta»,
+/// «menor o igual»), the character («δ»), its LaTeX («\delta») or a short cut («\d», «<=»), with suggestions while
+/// typing; or picked from a grid of the hard to type symbols.
+fn other_symbol_box(
+    appwindow: &RnAppWindow,
+    canvas: &RnCanvas,
+    popover: &gtk4::Popover,
+    group_check: &gtk4::CheckButton,
+    symbol_id: u64,
+) -> gtk4::Box {
+    let vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 4);
+    let entry = gtk4::SearchEntry::builder()
+        .placeholder_text(gettext("Other… (delta, \\d, δ, <=)"))
+        .build();
+    let suggestions = gtk4::FlowBox::builder()
+        .max_children_per_line(4)
+        .selection_mode(gtk4::SelectionMode::None)
+        .build();
+    let grid_box = gtk4::Box::new(gtk4::Orientation::Vertical, 2);
+    let expander = gtk4::Expander::new(Some(&gettext("All symbols")));
+    expander.set_child(Some(&grid_box));
+    vbox.append(&entry);
+    vbox.append(&suggestions);
+    vbox.append(&expander);
+
+    let choose = Rc::new(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        canvas,
+        #[weak]
+        popover,
+        #[weak]
+        group_check,
+        move |latex: String| {
+            popover.popdown();
+            correct_symbol(
+                &appwindow,
+                &canvas,
+                symbol_id,
+                &latex,
+                group_check.is_active(),
+            );
+        }
+    ));
+    let symbol_button = {
+        let choose = choose.clone();
+        move |e: &NameEntry, with_name: bool| {
+            let label = if with_name {
+                format!("{}  {}", e.char, e.name)
+            } else {
+                e.char.clone()
+            };
+            let button = gtk4::Button::with_label(&label);
+            button.add_css_class("flat");
+            let tooltip = if e.shortcut.is_empty() {
+                format!("{}  ·  {}", e.name, e.latex)
+            } else {
+                format!("{}  ·  {}  ·  {}", e.name, e.latex, e.shortcut)
+            };
+            button.set_tooltip_text(Some(&tooltip));
+            let latex = e.latex.clone();
+            let choose = choose.clone();
+            button.connect_clicked(move |_| choose(latex.clone()));
+            button
+        }
+    };
+    // the grid, by groups, when the dictionary arrives
+    glib::spawn_future_local(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        grid_box,
+        #[strong]
+        symbol_button,
+        async move {
+            let Some(names) = names(&appwindow).await else {
+                return;
+            };
+            let mut groups: Vec<&str> = vec![];
+            for e in names.iter() {
+                if !groups.contains(&e.group.as_str()) {
+                    groups.push(&e.group);
+                }
+            }
+            for group in groups {
+                let title = gtk4::Label::new(Some(group));
+                title.add_css_class("caption");
+                title.add_css_class("dim-label");
+                title.set_halign(gtk4::Align::Start);
+                grid_box.append(&title);
+                let flow = gtk4::FlowBox::builder()
+                    .max_children_per_line(10)
+                    .selection_mode(gtk4::SelectionMode::None)
+                    .build();
+                for e in names.iter().filter(|e| e.group == group) {
+                    flow.append(&symbol_button(e, false));
+                }
+                grid_box.append(&flow);
+            }
+        }
+    ));
+    // suggestions while typing
+    let exact: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
+    entry.connect_search_changed(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        suggestions,
+        #[strong]
+        exact,
+        #[strong]
+        symbol_button,
+        move |entry| {
+            let query = entry.text().to_string();
+            glib::spawn_future_local(clone!(
+                #[weak]
+                appwindow,
+                #[weak]
+                suggestions,
+                #[strong]
+                exact,
+                #[strong]
+                symbol_button,
+                async move {
+                    while let Some(child) = suggestions.first_child() {
+                        suggestions.remove(&child);
+                    }
+                    *exact.borrow_mut() = None;
+                    if query.trim().is_empty() {
+                        return;
+                    }
+                    let Some(helper) = helper(&appwindow) else {
+                        return;
+                    };
+                    let request = serde_json::json!({"id": 0, "cmd": "names", "query": query});
+                    let Ok(resp) = helper.request(request.to_string()).await else {
+                        reset_helper();
+                        return;
+                    };
+                    let v = serde_json::from_str::<serde_json::Value>(&resp).unwrap_or_default();
+                    *exact.borrow_mut() = v["exact"].as_str().map(String::from);
+                    for e in parse_names(&resp).iter().take(8) {
+                        suggestions.append(&symbol_button(e, true));
+                    }
+                }
+            ));
+        }
+    ));
+    // Enter: what was typed if it is clear, or the first suggestion
+    entry.connect_activate(clone!(
+        #[weak]
+        suggestions,
+        #[strong]
+        exact,
+        #[strong]
+        choose,
+        move |_| {
+            if let Some(latex) = exact.borrow().clone() {
+                choose(latex);
+            } else if let Some(button) = suggestions
+                .child_at_index(0)
+                .and_then(|c| c.child())
+                .and_downcast::<gtk4::Button>()
+            {
+                button.emit_clicked();
+            }
+        }
+    ));
+    vbox
+}
+
+/// A tap on what is written next to a line: the "?" says what was read, a wrong step its explanation.
+fn explain_overlay(
+    canvas: &RnCanvas,
+    pos: rnote_engine::engine::math::Vector2,
+    kind: &str,
+    text: &str,
+    latex: &str,
+) {
+    let message = match kind {
+        "unknown" => gettext(
+            "It can't be calculated. I read: {latex}\nTap the symbol that was read wrongly to correct it.",
+        )
+        .replace("{latex}", latex),
+        "error" => format!(
+            "{}\n{}",
+            text.trim_start_matches("✗ "),
+            gettext("The step is compared with the one before, with random values.")
+        ),
+        _ => format!("{text}\nLaTeX: {latex}"),
+    };
+    let surface_pos = canvas.engine_ref().camera.transform().transform_point2(pos);
+    let popover = gtk4::Popover::new();
+    let label = gtk4::Label::new(Some(&message));
+    label.set_wrap(true);
+    label.set_max_width_chars(40);
+    label.set_selectable(true);
+    popover.set_child(Some(&label));
+    popover.set_parent(canvas);
+    popover.set_pointing_to(Some(&gdk::Rectangle::new(
+        surface_pos.x as i32,
+        surface_pos.y as i32,
+        1,
+        1,
+    )));
+    popover.connect_closed(|popover| {
+        let popover = popover.clone();
+        glib::idle_add_local_once(move || popover.unparent());
+    });
+    popover.popup();
+}
+
 /// How a LaTeX label is shown on the candidate buttons.
 fn display_label(latex: &str) -> String {
+    if let Some(e) = NAMES.with(|n| {
+        n.borrow()
+            .as_ref()
+            .and_then(|names| names.iter().find(|e| e.latex == latex).cloned())
+    }) {
+        return e.char;
+    }
     let table: &[(&str, &str)] = &[
         (r"\alpha", "α"),
         (r"\beta", "β"),
@@ -250,6 +732,10 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     let Some(pos) = canvas.engine_ref().math_last_tap() else {
         return;
     };
+    if let Some((kind, text, latex)) = canvas.engine_ref().math_overlay_at(pos) {
+        explain_overlay(canvas, pos, &kind, &text, &latex);
+        return;
+    }
     let Some((symbol_id, candidates)) = canvas.engine_ref().math_symbol_at(pos) else {
         return;
     };
@@ -276,45 +762,27 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
             #[weak]
             group_check,
             move |_| {
-                let requests = canvas.engine_mut().math_correction_requests(
+                popover.popdown();
+                correct_symbol(
+                    &appwindow,
+                    &canvas,
                     symbol_id,
                     &latex,
                     group_check.is_active(),
-                    notebook_dir(&canvas),
                 );
-                popover.popdown();
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    appwindow,
-                    #[weak]
-                    canvas,
-                    async move {
-                        let Some(helper) = helper(&appwindow) else {
-                            return;
-                        };
-                        for request in requests {
-                            match helper.request(request).await {
-                                Ok(resp) => {
-                                    let widget_flags =
-                                        canvas.engine_mut().math_apply_correction(&resp);
-                                    appwindow.handle_widget_flags(widget_flags, &canvas);
-                                    note_correction(&appwindow);
-                                }
-                                Err(e) => {
-                                    tracing::error!("Math correction failed, Err: {e:?}");
-                                    reset_helper();
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                ));
             }
         ));
         flow.append(&button);
     }
     vbox.append(&flow);
     vbox.append(&group_check);
+    vbox.append(&other_symbol_box(
+        appwindow,
+        canvas,
+        &popover,
+        &group_check,
+        symbol_id,
+    ));
     // fix the cut into symbols: two strokes that belong together, or one symbol that is really two
     let cut_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
     for (label, join) in [

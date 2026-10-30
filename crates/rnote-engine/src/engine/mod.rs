@@ -9,6 +9,7 @@ pub mod onepepe_lines;
 pub mod onepepe_notebook;
 pub mod rendering;
 pub mod ruler;
+pub mod scratch;
 pub mod snapshot;
 pub mod strokecontent;
 pub mod visual_debug;
@@ -515,19 +516,53 @@ impl Engine {
             widget_flags.redraw = true;
             return (EventPropagation::Stop, widget_flags);
         };
-        // OnePepe: math mode: taps on recognized symbols, and queueing of finished strokes
-        let Some(event) = self.math_filter_pen_event(event, &mut widget_flags) else {
+        // OnePepe: math mode: taps on recognized symbols (the events are held back until it is clear whether it is
+        // a tap or a stroke), and queueing of finished strokes
+        let events = self.math_filter_pen_event(event, &mut widget_flags);
+        if events.is_empty() {
             widget_flags.redraw = true;
             return (EventPropagation::Stop, widget_flags);
-        };
-        let is_up = matches!(event, PenEvent::Up { .. });
-        let (propagation, wf) =
-            self.penholder
-                .handle_pen_event(event.clone(), None, now, &mut engine_view_mut!(self));
-        if is_up {
-            widget_flags |= self.math_after_pen_event(&event);
         }
-        (propagation, widget_flags | wf)
+        // OnePepe: in math mode a "0" must not become a circle: the ink to shape waits
+        let shapes = self.math.mode && {
+            let mut config = self.config.write();
+            std::mem::replace(
+                &mut config.pens_config.brush_config.shape_recognition,
+                false,
+            )
+        };
+        let mut propagation = EventPropagation::Proceed;
+        for event in events {
+            let is_up = matches!(event, PenEvent::Up { .. });
+            let brush = self
+                .penholder
+                .current_pen_style_w_override(&engine_view!(self))
+                == PenStyle::Brush;
+            let (p, wf) = self.penholder.handle_pen_event(
+                event.clone(),
+                None,
+                now,
+                &mut engine_view_mut!(self),
+            );
+            propagation = p;
+            widget_flags |= wf;
+            // OnePepe: a zigzag over ink erases it
+            if is_up && brush && self.scratch_out_after_stroke(&mut widget_flags) {
+                self.math_forget_stroke_in_progress();
+                continue;
+            }
+            if is_up {
+                widget_flags |= self.math_after_pen_event(&event);
+            }
+        }
+        if shapes {
+            self.config
+                .write()
+                .pens_config
+                .brush_config
+                .shape_recognition = true;
+        }
+        (propagation, widget_flags)
     }
 
     /// Handle a pressed shortcut key.

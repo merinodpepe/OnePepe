@@ -6,7 +6,8 @@ from . import glyphs
 from .context import apply_glossary, reading_order, share_within_groups, shape_groups, viterbi
 from .evaluate import answer
 from .layout import Sym, parse, to_latex
-from .segment import bbox, segment
+from .dots import fix_dotted_letters
+from .segment import bbox, segment, typical_size
 
 
 def recognize(
@@ -28,6 +29,8 @@ def recognize(
     línea, como [{"latex", "box"}], que dan contexto. Devuelve un dict con "symbols", "latex", "result".
     """
     syms = segment(strokes, classifier, params=segment_params, times=times)
+    if syms:
+        syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes))
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]
     cand_lists = [s["candidates"] for s in syms]
@@ -70,8 +73,9 @@ def recognize(
                 item["clean"] = [[[round(x, 2), round(y, 2)] for x, y in line] for line in lines]
         out_symbols.append(item)
 
-    layout_syms = [Sym(c[0][0], b) for c, b in zip(cand_lists, boxes)] + [
-        Sym(k["latex"], tuple(k["box"])) for k in known
+    # con sus otras lecturas, para unir funciones mal leídas («1n» → ln)
+    layout_syms = [Sym(c[0][0], b, tuple(x for x, _ in c[:5])) for c, b in zip(cand_lists, boxes)] + [
+        Sym(k["latex"], tuple(k["box"]), tuple(k.get("alts", ()))) for k in known
     ]
     tree = parse(layout_syms)
     result = answer(tree, units=units) if equals else None

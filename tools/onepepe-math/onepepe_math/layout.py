@@ -12,6 +12,7 @@ Nodos del árbol (tuplas):
     ("subsup", base, subíndice, exponente)
     ("frac", numerador, denominador)
     ("sqrt", radicando)
+    ("root", índice, radicando)          raíz n-ésima
 """
 
 import re
@@ -24,6 +25,8 @@ from .symbols import category
 class Sym:
     label: str
     box: tuple  # (x0, y0, x1, y1)
+    # otras lecturas posibles del símbolo (sus candidatas), para unir funciones mal leídas («1n» → ln)
+    alts: tuple = ()
 
     @property
     def cx(self):
@@ -115,9 +118,23 @@ def _parse_region(syms, typical):
             and s.cy <= root.box[3] + 0.1 * typical
         ]
         if inside:
+            # índice: algo pequeño encima del gancho, a la izquierda de la raíz (∛)
+            index = [
+                s
+                for s in syms
+                if s is not root
+                and s not in inside
+                and s.cx <= root.box[0] + 0.45 * root.w
+                and s.box[2] <= root.box[0] + 0.6 * root.w
+                and s.box[3] <= root.cy + 0.1 * typical
+                and s.box[1] >= root.box[1] - 0.8 * typical
+                and s.h < 0.75 * typical
+                and s.label not in _FLAT
+            ]
             node = Sym(label="", box=root.box)
-            node.node = ("sqrt", _parse_region(inside, typical))
-            rest = [s for s in syms if s is not root and s not in inside]
+            radicand = _parse_region(inside, typical)
+            node.node = ("root", _parse_region(index, typical), radicand) if index else ("sqrt", radicand)
+            rest = [s for s in syms if s is not root and s not in inside and s not in index]
             return _parse_region(rest + [node], typical)
     # 3. línea base con potencias y subíndices
     return _parse_row(sorted(syms, key=lambda s: s.box[0]), typical)
@@ -129,21 +146,46 @@ def _node(s):
 
 FUNCTIONS = ["sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "arcsin", "arccos", "arctan",
              "ln", "log", "exp", "lim", "max", "min", "det"]
+# nombres en español: se escriben así y se guardan con el nombre de LaTeX (sen x → \sin x)
+FUNCTION_ALIASES = {"sen": "sin", "tg": "tan", "arcsen": "arcsin", "arctg": "arctan", "cotg": "cot",
+                    "senh": "sinh", "tgh": "tanh"}
 # no pueden ser exponente ni subíndice por sí solos
 _NEVER_SCRIPT = {",", ".", "=", "<", ">", r"\leq", r"\geq", r"\neq", r"\approx", r"\rightarrow", r"\Rightarrow",
                  r"\Leftrightarrow", ";", ":"}
+# letras que la red confunde con otros símbolos que se escriben igual: «l» con «1» o «|», «o» con «0»
+_LOOKALIKE = {"l": {"1", "|", "I"}, "o": {"0", "O"}, "s": {"5", "S"}, "g": {"9"}, "i": {"1"}}
+
+
+def _letter_matches(sym, letter, strict):
+    if sym.label == letter:
+        return True
+    if strict or sym.label not in _LOOKALIKE.get(letter, ()):
+        return False
+    # leído como «1», pero «l» era una de sus candidatas (si no se conocen, se acepta)
+    return not sym.alts or letter in sym.alts
 
 
 def _merge_functions(syms, typical):
-    """Une letras seguidas que forman sin, cos, ln, lim... en un solo símbolo (\\sin, \\cos...)."""
+    """Une letras seguidas que forman sin, cos, ln, lim... en un solo símbolo (\\sin, \\cos...).
+
+    Acepta las letras leídas como otro símbolo que se escribe igual («1n» → ln, «c0s» → cos) cuando la palabra
+    entera encaja y la letra estaba entre las candidatas.
+    """
+    names = sorted(set(FUNCTIONS) | set(FUNCTION_ALIASES), key=len, reverse=True)
     out = []
     i = 0
     while i < len(syms):
         merged = False
-        for name in sorted(FUNCTIONS, key=len, reverse=True):
+        for name in names:
             n = len(name)
             group = syms[i : i + n]
-            if len(group) == n and "".join(s.label for s in group) == name:
+            if len(group) != n:
+                continue
+            exact = all(_letter_matches(s, c, True) for s, c in zip(group, name))
+            # la tolerancia solo con palabras de 2 o más letras que no son todas parecidas («10» no es «lo»)
+            loose = not exact and all(_letter_matches(s, c, False) for s, c in zip(group, name))
+            loose = loose and sum(s.label == c for s, c in zip(group, name)) >= max(1, n - 1)
+            if exact or loose:
                 gaps_ok = all(b.box[0] - a.box[2] < 0.6 * typical for a, b in zip(group, group[1:]))
                 if gaps_ok:
                     box = (
@@ -152,7 +194,10 @@ def _merge_functions(syms, typical):
                         max(s.box[2] for s in group),
                         max(s.box[3] for s in group),
                     )
-                    out.append(Sym("\\" + name, box))
+                    fn = Sym("\\" + FUNCTION_ALIASES.get(name, name), box)
+                    # la línea base de la palabra, sin contar las letras que bajan (la «g» de log)
+                    fn.baseline = max((s.box[3] for s in group if s.label not in _DESC), default=box[3])
+                    out.append(fn)
                     i += n
                     merged = True
                     break
@@ -160,6 +205,10 @@ def _merge_functions(syms, typical):
             out.append(syms[i])
             i += 1
     return out
+
+
+def is_function(label):
+    return label.startswith("\\") and label[1:] in FUNCTIONS
 
 
 def _parse_row(syms, typical):
@@ -181,8 +230,24 @@ def _parse_row(syms, typical):
             s = syms[i]
             if s.label in _NEVER_SCRIPT or (s.box[0] > base.box[2] + 1.2 * typical and not (sup or sub)):
                 break
+            # una función de letras bajas tras un paréntesis («sin(x)cos(x)») sigue en la línea; solo es exponente
+            # si queda entera por encima del centro (e^{sin x})
+            if is_function(s.label) and not s.box[3] < base_mid:
+                break
             smaller = s.h < 0.85 * max(base.h, typical) or s.label in _FLAT
             mid = _middle(s, typical)
+            if is_function(base.label):
+                # tras una función, lo que sigue es su argumento (sin x, ln 2); solo es subíndice lo que queda
+                # claramente por debajo de la línea base (la base de log₂)
+                baseline = getattr(base, "baseline", base_bot)
+                if smaller and s.box[3] < baseline - 0.45 * typical and mid < base_mid:
+                    sup.append(s)
+                elif smaller and s.cy > baseline - 0.1 * typical and not sup:
+                    sub.append(s)
+                else:
+                    break
+                i += 1
+                continue
             if smaller and mid < base_mid - 0.25 * typical and s.box[3] < base_bot - 0.05 * typical:
                 sup.append(s)
             elif smaller and mid > base_mid + 0.12 * typical and s.box[1] > base_top + 0.05 * typical:
@@ -223,6 +288,8 @@ def to_latex(node):
         return f"\\frac{{{to_latex(node[1])}}}{{{to_latex(node[2])}}}"
     if kind == "sqrt":
         return f"\\sqrt{{{to_latex(node[1])}}}"
+    if kind == "root":
+        return f"\\sqrt[{to_latex(node[1])}]{{{to_latex(node[2])}}}"
     raise ValueError(kind)
 
 
