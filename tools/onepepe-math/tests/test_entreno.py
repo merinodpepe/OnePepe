@@ -21,24 +21,31 @@ except ImportError:
 
 
 class TestSet(unittest.TestCase):
-    def setUp(self):
-        self.data = entreno.load_set("general-200")
+    def sets(self):
+        return [entreno.load_set(s["name"]) for s in entreno.list_sets()]
 
     def test_two_hundred_with_unique_ids(self):
-        items = self.data["items"]
-        self.assertEqual(len(items), 200)
-        self.assertEqual(len({it["id"] for it in items}), 200)
-        kinds = {it["kind"] for it in items}
-        self.assertEqual(kinds, {"expr", "steps", "symbols"})
-        self.assertTrue(all(len(it["lines"]) >= 2 for it in items if it["kind"] == "steps"))
+        names = [d["name"] for d in self.sets()]
+        self.assertIn("general-200", names)
+        self.assertIn("asignaturas-200", names)
+        all_ids = []
+        for data in self.sets():
+            items = data["items"]
+            self.assertEqual(len(items), 200, data["name"])
+            all_ids += [it["id"] for it in items]
+            self.assertEqual({it["kind"] for it in items}, {"expr", "steps", "symbols"})
+            self.assertTrue(all(len(it["lines"]) >= 2 for it in items if it["kind"] == "steps"))
+        # ids únicos también entre sets (las respuestas se guardan por id)
+        self.assertEqual(len(all_ids), len(set(all_ids)))
 
     def test_every_symbol_is_known_by_the_recognizer(self):
-        for it in self.data["items"]:
-            for latex in it["lines"]:
-                symbols = entreno.expected_symbols(latex)
-                self.assertTrue(symbols, latex)
-                unknown = [s for s in symbols if s not in CORE]
-                self.assertEqual(unknown, [], f"{it['id']}: {latex}")
+        for data in self.sets():
+            for it in data["items"]:
+                for latex in it["lines"]:
+                    symbols = entreno.expected_symbols(latex)
+                    self.assertTrue(symbols, latex)
+                    unknown = [s for s in symbols if s not in CORE]
+                    self.assertEqual(unknown, [], f"{it['id']}: {latex}")
 
     def test_expected_symbols(self):
         self.assertEqual(entreno.expected_symbols(r"\sin(0)="), ["s", "i", "n", "(", "0", ")", "="])
@@ -48,9 +55,9 @@ class TestSet(unittest.TestCase):
 
     @unittest.skipUnless(HAVE_MPL, "sin matplotlib")
     def test_every_expression_can_be_drawn(self):
-        for it in self.data["items"]:
-            for latex in it["lines"]:
-                self.assertIsNotNone(entreno.render(latex), latex)
+        for data in self.sets():
+            for it in data["items"]:
+                self.assertIsNotNone(entreno.render(tuple(it["lines"])), it["lines"])
 
     def test_listed(self):
         self.assertIn("general-200", [s["name"] for s in entreno.list_sets()])

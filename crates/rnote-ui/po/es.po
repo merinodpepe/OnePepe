@@ -4211,3 +4211,6 @@ msgstr ""
 
 msgid "← Previous"
 msgstr "← Anterior"
+
+msgid "Which expressions do you want to write?"
+msgstr "¿Qué expresiones quieres escribir?"

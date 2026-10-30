@@ -7,7 +7,13 @@
 > Actualizado: 2026-10-30 (tarde). Rama de trabajo: `onepepe` (y `main`, que avanza igual). Si algo de aquí contradice al código, manda el código; si
 > contradice una petición nueva del usuario, manda el usuario (y actualiza este documento).
 
-> **Lo más nuevo: versión 1.2 (modo entreno).** El usuario fijó que lo anterior es la **1.1** y que cada tanda sube
+> **Lo más nuevo: versión 1.3.** Asignaturas del usuario: **genética de poblaciones, biofísica y aprendizaje
+> estadístico** (mucha estadística, cálculo y álgebra). Set `entrenos/asignaturas-200.json` (ids «a001…»), elegir el
+> set al crear un entreno (`entreno.rs`, `choose_set`), símbolos de estadística en `CORE` (\hat, \overline,
+> \tilde, 𝔼, ℙ, ℝ, ⊤, ⟨ ⟩, ∩, ∪, ⇌) con nodo `accent` en `layout.py` (ŷ, x̄ son variables `yhat`, `xbar`), y glosario
+> plantilla `tools/onepepe-math/glosarios/biofisica.txt`.
+>
+> **Versión 1.2 (modo entreno).** El usuario fijó que lo anterior es la **1.1** y que cada tanda sube
 > la versión y se apunta en **`VERSIONES.md`** (obligatorio desde ahora; número en `meson.build` y en
 > `crates/rnote-ui/data/app.metainfo.xml.in.in`). La versión se ve en la barra de estado con el commit
 > (`globals::onepepe_version`, `build.rs`). Modo entreno: `crates/rnote-ui/src/entreno.rs` (ventana, archivo
@@ -70,7 +76,7 @@
 - Unos **156 archivos cambiados**, **~21 700 líneas añadidas** respecto a `rnote-original`.
 - **Estado:**
   - Todo compila y los tests pasan: motor de Rust 77 + 4 + 2 (+1 ignorado), `rnote-compose` 23 (+1 ignorado) y
-    Python 79 (+1 saltado sin modelo).
+    Python 83 (+1 saltado sin modelo).
   - Casi todo se ha **ejecutado en una app de prueba en la nube** (GTK 4.14 sobre Xvfb, manejada con xdotool).
   - **Nada está probado todavía con el lápiz real** del usuario ni con GTK 4.22.
 - **El formato `.rnote` no se ha cambiado**: lo nuevo que no cabe va a un **archivo oculto** por página, a un índice
@@ -887,6 +893,7 @@ esperados; de ahí salen ejemplos de símbolos y de «trozos».
 **`layout.py`:**
 - Estructura espacial: `Sym(label, box)` → árbol (`row`, `sup`, `sub`, `subsup`, `frac`, `sqrt`) y LaTeX
   (`to_latex`).
+- Nodo `("accent", \hat|\overline|\tilde, base)` (versión 1.3): acento pequeño justo encima de un símbolo.
 - `_NEVER_SCRIPT`: símbolos que nunca son exponentes, como `, . = < > ≤ ≥ ≠ ≈ → ⇒ ⇔ ; :`.
 
 **`evaluate.py`:**
@@ -1177,7 +1184,7 @@ cd tools/onepepe-math && ./instalar.sh --entrenar
 cargo test -p rnote-compose -p rnote-engine        # 23 (+1 ign.) y 77 + 4 + 2 (+1 ign.)
 cd tools/onepepe-math
 python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -r requirements-train.txt
-/tmp/venv/bin/python -m unittest discover -s tests   # 79 (1 saltado sin modelo)
+/tmp/venv/bin/python -m unittest discover -s tests   # 83 (1 saltado sin modelo)
 msgfmt -c -o /dev/null crates/rnote-ui/po/es.po      # traducción
 ```
 
@@ -1286,7 +1293,7 @@ Los scripts de la nube se pierden en cada sesión; este es el esencial.
 
 **Ramas fusionadas en `onepepe`**, de la más reciente a la más antigua:
 
-- **Versiones 1.1 y 1.2 (2026-10-30):** `feat/version`, `feat/modo-entreno`.
+- **Versiones 1.1, 1.2 y 1.3 (2026-10-30):** `feat/version`, `feat/modo-entreno`, `feat/entreno-asignaturas`.
 - **Arreglos de matemáticas y plan MyScript (2026-10-30, tarde):** `feat/matematicas-arreglos`.
 - **Solo documentación (2026-10-30):** `feat/contexto-ia-2`, `feat/pendiente-myscript`, `feat/pendiente-funciones`,
   `feat/pendiente-resultado`, `feat/pendiente-matematicas-2`, `feat/pendiente-reconocer-seleccion`,
@@ -1323,7 +1330,7 @@ La tabla detallada de qué se probó en cada una está en `ESTADO.md` → «Hech
 - Probar con el lápiz siguiendo `CAMBIOS-ONEPEPE.md`.
 - Comprobar que la rama por defecto en GitHub es `main` (Settings → General → Default branch).
 - Ejecutar la prueba del «=» de §10.3d en su equipo: en la app no le sale el resultado (§13.1, punto 6).
-- Decir sus asignaturas, para preparar la lista de unas 80 expresiones de entrenamiento (§13.1, punto 8).
+- ~~Decir sus asignaturas~~: genética de poblaciones, biofísica y aprendizaje estadístico (hecho el set, versión 1.3).
 - Enviar `mis_simbolos.rnote`.
 - Contestar las preguntas cortas de `MATEMATICAS-INFORME.md` §5: signo de multiplicar, coma o punto decimal, unidades,
   asignaturas.
