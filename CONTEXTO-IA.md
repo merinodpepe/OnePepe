@@ -1608,6 +1608,13 @@ Aplazado por el usuario: resolver desde una foto o un PDF.
   `idle_add_local_once`.
 
 **Rust y Rnote:**
+- **Nunca `if let`/`match`/`while let` con `canvas.engine_ref()` o `engine_mut()` en la condición** si dentro se
+  abre una ventanita, se cambia el foco o se llama a algo que use el motor: el préstamo dura todo el bloque y la app
+  se cierra con «RefCell already borrowed» (así se cerraba al tocar el «?», versión 1.3.3). Primero
+  `let x = canvas.engine_ref().algo();` y luego `if let Some(..) = x`. Las ventanitas, con
+  `glib::idle_add_local_once(move || popover.popup())`.
+- Si la app se cierra por un error, el informe está en `fallos.log` (con Flatpak,
+  `~/.var/app/com.github.flxzt.rnote.Devel/data/onepepe/fallos.log`; `crashreport.rs`, versión 1.3.2).
 - `replace_attr_for_range` de Rnote **descarta los demás atributos del rango**: los estilos meten
   `RangedTextAttribute` directamente.
 - `rustfmt` puede cambiar el texto que una edición busca: después de formatear, vuelve a leer antes de editar. Así se

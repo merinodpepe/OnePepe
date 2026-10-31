@@ -7,6 +7,14 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.3.3 (2026-10-31) — arreglado el cierre al tocar el «?»
+
+- **OnePepe se cerraba al tocar el «?»** de un «=» (tu informe de fallos lo pilló: «RefCell already borrowed» en
+  `canvas/mod.rs`). Al tocar el «?», la app seguía usando el motor mientras abría la ventanita de la explicación; en
+  tu escritorio, abrirla mueve el foco y lo que se ejecuta entonces también usa el motor: dos a la vez y se cerraba.
+  Al tocar un número no pasaba porque esa ventanita soltaba el motor antes: por eso «a veces sí, a veces no».
+- Además, las dos ventanitas (candidatas y explicación) se abren un instante después, cuando nada usa el motor.
+
 ## 1.3.2 (2026-10-31) — informe de fallos
 
 - Me contaste que, con «Variables» y «Resultado del =» activos, a veces salía el «?», escribías el número detrás del
