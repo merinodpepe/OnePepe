@@ -4223,3 +4223,6 @@ msgstr "El programa de matemáticas es más antiguo que la app: actualiza con gi
 
 msgid "The file dialog failed"
 msgstr "Falló la ventana para elegir el archivo"
+
+msgid "OnePepe closed because of an error last time. The report is in {path}: send it to fix it"
+msgstr "OnePepe se cerró por un fallo la última vez. El informe está en {path}: mándamelo para arreglarlo"

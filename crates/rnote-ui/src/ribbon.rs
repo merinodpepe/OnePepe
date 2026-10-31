@@ -114,6 +114,7 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
         None => error!("Could not place the ribbon: the tab bar has no box as parent"),
     }
     crate::statusbar::setup(appwindow);
+    crate::crashreport::notify_previous(appwindow);
     crate::optionsbar::setup(appwindow);
     crate::settingslayout::setup(&appwindow.sidebar().settings_panel(), appwindow);
 }

@@ -7,6 +7,15 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.3.2 (2026-10-31) — informe de fallos
+
+- Me contaste que, con «Variables» y «Resultado del =» activos, a veces salía el «?», escribías el número detrás del
+  «=» y **OnePepe se cerraba**. En la app de prueba de la nube no se cierra (probado: «x =», sale «?», escribo «3»
+  encima y queda «x=3»), y no encuentro en el código nada que lo explique. Para pillarlo:
+  - Si OnePepe se cierra por un fallo, ahora guarda un **informe** (`fallos.log`: versión, mensaje, dónde y la
+    traza). Con Flatpak está en `~/.var/app/com.github.flxzt.rnote.Devel/data/onepepe/fallos.log`.
+  - Al abrir la siguiente vez, avisa de dónde está para que me lo mandes.
+
 ## 1.3.1 (2026-10-31) — arreglos
 
 - **«Nuevo entreno» no hacía nada** (tu prueba): si el programa de matemáticas no respondía, la app callaba. Ahora:
