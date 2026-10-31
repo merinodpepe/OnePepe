@@ -73,6 +73,7 @@ Leyenda de cómo se probó cada cosa:
 | 1.3.1 | **Programa de matemáticas por su ruta en Flatpak** y aviso si no responde («Nuevo entreno» no hacía nada en tu equipo) | `fix/programa-matematicas` | sí | ejecutada ✔ (con un programa que no responde sale el aviso; con el bueno, el selector de sets) | pendiente |
 | 1.3.2 | **Informe de fallos** (`fallos.log` si la app se cierra por un error; aviso al abrir) | `fix/informe-fallos` | sí | funcionó en tu equipo: guardó el informe del cierre del «?» | sí |
 | 1.3.3 | **Cierre al tocar el «?»**: arreglado (causa vista en tu informe: el motor seguía en uso al abrir la ventanita) | `fix/cierre-interrogacion` | sí | ejecutada ✔ (las dos ventanitas abren; el cierre no se reproduce en la nube porque allí no cambia el foco) | pendiente |
+| 1.3.4 | **Sets del entreno en el repositorio** (faltaban por el `.gitignore`: «file not found») | `fix/sets-entreno-en-git` | — | sí, en una copia limpia del repositorio (83 tests de Python) | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con

@@ -1,5 +1,9 @@
 # Datos personales y resultados: nunca al repositorio
 *.json
+# excepto los sets del modo entreno: son listas de expresiones, sin datos tuyos (tus *.entreno.json siguen fuera)
+!entrenos/
+!entrenos/*.json
+entrenos/*.entreno.json
 svg_*/
 mis_*.rnote
 datos-*/

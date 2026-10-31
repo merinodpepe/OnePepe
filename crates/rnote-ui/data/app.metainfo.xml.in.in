@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.3.4" date="2026-10-31">
+      <description>
+        <p>Fixed: the training sets were missing from the repository, so «New training» said file not found.</p>
+      </description>
+    </release>
     <release version="1.3.3" date="2026-10-31">
       <description>
         <p>Fixed: tapping the "?" after an "=" closed the app.</p>

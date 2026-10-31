@@ -7,6 +7,14 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.3.4 (2026-10-31) — faltaban los sets del entreno
+
+- **«Nuevo entreno» decía «file not found» en la carpeta `entrenos`**: los dos sets de 200 expresiones nunca se
+  subieron al repositorio, porque `tools/onepepe-math/.gitignore` ignora todos los `.json` (para que no se suban
+  datos personales). En la nube funcionaban porque estaban en mi copia local. Ahora hay una excepción solo para
+  `entrenos/*.json` (tus `*.entreno.json` siguen fuera) y están subidos.
+- Comprobado con una copia limpia del repositorio: están los dos sets y pasan los tests.
+
 ## 1.3.3 (2026-10-31) — arreglado el cierre al tocar el «?»
 
 - **OnePepe se cerraba al tocar el «?»** de un «=» (tu informe de fallos lo pilló: «RefCell already borrowed» en
