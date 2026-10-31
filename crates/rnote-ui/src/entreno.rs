@@ -145,6 +145,10 @@ pub(crate) fn new_training(appwindow: &RnAppWindow) {
             let Some(resp) = crate::mathhelper::ask(&appwindow, request.to_string()).await else {
                 return;
             };
+            if let Some(e) = crate::mathhelper::answer_error(&resp) {
+                appwindow.overlays().dispatch_toast_error(&e);
+                return;
+            }
             let session = serde_json::from_str::<serde_json::Value>(&resp)
                 .ok()
                 .and_then(|v| serde_json::from_value::<Session>(v["session"].clone()).ok());
@@ -168,8 +172,12 @@ pub(crate) fn new_training(appwindow: &RnAppWindow) {
                 .initial_folder(&gio::File::for_path(&folder))
                 .initial_name(format!("{}{SUFFIX}", session.title.replace(':', "")))
                 .build();
-            let Ok(file) = dialog.save_future(Some(&appwindow)).await else {
-                return;
+            let file = match dialog.save_future(Some(&appwindow)).await {
+                Ok(file) => file,
+                Err(e) => {
+                    file_dialog_failed(&appwindow, &e);
+                    return;
+                }
             };
             let Some(mut path) = file.path() else {
                 return;
@@ -204,6 +212,17 @@ pub(crate) fn new_training(appwindow: &RnAppWindow) {
     ));
 }
 
+/// The file dialog failed: say why, unless the user just cancelled it.
+fn file_dialog_failed(appwindow: &RnAppWindow, e: &glib::Error) {
+    if e.matches(gtk4::DialogError::Dismissed) || e.matches(gtk4::DialogError::Cancelled) {
+        return;
+    }
+    tracing::error!("The file dialog of the training failed, Err: {e:?}");
+    appwindow
+        .overlays()
+        .dispatch_toast_error(&format!("{}: {e}", gettext("The file dialog failed")));
+}
+
 /// Asks which set of expressions to write (when there is more than one).
 async fn choose_set(appwindow: &RnAppWindow) -> Option<String> {
     let resp = crate::mathhelper::ask(
@@ -211,6 +230,10 @@ async fn choose_set(appwindow: &RnAppWindow) -> Option<String> {
         r#"{"id": 0, "cmd": "training_sets"}"#.to_string(),
     )
     .await?;
+    if let Some(e) = crate::mathhelper::answer_error(&resp) {
+        appwindow.overlays().dispatch_toast_error(&e);
+        return None;
+    }
     let v = serde_json::from_str::<serde_json::Value>(&resp).ok()?;
     let sets = v["sets"].as_array()?.clone();
     match sets.len() {
@@ -268,8 +291,12 @@ pub(crate) fn open_training(appwindow: &RnAppWindow) {
             } else {
                 builder.initial_folder(&gio::File::for_path(default_folder()))
             };
-            let Ok(file) = builder.build().open_future(Some(&appwindow)).await else {
-                return;
+            let file = match builder.build().open_future(Some(&appwindow)).await {
+                Ok(file) => file,
+                Err(e) => {
+                    file_dialog_failed(&appwindow, &e);
+                    return;
+                }
             };
             let Some(path) = file.path() else {
                 return;

@@ -783,7 +783,7 @@ La guía pedía: jerarquía por tono, un solo acento morado, poco marco, escala 
 **Rust, interfaz** (`rnote-ui/src/mathhelper.rs`):
 - **Lanzamiento** (`helper_command`):
   - la variable de entorno `ONEPEPE_MATH_CMD`, si existe (se usa en la nube);
-  - dentro de Flatpak, `flatpak-spawn --host onepepe-math`. El manifiesto tiene `--talk-name=org.freedesktop.Flatpak`,
+  - dentro de Flatpak, `flatpak-spawn --host ~/.local/bin/onepepe-math` (ruta completa desde la 1.3.1: el PATH del escritorio no suele tener ~/.local/bin). El manifiesto tiene `--talk-name=org.freedesktop.Flatpak`,
     que el usuario pidió explícitamente;
   - fuera de Flatpak, `onepepe-math` del `PATH` (`~/.local/bin`).
 - El proceso es **persistente**: se lanza una vez y habla por stdin/stdout, una línea JSON por petición, con un `id`.

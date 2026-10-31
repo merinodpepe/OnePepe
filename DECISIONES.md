@@ -339,6 +339,16 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## Programa de matemáticas en Flatpak (versión 1.3.1, 2026-10-31)
+
+- Tu prueba: «Nuevo entreno» no hacía nada. La causa más probable: dentro de Flatpak la app lanzaba
+  `flatpak-spawn --host onepepe-math` por su nombre, y el PATH del escritorio no suele tener `~/.local/bin`; el
+  proceso arrancaba, moría sin responder y la app callaba (el aviso solo salía si ni siquiera se podía lanzar).
+  Ahora va por la ruta completa (`~/.local/bin/onepepe-math`, donde lo deja `instalar.sh`; `ONEPEPE_MATH_CMD` sigue
+  mandando) y cualquier fallo del programa se avisa (como mucho una vez por minuto).
+- Los avisos de «Revisar pasos» van debajo del renglón: a la derecha chocaban con el resultado del «=» y con el valor
+  de las variables.
+
 ## Tus asignaturas y estadística (versión 1.3, 2026-10-30)
 
 - **Vocabulario:** se añaden a `CORE` los símbolos de estadística que el modelo ya tenía y no se usaban (\hat,
