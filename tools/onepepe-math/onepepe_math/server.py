@@ -151,7 +151,7 @@ class Server:
             from . import entreno
 
             lines = req.get("lines") or [req["latex"]]
-            return {"png": entreno.render(tuple(lines), req.get("color", "#000000"))}
+            return entreno.render_answer(lines, req.get("color", "#000000"))
         if cmd == "training_import":
             from . import entreno
 

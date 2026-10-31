@@ -7,6 +7,13 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.3.5 (2026-10-31) — la expresión del entreno siempre se ve
+
+- En tu captura solo se veía el código LaTeX (`3+4\cdot 5=`): en tu equipo falta **matplotlib**, que es lo que
+  dibuja las expresiones (se instala con `./instalar.sh`). Ahora, si no se puede dibujar, la expresión sale en
+  **texto legible y grande** (`3 + 4 · 5 =`, `x² + y² = r²`, `β̂ = (Xᵀ X)⁻¹Xᵀ y`) y abajo pone qué instalar.
+- Probado en la nube con y sin matplotlib.
+
 ## 1.3.4 (2026-10-31) — faltaban los sets del entreno
 
 - **«Nuevo entreno» decía «file not found» en la carpeta `entrenos`**: los dos sets de 200 expresiones nunca se

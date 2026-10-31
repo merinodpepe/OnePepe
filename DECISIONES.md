@@ -339,6 +339,13 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## La expresión del entreno sin matplotlib (versión 1.3.5, 2026-10-31)
+
+- En el equipo del usuario no se veía la expresión: no tenía matplotlib (no había pasado `./instalar.sh` tras la
+  1.2). En vez de depender solo de él, `training_render` devuelve siempre también un texto legible
+  (`entreno.to_unicode`: superíndices y subíndices Unicode, fracciones como a/b, √, acentos combinados, griego del
+  diccionario) y `missing: "matplotlib"` si falta. La ventana enseña el texto grande y cómo instalarlo.
+
 ## Sets del entreno en git (versión 1.3.4, 2026-10-31)
 
 - Los sets no se habían subido: `tools/onepepe-math/.gitignore` tiene `*.json`. Se añade `!entrenos/*.json` (y se

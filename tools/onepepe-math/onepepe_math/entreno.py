@@ -128,6 +128,113 @@ def render(lines, color="#000000", dpi=140):
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
+# ---------- sin matplotlib: la expresión en texto ----------
+
+_SUP = dict(zip("0123456789+-−=()nijkxyTt⊤", "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁻⁼⁽⁾ⁿⁱʲᵏˣʸᵀᵗᵀ"))
+_SUB = dict(zip("0123456789+-−=()aeijkmnoprstx", "₀₁₂₃₄₅₆₇₈₉₊₋₋₌₍₎ₐₑᵢⱼₖₘₙₒₚᵣₛₜₓ"))
+_ACCENT = {"hat": "\u0302", "bar": "\u0304", "overline": "\u0304", "tilde": "\u0303", "vec": "\u20d7"}
+_SPACES = {"quad": "   ", ",": " ", ";": " ", ":": " ", " ": " ", "!": ""}
+
+
+def _group(s, i):
+    """El grupo que empieza en s[i] ({...} o un solo carácter/orden) y dónde acaba."""
+    if i >= len(s):
+        return "", i
+    if s[i] == "{":
+        depth, j = 0, i
+        while j < len(s):
+            depth += {"{": 1, "}": -1}.get(s[j], 0)
+            if depth == 0:
+                return s[i + 1 : j], j + 1
+            j += 1
+        return s[i + 1 :], len(s)
+    if s[i] == "\\":
+        m = re.match(r"\\([A-Za-z]+|.)", s[i:])
+        return m.group(0), i + len(m.group(0))
+    return s[i], i + 1
+
+
+def _script(text, table, mark):
+    """Exponente o subíndice: con caracteres pequeños si todos existen; si no, ^(…) o _(…)."""
+    plain = to_unicode(text).replace(" ", "")
+    if plain and all(c in table for c in plain):
+        return "".join(table[c] for c in plain)
+    return f"{mark}{plain}" if len(plain) == 1 else f"{mark}({plain})"
+
+
+def to_unicode(latex):
+    """La expresión escrita con caracteres normales (x² + y² = r², √(2), 𝔼[X]), para verla sin matplotlib."""
+    from .nombres import ENTRIES
+
+    chars = {e["latex"].lstrip("\\"): e["char"] for e in ENTRIES if e["latex"].startswith("\\")}
+    chars.update({"cdot": "·", "times": "×", "ln": "ln", "log": "log", "exp": "exp", "lim": "lim", "max": "max",
+                  "det": "det", "left": "", "right": "", "circ": "°", "prime": "′", "ell": "ℓ", "%": "%"})
+    out, i = "", 0
+    while i < len(latex):
+        c = latex[i]
+        if c == "\\":
+            name, i = _group(latex, i)
+            cmd = name[1:]
+            if cmd in ("frac", "tfrac", "dfrac"):
+                num, i = _group(latex, i)
+                den, i = _group(latex, i)
+                n, d = to_unicode(num), to_unicode(den)
+                n = n if len(n) == 1 or n.isdigit() else f"({n})"
+                d = d if len(d) == 1 or d.isdigit() else f"({d})"
+                out += f"{n}/{d}"
+            elif cmd == "sqrt":
+                index = ""
+                if i < len(latex) and latex[i] == "[":
+                    j = latex.index("]", i)
+                    index, i = to_unicode(latex[i + 1 : j]), j + 1
+                body, i = _group(latex, i)
+                b = to_unicode(body)
+                out += (_script(index, _SUP, "^") if index else "") + "√" + (b if len(b) == 1 else f"({b})")
+            elif cmd in _ACCENT:
+                body, i = _group(latex, i)
+                b = to_unicode(body)
+                out += b + _ACCENT[cmd] if len(b) == 1 else f"{b}{_ACCENT[cmd]}"
+            elif cmd in ("mathrm", "text", "operatorname", "mathit"):
+                body, i = _group(latex, i)
+                out += to_unicode(body)
+            elif cmd == "mathbb":
+                body, i = _group(latex, i)
+                out += chars.get(f"mathbb{{{body}}}", body)
+            elif cmd in _SPACES:
+                out += _SPACES[cmd]
+            elif cmd in ("{", "}", "%", "_"):
+                out += cmd
+            else:
+                out += chars.get(cmd, cmd)
+        elif c in "^_":
+            body, i = _group(latex, i + 1)
+            out += _script(body, _SUP if c == "^" else _SUB, c)
+        elif c in "{}":
+            i += 1
+        else:
+            out += {"-": "−", "*": "·"}.get(c, c)
+            i += 1
+    # espacios alrededor de los signos, como se escribe
+    out = re.sub(r"\s*([=+<>≤≥≠≈→⇒⇔·×÷])\s*", r" \1 ", out)
+    # el menos: con espacios entre dos cosas (a − b), pegado si es el signo (−3, (−1))
+    out = re.sub(r"(?<=[^\s(\[{=^_])\s*−\s*", " − ", out)
+    return re.sub(r"  +", " ", out).strip()
+
+
+def render_answer(lines, color="#000000"):
+    """Lo que la app enseña de una expresión: la imagen (si hay matplotlib) y siempre el texto legible."""
+    png = render(tuple(lines), color)
+    out = {"png": png, "text": "\n".join(to_unicode(line) for line in lines)}
+    if png is None:
+        try:
+            import matplotlib  # noqa: F401
+
+            out["missing"] = None
+        except ImportError:
+            out["missing"] = "matplotlib"
+    return out
+
+
 # ---------- importar ----------
 
 
