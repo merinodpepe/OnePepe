@@ -1,0 +1,1606 @@
+{
+ "name": "asignaturas-200",
+ "title": "Tus asignaturas: 200 expresiones",
+ "description": "Genética de poblaciones, biofísica y aprendizaje estadístico, con cálculo y álgebra: símbolos sueltos, fórmulas y desarrollos de varios pasos.",
+ "items": [
+  {
+   "id": "a001",
+   "kind": "expr",
+   "lines": [
+    "y=\\beta_0+\\beta_1x+\\varepsilon"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a002",
+   "kind": "expr",
+   "lines": [
+    "p+q=1"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a003",
+   "kind": "expr",
+   "lines": [
+    "E=\\frac{RT}{zF}\\ln\\frac{[C]_o}{[C]_i}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a004",
+   "kind": "steps",
+   "lines": [
+    "p=0,6",
+    "q=1-p=0,4",
+    "2pq=0,48"
+   ]
+  },
+  {
+   "id": "a005",
+   "kind": "symbols",
+   "lines": [
+    "\\hat{y}\\quad \\hat{y}\\quad \\hat{y}\\quad \\hat{y}\\quad \\hat{y}\\quad \\hat{y}"
+   ]
+  },
+  {
+   "id": "a006",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d}{dx}e^{ax}=ae^{ax}"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a007",
+   "kind": "expr",
+   "lines": [
+    "\\hat{y}=\\hat{\\beta}_0+\\hat{\\beta}_1x"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a008",
+   "kind": "expr",
+   "lines": [
+    "p^2+2pq+q^2=1"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a009",
+   "kind": "expr",
+   "lines": [
+    "V_m=\\frac{RT}{F}\\ln\\frac{P_K[K]_o+P_{Na}[Na]_o}{P_K[K]_i+P_{Na}[Na]_i}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a010",
+   "kind": "steps",
+   "lines": [
+    "p^2=0,36",
+    "p=0,6",
+    "q=0,4"
+   ]
+  },
+  {
+   "id": "a011",
+   "kind": "symbols",
+   "lines": [
+    "\\bar{x}\\quad \\bar{x}\\quad \\bar{x}\\quad \\bar{x}\\quad \\bar{x}\\quad \\bar{x}"
+   ]
+  },
+  {
+   "id": "a012",
+   "kind": "expr",
+   "lines": [
+    "\\hat{\\beta}=(X^\\top X)^{-1}X^\\top y"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a013",
+   "kind": "expr",
+   "lines": [
+    "f(AA)=p^2"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a014",
+   "kind": "expr",
+   "lines": [
+    "J=-D\\frac{dc}{dx}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a015",
+   "kind": "expr",
+   "lines": [
+    "MSE=\\frac{1}{n}\\sum_{i=1}^{n}(y_i-\\hat{y}_i)^2"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a016",
+   "kind": "steps",
+   "lines": [
+    "H_o=0,3",
+    "H_e=0,5",
+    "F=1-\\frac{0,3}{0,5}=0,4"
+   ]
+  },
+  {
+   "id": "a017",
+   "kind": "symbols",
+   "lines": [
+    "\\sigma\\quad \\sigma\\quad \\sigma\\quad \\sigma\\quad \\sigma\\quad \\sigma"
+   ]
+  },
+  {
+   "id": "a018",
+   "kind": "expr",
+   "lines": [
+    "f(Aa)=2pq"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a019",
+   "kind": "expr",
+   "lines": [
+    "x^2=2Dt"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a020",
+   "kind": "expr",
+   "lines": [
+    "R^2=1-\\frac{SS_{res}}{SS_{tot}}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a021",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d}{dx}\\ln x=\\frac{1}{x}"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a022",
+   "kind": "expr",
+   "lines": [
+    "H_e=2pq"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a023",
+   "kind": "expr",
+   "lines": [
+    "D=\\frac{k_BT}{6\\pi\\eta r}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a024",
+   "kind": "steps",
+   "lines": [
+    "N_m=10",
+    "N_f=40",
+    "N_e=\\frac{4\\cdot 10\\cdot 40}{50}=32"
+   ]
+  },
+  {
+   "id": "a025",
+   "kind": "symbols",
+   "lines": [
+    "\\mu\\quad \\mu\\quad \\mu\\quad \\mu\\quad \\mu\\quad \\mu"
+   ]
+  },
+  {
+   "id": "a026",
+   "kind": "expr",
+   "lines": [
+    "p=\\frac{1}{1+e^{-z}}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a027",
+   "kind": "expr",
+   "lines": [
+    "H_e=1-\\sum_{i} p_i^2"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a028",
+   "kind": "expr",
+   "lines": [
+    "F=6\\pi\\eta rv"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a029",
+   "kind": "expr",
+   "lines": [
+    "z=\\beta^\\top x"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a030",
+   "kind": "steps",
+   "lines": [
+    "\\Delta p=-m(p-p_m)",
+    "m=0,1",
+    "\\Delta p=-0,1(0,8-0,2)=-0,06"
+   ]
+  },
+  {
+   "id": "a031",
+   "kind": "symbols",
+   "lines": [
+    "\\beta\\quad \\beta\\quad \\beta\\quad \\beta\\quad \\beta\\quad \\beta"
+   ]
+  },
+  {
+   "id": "a032",
+   "kind": "expr",
+   "lines": [
+    "F=1-\\frac{H_o}{H_e}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a033",
+   "kind": "expr",
+   "lines": [
+    "\\frac{n_1}{n_2}=e^{-\\frac{\\Delta E}{k_BT}}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a034",
+   "kind": "expr",
+   "lines": [
+    "\\log\\frac{p}{1-p}=\\beta_0+\\beta_1x"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a035",
+   "kind": "expr",
+   "lines": [
+    "\\int_0^\\infty e^{-x}dx=1"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a036",
+   "kind": "steps",
+   "lines": [
+    "D=p_{AB}-p_Ap_B",
+    "=0,3-0,5\\cdot 0,4",
+    "=0,1"
+   ]
+  },
+  {
+   "id": "a037",
+   "kind": "symbols",
+   "lines": [
+    "\\theta\\quad \\theta\\quad \\theta\\quad \\theta\\quad \\theta\\quad \\theta"
+   ]
+  },
+  {
+   "id": "a038",
+   "kind": "expr",
+   "lines": [
+    "F_{ST}=\\frac{H_T-H_S}{H_T}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a039",
+   "kind": "expr",
+   "lines": [
+    "\\Delta G=\\Delta G^\\circ+RT\\ln Q"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a040",
+   "kind": "expr",
+   "lines": [
+    "L(\\theta)=\\prod_{i=1}^{n}f(x_i|\\theta)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a041",
+   "kind": "expr",
+   "lines": [
+    "l(\\theta)=\\sum_{i=1}^{n}\\log f(x_i|\\theta)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a042",
+   "kind": "expr",
+   "lines": [
+    "\\Delta p=\\frac{spq}{\\bar{w}}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a043",
+   "kind": "expr",
+   "lines": [
+    "\\Delta G^\\circ=-RT\\ln K"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a044",
+   "kind": "steps",
+   "lines": [
+    "\\chi^2=\\frac{(30-25)^2}{25}+\\frac{(20-25)^2}{25}",
+    "=1+1",
+    "=2"
+   ]
+  },
+  {
+   "id": "a045",
+   "kind": "symbols",
+   "lines": [
+    "\\lambda\\quad \\lambda\\quad \\lambda\\quad \\lambda\\quad \\lambda\\quad \\lambda"
+   ]
+  },
+  {
+   "id": "a046",
+   "kind": "expr",
+   "lines": [
+    "\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a047",
+   "kind": "expr",
+   "lines": [
+    "\\hat{\\theta}=\\mathrm{arg}\\max\\, l(\\theta)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a048",
+   "kind": "expr",
+   "lines": [
+    "\\bar{w}=p^2w_{11}+2pqw_{12}+q^2w_{22}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a049",
+   "kind": "expr",
+   "lines": [
+    "\\Delta G=\\Delta H-T\\Delta S"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a050",
+   "kind": "steps",
+   "lines": [
+    "E=\\frac{RT}{F}\\ln\\frac{[K]_o}{[K]_i}",
+    "=0,0267\\ln\\frac{5}{140}",
+    "\\approx -0,089"
+   ]
+  },
+  {
+   "id": "a051",
+   "kind": "symbols",
+   "lines": [
+    "\\chi\\quad \\chi\\quad \\chi\\quad \\chi\\quad \\chi\\quad \\chi"
+   ]
+  },
+  {
+   "id": "a052",
+   "kind": "expr",
+   "lines": [
+    "-\\sum_{i}y_i\\log\\hat{y}_i"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a053",
+   "kind": "expr",
+   "lines": [
+    "p'=\\frac{p(pw_{11}+qw_{12})}{\\bar{w}}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a054",
+   "kind": "expr",
+   "lines": [
+    "Q=\\frac{\\pi r^4\\Delta P}{8\\eta L}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a055",
+   "kind": "expr",
+   "lines": [
+    "\\sum_{i}(y_i-\\hat{y}_i)^2+\\lambda\\sum_{j}\\beta_j^2"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a056",
+   "kind": "steps",
+   "lines": [
+    "J=-D\\frac{dc}{dx}",
+    "=-10^{-9}\\cdot(-2)",
+    "=2\\cdot 10^{-9}"
+   ]
+  },
+  {
+   "id": "a057",
+   "kind": "symbols",
+   "lines": [
+    "\\rho\\quad \\rho\\quad \\rho\\quad \\rho\\quad \\rho\\quad \\rho"
+   ]
+  },
+  {
+   "id": "a058",
+   "kind": "expr",
+   "lines": [
+    "w=1-s"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a059",
+   "kind": "expr",
+   "lines": [
+    "\\Delta P=\\frac{2\\gamma}{r}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a060",
+   "kind": "expr",
+   "lines": [
+    "\\sum_{i}(y_i-\\hat{y}_i)^2+\\lambda\\sum_{j}|\\beta_j|"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a061",
+   "kind": "expr",
+   "lines": [
+    "\\frac{\\partial^2 f}{\\partial x\\partial y}"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a062",
+   "kind": "expr",
+   "lines": [
+    "w_{12}=1-hs"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a063",
+   "kind": "expr",
+   "lines": [
+    "v=\\frac{V_{max}[S]}{K_m+[S]}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a064",
+   "kind": "steps",
+   "lines": [
+    "\\Delta G=\\Delta H-T\\Delta S",
+    "=-40-310(-0,1)",
+    "=-9"
+   ]
+  },
+  {
+   "id": "a065",
+   "kind": "symbols",
+   "lines": [
+    "\\eta\\quad \\eta\\quad \\eta\\quad \\eta\\quad \\eta\\quad \\eta"
+   ]
+  },
+  {
+   "id": "a066",
+   "kind": "expr",
+   "lines": [
+    "\\theta\\leftarrow\\theta-\\alpha\\nabla J(\\theta)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a067",
+   "kind": "expr",
+   "lines": [
+    "\\hat{q}=\\sqrt{\\frac{\\mu}{s}}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a068",
+   "kind": "expr",
+   "lines": [
+    "\\theta=\\frac{[L]^n}{K_d+[L]^n}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a069",
+   "kind": "expr",
+   "lines": [
+    "\\sigma(z)=\\frac{e^{z_k}}{\\sum_{j}e^{z_j}}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a070",
+   "kind": "steps",
+   "lines": [
+    "[A]=[A]_0e^{-kt}",
+    "\\ln\\frac{[A]}{[A]_0}=-kt",
+    "t=\\frac{\\ln 2}{k}"
+   ]
+  },
+  {
+   "id": "a071",
+   "kind": "symbols",
+   "lines": [
+    "\\varepsilon\\quad \\varepsilon\\quad \\varepsilon\\quad \\varepsilon\\quad \\varepsilon\\quad \\varepsilon"
+   ]
+  },
+  {
+   "id": "a072",
+   "kind": "expr",
+   "lines": [
+    "N_e=\\frac{4N_mN_f}{N_m+N_f}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a073",
+   "kind": "expr",
+   "lines": [
+    "A=\\varepsilon lc"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a074",
+   "kind": "expr",
+   "lines": [
+    "P(A|B)=\\frac{P(B|A)P(A)}{P(B)}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a075",
+   "kind": "expr",
+   "lines": [
+    "\\nabla f=(\\frac{\\partial f}{\\partial x},\\frac{\\partial f}{\\partial y})"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a076",
+   "kind": "steps",
+   "lines": [
+    "v=\\frac{V_{max}[S]}{K_m+[S]}",
+    "[S]=K_m",
+    "v=\\frac{V_{max}}{2}"
+   ]
+  },
+  {
+   "id": "a077",
+   "kind": "symbols",
+   "lines": [
+    "\\tau\\quad \\tau\\quad \\tau\\quad \\tau\\quad \\tau\\quad \\tau"
+   ]
+  },
+  {
+   "id": "a078",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{N_e}=\\frac{1}{t}\\sum_{i=1}^{t}\\frac{1}{N_i}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a079",
+   "kind": "expr",
+   "lines": [
+    "I=I_0e^{-\\mu x}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a080",
+   "kind": "expr",
+   "lines": [
+    "P(A\\cap B)=P(A)P(B|A)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a081",
+   "kind": "expr",
+   "lines": [
+    "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a082",
+   "kind": "expr",
+   "lines": [
+    "H_t=H_0(1-\\frac{1}{2N_e})^t"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a083",
+   "kind": "expr",
+   "lines": [
+    "\\tau=RC"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a084",
+   "kind": "steps",
+   "lines": [
+    "\\tau=RC",
+    "R=10^8",
+    "C=10^{-10}",
+    "\\tau=10^{-2}"
+   ]
+  },
+  {
+   "id": "a085",
+   "kind": "symbols",
+   "lines": [
+    "\\gamma\\quad \\gamma\\quad \\gamma\\quad \\gamma\\quad \\gamma\\quad \\gamma"
+   ]
+  },
+  {
+   "id": "a086",
+   "kind": "expr",
+   "lines": [
+    "\\lim_{n\\rightarrow\\infty}(1+\\frac{1}{n})^n=e"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a087",
+   "kind": "expr",
+   "lines": [
+    "\\mathbb{E}[X]=\\sum_{x}xp(x)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a088",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{Var}(\\Delta p)=\\frac{pq}{2N}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a089",
+   "kind": "expr",
+   "lines": [
+    "\\lambda=\\sqrt{\\frac{r_m}{r_i}}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a090",
+   "kind": "steps",
+   "lines": [
+    "pH=pK_a+\\log\\frac{[A^-]}{[HA]}",
+    "=4,8+\\log 1",
+    "=4,8"
+   ]
+  },
+  {
+   "id": "a091",
+   "kind": "symbols",
+   "lines": [
+    "\\pi\\quad \\pi\\quad \\pi\\quad \\pi\\quad \\pi\\quad \\pi"
+   ]
+  },
+  {
+   "id": "a092",
+   "kind": "expr",
+   "lines": [
+    "\\mathbb{E}[X]=\\int xf(x)dx"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a093",
+   "kind": "expr",
+   "lines": [
+    "\\theta=4N_e\\mu"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a094",
+   "kind": "expr",
+   "lines": [
+    "C_m\\frac{dV}{dt}=-g_K(V-E_K)"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a095",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{Var}(X)=\\mathbb{E}[X^2]-\\mathbb{E}[X]^2"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a096",
+   "kind": "steps",
+   "lines": [
+    "P=\\frac{F}{A}",
+    "=\\frac{10}{0,5}",
+    "=20"
+   ]
+  },
+  {
+   "id": "a097",
+   "kind": "symbols",
+   "lines": [
+    "\\Sigma\\quad \\Sigma\\quad \\Sigma\\quad \\Sigma\\quad \\Sigma\\quad \\Sigma"
+   ]
+  },
+  {
+   "id": "a098",
+   "kind": "expr",
+   "lines": [
+    "D=p_{AB}-p_Ap_B"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a099",
+   "kind": "expr",
+   "lines": [
+    "I=g(V-E)"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a100",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{Cov}(X,Y)=\\mathbb{E}[XY]-\\mathbb{E}[X]\\mathbb{E}[Y]"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a101",
+   "kind": "expr",
+   "lines": [
+    "\\sum_{k=0}^{\\infty}x^k=\\frac{1}{1-x}"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a102",
+   "kind": "expr",
+   "lines": [
+    "r^2=\\frac{D^2}{p_Ap_ap_Bp_b}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a103",
+   "kind": "expr",
+   "lines": [
+    "pH=pK_a+\\log\\frac{[A^-]}{[HA]}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a104",
+   "kind": "steps",
+   "lines": [
+    "\\hat{y}=2+3x",
+    "x=4",
+    "\\hat{y}=14"
+   ]
+  },
+  {
+   "id": "a105",
+   "kind": "symbols",
+   "lines": [
+    "\\prod\\quad \\prod\\quad \\prod\\quad \\prod\\quad \\prod\\quad \\prod"
+   ]
+  },
+  {
+   "id": "a106",
+   "kind": "expr",
+   "lines": [
+    "\\rho=\\frac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a107",
+   "kind": "expr",
+   "lines": [
+    "D_t=(1-r)^tD_0"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a108",
+   "kind": "expr",
+   "lines": [
+    "\\pi=iMRT"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a109",
+   "kind": "expr",
+   "lines": [
+    "f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a110",
+   "kind": "steps",
+   "lines": [
+    "e_i=y_i-\\hat{y}_i",
+    "=10-14",
+    "=-4"
+   ]
+  },
+  {
+   "id": "a111",
+   "kind": "symbols",
+   "lines": [
+    "\\partial\\quad \\partial\\quad \\partial\\quad \\partial\\quad \\partial\\quad \\partial"
+   ]
+  },
+  {
+   "id": "a112",
+   "kind": "expr",
+   "lines": [
+    "e^x=\\sum_{k=0}^{\\infty}\\frac{x^k}{k!}"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a113",
+   "kind": "expr",
+   "lines": [
+    "p_t=p_0(1-m)^t+\\bar{p}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a114",
+   "kind": "expr",
+   "lines": [
+    "P=\\frac{F}{A}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a115",
+   "kind": "expr",
+   "lines": [
+    "X\\sim N(\\mu,\\sigma^2)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a116",
+   "kind": "steps",
+   "lines": [
+    "MSE=\\frac{1}{3}(1+4+4)",
+    "=3"
+   ]
+  },
+  {
+   "id": "a117",
+   "kind": "symbols",
+   "lines": [
+    "\\nabla\\quad \\nabla\\quad \\nabla\\quad \\nabla\\quad \\nabla\\quad \\nabla"
+   ]
+  },
+  {
+   "id": "a118",
+   "kind": "expr",
+   "lines": [
+    "\\Delta p=-m(p-p_m)"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a119",
+   "kind": "expr",
+   "lines": [
+    "E=h\\nu"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a120",
+   "kind": "expr",
+   "lines": [
+    "z=\\frac{x-\\mu}{\\sigma}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a121",
+   "kind": "expr",
+   "lines": [
+    "t=\\frac{\\bar{x}-\\mu_0}{s/\\sqrt{n}}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a122",
+   "kind": "expr",
+   "lines": [
+    "F_{IS}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a123",
+   "kind": "expr",
+   "lines": [
+    "E=\\frac{hc}{\\lambda}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a124",
+   "kind": "steps",
+   "lines": [
+    "L(p)=p^k(1-p)^{n-k}",
+    "l(p)=k\\log p+(n-k)\\log(1-p)",
+    "\\frac{k}{p}-\\frac{n-k}{1-p}=0",
+    "\\hat{p}=\\frac{k}{n}"
+   ]
+  },
+  {
+   "id": "a125",
+   "kind": "symbols",
+   "lines": [
+    "\\mathbb{E}\\quad \\mathbb{E}\\quad \\mathbb{E}\\quad \\mathbb{E}\\quad \\mathbb{E}\\quad \\mathbb{E}"
+   ]
+  },
+  {
+   "id": "a126",
+   "kind": "expr",
+   "lines": [
+    "Ax=\\lambda x"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a127",
+   "kind": "expr",
+   "lines": [
+    "\\bar{x}\\pm 1,96\\frac{s}{\\sqrt{n}}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a128",
+   "kind": "expr",
+   "lines": [
+    "F_{IT}=1-(1-F_{IS})(1-F_{ST})"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a129",
+   "kind": "expr",
+   "lines": [
+    "k_B=1,38\\cdot 10^{-23}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a130",
+   "kind": "steps",
+   "lines": [
+    "P(A|B)=\\frac{P(B|A)P(A)}{P(B)}",
+    "=\\frac{0,9\\cdot 0,01}{0,05}",
+    "=0,18"
+   ]
+  },
+  {
+   "id": "a131",
+   "kind": "symbols",
+   "lines": [
+    "\\mathbb{P}\\quad \\mathbb{P}\\quad \\mathbb{P}\\quad \\mathbb{P}\\quad \\mathbb{P}\\quad \\mathbb{P}"
+   ]
+  },
+  {
+   "id": "a132",
+   "kind": "expr",
+   "lines": [
+    "s^2=\\frac{1}{n-1}\\sum(x_i-\\bar{x})^2"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a133",
+   "kind": "expr",
+   "lines": [
+    "\\chi^2=\\sum\\frac{(O-E)^2}{E}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a134",
+   "kind": "expr",
+   "lines": [
+    "R=8,31"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a135",
+   "kind": "expr",
+   "lines": [
+    "\\bar{x}=\\frac{1}{n}\\sum_{i=1}^{n}x_i"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a136",
+   "kind": "steps",
+   "lines": [
+    "\\mathbb{E}[X]=0\\cdot 0,5+1\\cdot 0,5",
+    "=0,5"
+   ]
+  },
+  {
+   "id": "a137",
+   "kind": "symbols",
+   "lines": [
+    "\\Delta\\quad \\Delta\\quad \\Delta\\quad \\Delta\\quad \\Delta\\quad \\Delta"
+   ]
+  },
+  {
+   "id": "a138",
+   "kind": "expr",
+   "lines": [
+    "E(AA)=Np^2"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a139",
+   "kind": "expr",
+   "lines": [
+    "F=96485"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a140",
+   "kind": "expr",
+   "lines": [
+    "P(X=k)=\\frac{n!}{k!(n-k)!}p^k(1-p)^{n-k}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a141",
+   "kind": "expr",
+   "lines": [
+    "\\det(A-\\lambda I)=0"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a142",
+   "kind": "expr",
+   "lines": [
+    "P_{fix}=\\frac{1}{2N}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a143",
+   "kind": "expr",
+   "lines": [
+    "N_A=6,02\\cdot 10^{23}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a144",
+   "kind": "steps",
+   "lines": [
+    "\\mathrm{Var}(X)=\\mathbb{E}[X^2]-\\mathbb{E}[X]^2",
+    "=0,5-0,25",
+    "=0,25"
+   ]
+  },
+  {
+   "id": "a145",
+   "kind": "symbols",
+   "lines": [
+    "\\alpha\\quad \\alpha\\quad \\alpha\\quad \\alpha\\quad \\alpha\\quad \\alpha"
+   ]
+  },
+  {
+   "id": "a146",
+   "kind": "expr",
+   "lines": [
+    "P(X=k)=\\frac{\\lambda^ke^{-\\lambda}}{k!}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a147",
+   "kind": "expr",
+   "lines": [
+    "P_{fix}\\approx 2s"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a148",
+   "kind": "expr",
+   "lines": [
+    "A+B\\rightleftharpoons C"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a149",
+   "kind": "expr",
+   "lines": [
+    "\\mathbb{P}(X\\leq x)=F(x)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a150",
+   "kind": "steps",
+   "lines": [
+    "z=\\frac{x-\\mu}{\\sigma}",
+    "=\\frac{130-100}{15}",
+    "=2"
+   ]
+  },
+  {
+   "id": "a151",
+   "kind": "symbols",
+   "lines": [
+    "\\omega\\quad \\omega\\quad \\omega\\quad \\omega\\quad \\omega\\quad \\omega"
+   ]
+  },
+  {
+   "id": "a152",
+   "kind": "expr",
+   "lines": [
+    "(AB)^\\top=B^\\top A^\\top"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a153",
+   "kind": "expr",
+   "lines": [
+    "t\\approx 4N_e"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a154",
+   "kind": "expr",
+   "lines": [
+    "K_d=\\frac{[A][B]}{[AB]}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a155",
+   "kind": "expr",
+   "lines": [
+    "\\frac{TP}{TP+FP}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a156",
+   "kind": "steps",
+   "lines": [
+    "\\bar{x}=\\frac{2+4+6}{3}",
+    "=4"
+   ]
+  },
+  {
+   "id": "a157",
+   "kind": "symbols",
+   "lines": [
+    "\\varphi\\quad \\varphi\\quad \\varphi\\quad \\varphi\\quad \\varphi\\quad \\varphi"
+   ]
+  },
+  {
+   "id": "a158",
+   "kind": "expr",
+   "lines": [
+    "\\pi=\\frac{1}{L}\\sum_{i<j}d_{ij}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a159",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d[A]}{dt}=-k[A]"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a160",
+   "kind": "expr",
+   "lines": [
+    "\\frac{TP}{TP+FN}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a161",
+   "kind": "expr",
+   "lines": [
+    "F_1=\\frac{2PR}{P+R}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a162",
+   "kind": "expr",
+   "lines": [
+    "S=a_n\\theta"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a163",
+   "kind": "expr",
+   "lines": [
+    "[A]=[A]_0e^{-kt}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a164",
+   "kind": "steps",
+   "lines": [
+    "p=\\frac{1}{1+e^{-z}}",
+    "z=0",
+    "p=\\frac{1}{2}"
+   ]
+  },
+  {
+   "id": "a165",
+   "kind": "symbols",
+   "lines": [
+    "\\sim\\quad \\sim\\quad \\sim\\quad \\sim\\quad \\sim\\quad \\sim"
+   ]
+  },
+  {
+   "id": "a166",
+   "kind": "expr",
+   "lines": [
+    "x^\\top Ax"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a167",
+   "kind": "expr",
+   "lines": [
+    "\\frac{TP+TN}{n}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a168",
+   "kind": "expr",
+   "lines": [
+    "a_n=\\sum_{i=1}^{n-1}\\frac{1}{i}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a169",
+   "kind": "expr",
+   "lines": [
+    "t_{1/2}=\\frac{\\ln 2}{k}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a170",
+   "kind": "steps",
+   "lines": [
+    "\\theta\\leftarrow\\theta-\\alpha\\nabla J",
+    "=1-0,1\\cdot 2",
+    "=0,8"
+   ]
+  },
+  {
+   "id": "a171",
+   "kind": "symbols",
+   "lines": [
+    "\\propto\\quad \\propto\\quad \\propto\\quad \\propto\\quad \\propto\\quad \\propto"
+   ]
+  },
+  {
+   "id": "a172",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{Bias}^2+\\mathrm{Var}+\\sigma^2"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a173",
+   "kind": "expr",
+   "lines": [
+    "D_T=\\frac{\\pi-\\frac{S}{a_n}}{\\sigma}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a174",
+   "kind": "expr",
+   "lines": [
+    "Re=\\frac{\\rho vL}{\\eta}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a175",
+   "kind": "expr",
+   "lines": [
+    "\\hat{f}(x)=\\frac{1}{k}\\sum_{i\\in N_k(x)}y_i"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a176",
+   "kind": "steps",
+   "lines": [
+    "\\frac{d}{dx}(x^2e^x)",
+    "=2xe^x+x^2e^x",
+    "=xe^x(2+x)"
+   ]
+  },
+  {
+   "id": "a177",
+   "kind": "symbols",
+   "lines": [
+    "\\approx\\quad \\approx\\quad \\approx\\quad \\approx\\quad \\approx\\quad \\approx"
+   ]
+  },
+  {
+   "id": "a178",
+   "kind": "expr",
+   "lines": [
+    "h^2=\\frac{V_A}{V_P}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a179",
+   "kind": "expr",
+   "lines": [
+    "\\sigma=\\frac{F}{A}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a180",
+   "kind": "expr",
+   "lines": [
+    "w\\in\\mathbb{R}^p"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a181",
+   "kind": "expr",
+   "lines": [
+    "\\log(ab)=\\log a+\\log b"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a182",
+   "kind": "expr",
+   "lines": [
+    "R=h^2S"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a183",
+   "kind": "expr",
+   "lines": [
+    "\\varepsilon=\\frac{\\Delta L}{L}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a184",
+   "kind": "steps",
+   "lines": [
+    "\\int_0^1 2x\\,dx",
+    "=x^2|_0^1",
+    "=1"
+   ]
+  },
+  {
+   "id": "a185",
+   "kind": "symbols",
+   "lines": [
+    "\\infty\\quad \\infty\\quad \\infty\\quad \\infty\\quad \\infty\\quad \\infty"
+   ]
+  },
+  {
+   "id": "a186",
+   "kind": "expr",
+   "lines": [
+    "\\sigma'(z)=\\sigma(z)(1-\\sigma(z))"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a187",
+   "kind": "expr",
+   "lines": [
+    "V_P=V_G+V_E"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a188",
+   "kind": "expr",
+   "lines": [
+    "E=\\frac{\\sigma}{\\varepsilon}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a189",
+   "kind": "expr",
+   "lines": [
+    "\\frac{\\partial J}{\\partial\\beta_j}=\\frac{1}{n}\\sum(\\hat{y}_i-y_i)x_{ij}"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a190",
+   "kind": "steps",
+   "lines": [
+    "\\det(A)",
+    "=2\\cdot 2-1\\cdot 1",
+    "=3"
+   ]
+  },
+  {
+   "id": "a191",
+   "kind": "symbols",
+   "lines": [
+    "\\rightleftharpoons\\quad \\rightleftharpoons\\quad \\rightleftharpoons\\quad \\rightleftharpoons\\quad \\rightleftharpoons\\quad \\rightleftharpoons"
+   ]
+  },
+  {
+   "id": "a192",
+   "kind": "expr",
+   "lines": [
+    "f(x)\\approx f(a)+f'(a)(x-a)"
+   ],
+   "hint": "Cálculo y álgebra"
+  },
+  {
+   "id": "a193",
+   "kind": "expr",
+   "lines": [
+    "\\lambda=\\frac{N_{t+1}}{N_t}"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a194",
+   "kind": "expr",
+   "lines": [
+    "\\Phi=\\frac{q}{\\varepsilon_0}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a195",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{AIC}=2k-2\\ln L"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "a196",
+   "kind": "steps",
+   "lines": [
+    "\\sigma'(z)=\\sigma(z)(1-\\sigma(z))",
+    "\\sigma(0)=\\frac{1}{2}",
+    "\\sigma'(0)=\\frac{1}{4}"
+   ]
+  },
+  {
+   "id": "a197",
+   "kind": "symbols",
+   "lines": [
+    "|\\quad |\\quad |\\quad |\\quad |\\quad |"
+   ]
+  },
+  {
+   "id": "a198",
+   "kind": "expr",
+   "lines": [
+    "\\frac{dN}{dt}=rN(1-\\frac{N}{K})"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "a199",
+   "kind": "expr",
+   "lines": [
+    "U=\\frac{1}{2}CV^2"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "a200",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{BIC}=k\\ln n-2\\ln L"
+   ],
+   "hint": "Aprendizaje estadístico"
+  }
+ ]
+}

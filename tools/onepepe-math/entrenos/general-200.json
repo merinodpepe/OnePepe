@@ -1,0 +1,1574 @@
+{
+ "name": "general-200",
+ "title": "General: 200 expresiones",
+ "description": "Símbolos sueltos, expresiones de cada tema y cálculos seguidos. Escribe como en clase, con tu tamaño de letra normal.",
+ "items": [
+  {
+   "id": "g001",
+   "kind": "expr",
+   "lines": [
+    "3+4\\cdot 5="
+   ]
+  },
+  {
+   "id": "g002",
+   "kind": "symbols",
+   "lines": [
+    "i\\quad i\\quad i\\quad i\\quad i\\quad i"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g003",
+   "kind": "steps",
+   "lines": [
+    "2x+4=10",
+    "2x=6",
+    "x=3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g004",
+   "kind": "expr",
+   "lines": [
+    "12-7+3="
+   ]
+  },
+  {
+   "id": "g005",
+   "kind": "expr",
+   "lines": [
+    "(8-3)\\times 4="
+   ]
+  },
+  {
+   "id": "g006",
+   "kind": "symbols",
+   "lines": [
+    "j\\quad j\\quad j\\quad j\\quad j\\quad j"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g007",
+   "kind": "expr",
+   "lines": [
+    "45\\div 9="
+   ]
+  },
+  {
+   "id": "g008",
+   "kind": "steps",
+   "lines": [
+    "3x-5=7",
+    "3x=12",
+    "x=4"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g009",
+   "kind": "expr",
+   "lines": [
+    "2,5\\cdot 4="
+   ]
+  },
+  {
+   "id": "g010",
+   "kind": "symbols",
+   "lines": [
+    "x\\quad x\\quad x\\quad x\\quad x\\quad x"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g011",
+   "kind": "expr",
+   "lines": [
+    "100-37="
+   ]
+  },
+  {
+   "id": "g012",
+   "kind": "steps",
+   "lines": [
+    "(x+1)^2",
+    "=x^2+2x+1"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g013",
+   "kind": "expr",
+   "lines": [
+    "6\\cdot(2+3)="
+   ]
+  },
+  {
+   "id": "g014",
+   "kind": "symbols",
+   "lines": [
+    "1\\quad 1\\quad 1\\quad 1\\quad 1\\quad 1"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g015",
+   "kind": "expr",
+   "lines": [
+    "0,75+1,25="
+   ]
+  },
+  {
+   "id": "g016",
+   "kind": "symbols",
+   "lines": [
+    "l\\quad l\\quad l\\quad l\\quad l\\quad l"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g017",
+   "kind": "expr",
+   "lines": [
+    "7\\cdot 8-6="
+   ]
+  },
+  {
+   "id": "g018",
+   "kind": "steps",
+   "lines": [
+    "3(x+2)-x",
+    "=3x+6-x",
+    "=2x+6"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g019",
+   "kind": "expr",
+   "lines": [
+    "25\\%\\ de\\ 80"
+   ]
+  },
+  {
+   "id": "g020",
+   "kind": "symbols",
+   "lines": [
+    "7\\quad 7\\quad 7\\quad 7\\quad 7\\quad 7"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g021",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{2}+\\frac{1}{3}="
+   ]
+  },
+  {
+   "id": "g022",
+   "kind": "expr",
+   "lines": [
+    "\\frac{7}{8}-\\frac{1}{4}="
+   ]
+  },
+  {
+   "id": "g023",
+   "kind": "steps",
+   "lines": [
+    "\\frac{1}{2}+\\frac{1}{4}",
+    "=\\frac{2}{4}+\\frac{1}{4}",
+    "=\\frac{3}{4}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g024",
+   "kind": "symbols",
+   "lines": [
+    "0\\quad 0\\quad 0\\quad 0\\quad 0\\quad 0"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g025",
+   "kind": "expr",
+   "lines": [
+    "\\frac{3}{5}\\cdot\\frac{10}{9}="
+   ]
+  },
+  {
+   "id": "g026",
+   "kind": "expr",
+   "lines": [
+    "\\frac{2}{3}\\div\\frac{4}{9}="
+   ]
+  },
+  {
+   "id": "g027",
+   "kind": "symbols",
+   "lines": [
+    "o\\quad o\\quad o\\quad o\\quad o\\quad o"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g028",
+   "kind": "steps",
+   "lines": [
+    "x^2-9=0",
+    "x^2=9",
+    "x=3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g029",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x+1}{x-1}"
+   ]
+  },
+  {
+   "id": "g030",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a}{b}+\\frac{c}{d}"
+   ]
+  },
+  {
+   "id": "g031",
+   "kind": "symbols",
+   "lines": [
+    "2\\quad 2\\quad 2\\quad 2\\quad 2\\quad 2"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g032",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{1+\\frac{1}{2}}="
+   ]
+  },
+  {
+   "id": "g033",
+   "kind": "steps",
+   "lines": [
+    "2(x-1)=x+3",
+    "2x-2=x+3",
+    "x=5"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g034",
+   "kind": "expr",
+   "lines": [
+    "\\frac{15}{25}="
+   ]
+  },
+  {
+   "id": "g035",
+   "kind": "symbols",
+   "lines": [
+    "z\\quad z\\quad z\\quad z\\quad z\\quad z"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g036",
+   "kind": "expr",
+   "lines": [
+    "\\frac{9}{12}+\\frac{1}{4}="
+   ]
+  },
+  {
+   "id": "g037",
+   "kind": "steps",
+   "lines": [
+    "a=3",
+    "b=a+2",
+    "a\\cdot b="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g038",
+   "kind": "expr",
+   "lines": [
+    "2^{10}="
+   ]
+  },
+  {
+   "id": "g039",
+   "kind": "symbols",
+   "lines": [
+    "y\\quad y\\quad y\\quad y\\quad y\\quad y"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g040",
+   "kind": "expr",
+   "lines": [
+    "x^2+y^2=r^2"
+   ]
+  },
+  {
+   "id": "g041",
+   "kind": "symbols",
+   "lines": [
+    "g\\quad g\\quad g\\quad g\\quad g\\quad g"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g042",
+   "kind": "expr",
+   "lines": [
+    "a^3\\cdot a^4=a^7"
+   ]
+  },
+  {
+   "id": "g043",
+   "kind": "steps",
+   "lines": [
+    "x=2",
+    "y=3x-1",
+    "x+y="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g044",
+   "kind": "expr",
+   "lines": [
+    "\\sqrt{144}="
+   ]
+  },
+  {
+   "id": "g045",
+   "kind": "symbols",
+   "lines": [
+    "q\\quad q\\quad q\\quad q\\quad q\\quad q"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g046",
+   "kind": "expr",
+   "lines": [
+    "\\sqrt{2}\\approx 1,41"
+   ]
+  },
+  {
+   "id": "g047",
+   "kind": "expr",
+   "lines": [
+    "\\sqrt[3]{27}="
+   ]
+  },
+  {
+   "id": "g048",
+   "kind": "steps",
+   "lines": [
+    "\\frac{x}{2}+1=4",
+    "\\frac{x}{2}=3",
+    "x=6"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g049",
+   "kind": "symbols",
+   "lines": [
+    "9\\quad 9\\quad 9\\quad 9\\quad 9\\quad 9"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g050",
+   "kind": "expr",
+   "lines": [
+    "(a+b)^2=a^2+2ab+b^2"
+   ]
+  },
+  {
+   "id": "g051",
+   "kind": "expr",
+   "lines": [
+    "e^{-x}"
+   ]
+  },
+  {
+   "id": "g052",
+   "kind": "symbols",
+   "lines": [
+    "t\\quad t\\quad t\\quad t\\quad t\\quad t"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g053",
+   "kind": "steps",
+   "lines": [
+    "5x=2x+9",
+    "3x=9",
+    "x=3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g054",
+   "kind": "expr",
+   "lines": [
+    "x^{n+1}"
+   ]
+  },
+  {
+   "id": "g055",
+   "kind": "expr",
+   "lines": [
+    "\\sqrt{x^2+1}"
+   ]
+  },
+  {
+   "id": "g056",
+   "kind": "symbols",
+   "lines": [
+    "a\\quad a\\quad a\\quad a\\quad a\\quad a"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g057",
+   "kind": "expr",
+   "lines": [
+    "5\\cdot 10^{4}"
+   ]
+  },
+  {
+   "id": "g058",
+   "kind": "steps",
+   "lines": [
+    "(a+b)(a-b)",
+    "=a^2-ab+ab-b^2",
+    "=a^2-b^2"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g059",
+   "kind": "expr",
+   "lines": [
+    "2a+3a-b="
+   ]
+  },
+  {
+   "id": "g060",
+   "kind": "symbols",
+   "lines": [
+    "d\\quad d\\quad d\\quad d\\quad d\\quad d"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g061",
+   "kind": "expr",
+   "lines": [
+    "3(x+2)=3x+6"
+   ]
+  },
+  {
+   "id": "g062",
+   "kind": "steps",
+   "lines": [
+    "2^3\\cdot 2^2",
+    "=2^5",
+    "=32"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g063",
+   "kind": "expr",
+   "lines": [
+    "(a-b)(a+b)=a^2-b^2"
+   ]
+  },
+  {
+   "id": "g064",
+   "kind": "symbols",
+   "lines": [
+    "b\\quad b\\quad b\\quad b\\quad b\\quad b"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g065",
+   "kind": "expr",
+   "lines": [
+    "x^2-5x+6"
+   ]
+  },
+  {
+   "id": "g066",
+   "kind": "symbols",
+   "lines": [
+    "u\\quad u\\quad u\\quad u\\quad u\\quad u"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g067",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x^2-1}{x-1}=x+1"
+   ]
+  },
+  {
+   "id": "g068",
+   "kind": "steps",
+   "lines": [
+    "\\sqrt{50}",
+    "=\\sqrt{25\\cdot 2}",
+    "=5\\sqrt{2}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g069",
+   "kind": "expr",
+   "lines": [
+    "2(x-1)-3(x+2)"
+   ]
+  },
+  {
+   "id": "g070",
+   "kind": "symbols",
+   "lines": [
+    "v\\quad v\\quad v\\quad v\\quad v\\quad v"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g071",
+   "kind": "expr",
+   "lines": [
+    "|x-3|<2"
+   ]
+  },
+  {
+   "id": "g072",
+   "kind": "expr",
+   "lines": [
+    "x\\geq 0"
+   ]
+  },
+  {
+   "id": "g073",
+   "kind": "steps",
+   "lines": [
+    "\\frac{6x^2}{3x}",
+    "=2x"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g074",
+   "kind": "symbols",
+   "lines": [
+    "n\\quad n\\quad n\\quad n\\quad n\\quad n"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g075",
+   "kind": "expr",
+   "lines": [
+    "y\\neq 0"
+   ]
+  },
+  {
+   "id": "g076",
+   "kind": "expr",
+   "lines": [
+    "f(x)=2x+1"
+   ]
+  },
+  {
+   "id": "g077",
+   "kind": "symbols",
+   "lines": [
+    "k\\quad k\\quad k\\quad k\\quad k\\quad k"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g078",
+   "kind": "steps",
+   "lines": [
+    "4x-3=2x+7",
+    "2x=10",
+    "x=5"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g079",
+   "kind": "expr",
+   "lines": [
+    "g(t)=t^2-4"
+   ]
+  },
+  {
+   "id": "g080",
+   "kind": "expr",
+   "lines": [
+    "p(x)=x^3-2x^2+x"
+   ]
+  },
+  {
+   "id": "g081",
+   "kind": "symbols",
+   "lines": [
+    "e\\quad e\\quad e\\quad e\\quad e\\quad e"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g082",
+   "kind": "expr",
+   "lines": [
+    "-(a-b)=b-a"
+   ]
+  },
+  {
+   "id": "g083",
+   "kind": "steps",
+   "lines": [
+    "m=2",
+    "v=3",
+    "E=\\frac{1}{2}mv^2="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g084",
+   "kind": "expr",
+   "lines": [
+    "2x+1=7"
+   ]
+  },
+  {
+   "id": "g085",
+   "kind": "symbols",
+   "lines": [
+    "s\\quad s\\quad s\\quad s\\quad s\\quad s"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g086",
+   "kind": "expr",
+   "lines": [
+    "3x-4=2x+5"
+   ]
+  },
+  {
+   "id": "g087",
+   "kind": "steps",
+   "lines": [
+    "F=ma",
+    "a=\\frac{F}{m}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g088",
+   "kind": "expr",
+   "lines": [
+    "x^2=16"
+   ]
+  },
+  {
+   "id": "g089",
+   "kind": "symbols",
+   "lines": [
+    "5\\quad 5\\quad 5\\quad 5\\quad 5\\quad 5"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g090",
+   "kind": "expr",
+   "lines": [
+    "x^2-5x+6=0"
+   ]
+  },
+  {
+   "id": "g091",
+   "kind": "symbols",
+   "lines": [
+    "4\\quad 4\\quad 4\\quad 4\\quad 4\\quad 4"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g092",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x}{3}=4"
+   ]
+  },
+  {
+   "id": "g093",
+   "kind": "steps",
+   "lines": [
+    "x^2+6x+9",
+    "=(x+3)^2"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g094",
+   "kind": "expr",
+   "lines": [
+    "2x+4=10\\rightarrow x=3"
+   ]
+  },
+  {
+   "id": "g095",
+   "kind": "symbols",
+   "lines": [
+    "3\\quad 3\\quad 3\\quad 3\\quad 3\\quad 3"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g096",
+   "kind": "expr",
+   "lines": [
+    "5-x=2"
+   ]
+  },
+  {
+   "id": "g097",
+   "kind": "expr",
+   "lines": [
+    "x+y=10"
+   ]
+  },
+  {
+   "id": "g098",
+   "kind": "steps",
+   "lines": [
+    "\\frac{d}{dx}(x^2+3x)",
+    "=2x+3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g099",
+   "kind": "symbols",
+   "lines": [
+    "6\\quad 6\\quad 6\\quad 6\\quad 6\\quad 6"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g100",
+   "kind": "expr",
+   "lines": [
+    "2x-y=1"
+   ]
+  },
+  {
+   "id": "g101",
+   "kind": "expr",
+   "lines": [
+    "x^2+2x+1=0"
+   ]
+  },
+  {
+   "id": "g102",
+   "kind": "symbols",
+   "lines": [
+    "8\\quad 8\\quad 8\\quad 8\\quad 8\\quad 8"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g103",
+   "kind": "steps",
+   "lines": [
+    "\\int 2x\\,dx",
+    "=x^2+C"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g104",
+   "kind": "expr",
+   "lines": [
+    "ax+b=0"
+   ]
+  },
+  {
+   "id": "g105",
+   "kind": "expr",
+   "lines": [
+    "y=mx+n"
+   ]
+  },
+  {
+   "id": "g106",
+   "kind": "symbols",
+   "lines": [
+    "\\delta\\quad \\delta\\quad \\delta\\quad \\delta\\quad \\delta\\quad \\delta"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g107",
+   "kind": "expr",
+   "lines": [
+    "\\sin(0)="
+   ]
+  },
+  {
+   "id": "g108",
+   "kind": "steps",
+   "lines": [
+    "7-2(x+1)=1",
+    "7-2x-2=1",
+    "-2x=-4",
+    "x=2"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g109",
+   "kind": "expr",
+   "lines": [
+    "\\cos(\\pi)="
+   ]
+  },
+  {
+   "id": "g110",
+   "kind": "symbols",
+   "lines": [
+    "\\partial\\quad \\partial\\quad \\partial\\quad \\partial\\quad \\partial\\quad \\partial"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g111",
+   "kind": "expr",
+   "lines": [
+    "\\ln(1)="
+   ]
+  },
+  {
+   "id": "g112",
+   "kind": "steps",
+   "lines": [
+    "\\ln(e^3)",
+    "=3\\ln e",
+    "=3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g113",
+   "kind": "expr",
+   "lines": [
+    "\\log(100)="
+   ]
+  },
+  {
+   "id": "g114",
+   "kind": "symbols",
+   "lines": [
+    "\\alpha\\quad \\alpha\\quad \\alpha\\quad \\alpha\\quad \\alpha\\quad \\alpha"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g115",
+   "kind": "expr",
+   "lines": [
+    "e^{\\ln 2}="
+   ]
+  },
+  {
+   "id": "g116",
+   "kind": "symbols",
+   "lines": [
+    "\\beta\\quad \\beta\\quad \\beta\\quad \\beta\\quad \\beta\\quad \\beta"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g117",
+   "kind": "expr",
+   "lines": [
+    "\\sin^2 x+\\cos^2 x=1"
+   ]
+  },
+  {
+   "id": "g118",
+   "kind": "steps",
+   "lines": [
+    "\\log_2 32",
+    "=5"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g119",
+   "kind": "expr",
+   "lines": [
+    "\\tan x=\\frac{\\sin x}{\\cos x}"
+   ]
+  },
+  {
+   "id": "g120",
+   "kind": "symbols",
+   "lines": [
+    "\\theta\\quad \\theta\\quad \\theta\\quad \\theta\\quad \\theta\\quad \\theta"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g121",
+   "kind": "expr",
+   "lines": [
+    "\\log_2 8="
+   ]
+  },
+  {
+   "id": "g122",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{sen}(30^\\circ)"
+   ]
+  },
+  {
+   "id": "g123",
+   "kind": "steps",
+   "lines": [
+    "y=2x+1",
+    "x=4",
+    "y="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g124",
+   "kind": "symbols",
+   "lines": [
+    "\\lambda\\quad \\lambda\\quad \\lambda\\quad \\lambda\\quad \\lambda\\quad \\lambda"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g125",
+   "kind": "expr",
+   "lines": [
+    "\\mathrm{tg}\\,x"
+   ]
+  },
+  {
+   "id": "g126",
+   "kind": "expr",
+   "lines": [
+    "\\ln(xy)=\\ln x+\\ln y"
+   ]
+  },
+  {
+   "id": "g127",
+   "kind": "symbols",
+   "lines": [
+    "\\mu\\quad \\mu\\quad \\mu\\quad \\mu\\quad \\mu\\quad \\mu"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g128",
+   "kind": "steps",
+   "lines": [
+    "10\\%\\ de\\ 250",
+    "=0,1\\cdot 250",
+    "=25"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g129",
+   "kind": "expr",
+   "lines": [
+    "f(x)=e^{2x}"
+   ]
+  },
+  {
+   "id": "g130",
+   "kind": "expr",
+   "lines": [
+    "y=\\sin(2x)"
+   ]
+  },
+  {
+   "id": "g131",
+   "kind": "symbols",
+   "lines": [
+    "\\pi\\quad \\pi\\quad \\pi\\quad \\pi\\quad \\pi\\quad \\pi"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g132",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d}{dx}(x^3)="
+   ]
+  },
+  {
+   "id": "g133",
+   "kind": "steps",
+   "lines": [
+    "\\frac{3}{4}\\cdot\\frac{8}{9}",
+    "=\\frac{24}{36}",
+    "=\\frac{2}{3}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g134",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d}{dx}(\\sin x)="
+   ]
+  },
+  {
+   "id": "g135",
+   "kind": "symbols",
+   "lines": [
+    "\\sigma\\quad \\sigma\\quad \\sigma\\quad \\sigma\\quad \\sigma\\quad \\sigma"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g136",
+   "kind": "expr",
+   "lines": [
+    "\\frac{dy}{dx}"
+   ]
+  },
+  {
+   "id": "g137",
+   "kind": "steps",
+   "lines": [
+    "x+y=5",
+    "x-y=1",
+    "2x=6",
+    "x=3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g138",
+   "kind": "expr",
+   "lines": [
+    "f'(x)=2x"
+   ]
+  },
+  {
+   "id": "g139",
+   "kind": "symbols",
+   "lines": [
+    "\\varphi\\quad \\varphi\\quad \\varphi\\quad \\varphi\\quad \\varphi\\quad \\varphi"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g140",
+   "kind": "expr",
+   "lines": [
+    "\\int x^2\\,dx="
+   ]
+  },
+  {
+   "id": "g141",
+   "kind": "symbols",
+   "lines": [
+    "\\omega\\quad \\omega\\quad \\omega\\quad \\omega\\quad \\omega\\quad \\omega"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g142",
+   "kind": "expr",
+   "lines": [
+    "\\int_0^1 x\\,dx="
+   ]
+  },
+  {
+   "id": "g143",
+   "kind": "steps",
+   "lines": [
+    "\\sin^2 x+\\cos^2 x",
+    "=1"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g144",
+   "kind": "expr",
+   "lines": [
+    "\\int_0^{\\pi}\\sin x\\,dx="
+   ]
+  },
+  {
+   "id": "g145",
+   "kind": "symbols",
+   "lines": [
+    "\\Delta\\quad \\Delta\\quad \\Delta\\quad \\Delta\\quad \\Delta\\quad \\Delta"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g146",
+   "kind": "expr",
+   "lines": [
+    "\\sum_{i=1}^{n} i=\\frac{n(n+1)}{2}"
+   ]
+  },
+  {
+   "id": "g147",
+   "kind": "expr",
+   "lines": [
+    "\\sum_{k=0}^{4} k="
+   ]
+  },
+  {
+   "id": "g148",
+   "kind": "steps",
+   "lines": [
+    "(2x)^3",
+    "=8x^3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g149",
+   "kind": "symbols",
+   "lines": [
+    "\\Sigma\\quad \\Sigma\\quad \\Sigma\\quad \\Sigma\\quad \\Sigma\\quad \\Sigma"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g150",
+   "kind": "expr",
+   "lines": [
+    "\\lim_{x\\rightarrow 0}\\frac{\\sin x}{x}="
+   ]
+  },
+  {
+   "id": "g151",
+   "kind": "expr",
+   "lines": [
+    "\\lim_{x\\rightarrow\\infty}\\frac{1}{x}=0"
+   ]
+  },
+  {
+   "id": "g152",
+   "kind": "symbols",
+   "lines": [
+    "\\int\\quad \\int\\quad \\int\\quad \\int\\quad \\int\\quad \\int"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g153",
+   "kind": "steps",
+   "lines": [
+    "P=\\frac{F}{A}",
+    "F=50",
+    "A=2",
+    "P="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g154",
+   "kind": "expr",
+   "lines": [
+    "\\frac{\\partial f}{\\partial x}"
+   ]
+  },
+  {
+   "id": "g155",
+   "kind": "expr",
+   "lines": [
+    "\\nabla f"
+   ]
+  },
+  {
+   "id": "g156",
+   "kind": "symbols",
+   "lines": [
+    "\\sqrt{\\,}\\quad \\sqrt{\\,}\\quad \\sqrt{\\,}\\quad \\sqrt{\\,}\\quad \\sqrt{\\,}\\quad \\sqrt{\\,}"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g157",
+   "kind": "expr",
+   "lines": [
+    "\\prod_{i=1}^{3} i="
+   ]
+  },
+  {
+   "id": "g158",
+   "kind": "steps",
+   "lines": [
+    "\\Delta T=310-300",
+    "=10"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g159",
+   "kind": "expr",
+   "lines": [
+    "\\int e^x\\,dx=e^x+C"
+   ]
+  },
+  {
+   "id": "g160",
+   "kind": "symbols",
+   "lines": [
+    "\\infty\\quad \\infty\\quad \\infty\\quad \\infty\\quad \\infty\\quad \\infty"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g161",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d^2y}{dx^2}"
+   ]
+  },
+  {
+   "id": "g162",
+   "kind": "steps",
+   "lines": [
+    "e^{0}+e^{\\ln 5}",
+    "=1+5",
+    "=6"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g163",
+   "kind": "expr",
+   "lines": [
+    "\\Delta x\\rightarrow 0"
+   ]
+  },
+  {
+   "id": "g164",
+   "kind": "symbols",
+   "lines": [
+    "\\rightarrow\\quad \\rightarrow\\quad \\rightarrow\\quad \\rightarrow\\quad \\rightarrow\\quad \\rightarrow"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g165",
+   "kind": "expr",
+   "lines": [
+    "\\int_a^b f(x)\\,dx"
+   ]
+  },
+  {
+   "id": "g166",
+   "kind": "symbols",
+   "lines": [
+    "\\Rightarrow\\quad \\Rightarrow\\quad \\Rightarrow\\quad \\Rightarrow\\quad \\Rightarrow\\quad \\Rightarrow"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g167",
+   "kind": "expr",
+   "lines": [
+    "F=m\\cdot a"
+   ]
+  },
+  {
+   "id": "g168",
+   "kind": "steps",
+   "lines": [
+    "\\frac{x^2-4}{x+2}",
+    "=\\frac{(x-2)(x+2)}{x+2}",
+    "=x-2"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g169",
+   "kind": "expr",
+   "lines": [
+    "E=mc^2"
+   ]
+  },
+  {
+   "id": "g170",
+   "kind": "symbols",
+   "lines": [
+    "\\leq\\quad \\leq\\quad \\leq\\quad \\leq\\quad \\leq\\quad \\leq"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g171",
+   "kind": "expr",
+   "lines": [
+    "v=\\frac{\\Delta x}{\\Delta t}"
+   ]
+  },
+  {
+   "id": "g172",
+   "kind": "expr",
+   "lines": [
+    "p=\\rho g h"
+   ]
+  },
+  {
+   "id": "g173",
+   "kind": "steps",
+   "lines": [
+    "3x+2\\leq 11",
+    "3x\\leq 9",
+    "x\\leq 3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g174",
+   "kind": "symbols",
+   "lines": [
+    "\\neq\\quad \\neq\\quad \\neq\\quad \\neq\\quad \\neq\\quad \\neq"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g175",
+   "kind": "expr",
+   "lines": [
+    "P\\cdot V=n R T"
+   ]
+  },
+  {
+   "id": "g176",
+   "kind": "expr",
+   "lines": [
+    "k_B T"
+   ]
+  },
+  {
+   "id": "g177",
+   "kind": "symbols",
+   "lines": [
+    "\\times\\quad \\times\\quad \\times\\quad \\times\\quad \\times\\quad \\times"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "g178",
+   "kind": "steps",
+   "lines": [
+    "\\sum_{i=1}^{3} i^2",
+    "=1+4+9",
+    "=14"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g179",
+   "kind": "expr",
+   "lines": [
+    "\\Delta G=\\Delta H-T\\Delta S"
+   ]
+  },
+  {
+   "id": "g180",
+   "kind": "expr",
+   "lines": [
+    "E=h\\nu"
+   ]
+  },
+  {
+   "id": "g181",
+   "kind": "symbols",
+   "lines": [
+    "i\\quad i\\quad i\\quad i\\quad i\\quad i"
+   ],
+   "hint": "Otra vez: es de los que más se confunden"
+  },
+  {
+   "id": "g182",
+   "kind": "expr",
+   "lines": [
+    "\\lambda=\\frac{c}{f}"
+   ]
+  },
+  {
+   "id": "g183",
+   "kind": "steps",
+   "lines": [
+    "\\lim_{x\\rightarrow 2}(x^2+1)",
+    "=5"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g184",
+   "kind": "expr",
+   "lines": [
+    "I=\\frac{V}{R}"
+   ]
+  },
+  {
+   "id": "g185",
+   "kind": "symbols",
+   "lines": [
+    "j\\quad j\\quad j\\quad j\\quad j\\quad j"
+   ],
+   "hint": "Otra vez: es de los que más se confunden"
+  },
+  {
+   "id": "g186",
+   "kind": "expr",
+   "lines": [
+    "Q=m c\\Delta T"
+   ]
+  },
+  {
+   "id": "g187",
+   "kind": "steps",
+   "lines": [
+    "2,5\\cdot 4",
+    "=10"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g188",
+   "kind": "expr",
+   "lines": [
+    "\\omega=2\\pi f"
+   ]
+  },
+  {
+   "id": "g189",
+   "kind": "symbols",
+   "lines": [
+    "x\\quad x\\quad x\\quad x\\quad x\\quad x"
+   ],
+   "hint": "Otra vez: es de los que más se confunden"
+  },
+  {
+   "id": "g190",
+   "kind": "expr",
+   "lines": [
+    "\\sigma=\\frac{F}{A}"
+   ]
+  },
+  {
+   "id": "g191",
+   "kind": "symbols",
+   "lines": [
+    "1\\quad 1\\quad 1\\quad 1\\quad 1\\quad 1"
+   ],
+   "hint": "Otra vez: es de los que más se confunden"
+  },
+  {
+   "id": "g192",
+   "kind": "expr",
+   "lines": [
+    "m=70\\,kg"
+   ]
+  },
+  {
+   "id": "g193",
+   "kind": "steps",
+   "lines": [
+    "a^2\\cdot a^3",
+    "=a^{2+3}",
+    "=a^5"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g194",
+   "kind": "expr",
+   "lines": [
+    "g=9,8"
+   ]
+  },
+  {
+   "id": "g195",
+   "kind": "symbols",
+   "lines": [
+    "\\delta\\quad \\delta\\quad \\delta\\quad \\delta\\quad \\delta\\quad \\delta"
+   ],
+   "hint": "Otra vez: es de los que más se confunden"
+  },
+  {
+   "id": "g196",
+   "kind": "expr",
+   "lines": [
+    "\\mu=\\frac{1}{n}\\sum x_i"
+   ]
+  },
+  {
+   "id": "g197",
+   "kind": "expr",
+   "lines": [
+    "x_1+x_2"
+   ]
+  },
+  {
+   "id": "g198",
+   "kind": "steps",
+   "lines": [
+    "r=2",
+    "A=\\pi r^2",
+    "A="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "g199",
+   "kind": "symbols",
+   "lines": [
+    "\\partial\\quad \\partial\\quad \\partial\\quad \\partial\\quad \\partial\\quad \\partial"
+   ],
+   "hint": "Otra vez: es de los que más se confunden"
+  },
+  {
+   "id": "g200",
+   "kind": "expr",
+   "lines": [
+    "\\alpha+\\beta+\\gamma=180^\\circ"
+   ]
+  }
+ ]
+}

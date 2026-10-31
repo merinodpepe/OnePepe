@@ -1607,6 +1607,12 @@ Aplazado por el usuario: resolver desde una foto o un PDF.
 - `set_halign` de la barra flotante dentro de un arrastre no se aplica hasta el siguiente ciclo de diseño: se hace en
   `idle_add_local_once`.
 
+**Git:**
+- `tools/onepepe-math/.gitignore` ignora **todos los `.json`** (datos personales); la excepción son
+  `entrenos/*.json`. Un archivo nuevo de datos que deba ir al repositorio necesita su excepción: así se quedaron
+  fuera los sets del entreno hasta la 1.3.4. **Antes de dar algo por subido, comprueba en una copia limpia**
+  (`git clone` a una carpeta temporal y tests), no en tu árbol de trabajo.
+
 **Rust y Rnote:**
 - **Nunca `if let`/`match`/`while let` con `canvas.engine_ref()` o `engine_mut()` en la condición** si dentro se
   abre una ventanita, se cambia el foco o se llama a algo que use el motor: el préstamo dura todo el bloque y la app

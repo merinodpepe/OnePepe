@@ -339,6 +339,12 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## Sets del entreno en git (versión 1.3.4, 2026-10-31)
+
+- Los sets no se habían subido: `tools/onepepe-math/.gitignore` tiene `*.json`. Se añade `!entrenos/*.json` (y se
+  vuelve a ignorar `entrenos/*.entreno.json`, por si alguien guarda ahí una sesión con su letra). A partir de ahora
+  se comprueba en una copia limpia del repositorio antes de decir que algo está subido.
+
 ## Cierre al tocar el «?» (versión 1.3.3, 2026-10-31)
 
 - Causa (informe del usuario: «RefCell already borrowed», `canvas/mod.rs`, al abrir una ventanita): `if let
