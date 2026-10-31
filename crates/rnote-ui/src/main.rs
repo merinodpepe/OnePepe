@@ -17,6 +17,7 @@ pub(crate) mod canvaswrapper;
 pub(crate) mod colorpicker;
 pub(crate) mod config;
 pub(crate) mod contextmenu;
+pub(crate) mod crashreport;
 pub(crate) mod dialogs;
 pub(crate) mod entreno;
 pub(crate) mod env;
@@ -80,6 +81,8 @@ use gtk4::{gio, glib, prelude::*};
 use tracing::debug;
 
 fn main() -> glib::ExitCode {
+    // OnePepe: a crash leaves a report to send
+    crashreport::install();
     if let Err(e) = setup_tracing() {
         eprintln!("failed to setup tracing, Err: {e:?}");
     }

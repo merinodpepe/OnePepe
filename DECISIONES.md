@@ -339,6 +339,14 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## Informe de fallos (versión 1.3.2, 2026-10-31)
+
+- El usuario vio que OnePepe se cerraba al escribir un número tras el «?» con Variables y «=» activos. No se
+  reproduce en la nube y revisando el código nuevo (préstamos del motor, índices, `unwrap`, cerrojos de la
+  configuración) no aparece la causa. En vez de adivinar, se guarda un informe de cada cierre por error
+  (`std::panic::set_hook`, en `crashreport.rs`, antes de todo lo demás en `main`) y se avisa al abrir. Así el
+  próximo cierre trae el mensaje y la traza exactos.
+
 ## Programa de matemáticas en Flatpak (versión 1.3.1, 2026-10-31)
 
 - Tu prueba: «Nuevo entreno» no hacía nada. La causa más probable: dentro de Flatpak la app lanzaba

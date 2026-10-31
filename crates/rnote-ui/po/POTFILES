@@ -65,6 +65,7 @@ crates/rnote-ui/src/lines.rs
 crates/rnote-ui/src/ribbon.rs
 crates/rnote-ui/src/textstyles.rs
 crates/rnote-ui/src/statusbar.rs
+crates/rnote-ui/src/crashreport.rs
 crates/rnote-ui/src/entreno.rs
 crates/rnote-ui/src/mathhelper.rs
 crates/rnote-ui/src/penssidebar/typewriterpage.rs
