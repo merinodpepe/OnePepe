@@ -7,6 +7,17 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.3.1 (2026-10-31) — arreglos
+
+- **«Nuevo entreno» no hacía nada** (tu prueba): si el programa de matemáticas no respondía, la app callaba. Ahora:
+  - Dentro de Flatpak se lanza por su ruta completa, `~/.local/bin/onepepe-math`. Antes iba por su nombre, y el
+    escritorio a menudo no tiene `~/.local/bin` en el PATH (solo la terminal), así que no arrancaba. Probablemente
+    era también por qué no te salía el resultado del «=».
+  - Si no responde, sale un aviso con la orden para comprobarlo. Si es más antiguo que la app, también lo dice.
+  - Si falla la ventana para elegir el archivo, lo dice (cancelar no avisa).
+- **Revisar pasos:** el aviso en rojo va debajo del renglón, no a su derecha, para no pisar el resultado del «=» ni
+  el valor de las variables.
+
 ## 1.3 (2026-10-30)
 
 - **Set «Tus asignaturas» (200)**: genética de poblaciones (Hardy-Weinberg, F, F_ST, N_e, deriva, selección,

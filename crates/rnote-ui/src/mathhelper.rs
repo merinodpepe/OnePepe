@@ -31,6 +31,10 @@ thread_local! {
     static SPAWN_FAILED: Cell<bool> = const { Cell::new(false) };
     static TIMER: RefCell<Option<glib::SourceId>> = const { RefCell::new(None) };
     static PAGE_TIMER: RefCell<Option<glib::SourceId>> = const { RefCell::new(None) };
+    /// The window, to say when the helper does not answer.
+    static WINDOW: RefCell<glib::WeakRef<RnAppWindow>> = RefCell::new(glib::WeakRef::new());
+    /// When the user was last told that the helper does not answer (not more than once a minute).
+    static LAST_FAILURE_TOAST: Cell<Option<std::time::Instant>> = const { Cell::new(None) };
     /// The dictionary of symbols (`names` of the helper), asked once: (latex, character, group, first name).
     static NAMES: RefCell<Option<Rc<Vec<NameEntry>>>> = const { RefCell::new(None) };
 }
@@ -54,10 +58,15 @@ fn helper_command() -> Vec<String> {
         }
     }
     if std::env::var_os("FLATPAK_ID").is_some() {
+        // by its full path: the desktop session often does not have ~/.local/bin in its PATH (only the terminal adds
+        // it), and then the helper never started and nothing said so
         vec![
             "flatpak-spawn".into(),
             "--host".into(),
-            "onepepe-math".into(),
+            glib::home_dir()
+                .join(".local/bin/onepepe-math")
+                .to_string_lossy()
+                .to_string(),
         ]
     } else {
         vec!["onepepe-math".into()]
@@ -103,6 +112,7 @@ impl MathHelper {
 
 /// The running helper, started if needed. Shows an error once if it can't be started.
 fn helper(appwindow: &RnAppWindow) -> Option<Rc<MathHelper>> {
+    WINDOW.with(|w| w.borrow().set(Some(appwindow)));
     if let Some(h) = HELPER.with(|h| h.borrow().clone()) {
         return Some(h);
     }
@@ -124,9 +134,35 @@ fn helper(appwindow: &RnAppWindow) -> Option<Rc<MathHelper>> {
     }
 }
 
-/// The helper broke (e.g. it was closed): start a new one next time.
+/// The helper broke (it was closed, or it never really started, e.g. not installed): start a new one next time, and
+/// say so (once a minute at most), so a button never seems to do nothing.
 fn reset_helper() {
     HELPER.with(|h| *h.borrow_mut() = None);
+    let recent = LAST_FAILURE_TOAST
+        .with(|t| t.get())
+        .is_some_and(|t| t.elapsed() < Duration::from_secs(60));
+    if recent {
+        return;
+    }
+    LAST_FAILURE_TOAST.with(|t| t.set(Some(std::time::Instant::now())));
+    if let Some(appwindow) = WINDOW.with(|w| w.borrow().upgrade()) {
+        appwindow.overlays().dispatch_toast_error(&gettext(
+            "The math helper \"onepepe-math\" does not answer. Check it in a terminal: echo '{\"id\":1,\"cmd\":\"ping\"}' | ~/.local/bin/onepepe-math",
+        ));
+    }
+}
+
+/// The error of an answer of the helper, if any («orden desconocida» means the helper is older than the app).
+pub(crate) fn answer_error(resp: &str) -> Option<String> {
+    let v = serde_json::from_str::<serde_json::Value>(resp).ok()?;
+    let e = v["error"].as_str()?;
+    Some(if e.contains("orden desconocida") {
+        gettext(
+            "The math helper is older than the app: update with git pull and open OnePepe again",
+        )
+    } else {
+        e.to_string()
+    })
 }
 
 fn notebook_dir(canvas: &RnCanvas) -> Option<String> {

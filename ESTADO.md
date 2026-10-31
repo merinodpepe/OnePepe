@@ -70,6 +70,7 @@ Leyenda de cómo se probó cada cosa:
 | 1.3 | **Set «Tus asignaturas»** (genética de poblaciones, biofísica, aprendizaje estadístico; 200) y **elegir el set** | `feat/entreno-asignaturas` | sí | sí (se dibujan las 200, todo en el vocabulario) + medido (199 de 200 encajan; 88 % de símbolos exactos con letra ajena) + ejecutada ✔ (elegir set, Nernst dibujado) | pendiente |
 | 1.3 | **Símbolos de estadística** (ŷ, x̄, x̃, 𝔼, ℙ, ℝ, ⊤, ⟨ ⟩, ∩, ∪, ⇌) y acentos en la estructura | `feat/entreno-asignaturas` | — | sí (4) + medido (el resto igual: 1725 de 2641) | pendiente |
 | 1.3 | **Glosario de biofísica** (k_B, R, F, N_A, h, c, q_e) | `feat/entreno-asignaturas` | — | comprobado: RT/F a 310 K = 26,71 mV | pendiente |
+| 1.3.1 | **Programa de matemáticas por su ruta en Flatpak** y aviso si no responde («Nuevo entreno» no hacía nada en tu equipo) | `fix/programa-matematicas` | sí | ejecutada ✔ (con un programa que no responde sale el aviso; con el bueno, el selector de sets) | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con

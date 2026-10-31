@@ -458,7 +458,9 @@ def _check_row(tokens, syms, typical, box, previous, env):
         tokens = tokens[:-1]
 
     def bad(why, where):
-        return _mark("error", "✗ " + why, why, _after(where, typical), 0.6 * typical)
+        # debajo del renglón, empezando por la izquierda: así no se cruza con el resultado del «=» ni con el valor
+        # de las variables, que van a la derecha
+        return _mark("error", "✗ " + why, why, (where[0], where[3] + 0.55 * typical), 0.55 * typical)
 
     # «= …» sigue la expresión del renglón de encima
     continues = bool(tokens) and tokens[0][0] == "sym" and tokens[0][1] == "="
