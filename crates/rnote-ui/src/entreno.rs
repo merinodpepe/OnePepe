@@ -337,6 +337,10 @@ struct Widgets {
     progress: gtk4::ProgressBar,
     hint: gtk4::Label,
     picture: gtk4::Picture,
+    /// The strip of fixed height with the picture.
+    strip: gtk4::ScrolledWindow,
+    /// The expression as readable text, when it can't be drawn (matplotlib missing).
+    plain: gtk4::Label,
     latex: gtk4::Label,
     area: gtk4::DrawingArea,
     message: gtk4::Label,
@@ -390,6 +394,11 @@ fn open_window(appwindow: &RnAppWindow, state: State) {
         .propagate_natural_height(false)
         .child(&picture)
         .build();
+    let plain = gtk4::Label::new(None);
+    plain.add_css_class("title-1");
+    plain.set_wrap(true);
+    plain.set_justify(gtk4::Justification::Center);
+    plain.set_visible(false);
     let latex = gtk4::Label::new(None);
     latex.set_selectable(true);
     latex.add_css_class("dim-label");
@@ -426,6 +435,7 @@ fn open_window(appwindow: &RnAppWindow, state: State) {
     vbox.append(&top);
     vbox.append(&hint);
     vbox.append(&picture_strip);
+    vbox.append(&plain);
     vbox.append(&latex);
     vbox.append(&frame);
     vbox.append(&buttons);
@@ -439,6 +449,8 @@ fn open_window(appwindow: &RnAppWindow, state: State) {
         progress,
         hint,
         picture,
+        strip: picture_strip.clone(),
+        plain,
         latex,
         area: area.clone(),
         message,
@@ -782,14 +794,30 @@ fn show_item(appwindow: &RnAppWindow, state: &Rc<RefCell<State>>, widgets: &Rc<W
             {
                 return;
             }
-            let png = serde_json::from_str::<serde_json::Value>(&resp)
-                .ok()
-                .and_then(|v| v["png"].as_str().map(String::from))
-                .and_then(|b| base64::engine::general_purpose::STANDARD.decode(b).ok());
-            if let Some(png) = png
-                && let Ok(texture) = gdk::Texture::from_bytes(&glib::Bytes::from(&png))
-            {
-                widgets.picture.set_paintable(Some(&texture));
+            let v = serde_json::from_str::<serde_json::Value>(&resp).unwrap_or_default();
+            let texture = v["png"]
+                .as_str()
+                .and_then(|b| base64::engine::general_purpose::STANDARD.decode(b).ok())
+                .and_then(|png| gdk::Texture::from_bytes(&glib::Bytes::from(&png)).ok());
+            match texture {
+                Some(texture) => {
+                    widgets.picture.set_paintable(Some(&texture));
+                    widgets.plain.set_visible(false);
+                    widgets.strip.set_visible(true);
+                }
+                None => {
+                    // not drawn: the expression as text, big, and how to get it drawn
+                    widgets.strip.set_visible(false);
+                    widgets
+                        .plain
+                        .set_text(v["text"].as_str().unwrap_or(&item.lines.join("\n")));
+                    widgets.plain.set_visible(true);
+                    if v["missing"].as_str() == Some("matplotlib") {
+                        widgets.message.set_text(&gettext(
+                            "To see it drawn, install matplotlib once: cd tools/onepepe-math && ./instalar.sh",
+                        ));
+                    }
+                }
             }
         }
     ));

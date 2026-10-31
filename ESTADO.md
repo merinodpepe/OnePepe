@@ -74,6 +74,7 @@ Leyenda de cómo se probó cada cosa:
 | 1.3.2 | **Informe de fallos** (`fallos.log` si la app se cierra por un error; aviso al abrir) | `fix/informe-fallos` | sí | funcionó en tu equipo: guardó el informe del cierre del «?» | sí |
 | 1.3.3 | **Cierre al tocar el «?»**: arreglado (causa vista en tu informe: el motor seguía en uso al abrir la ventanita) | `fix/cierre-interrogacion` | sí | ejecutada ✔ (las dos ventanitas abren; el cierre no se reproduce en la nube porque allí no cambia el foco) | pendiente |
 | 1.3.4 | **Sets del entreno en el repositorio** (faltaban por el `.gitignore`: «file not found») | `fix/sets-entreno-en-git` | — | sí, en una copia limpia del repositorio (83 tests de Python) | pendiente |
+| 1.3.5 | **Expresión del entreno en texto legible** si no hay matplotlib, y aviso de qué instalar | `fix/entreno-expresion-visible` | sí | sí (2) + ejecutada ✔ con y sin matplotlib | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con

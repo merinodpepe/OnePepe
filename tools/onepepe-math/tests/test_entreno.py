@@ -141,3 +141,22 @@ class TestServer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTextWithoutMatplotlib(unittest.TestCase):
+    def test_readable_text(self):
+        self.assertEqual(entreno.to_unicode(r"3+4\cdot 5="), "3 + 4 · 5 =")
+        self.assertEqual(entreno.to_unicode(r"x^2+y^2=r^2"), "x² + y² = r²")
+        self.assertEqual(entreno.to_unicode(r"\hat{\beta}=(X^\top X)^{-1}X^\top y"), "β̂ = (Xᵀ X)⁻¹Xᵀ y")
+        self.assertEqual(entreno.to_unicode(r"\frac{1}{2}+\frac{1}{3}="), "1/2 + 1/3 =")
+        self.assertEqual(entreno.to_unicode(r"-3+(-5)="), "−3 + (−5) =")
+        self.assertEqual(entreno.to_unicode(r"\mathbb{E}[\bar{x}]"), "𝔼[x̄]")
+
+    def test_answer_always_has_text(self):
+        r = entreno.render_answer([r"2x+4=10", r"x=3"])
+        self.assertEqual(r["text"], "2x + 4 = 10\nx = 3")
+        # every expression of both sets has a readable text
+        for s in entreno.list_sets():
+            for it in entreno.load_set(s["name"])["items"]:
+                for line in it["lines"]:
+                    self.assertTrue(entreno.to_unicode(line), line)
