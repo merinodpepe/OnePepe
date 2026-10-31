@@ -339,6 +339,14 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## Cierre al tocar el «?» (versión 1.3.3, 2026-10-31)
+
+- Causa (informe del usuario: «RefCell already borrowed», `canvas/mod.rs`, al abrir una ventanita): `if let
+  Some(..) = canvas.engine_ref().math_overlay_at(pos) { explain_overlay(..) }` mantiene el préstamo del motor
+  durante todo el bloque. Al abrir la ventanita cambia el foco y un manejador del lienzo pide `engine_mut()`.
+- Arreglo: guardar el resultado en una variable antes (`let overlay = ...;`) y abrir las ventanitas en
+  `idle_add_local_once`. Regla para el futuro en `CONTEXTO-IA.md` §14.
+
 ## Informe de fallos (versión 1.3.2, 2026-10-31)
 
 - El usuario vio que OnePepe se cerraba al escribir un número tras el «?» con Variables y «=» activos. No se

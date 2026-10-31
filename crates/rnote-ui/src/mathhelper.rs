@@ -693,7 +693,8 @@ fn explain_overlay(
         let popover = popover.clone();
         glib::idle_add_local_once(move || popover.unparent());
     });
-    popover.popup();
+    // when nothing holds the engine any more (the focus moves to the popover and the canvas handlers use it)
+    glib::idle_add_local_once(move || popover.popup());
 }
 
 /// How a LaTeX label is shown on the candidate buttons.
@@ -781,7 +782,10 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     let Some(pos) = canvas.engine_ref().math_last_tap() else {
         return;
     };
-    if let Some((kind, text, latex)) = canvas.engine_ref().math_overlay_at(pos) {
+    // the engine must be free before a popover opens: opening it moves the focus, and the canvas handlers that run
+    // then use the engine too (an `if let` would keep it borrowed: that closed the app when tapping a "?")
+    let overlay = canvas.engine_ref().math_overlay_at(pos);
+    if let Some((kind, text, latex)) = overlay {
         explain_overlay(canvas, pos, &kind, &text, &latex);
         return;
     }
@@ -912,7 +916,8 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
         // unparent after the closing animation
         glib::idle_add_local_once(move || popover.unparent());
     });
-    popover.popup();
+    // when nothing holds the engine any more (the focus moves to the popover and the canvas handlers use it)
+    glib::idle_add_local_once(move || popover.popup());
 }
 
 // ---------- OnePepe: hidden file next to the page with the recognized math symbols ----------
