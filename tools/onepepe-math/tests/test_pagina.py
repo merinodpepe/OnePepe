@@ -41,7 +41,7 @@ class TestEquals(unittest.TestCase):
     def test_fraction_formats(self):
         r = page("7/2=")
         formats = [f["text"] for f in r[0]["marks"][0]["formats"]]
-        self.assertEqual(formats, ["7/2", "3.5", "3 1/2"])
+        self.assertEqual(formats, ["7/2", "3,5", "3 1/2"])
         self.assertEqual(pagina.number_formats(4), [])
 
     def test_off(self):

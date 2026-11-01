@@ -246,6 +246,51 @@ tu lápiz. Lo que queda de cada una:
 | 5. LaTeX | «Copiar como LaTeX» de la selección | — |
 | 6. Fracciones y gráficos | tocar un resultado: fracción → decimal → mixta; gráfica de y = f(x) | la gráfica cambia al corregir la fórmula; ofrecer la gráfica al tocar el resultado |
 
+## 8. Mejoras que has ido apuntando al usar la app (2026-11-01, solo apuntadas)
+
+Tus notas, tal cual las pediste, con lo que ya sé de cada una. **Nada de esto está hecho.**
+
+1. **Copiar y pegar la selección.** Seleccionar con el lazo y poder copiar y pegar lo seleccionado.
+   - Ya existe en el código: **Ctrl+C / Ctrl+V** y la pestaña **Inicio → Portapapeles** (acciones `win.clipboard-copy`
+     y `win.clipboard-paste`, de Rnote). Falta ver por qué no lo encontraste: probablemente porque **no sale en el menú
+     de la selección** ni al tocarla. Propuesta: botones «Copiar», «Cortar», «Pegar» y «Duplicar» encima de la
+     selección y en el clic derecho; comprobar que funciona entre páginas y pestañas.
+2. **Asignatura de la hoja → símbolos más probables.** Elegir la asignatura de la página (o de la sección) y que el
+   reconocedor dé ventaja a sus símbolos.
+   - Ya hay algo: el glosario por carpeta (`.onepepe-glosario.txt`) refuerza sus símbolos, pero hay que crearlo a
+     mano. Propuesta: un selector «Asignatura» (Genética, Biofísica, Estadística…) en la pestaña Matemáticas, guardado
+     en el archivo oculto de la página o en el índice de la sección, con una lista de símbolos y constantes por
+     asignatura (los sets de entreno ya los tienen).
+3. **Ejercicios de PGME.** Pasarme ejercicios de PGME para ver cómo trabajas de verdad (qué escribes, cómo colocas
+   los pasos, qué símbolos usas). Por el chat o por Drive, **nunca por git**. Sirven para medir el reconocimiento con
+   tu letra y para preparar un set de entreno con ellos.
+4. **Doble clic en un objeto para moverlo y ajustarlo.** Con el ratón o el lápiz: doble clic en una imagen, un PDF o
+   una hoja la selecciona para moverla, cambiar su tamaño y ver sus ajustes, sin cambiar de herramienta.
+   - En Rnote hay que pasar a la herramienta de selección. Propuesta: doble toque con cualquier herramienta = seleccionar
+     ese objeto (con sus asas), y Esc o un toque fuera vuelve a la herramienta de antes.
+5. **Botones del lápiz.** Hoy: el **primero no hace nada** y el **segundo abre la goma**. Lo que quieres: primero =
+   **goma**, segundo = **lazo**, y que se pueda seguir cambiando en ajustes.
+   - En el código, por defecto ya es así («botón primario» = goma, «secundario» = lazo). Que en tu Wacom vaya
+     corrido indica que **tu lápiz manda los botones con otros números** de los que espera la app (el de abajo como
+     botón «central» o el de arriba como «secundario»). Para arreglarlo hace falta saber qué número manda cada botón:
+     la salida de `evtest` al pulsar cada uno (ya estaba pedida) o la de `GTK_DEBUG=events flatpak run
+     com.github.flxzt.rnote.Devel`. Luego: reconocer bien los tres números, y en ajustes poner el nombre real de
+     cada botón.
+   - **Idea:** doble pulsación del botón secundario = otra acción (por ejemplo, deshacer o el menú radial). Por decidir.
+6. **Recordar la última carpeta y una carpeta base.**
+   - Que al guardar (y al abrir) se proponga la **última carpeta** usada.
+   - Poder elegir una **carpeta base** (por ejemplo `~/Apuntes`) con subcarpetas, que sea donde viven tus cuadernos
+     y secciones.
+7. **No encuentras la jerarquía cuaderno → sección → página.** Existe (el árbol del panel lateral: cuadernos en la
+   barra de la izquierda, secciones = carpetas, páginas = archivos `.rnote`, subpáginas), pero no se ve claro.
+   Propuesta: mostrarlo abierto al empezar, con el nombre de cada nivel, un botón «Nuevo cuaderno / Nueva sección /
+   Nueva página» bien visible, y que se pueda poner la carpeta base del punto 6 como primer cuaderno.
+8. **¿Entiende las fracciones escritas en vertical** (número arriba, raya, número abajo)? En el código sí: una raya
+   más larga que lo de arriba y lo de abajo, con algo encima y debajo, es una fracción, también dentro de otras
+   (`layout.py`, y hay tests). Lo que falta es **comprobarlo con tu letra**: que la raya sea claramente más larga que
+   los números, y que no se lea como «−» suelto. Queda: medirlo con tus ejercicios (punto 3) o con el set de entreno,
+   que tiene muchas fracciones.
+
 ## No hacer
 
 Copiar formato, adjuntar archivos como icono, búsqueda de imágenes en línea, tinta con texturas, editor de ecuaciones

@@ -181,7 +181,7 @@ FUNCTIONS = ["sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "
 FUNCTION_ALIASES = {"sen": "sin", "tg": "tan", "arcsen": "arcsin", "arctg": "arctan", "cotg": "cot",
                     "senh": "sinh", "tgh": "tanh"}
 # no pueden ser exponente ni subíndice por sí solos
-_NEVER_SCRIPT = {",", ".", "=", "<", ">", r"\leq", r"\geq", r"\neq", r"\approx", r"\rightarrow", r"\Rightarrow",
+_NEVER_SCRIPT = {",", ".", r"\cdot", "=", "<", ">", r"\leq", r"\geq", r"\neq", r"\approx", r"\rightarrow", r"\Rightarrow",
                  r"\Leftrightarrow", ";", ":"}
 # letras que la red confunde con otros símbolos que se escriben igual: «l» con «1» o «|», «o» con «0»
 _LOOKALIKE = {"l": {"1", "|", "I"}, "o": {"0", "O"}, "s": {"5", "S"}, "g": {"9"}, "i": {"1"}}

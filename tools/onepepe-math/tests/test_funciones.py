@@ -100,3 +100,32 @@ class TestFunctions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDotTimes(unittest.TestCase):
+    """Con coma decimal (como escribe el usuario), el punto multiplica."""
+
+    def dot(self, x):
+        return Sym(".", (x, 18, x + 2, 20))
+
+    def test_dot_between_numbers_and_letters_multiplies(self):
+        # 3.4 = 12, no 3,4
+        syms = write(list("3")) + [self.dot(9)] + write(list("4="), x=12)
+        self.assertEqual(result(syms), "12")
+        # 2.x - 2x = 0
+        syms = write(list("2")) + [self.dot(9)] + write(list("x-2x="), x=12)
+        self.assertEqual(result(syms), "0")
+
+    def test_comma_is_the_decimal_separator(self):
+        self.assertEqual(result(write(list("2,5+1="))), "7/2")
+        # el resultado con coma
+        from onepepe_math import pagina
+
+        r = pagina.page([{"symbols": [{"latex": s.label, "box": list(s.box)} for s in write(list("ln2="))]}])
+        self.assertTrue(r[0]["marks"][0]["text"].startswith("ln(2) ≈ 0,69"), r[0]["marks"][0]["text"])
+
+    def test_a_final_dot_is_ignored(self):
+        syms = write(list("2+3=")) + [self.dot(40)]
+        # «2+3=.»: el punto final se quita
+        self.assertEqual(result(syms), "5")
+        self.assertEqual(result(write(list("2+3")) + [self.dot(31)] + write(list("="), x=34)), "5")

@@ -7,6 +7,17 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.4 (2026-11-01) — el punto multiplica
+
+- Usas **coma decimal**, así que en el modo matemáticas:
+  - la **coma** es el decimal: `2,5` es dos coma cinco;
+  - el **punto multiplica**, esté abajo o a media altura: `3.4` = 12, `2.x` = 2x, `a.b` = ab;
+  - un punto al final (`2+3=.`) se ignora;
+  - los **resultados salen con coma**: `ln 2 ≈ 0,6931`, `7/2 → 3,5`.
+- **Plan de mejoras** con tus notas (copiar y pegar, asignatura de la hoja, ejercicios de PGME, doble clic para
+  mover, botones del lápiz, última carpeta y carpeta base, jerarquía de cuadernos, fracciones):
+  `PLAN-PENDIENTE.md` §8. Solo apuntadas.
+
 ## 1.3.5 (2026-10-31) — la expresión del entreno siempre se ve
 
 - En tu captura solo se veía el código LaTeX (`3+4\cdot 5=`): en tu equipo falta **matplotlib**, que es lo que
