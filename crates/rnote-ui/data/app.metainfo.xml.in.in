@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.4.1" date="2026-11-01">
+      <description>
+        <p>Selection toolbar: copy, cut, paste and recognize as math buttons.</p>
+      </description>
+    </release>
     <release version="1.4.0" date="2026-11-01">
       <description>
         <p>Math mode: the comma is the decimal separator and a dot multiplies. Results are shown with a decimal

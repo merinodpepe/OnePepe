@@ -140,6 +140,46 @@
           </object>
         </child>
         <child>
+          <object class="GtkButton" id="selection_copy_button">
+            <property name="tooltip_text" translatable="yes">Copy Selection</property>
+            <property name="action-name">win.clipboard-copy</property>
+            <property name="icon-name">edit-copy-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_cut_button">
+            <property name="tooltip_text" translatable="yes">Cut Selection</property>
+            <property name="action-name">win.clipboard-cut</property>
+            <property name="icon-name">edit-cut-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_paste_button">
+            <property name="tooltip_text" translatable="yes">Paste</property>
+            <property name="action-name">win.clipboard-paste</property>
+            <property name="icon-name">edit-paste-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_math_recognize_button">
+            <property name="tooltip_text" translatable="yes">Recognize Selection as Math</property>
+            <property name="action-name">win.math-recognize-selection</property>
+            <property name="icon-name">edit-select-all-symbolic</property>
+            <style>
+              <class name="flat" />
+            </style>
+          </object>
+        </child>
+        <child>
           <object class="GtkButton" id="selection_duplicate_button">
             <property name="tooltip_text" translatable="yes">Duplicate Selection</property>
             <property name="action-name">win.selection-duplicate</property>

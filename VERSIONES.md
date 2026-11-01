@@ -7,6 +7,14 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.4.1 (2026-11-01) — copiar y pegar a la vista
+
+- La barra de la **selección** (lazo) tiene ahora botones **Copiar, Cortar, Pegar** y **Reconocer como
+  matemáticas**, además de duplicar y borrar. Usan las acciones de siempre (Ctrl+C, Ctrl+X, Ctrl+V y «Reconocer
+  selección»).
+- Compilado y traducción comprobada; **no probado con la app ni con el lápiz**.
+- Queda apuntado: el clic derecho sobre la selección.
+
 ## 1.4 (2026-11-01) — el punto multiplica
 
 - Usas **coma decimal**, así que en el modo matemáticas:

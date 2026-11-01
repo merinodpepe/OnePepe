@@ -760,6 +760,18 @@ msgstr "Deseleccionar todos los trazos"
 msgid "Invert Color Brightness of All Selected Strokes"
 msgstr "Invierte el brillo del color de todos los trazos seleccionados"
 
+#: crates/rnote-ui/data/ui/penssidebar/selectorpage.ui
+msgid "Copy Selection"
+msgstr "Copiar selección"
+
+#: crates/rnote-ui/data/ui/penssidebar/selectorpage.ui
+msgid "Cut Selection"
+msgstr "Cortar selección"
+
+#: crates/rnote-ui/data/ui/penssidebar/selectorpage.ui
+msgid "Recognize Selection as Math"
+msgstr "Reconocer la selección como matemáticas"
+
 #: crates/rnote-ui/data/ui/penssidebar/selectorpage.ui:100
 #: crates/rnote-ui/data/ui/shortcuts.ui:260
 msgid "Duplicate Selection"
