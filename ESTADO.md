@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-10-30. **Versión 1.3** (set de tus asignaturas y símbolos de estadística; antes, 1.2: modo entreno; qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Antes, en el mismo día: arreglos del modo matemáticas y plan tipo MyScript; antes, el diseño nuevo según tu guía, con capturas en [`DISENO.md`](DISENO.md)). Rama de integración: `onepepe`; **`main` = OnePepe** desde el 2026-10-29 y el Rnote original está en `rnote-original`.
+Actualizado: 2026-11-01. **Versión 1.4.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
 Leyenda de cómo se probó cada cosa:
@@ -87,25 +87,40 @@ detalle (diseño y medidas): [`MATEMATICAS-INFORME.md`](MATEMATICAS-INFORME.md).
 
 ## Pendiente
 
-Resumen (detalle en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md)):
+Detalle en [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md). Resumen por esfuerzo (2026-11-01):
 
-1. **Tus pruebas con lápiz real** de todo lo anterior (primero: hojas infinitas, tinta a formas, matemáticas, botones).
-2. **Matemáticas con tu letra:** medir y ajustar con tus 30 expresiones; ahora mismo, con el modelo genérico, la
-   sustitución acierta ~84 % de lo que sustituye y una fórmula entera sale perfecta solo ~10 % de las veces (medido con
-   letra de otras personas). Tus correcciones mejoran el resultado al momento. Falta también el modo matemáticas
-   "solo mientras mantengo pulsado un botón del lápiz".
-3. **Que la aplicación se llame OnePepe por dentro** (título, "Acerca de", icono e identificador), con migración de
-   ajustes y posibilidad de instalarla junto a Rnote.
-4. Opcionales: árbol desplegable de tres niveles para los cuadernos, tinta a texto (Fase 5).
-5. Ideas para más adelante (sección 6 de `PLAN-PENDIENTE.md`, sin implementar):
-   - Reentrenar el modelo en tu equipo cuando tú quieras, con tiempo estimado.
-   - Gráficas de funciones a partir de lo que escribes en modo matemáticas.
-   - Etiquetas y búsqueda.
-   - Menú radial bajo el lápiz y minimapa.
-   - Modo repaso, entre otras.
+**Probado por ti con el lápiz (1.3.x):** no se cierra al tocar el «?» (arreglado en 1.3.3 con tu informe de fallos),
+el modo variables y el «=» funcionan. Falta probar el resto (`CAMBIOS-ONEPEPE.md`).
 
-Ya hecho en esta tanda: el permiso de Flatpak para el programa de matemáticas está **en el manifiesto** a petición tuya
-(`feat/flatpak-matematicas`), y el README es de OnePepe (`feat/readme`).
+**Esfuerzo bajo (una hora o menos cada una):**
+- «Reconocer selección» también en el menú de la selección.
+- Control de sensibilidad del tachado (el ajuste ya existe).
+- Glosarios de genética y de estadística (como el de biofísica).
+- Guardar las variables definidas en el archivo oculto de la página.
+- Color del cuaderno en el árbol; vista previa del trazo; transición suave al sustituir un símbolo.
+- «Insertar del glosario»; guía de sincronización (Syncthing / Nextcloud).
+- De tus notas (§8): recordar la última carpeta; botones Copiar / Pegar junto a la selección; botones del lápiz
+  (en cuanto tenga la salida de `evtest`).
+
+**Esfuerzo medio:**
+- Pantalla para ver y borrar tus ejemplos de letra.
+- Modo matemáticas solo mientras mantienes un botón del lápiz.
+- Gráficas: unidades en los ejes y que se rehagan al corregir la fórmula.
+- Revisar pasos: más reglas (potencias, logaritmos, varias variables).
+- Plantillas propias, etiquetas, índice de la página, modo repaso.
+- De tus notas (§8): asignatura de la hoja; doble clic para mover objetos; carpeta base; jerarquía cuaderno →
+  sección → página más visible.
+
+**Esfuerzo alto o necesita que decidas:**
+- Nombre interno OnePepe (identificador, migrar ajustes, instalar junto a Rnote).
+- Tinta a texto, tablas de texto, búsqueda global, corte en símbolos con varias hipótesis.
+
+**Depende de ti:**
+- Escribir el entreno (Matemáticas → Nuevo entreno → Tus asignaturas) y pulsar «Usar para entrenar» y «Reentrenar».
+- Mandarme ejercicios de PGME (chat o Drive, nunca git).
+- La salida de `evtest` al pulsar cada botón del lápiz.
+- Si con mucho zoom sigue reconociendo peor: una página escrita con zoom y la misma sin zoom.
+- Comprobar las fracciones en vertical con tu letra.
 
 ## Qué necesito de ti
 
