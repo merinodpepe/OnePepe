@@ -36,7 +36,11 @@ class ParseError(Exception):
 
 
 def _tokens(row, decimal_comma=True):
-    """Fichas de una fila del árbol: (tipo, valor, exponente, subíndice)."""
+    """Fichas de una fila del árbol: (tipo, valor, exponente, subíndice).
+
+    `decimal_comma` (lo normal, como escribe el usuario): la coma es el separador decimal y **el punto multiplica**
+    (2·x, 3.4 = 3 por 4). Con False, el punto es decimal (solo para leer intervalos «[0.5; 2]»).
+    """
     assert row[0] == "row"
     out = []
     for node in row[1]:
@@ -63,7 +67,7 @@ def _tokens(row, decimal_comma=True):
             continue
         if (
             t[0] == "sym"
-            and t[1] in ({".", ","} if decimal_comma else {"."})
+            and t[1] in ({","} if decimal_comma else {"."})
             and prev is not None
             and prev[0] == "num"
             and "." not in prev[1]
@@ -84,6 +88,19 @@ def _tokens(row, decimal_comma=True):
             final.append(["sym", t[4] if len(t) > 4 else ".", t[2], t[3]])
         else:
             final.append(t)
+    # con coma decimal, un punto suelto multiplica si está entre dos cosas (2.x, a.b, 3.4); si no, sobra (un punto
+    # final) y se quita
+    if decimal_comma:
+        dotted = []
+        for i, t in enumerate(final):
+            if t[0] == "sym" and t[1] == "." and t[2] is None and t[3] is None:
+                prev = dotted[-1] if dotted else None
+                nxt = final[i + 1] if i + 1 < len(final) else None
+                if _operand_end(prev) and _operand_start(nxt):
+                    dotted.append(["sym", r"\cdot", None, None])
+                continue
+            dotted.append(t)
+        final = dotted
     # una «x» entre dos números es el signo de multiplicar (3 x 4), no una variable
     for i in range(1, len(final) - 1):
         t = final[i]
@@ -98,6 +115,20 @@ def _tokens(row, decimal_comma=True):
         ):
             final[i] = ["sym", r"\times", None, None]
     return final
+
+
+_NOT_OPERAND = {"+", "-", r"\pm", r"\mp", r"\times", r"\cdot", r"\div", "/", "*", "=", r"\neq", "<", ">",
+                r"\leq", r"\geq", r"\approx", ",", ";", ":", r"\rightarrow", r"\Rightarrow", r"\Leftrightarrow"}
+
+
+def _operand_end(t):
+    """¿Puede la ficha ser lo de la izquierda de una multiplicación? (un número, una letra, «)»…)"""
+    return t is not None and not (t[0] == "sym" and (t[1] in _NOT_OPERAND or t[1] in ("(", "[", r"\{")))
+
+
+def _operand_start(t):
+    """¿Puede la ficha ser lo de la derecha de una multiplicación? (un número, una letra, «(»…)"""
+    return t is not None and not (t[0] == "sym" and (t[1] in _NOT_OPERAND or t[1] in (")", "]", r"\}")))
 
 
 # ---------- analizador ----------

@@ -965,7 +965,8 @@ entrenar (más scikit-learn).
   | constantes y unidades del glosario (pint) | se calculan; si las dimensiones no casan, no hay resultado |
   | cualquier cosa ambigua | `None`: no se muestra nada |
 
-- La coma decimal se une a las cifras **antes** de partir por comas (`decimal_comma=True`).
+- La coma decimal se une a las cifras **antes** de partir por comas (`decimal_comma=True`). **El usuario usa coma
+  decimal: desde la 1.4 el punto multiplica** (`3.4` = 12) y los resultados salen con coma (`pagina._mark`).
 - Funciones: tras una función lo que sigue es su argumento (`sin x`, `sin 2x` = sin(2x)); `log₂ 8` usa la base;
   el resultado dice `ln` (no `log`); `sen`, `tg`, `arcsen`, `arctg`, `cotg`; «1n» → ln si «l» era candidata; `∛`.
 - Una «x» entre dos números es «por».
@@ -1332,8 +1333,9 @@ La tabla detallada de qué se probó en cada una está en `ESTADO.md` → «Hech
 - Ejecutar la prueba del «=» de §10.3d en su equipo: en la app no le sale el resultado (§13.1, punto 6).
 - ~~Decir sus asignaturas~~: genética de poblaciones, biofísica y aprendizaje estadístico (hecho el set, versión 1.3).
 - Enviar `mis_simbolos.rnote`.
-- Contestar las preguntas cortas de `MATEMATICAS-INFORME.md` §5: signo de multiplicar, coma o punto decimal, unidades,
-  asignaturas.
+- Contestar las preguntas cortas de `MATEMATICAS-INFORME.md` §5: signo de multiplicar, unidades. (Ya contestado:
+  **coma decimal**; asignaturas: genética de poblaciones, biofísica, aprendizaje estadístico.)
+- Sus notas de uso (2026-11-01), solo apuntadas: `PLAN-PENDIENTE.md` §8.
 - Decir el modelo de su Wacom y la salida de `evtest`.
 
 ---

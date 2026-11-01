@@ -14,6 +14,7 @@ Nada de esto cambia la tinta: son anotaciones que la app dibuja encima.
 """
 
 import random
+import re
 
 import sympy as sp
 
@@ -349,9 +350,17 @@ def check_steps(a, b):
 # ---------- la página ----------
 
 
+def decimal_comma(text, latex=False):
+    """Los números con coma decimal, como los escribe el usuario: 0.6931 → 0,6931 (en LaTeX, 0{,}6931)."""
+    return re.sub(r"(\d)\.(\d)", r"\1{,}\2" if latex else r"\1,\2", text)
+
+
 def _mark(kind, text, latex, anchor, height, **extra):
-    out = {"kind": kind, "text": text, "latex": latex, "anchor": [round(anchor[0], 2), round(anchor[1], 2)],
-           "height": round(height, 2)}
+    out = {"kind": kind, "text": decimal_comma(text), "latex": decimal_comma(latex, latex=True),
+           "anchor": [round(anchor[0], 2), round(anchor[1], 2)], "height": round(height, 2)}
+    if "formats" in extra:
+        extra["formats"] = [dict(f, text=decimal_comma(f["text"]), latex=decimal_comma(f["latex"], latex=True))
+                            for f in extra["formats"]]
     out.update(extra)
     return out
 

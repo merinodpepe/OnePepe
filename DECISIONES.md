@@ -339,6 +339,14 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   `scratch_out_sensitivity`, con valor por defecto) y al archivo oculto (`kind`, `formats`, `format` y `keys` de cada
   anotación).
 
+## El punto multiplica (versión 1.4, 2026-11-01)
+
+- El usuario usa **coma decimal**. Por eso el punto deja de ser decimal: entre dos cosas que se pueden multiplicar es
+  «·» (no importa si la red lo leyó como «.» o «\cdot», que se confunden mucho), y suelto al final se quita. Los
+  resultados se escriben con coma (en LaTeX, `{,}`). Los intervalos de las gráficas siguen admitiendo punto
+  (`decimal_comma=False`). Si algún día hace falta punto decimal, sería un ajuste.
+- `\cdot` no puede ser exponente (como «.»).
+
 ## La expresión del entreno sin matplotlib (versión 1.3.5, 2026-10-31)
 
 - En el equipo del usuario no se veía la expresión: no tenía matplotlib (no había pasado `./instalar.sh` tras la
