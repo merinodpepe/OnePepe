@@ -7,6 +7,41 @@ Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/P
 
 **Manual de ejecución (2026-11-15):** [`ARQUITECTURA-EJECUCION.md`](../planes/ARQUITECTURA-EJECUCION.md) convierte el plan en instrucciones para agentes (oleadas, especificación de cada tarea, matemática resuelta, contrato y protocolo de fallo). Cierre en marcha: T0 (banco de medida) hecha y fusionada, versión 1.5.0; ejecutado con tus datos en una copia de trabajo, nada probado con lápiz. El bloque A ya está respondido (§1 de ese documento): se permite `push` y el diseño fluido (T12) queda para el último paso. Todo lo de planificar está decidido. Para arrancar: sesión nueva con Opus 5.5 y la orden que hay al principio del manual.
 
+### Retoma de la tanda de diseño (2026-11-15, noche)
+
+**Reparto (no cambia):** Fable orquesta y NO programa; Sonnet programa; Haiku documenta y prueba. Regla para todos: leer todo lo necesario, editar todo, probar todo; sin bucle leer-editar por archivo.
+
+**Qué pidió el usuario:** «el diseño me gusta pero no me encanta, no da sensación premium; falta pulirlo, más fluido, no tan duro». Se le dieron 16 ideas en cuatro grupos y marcó ocho. De «espacio y letra» no marcó ninguna (no tocar tipografía, iconos ni altura de la cinta).
+
+| Idea elegida | Estado | Dónde |
+|--------------|--------|-------|
+| Esquinas más redondas (8 px botones y filas, 12 px flotantes) | hecha, fusionada en `onepepe` local (`feat/diseno-suave`, `9d1f3370`) | `style.css` |
+| Menos rayas, más planos de color (alto contraste conserva las líneas) | hecha, fusionada local | `style.css` |
+| Sombras suaves de dos capas en lo que flota | hecha, fusionada local | `theme.rs` (`op_shadow_contact`, `op_shadow_diffuse`), `style.css` |
+| Botones que se hunden al tocar (`scale(0.98)` + oscurecido, 100 ms) | hecha, fusionada local | `style.css` |
+| Anillo de foco morado (`:focus-visible`) | hecha, fusionada local | `style.css` |
+| Paneles que entran suave | parcial: el panel de cuadernos ya anima solo (`AdwOverlaySplitView`); las ventanitas no se tocan (las dibuja libadwaita); el plegado de la barra de opciones va en la segunda tanda | `optionsbar.rs` |
+| Resultado de matemáticas dentro de una pastilla morada tenue | **en marcha** (Sonnet, rama `feat/diseno-matematicas`) | `math.rs` `draw_math_overlays` |
+| Duda visible: subrayado de puntos bajo los símbolos con `confidence < threshold` | **en marcha** (misma rama) | `math.rs` |
+
+Comprobado de la primera tanda: `cargo check -p rnote` ok y 5 tests de `theme`. **Nada visto en pantalla.** Dudas que solo se resuelven mirando: si las esquinas de 12 px recortan algo y si el tono nuevo de la barra de estado contrasta bien.
+
+Comprobado al escribir esto (2026-11-15, en git): `feat/diseno-matematicas` apunta a `9d1f3370` y no tiene commits propios sobre `onepepe`. Por git, la segunda tanda no tiene código confirmado; si Sonnet dejó cambios, están sin commitear en su carpeta de trabajo.
+
+**Lo que falta, en orden:**
+
+1. Segunda tanda (`feat/diseno-matematicas`): si la rama tiene commits y no está fusionada, comprobar (`~/.local/share/onepepe/cierre-trabajo/rust.sh engine` → hoy 29 tests; `rust.sh ui`; tests de `theme` → hoy 5) y fusionar con `--no-ff`. Si no existe o está a medias, relanzar a Sonnet con el encargo: pastilla del resultado (color como dato, sin que el motor dependa de GTK; respeta `overlay_alpha`, `sure` y el rojo de error), duda visible (función pura `needs_doubt_mark(confidence, threshold, corrected)`; solo en pantalla, no se exporta; sin cambiar el protocolo con el programa auxiliar ni el `.rnote`) y plegado de la barra de opciones con `gtk::Revealer` y `MOTION_NORMAL`.
+2. Versión **1.11.0**: `meson.build`, `crates/rnote-ui/data/app.metainfo.xml.in.in`, `CLAUDE.md`, `docs/estado/VERSIONES.md`, esta página y `DECISIONES.md`.
+3. Antes del `push`: `git merge-base --is-ancestor 146e1526 onepepe` debe fallar; `git diff --stat origin/onepepe..onepepe` sin `.rnote`, `.npz`, `.jsonl`, `instalacion.log` ni `docs/archivo/`. Después `git push origin feat/diseno-suave feat/diseno-matematicas onepepe` y `git push origin onepepe:main`.
+4. **Recompilar e instalar la app sin abrirla** (20–40 min): `cd /home/pepe/Pepe_Flock/One_Pepe && ./setup-deps.sh --flatpak && flatpak-builder --user --install --force-clean _flatpak_app build-aux/com.github.flxzt.rnote.Devel.yaml`. Comprobar: `flatpak list --user | grep OnePepe` debe decir 1.11.0. (`~/instalar-onepepe.sh` hace lo mismo pero al final abre la app y se queda esperando: no sirve si después hay que apagar.)
+5. **Apagar el ordenador** (`systemctl poweroff`): lo pidió el usuario el 2026-11-15 para cuando todo lo anterior esté terminado. Si la compilación falla, apuntar aquí el error antes de apagar.
+
+Hay una reanudación programada para las 02:39 del 2026-11-16, que solo se dispara si la sesión de Claude Code sigue abierta. Si no, en una sesión nueva: «Continúa desde "Retoma de la tanda de diseño" de `docs/estado/ESTADO.md`».
+
+**Estado general al empezar esta tanda:** `onepepe` = `main` en GitHub = `58c4b014` (versión 1.10.3). Instalado en el equipo: app 1.10.0 (Flatpak), modelo v2 y almacén nuevo en `~/.local/share/onepepe/math/` (copias `.bak` del 2026-11-15 22:00), sin `confianza.json` (vale el umbral de la app, 0,95). El programa auxiliar lee el código de esta carpeta: lo de Python (despeje, definiciones a la derecha, integral que no encoge, set «refuerzo») ya funciona sin recompilar. Tests: 227 de Python, 29 sondas con 0 erróneas, motor 29, tema 5.
+
+**Pendiente del usuario (no bloquea):** probar con el lápiz (12 pruebas en `CAMBIOS-ONEPEPE.md` → «Cierre de matemáticas (1.9)»), escribir el set «refuerzo» y reentrenar otro día (`docs/planes/REENTRENAR.md`), decir qué «vista previa para móvil y tablet» hay que mejorar, y mirar el diseño nuevo.
+
 ### Cierre en curso: punto de retoma (2026-11-15, 16:20)
 
 Reparto: Fable orquesta, Sonnet programa, Haiku prueba y documenta. Regla para todos: leer todo, editar todo, probar todo.
