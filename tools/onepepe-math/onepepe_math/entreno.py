@@ -18,9 +18,10 @@ import re
 import time
 from functools import lru_cache
 
-from .forced import forced_groups, junk_examples
+from .forced import junk_examples
 from .latex_tokens import _INVISIBLE, _TOKEN
 from .layout import FUNCTION_ALIASES, FUNCTIONS
+from .personal import DEFAULT_PATH
 from .symbols import normalize_label
 
 SETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "entrenos")
@@ -251,39 +252,75 @@ def _split_by_guides(strokes, size, n_lines, line_height=None):
     return out
 
 
-def import_session(session, classifier, store, source=None):
+def ids_examen(directorio):
+    """Los ids del examen (`examen.json` de `directorio`); vacío si no existe."""
+    import json
+
+    ruta = os.path.join(directorio, "examen.json")
+    if not os.path.exists(ruta):
+        return set()
+    with open(ruta, encoding="utf-8") as f:
+        return {i for ids in json.load(f)["examen"].values() for i in ids}
+
+
+def import_session(session, classifier, store, source=None, forzar=False, examen=None):
     """Convierte lo escrito en ejemplos de tu letra (símbolos y «trozos») en el almacén.
 
-    Salta lo ya importado y lo que no encaja (más o menos trazos de los que caben). Devuelve
-    {"imported": [ids], "failed": [ids], "symbols": n, "junk": n}.
+    Salta lo del examen (que la app marca igualmente como importado), lo que no encaja (más o menos trazos de los
+    que caben) y, salvo con `forzar`, lo ya importado. Los símbolos que no pasan el control de calidad van a
+    `revision.jsonl` (junto al almacén) y no entran en él. Devuelve
+    {"imported": [ids], "failed": [ids], "examen": [ids], "symbols": n, "junk": n, "revision": n}.
     """
-    source = source or f"entreno:{session.get('set', '')}"
+    import json
+
+    from .alinear import aceptados, ordered_groups
+
+    datos = os.path.dirname(getattr(store, "path", "") or DEFAULT_PATH)
+    if examen is None:
+        examen = ids_examen(datos)
     items = {it["id"]: it for it in session.get("items", [])}
-    out = {"imported": [], "failed": [], "symbols": 0, "junk": 0}
+    out = {"imported": [], "failed": [], "examen": [], "symbols": 0, "junk": 0, "revision": 0}
+    personal = store if hasattr(store, "neighbors") else None
     for item_id, answer in session.get("answers", {}).items():
         item = items.get(item_id)
-        if item is None or answer.get("skipped") or answer.get("imported") or not answer.get("strokes"):
+        if item is None or answer.get("skipped") or not answer.get("strokes"):
             continue
+        if item_id in examen:
+            out["examen"].append(item_id)
+            out["imported"].append(item_id)
+            continue
+        if answer.get("imported") and not forzar:
+            continue
+        source_id = source or f"entreno:{session.get('set', '')}#{item_id}"
         strokes = [[(float(p[0]), float(p[1])) for p in s] for s in answer["strokes"] if s]
         lines = item["lines"]
         groups = _split_by_guides(strokes, answer.get("size", [1.0, 1.0]), len(lines), answer.get("line_height"))
         labeled_lines = []
         for latex, idx in zip(lines, groups):
             line_strokes = [strokes[i] for i in idx]
-            labeled = forced_groups(line_strokes, expected_symbols(latex), classifier)
-            if labeled is None:
+            res = ordered_groups(line_strokes, expected_symbols(latex), classifier, latex=latex, tardios=True)
+            if res is None:
                 labeled_lines = None
                 break
-            labeled_lines.append((line_strokes, labeled))
+            labeled_lines.append((line_strokes, res, aceptados(res, line_strokes, classifier, personal)))
         if labeled_lines is None:
             out["failed"].append(item_id)
             continue
-        for line_strokes, labeled in labeled_lines:
-            for group, label in labeled:
-                store.add_correction(label, [line_strokes[i] for i in group], notebook=source)
-                out["symbols"] += 1
-            for piece in junk_examples(line_strokes, labeled):
-                store.add_correction("__trozo__", piece, notebook=source, kind="junk")
-                out["junk"] += 1
+        for line_strokes, res, ok in labeled_lines:
+            for (group, label), good in zip(res["grupos"], ok):
+                if good:
+                    store.add_correction(label, [line_strokes[i] for i in group], notebook=source_id)
+                    out["symbols"] += 1
+                else:
+                    with open(os.path.join(datos, "revision.jsonl"), "a", encoding="utf-8") as f:
+                        f.write(json.dumps({"latex": label, "strokes": [line_strokes[i] for i in group],
+                                            "notebook": source_id, "kind": "symbol", "date": time.strftime(
+                                                "%Y-%m-%dT%H:%M:%S"), "motivo": "no aceptado"}) + "\n")
+                    out["revision"] += 1
+            if all(ok):
+                labeled = [(g, lab) for g, lab in res["grupos"]]
+                for piece in junk_examples(line_strokes, labeled):
+                    store.add_correction("__trozo__", piece, notebook=source_id, kind="junk")
+                    out["junk"] += 1
         out["imported"].append(item_id)
     return out
