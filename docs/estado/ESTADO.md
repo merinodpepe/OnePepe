@@ -161,6 +161,8 @@ el modo variables y el «=» funcionan. Falta probar el resto (`CAMBIOS-ONEPEPE.
 - Plantillas propias, etiquetas, índice de la página, modo repaso.
 - De tus notas (§8): asignatura de la hoja; doble clic para mover objetos; carpeta base; jerarquía cuaderno →
   sección → página más visible.
+- Matemáticas, despeje: ecuaciones con varias soluciones, sistemas y desigualdades; despejar con unidades; funciones
+  de varios parámetros (ver `PLAN-PENDIENTE.md`).
 
 **Esfuerzo alto o necesita que decidas:**
 - Nombre interno OnePepe (identificador, migrar ajustes, instalar junto a Rnote).

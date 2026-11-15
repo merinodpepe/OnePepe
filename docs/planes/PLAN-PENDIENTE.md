@@ -293,6 +293,14 @@ Tus notas, tal cual las pediste, con lo que ya sé de cada una. **Nada de esto e
 9. **Vista previa para móvil y tablet: hay que mejorarla** (apuntado por el usuario el 2026-11-15). Sin detalle todavía:
    falta que diga qué vista previa es (la de la página en la app, la de exportar, o cómo se ve en una pantalla pequeña)
    y qué le falla. Esfuerzo: sin valorar.
+10. **Ecuaciones con varias soluciones (x²=4), sistemas de ecuaciones y desigualdades** (apuntado por el usuario el
+    2026-11-15). Hoy OnePepe despeja solo si queda exactamente una letra sin definir y hay una única solución real;
+    en estos casos sale «?» o no define nada. El despeje está en `tools/onepepe-math/onepepe_math/entorno.py`
+    (`despejar`, `definir`). Esfuerzo: sin valorar.
+11. **Despejar cuando hay unidades (F=m·a con kg y m/s²)** (apuntado por el usuario el 2026-11-15). Hoy no define
+    nada en este caso y sale «?». Esfuerzo: sin valorar.
+12. **Funciones de varios parámetros (f(x,y))** (apuntado por el usuario el 2026-11-15). Hoy no define nada en este
+    caso y sale «?». Esfuerzo: sin valorar.
 
 ## No hacer
 
