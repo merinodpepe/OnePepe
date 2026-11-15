@@ -164,8 +164,16 @@ class TestDespejar(unittest.TestCase):
         self.assertEqual(self.t("x+y=5", "x="), ["?"])
         self.assertEqual(self.t("x=3", "2x=7", "x="), ["3"])
 
-    def test_silencioso(self):
-        self.assertEqual(compone("2x+4=10", variables=True)[0]["marks"], [])
+    def test_visible(self):
+        marcas = lambda *f, **kw: [[(m["kind"], m["text"]) for m in x["marks"]] for x in compone(*f, variables=True, **kw)]
+        self.assertEqual(marcas("2x+4=10"), [[("variable", "x = 3")]])
+        self.assertEqual(marcas("x=9/2=4y"), [[("variable", "y = 9/8")]])
+        self.assertEqual(marcas("x^2=4"), [[]])
+
+    def test_visible_no_con_error(self):
+        r = compone("2x+4=10", "2x=14", "x=7", "x=3", variables=True, check=True)
+        self.assertEqual([[m["kind"] for m in x["marks"]] for x in r],
+                         [["variable"], ["error"], [], ["error"]])
 
     def test_como_hoy(self):
         self.assertEqual(self.t("4+5=x", "x="), ["9"])

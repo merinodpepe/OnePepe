@@ -412,6 +412,16 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None, u
             # dos definiciones seguidas de nombres distintos (x = 5, y = 2x + 3) no son pasos de un desarrollo
             otro = d is not None and previous_d is not None and d.nombre != previous_d.nombre
             marks += _check_row(tokens, typical, box, None if otro else previous, entorno.vista(i - 1, solo_encima=True))
+        # 4. lo que el renglón despeja (`2x+4=10` → «x = 3»), salvo que lleve una marca de error
+        desp = [x for x in definiciones if x.renglon == i and x.despejada]
+        if desp and not any(m["kind"] == "error" for m in marks):
+            vals = []
+            for x in desp:
+                v = _value(x.expr)
+                vals.append((x.nombre, v if v.is_Rational else sp.Float(v, 4)))
+            marks.append(_mark("variable", "; ".join(f"{n} = {v}" for n, v in vals),
+                               r";\ ".join(f"{sp.latex(sp.Symbol(n))} = {sp.latex(v)}" for n, v in vals),
+                               _after(box, typical), 0.9 * typical))
         # M8: dudosa si algún símbolo del renglón tiene p baja (sin p en la petición, segura)
         sure = min([s["p"] for s in rows[i]["symbols"] if "p" in s] + [1.0]) >= umbral_renglon
         for m in marks:
