@@ -427,3 +427,35 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - **El set de 200** sin tus asignaturas: general (aritmética, fracciones, potencias, álgebra, ecuaciones,
   funciones, cálculo, física y biofísica) más símbolos sueltos y cálculos seguidos. Cuando digas tus asignaturas se
   añade otro set en `tools/onepepe-math/entrenos/`.
+
+## Auditoría de matemáticas y plan de cierre (2026-11-15)
+
+- Se auditó el modo matemáticas sin cambiar código ni versión. Se midió sobre la 1.3.5 que había en el equipo; el
+  remoto ya iba por la 1.4, y las sondas se repitieron sobre ella con el mismo resultado.
+- La hipótesis de que la penalización del corte juntaba cifras quedó refutada: solo 1 de 61 pares de cifras vecinas.
+- Lo que más pesa es la etiqueta con letra no vista (53,8–59,1 % top-1) y el corte de la raya de fracción (52,6 %).
+- Se descubrió que `forced_groups` ignora el orden (28 % de renglones con grupos distintos). Por eso se propone reimportar los entrenos con el alineado ordenado.
+- Se decide medir siempre con un examen congelado por expresión antes de aceptar cambios.
+- Detalle en [`AUDITORIA-MATEMATICAS.md`](AUDITORIA-MATEMATICAS.md) y [`PLAN-CIERRE.md`](PLAN-CIERRE.md).
+
+## Manual de ejecución del cierre (2026-11-15)
+
+- [`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md): cómo ejecutar T0–T13 con agentes (Opus orquesta, Sonnet
+  programa, Haiku integra y documenta). El usuario solo interviene en el bloque A (decisiones) y en el bloque B
+  (pruebas con lápiz, interfaz y `push`).
+- El examen congelado sale pequeño con lo escrito hoy (22 expresiones, 217 símbolos, 6 rayas de fracción). Por eso
+  los parámetros se eligen con una medida cruzada de cuatro pliegues sobre lo que no es examen (941 símbolos no
+  vistos), y el examen queda solo para aceptar.
+- Todo el cierre trabaja sobre una copia (`~/.local/share/onepepe/cierre-trabajo`); los datos reales solo se tocan
+  al final, con copia previa y solo si el usuario lo aprueba.
+- Las ramas de tarea no tocan versión ni documentos compartidos: los escribe el integrador al cerrar cada oleada,
+  para que las ramas en paralelo no choquen.
+- Las constantes de diseño aún sin medir están listadas como supuestos en §10 de ese documento.
+- Regla anti-bucle de lectura añadida a `CLAUDE.md`.
+- **Respuestas del usuario al bloque A (2026-11-15):** «ok» a todos los valores por defecto; **se permite `push`**
+  (lo hace el integrador al cerrar cada oleada, incluido `onepepe:main`); **el diseño fluido (T12) queda en espera
+  y es el último paso**, después del cierre.
+- **Punto de guardado local:** la rama local `onepepe` del equipo lleva el commit `146e1526` («Punto de guardado
+  antes de migrar») con archivos personales (`mis_expresiones_1.rnote`, `instalacion.log`). No se ha subido ni se
+  subirá. Los documentos se subieron por una línea limpia creada desde `origin/onepepe`. Qué hacer con ese commit
+  es la decisión A8 del manual.

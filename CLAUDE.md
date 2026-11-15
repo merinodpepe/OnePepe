@@ -16,3 +16,9 @@ Reglas que no se rompen nunca (detalle en `CONTEXTO-IA.md`, sección 3):
   en `VERSIONES.md` qué cambia. Ahora: 1.4.0.
 - Distingue compilado / tests / ejecutado en la nube / probado con lápiz real. **No des por probado lo que solo
   compila.** Apunta las decisiones en `DECISIONES.md` y el estado en `ESTADO.md`.
+- **Leer una vez, no en bucle.** Antes de cambiar nada: lista todos los archivos que necesitas, léelos todos de una
+  vez en paralelo, haz todas las ediciones y ejecuta los tests. Prohibido leer archivo por archivo o releer trozos
+  contiguos en bucle. Si eres un subagente y los tests fallan, no iteres: escala al orquestador
+  ([`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md) §4).
+
+Para ejecutar el cierre de matemáticas (tareas T0–T13): [`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md).
