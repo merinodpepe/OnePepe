@@ -3,10 +3,12 @@
 
 from . import glossary as gl
 from . import glyphs
+from .personal import D_MAX
 from .context import apply_glossary, reading_order, share_within_groups, shape_groups, viterbi
 from .evaluate import answer
 from .layout import Sym, bar_role, parse, to_latex
 from .lexico import corregir_entidades
+from .symbols import same_shape
 from .reparar import fix_dotted_letters, reparar
 from .segment import SegmentParams, bbox, segment, typical_size
 
@@ -29,6 +31,10 @@ def _raya_con_su_papel(cand_lists, boxes, typical):
     return out
 
 
+def _misma(a, b):
+    return same_shape(a, b) or (a in _RAYAS and b in _RAYAS)
+
+
 def recognize(
     strokes,
     classifier,
@@ -41,6 +47,7 @@ def recognize(
     equals=True,
     segment_params=None,
     times=None,
+    umbral_min=0.0,
 ):
     """Reconoce una línea de matemáticas.
 
@@ -54,10 +61,16 @@ def recognize(
             syms = reparar(syms, strokes, classifier, typical_size(strokes), segment_params)
         else:
             syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes))
+    y_red = [s["candidates"][0][0] for s in syms]  # lo que dice la red sola (M8.2)
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]
     cand_lists = [s["candidates"] for s in syms]
     embeddings = [classifier.embedding(g) for g in groups_strokes]
+    y_knn = [None] * len(syms)
+    if personal is not None and len(personal):
+        for i, e in enumerate(embeddings):
+            cerca = [lab for d, lab, _ in personal.neighbors(e) if d <= D_MAX]
+            y_knn[i] = cerca[0] if cerca else None
     if personal is not None and len(personal):
         cand_lists = [personal.adjust(g, c, embedding=e) for g, c, e in zip(groups_strokes, cand_lists, embeddings)]
     labels = gl.symbol_labels(glossary_names)
@@ -84,8 +97,9 @@ def recognize(
                                    range(len(syms), len(all_c)), segment_params.theta)
     cand_lists = all_c[: len(syms)]
 
+    umbral = max(threshold, umbral_min)
     out_symbols = []
-    for s, cands, box, g in zip(syms, cand_lists, boxes, groups):
+    for s, cands, box, g, yr, yk in zip(syms, cand_lists, boxes, groups, y_red, y_knn):
         top, p = cands[0]
         confidence = p * (1.0 - s.get("junk", 0.0))
         item = {
@@ -95,8 +109,10 @@ def recognize(
             "confidence": round(confidence, 4),
             "group": g,
             "clean": None,
+            # M8.2: confianza suficiente, la red coincide y el kNN no contradice
+            "sure": confidence >= umbral and _misma(yr, top) and (yk is None or _misma(yk, top)),
         }
-        if clean and confidence >= threshold:
+        if clean and item["sure"]:
             lines = glyphs.place_glyph(top, box)
             if lines is not None:
                 item["clean"] = [[[round(x, 2), round(y, 2)] for x, y in line] for line in lines]

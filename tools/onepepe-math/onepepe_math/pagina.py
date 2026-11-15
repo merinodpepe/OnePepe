@@ -328,7 +328,7 @@ def _valor_variable(tree, tokens, d, vista, units):
     return _natural_log_names({"text": str(value), "latex": sp.latex(value), "kind": "value"})
 
 
-def page(rows, equals=True, variables=False, check=False, glossary_units=None):
+def page(rows, equals=True, variables=False, check=False, glossary_units=None, umbral_renglon=0.7):
     """Anotaciones de cada renglón. `rows`: [{"symbols": [{"latex", "box"}]}], de arriba abajo."""
     glossary_units = glossary_units or {}
     parsed = []
@@ -404,6 +404,10 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None):
             # dos definiciones seguidas de nombres distintos (x = 5, y = 2x + 3) no son pasos de un desarrollo
             otro = d is not None and previous_d is not None and d.nombre != previous_d.nombre
             marks += _check_row(tokens, typical, box, None if otro else previous, entorno.vista(i - 1, solo_encima=True))
+        # M8: dudosa si algún símbolo del renglón tiene p baja (sin p en la petición, segura)
+        sure = min([s["p"] for s in rows[i]["symbols"] if "p" in s] + [1.0]) >= umbral_renglon
+        for m in marks:
+            m["sure"] = sure
         out.append({"latex": to_latex(tree), "marks": marks})
         previous = (tokens, syms)
         previous_d = d
