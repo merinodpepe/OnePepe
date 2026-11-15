@@ -461,3 +461,16 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   dijo que sí): el commit queda en la rama local `guardado/antes-de-migrar`, que no se sube, y la rama local
   `onepepe` se alineó con el remoto. Sus archivos siguen en la carpeta, sin seguimiento de git, con copia en
   `~/.local/share/onepepe/guardado-146e1526/`. Para deshacerlo: `git checkout -B onepepe guardado/antes-de-migrar`.
+
+## Cierre, oleada O1 (2026-11-15): T0 banco de medida
+
+- Banco de medida fijo: alineado ordenado con variantes de orden y penalización LEJOS = 3,0; reparto por hash sha1 (examen 20 %, validación 15 %, 4 pliegues); referencia congelada en `$ONEPEPE_DATA/math/referencia.json` (5 renglones dudosos de 157).
+- Línea base «visto, referencia O, sin fracciones»: corte exacto 91,4 %, corte y etiqueta 80,2 %, sustituciones erróneas 9,4 % (55 de 583), n = 844 símbolos en 127 renglones. La auditoría daba 90,0 / 79,0 / 10,5 %: se reproduce exacta con LEJOS = 0; la diferencia es esa penalización, que pide el manual. Aceptada como línea base nueva.
+- Sondas: 8 resultados erróneos de 11 (lo esperado). Tests de Python: 121 pasan, 10 fallos esperados (sondas que arreglarán T3 y T4).
+- SUPUESTO: la lista de sondas vive en `tests/sondas_util.py` y la usan `medir.py --sondas` y `tests/test_sondas.py`.
+- SUPUESTO: una sonda es «errónea» si su último renglón muestra un resultado que no es «?» ni variable y no encaja con el esperado; no mostrar nada o mostrar «?» no cuenta.
+- SUPUESTO: `medir.py --cruzada` y `--fallos` están escritos pero sin ejecutar (los estrenan T2 y T11). `--modelo` y `--ref F`, tampoco.
+- SUPUESTO: las 4 sondas con geometría propia (sumatorio, cifra pequeña, cifra en exponente, hueco entre números) las añade T3.
+- SUPUESTO: `docs/archivo/` (dos `*-viejo.md` del punto de guardado local) se queda fuera de git; el enlace de `docs/README.md` a esa carpeta no funciona en GitHub. Pendiente de que el usuario decida.
+- Entorno: Rust se comprueba dentro del SDK de Flatpak con `~/.local/share/onepepe/cierre-trabajo/rust.sh engine|ui|po` (el sistema no compila nativo: glib 2.80). Base: 23 tests del motor con filtro `math`, `cargo check -p rnote` ok, `msgfmt -c` ok.
+- Reparto de agentes en esta ejecución (petición del usuario del 2026-11-15): Fable 5.2 orquesta, Sonnet programa, Haiku prueba y documenta.

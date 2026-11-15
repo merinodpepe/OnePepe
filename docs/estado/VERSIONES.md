@@ -7,6 +7,11 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.5 (2026-11-15) — banco de medida
+
+- Banco de medida (T0 del cierre): `medir.py`, `onepepe_math/alinear.py` (alineado ordenado con variantes de orden),
+  examen congelado por hash (80 ids, 22 escritos), sondas como tests. Sin cambio de formato .rnote ni de la app.
+
 ## 1.4 (2026-11-01) — el punto multiplica
 
 - Usas **coma decimal**, así que en el modo matemáticas:

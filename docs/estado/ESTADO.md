@@ -1,11 +1,11 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-11-01. **Versión 1.4.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
+Actualizado: 2026-11-15. **Versión 1.5.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/PLAN-PENDIENTE.md) (plan de mejora).
 
 **Auditoría del 2026-11-15** (solo lectura: no cambia código ni versión; medida sobre la 1.3.5 del equipo y revisada contra la 1.4): [`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md) explica por qué falla el modo matemáticas, con medidas hechas con tu letra de los entrenos, y [`PLAN-CIERRE.md`](../planes/PLAN-CIERRE.md) dice qué hacer, en orden, para terminarlo. Medido fuera de la app; nada probado con el lápiz.
 
-**Manual de ejecución (2026-11-15):** [`ARQUITECTURA-EJECUCION.md`](../planes/ARQUITECTURA-EJECUCION.md) convierte el plan en instrucciones para agentes (oleadas, especificación de cada tarea, matemática resuelta, contrato y protocolo de fallo). Ninguna tarea T0–T13 está hecha todavía; la versión sigue siendo la 1.4.0. El bloque A ya está respondido (§1 de ese documento): se permite `push` y el diseño fluido (T12) queda para el último paso. Todo lo de planificar está decidido. Para arrancar: sesión nueva con Opus 5.5 y la orden que hay al principio del manual.
+**Manual de ejecución (2026-11-15):** [`ARQUITECTURA-EJECUCION.md`](../planes/ARQUITECTURA-EJECUCION.md) convierte el plan en instrucciones para agentes (oleadas, especificación de cada tarea, matemática resuelta, contrato y protocolo de fallo). Cierre en marcha: T0 (banco de medida) hecha y fusionada, versión 1.5.0; ejecutado con tus datos en una copia de trabajo, nada probado con lápiz. El bloque A ya está respondido (§1 de ese documento): se permite `push` y el diseño fluido (T12) queda para el último paso. Todo lo de planificar está decidido. Para arrancar: sesión nueva con Opus 5.5 y la orden que hay al principio del manual.
 
 Leyenda de cómo se probó cada cosa:
 - **compilado**: el motor compila de verdad; la interfaz GTK solo con `cargo check` (comprobación de tipos, sin
@@ -80,6 +80,7 @@ Leyenda de cómo se probó cada cosa:
 | 1.3.4 | **Sets del entreno en el repositorio** (faltaban por el `.gitignore`: «file not found») | `fix/sets-entreno-en-git` | — | sí, en una copia limpia del repositorio (83 tests de Python) | pendiente |
 | 1.3.5 | **Expresión del entreno en texto legible** si no hay matplotlib, y aviso de qué instalar | `fix/entreno-expresion-visible` | sí | sí (2) + ejecutada ✔ con y sin matplotlib | pendiente |
 | 1.4 | **El punto multiplica** (coma decimal); resultados con coma | `feat/punto-por` | — | sí (3, Python) | pendiente |
+| 1.5 | **Banco de medida** (T0 del cierre): alineado ordenado, examen congelado, `medir.py`, sondas como tests | `feat/banco-de-medida` | — | sí (33, Python) + ejecutado con tus datos (copia de trabajo) | no aplica |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
