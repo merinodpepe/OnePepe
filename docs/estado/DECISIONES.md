@@ -574,3 +574,13 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - Set «refuerzo»: 80 expresiones y no 200 (decisión de Fable: al usuario le quedan 285 de los otros dos). 61 `expr`, 12 `steps`, 7 `symbols`; 15 al examen. Las 27 clases con pocos ejemplos ajenos aparecen al menos 2 veces. Algunas expresiones valen para escribir pero no tienen sentido matemático estricto.
 - PENDIENTE: `examen.json` se congeló antes de existir este set; al reentrenar hay que añadir sus 15 ids (apuntado en `REENTRENAR.md`).
 - Tests: 227 de Python, 29 sondas con 0 erróneas.
+
+## Tanda de diseño «suave» (2026-11-15, noche)
+
+- El usuario eligió ocho ideas de dieciséis (lluvia de ideas de un agente Sonnet sobre `style.css`, `theme.rs` y `DISENO.md`, más las del orquestador). No eligió nada de espacio ni tipografía.
+- Hipótesis de por qué se veía «duro» (por lectura del código, sin ver la app): las superficies se separaban con rayas de 1 px y esquinas de 2–6 px, con una sola sombra corta.
+- Primera tanda (`feat/diseno-suave`): radios 8/12, sin rayas en cinta, barra de estado y ajustes (se conservan en alto contraste), sombra de dos capas en los flotantes, pulsado hundido, anillo de foco de marca. `cargo check` ok, 5 tests de tema.
+- SUPUESTO: GTK 4 admite `transform: scale()` y su transición en CSS, y `outline-color` en `transition`; no comprobado en pantalla.
+- «Paneles que entran suave»: el panel de cuadernos ya lo hace libadwaita; las ventanitas no se tocan; el plegado de la barra de opciones pasa a la segunda tanda.
+- Descartado sin hacer: flotantes translúcidos (GTK no tiene desenfoque en CSS; el trazo se vería a través).
+- Petición del usuario: al terminar, recompilar la app y apagar el ordenador; si se acaba la cuota, seguir a las 02:39 del 2026-11-16.
