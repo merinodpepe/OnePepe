@@ -499,3 +499,15 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   si el símbolo ya se sustituyó por trazos limpios; `medir.py --fallos` acepta `expected` como LaTeX. La pantalla de
   ejemplos queda fuera (pendiente del usuario).
 - **Pendiente al cerrar O2:** modelos de pliegue y medida cruzada (en marcha, rama `fix/medida-cruzada`).
+
+## Cierre, oleada O3 (2026-11-15): T5 y T6
+
+- Medida cruzada estrenada tras T2 (pliegues `entrenar_pliegues.py --receta v1 --peso 10 --epocas 2`; se mide con `medir.py --cruzada v1 --conjunto entreno`; n = 813 símbolos, 112 renglones, 28 rayas). SUPUESTO: la medida cruzada va sin kNN.
+- T5, medida cruzada antes → después: corte exacto 81,2 → 84,6 %; juntado 16,0 → 12,4 %; partido 1,6 → 1,5 %; corte y etiqueta 62,4 → 66,3 %; renglón perfecto 28,7 → 35,2 %; raya con corte exacto 32,1 → 25,0 % (n = 28). Comparación: P = 1,00 (mejora).
+- T5, elegido en la rejilla de M5.2: variante V0 y λ = 0 (antes 1,2). «Rayas primero» (V1–V3) probado y APAGADO (`bars_first = 0`): subía la raya a 46,4 % pero partía el 4,3–7,2 % de los símbolos sintéticos (límite 3,25 %). Reparación general y papel de la raya, encendidos (P = 0,95 y 0,97 frente a quitarlos).
+- T5, aceptación NO cumplida: raya con corte exacto 25,0 % (meta ≥ 85), juntado 12,4 % (meta ≤ 4); el corte exacto de «=» no se midió (`medir.py` no lo desglosa). Fusionada porque la medida global mejora (regla §4.5 del manual). Abre T5b (modelo de pares, supuesto 4 del manual) tras T7a.
+- SUPUESTO (T5): `SegmentParams` gana además `repair` y `bar_role` para poder apagar cada cambio; en la reparación, la unión tiene como máximo 4 trazos; el cruce exige que el centro del trazo caiga dentro del ancho de la raya.
+- T6, medida cruzada antes → después con θ = 2,5: números de 2 o más cifras 54,5 → 59,1 % (n = 22: de 12 a 13 números); corte y etiqueta 66,3 → 66,4 %; sustituciones erróneas 10,5 % igual. P = 0,64 (empate); se queda porque mejoran los números y las letras no bajan.
+- T6, aceptación NO cumplida: números 59,1 % (meta ≥ 90). El límite es el corte y la lectura de las cifras, no la corrección léxica. Sondas `dx/dt`, `dy/dx` y `d²y/dx²` en verde (24 sondas, 0 erróneas).
+- SUPUESTO (T6): dos cifras que se solapan son el mismo número (sin límite inferior de hueco); la coma decimal puede bajar hasta 0,4 del alto de la cifra; un solo dígito también es nodo `num`; `to_latex` escribe el decimal con coma; `SegmentParams` gana `entidades` (0 = apagado) y `theta`.
+- Tests tras T6: 180 de Python pasan; motor 24; nada probado con lápiz.

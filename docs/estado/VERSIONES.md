@@ -7,6 +7,17 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.7 (2026-11-15) — cierre de la oleada O3
+
+- **Corte de trazos** (T5): la penalización fija por símbolo pasa de 1,2 a 0; reparación general (`reparar.py`, antes
+  `dots.py`) y papel de la raya (`layout.bar_role`), con `elegir_corte.py`. Las rayas primero (V1–V3) se probaron y
+  quedan apagadas: partían símbolos sintéticos. Juntado 16,0 → 12,4 %; renglón perfecto 28,7 → 35,2 %. La raya de
+  fracción aún no llega a meta (25,0 %).
+- **Léxico de números** (T6): `lexico.py` con números de varias cifras, coma decimal, corrección de letras dentro de
+  un número (S→5, O→0, l→1…) y derivadas de Leibniz. Números de 2 o más cifras 54,5 → 59,1 % (meta 90; el límite
+  es el corte y la lectura de las cifras).
+- Sin cambio de formato .rnote.
+
 ## 1.6 (2026-11-15) — cierre de la oleada O2
 
 - **Evaluación correcta** (T3): las 8 sondas con resultado erróneo pasan a 0. `(x+1)+3=` da `x + 4`; segunda

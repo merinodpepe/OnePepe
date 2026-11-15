@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.7.0" date="2026-11-15">
+      <description>
+        <p>Math: better stroke segmentation (no fixed symbol penalty, general repair, fraction-bar role) and number lexicon (multi-digit numbers, decimal comma, digit/letter correction inside numbers).</p>
+      </description>
+    </release>
     <release version="1.6.0" date="2026-11-15">
       <description>
         <p>Math: correct evaluation (functions, derivatives, bound variables, units), page environment, failure capture button, leak-free training.</p>
