@@ -29,7 +29,7 @@ class SegmentParams:
     # uno encima del otro (=, i, ÷): hueco vertical máximo (× tamaño típico)
     stack_gap: float = 1.0
     # penalización por cada símbolo (más alta: junta más trazos)
-    symbol_penalty: float = 1.2
+    symbol_penalty: float = 0.0
     # cuánto cuenta la probabilidad de que un grupo sea un "trozo" y no un símbolo completo
     junk_weight: float = 1.0
     # pausas entre trazos (si se conocen): por debajo de esto (s) favorece el mismo símbolo; por encima, lo contrario
