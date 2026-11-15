@@ -7,6 +7,18 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.8 (2026-11-15) — cierre de las oleadas O4–O6
+
+- **Confianza calibrada** (T8): regla de sustitución con acuerdo entre la red y el kNN, y umbral calibrado
+  (`calibrar_umbral.py`, `confianza.json`). El resultado dudoso se muestra más tenue y con «?». Aceptación no cumplida:
+  con el umbral calibrado (0,999) la sustitución casi no actúa; elige el usuario al instalar (ver `DECISIONES.md`).
+- **Extracción de símbolos** (T7a): `extraer_simbolos.py` saca los símbolos de las fórmulas de MathWriting
+  (212 541 símbolos de `train/`, más 20 383 de `valid/`).
+- **Clasificador v2** (T7b): rasgos v2 (556 valores: direcciones que no dependen del orden ni del sentido, rejilla
+  16×16, tamaño y posición respecto al renglón) y entrenamiento con los símbolos extraídos. Los modelos v1 siguen
+  funcionando. Aceptación no cumplida: top-1 65,9 / 72,8 % (meta ≥ 80); top-5 92,6 % (meta ≥ 95).
+- Sin cambio de formato .rnote (la confianza va en el archivo oculto).
+
 ## 1.7 (2026-11-15) — cierre de la oleada O3
 
 - **Corte de trazos** (T5): la penalización fija por símbolo pasa de 1,2 a 0; reparación general (`reparar.py`, antes
