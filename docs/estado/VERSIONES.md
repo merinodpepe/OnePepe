@@ -7,6 +7,21 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.11 (2026-11-15) — diseño «suave»
+
+Ocho ideas elegidas por el usuario. Hay que recompilar la app para verlas.
+
+- **Esquinas más redondas:** 8 px en botones, pestañas y filas; 12 px en la barra flotante.
+- **Menos rayas:** la cinta, la barra de estado y los ajustes se separan por tono, no por una línea (en alto
+  contraste las líneas se conservan).
+- **Sombras suaves** de dos capas en lo que flota; la cinta, sin sombra.
+- **Botones que se hunden** al tocar y **anillo de foco** morado.
+- **Barra de opciones:** el plegado se desliza en vez de saltar.
+- **Resultado de matemáticas en una pastilla** tenue del color de cada marca.
+- **Duda visible:** subrayado de puntos morado bajo los símbolos leídos con menos confianza que el umbral; solo en
+  pantalla, no se exporta. Desaparece al corregir.
+- Con «reducir animaciones» del sistema no se anima nada. Sin cambio de formato .rnote.
+
 ## 1.10.3 (2026-11-15) — la integral no encoge y set de entreno «Refuerzo»
 
 - **∫, ∑ y ∏ limpios con el alto de lo escrito:** antes se escalaban por el ancho y salían al 36–50 % del alto.

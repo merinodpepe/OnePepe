@@ -584,3 +584,10 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - «Paneles que entran suave»: el panel de cuadernos ya lo hace libadwaita; las ventanitas no se tocan; el plegado de la barra de opciones pasa a la segunda tanda.
 - Descartado sin hacer: flotantes translúcidos (GTK no tiene desenfoque en CSS; el trazo se vería a través).
 - Petición del usuario: al terminar, recompilar la app y apagar el ordenador; si se acaba la cuota, seguir a las 02:39 del 2026-11-16.
+
+## 1.11.0 (2026-11-15): segunda tanda de diseño
+
+- Pastilla del resultado: color fijo en el motor (el de cada marca) con alfa 0,12 (0,07 si el resultado es dudoso), fundida con `overlay_alpha`. SUPUESTO: mismo alfa en tema oscuro, porque el motor no sabe el tema.
+- Duda visible: se subrayan todos los símbolos con `confidence < threshold` (el motor guarda la caja de todos, sustituidos o no; no se tocó el protocolo). SUPUESTO: «corregido a mano» = confianza 1,0. Se dibuja aunque el modo matemáticas esté apagado si la página tiene símbolos.
+- Plegado de la barra de opciones con `gtk::Revealer` (deslizamiento, 160 ms). Sin comprobar en pantalla: el orden de las piezas y el arrastre tras mover el `scroller`.
+- Tests: motor 32 (filtro `math`), tema 5, `cargo check` de la interfaz ok. Nada visto en pantalla.

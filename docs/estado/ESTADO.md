@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-11-15. **Versión 1.10.3** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
+Actualizado: 2026-11-15. **Versión 1.11.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/PLAN-PENDIENTE.md) (plan de mejora).
 
 **Auditoría del 2026-11-15** (solo lectura: no cambia código ni versión; medida sobre la 1.3.5 del equipo y revisada contra la 1.4): [`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md) explica por qué falla el modo matemáticas, con medidas hechas con tu letra de los entrenos, y [`PLAN-CIERRE.md`](../planes/PLAN-CIERRE.md) dice qué hacer, en orden, para terminarlo. Medido fuera de la app; nada probado con el lápiz.
@@ -21,8 +21,8 @@ Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/P
 | Botones que se hunden al tocar (`scale(0.98)` + oscurecido, 100 ms) | hecha, fusionada local | `style.css` |
 | Anillo de foco morado (`:focus-visible`) | hecha, fusionada local | `style.css` |
 | Paneles que entran suave | parcial: el panel de cuadernos ya anima solo (`AdwOverlaySplitView`); las ventanitas no se tocan (las dibuja libadwaita); el plegado de la barra de opciones va en la segunda tanda | `optionsbar.rs` |
-| Resultado de matemáticas dentro de una pastilla morada tenue | **en marcha** (Sonnet, rama `feat/diseno-matematicas`) | `math.rs` `draw_math_overlays` |
-| Duda visible: subrayado de puntos bajo los símbolos con `confidence < threshold` | **en marcha** (misma rama) | `math.rs` |
+| Resultado de matemáticas dentro de una pastilla morada tenue | hecha, fusionada (1.11.0); antes: en marcha (Sonnet, rama `feat/diseno-matematicas`) | `math.rs` `draw_math_overlays` |
+| Duda visible: subrayado de puntos bajo los símbolos con `confidence < threshold` | hecha, fusionada (1.11.0); antes: en marcha (misma rama) | `math.rs` |
 
 Comprobado de la primera tanda: `cargo check -p rnote` ok y 5 tests de `theme`. **Nada visto en pantalla.** Dudas que solo se resuelven mirando: si las esquinas de 12 px recortan algo y si el tono nuevo de la barra de estado contrasta bien.
 
