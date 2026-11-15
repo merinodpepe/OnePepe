@@ -200,6 +200,7 @@ SONDAS = [
     ("dxdt_frac", ["x=t^2", r"\frac{dx}{dt}="], True, r"^2\*t$"),
     ("dydx_frac", ["y=x^2", r"\frac{dy}{dx}="], True, r"^2\*x$"),
     ("dxdt_linea", ["x=t^2", "dx/dt="], True, r"^2\*t$"),
+    ("segunda_derivada_y", ["y=x^3", r"\frac{d^2y}{dx^2}="], True, r"^(6\s*\*?\s*x|\?)$"),
     ("f_de_3", ["f(x)=x^2+1", "f(3)="], True, r"^10$"),
     ("f_de_x", ["x=5", "f(x)=x^2+1", "f(x)="], True, r"^26$"),
     ("unidades", ["m=70kg", "g=9,8m/s^2", "mg="], True, r"^686.*N$"),

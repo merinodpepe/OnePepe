@@ -15,6 +15,7 @@ con un analizador propio. Comportamiento (ver MATEMATICAS-INFORME.md, sección 0
 import sympy as sp
 
 from .latex_tokens import visible_tokens
+from .lexico import _leibniz
 from .symbols import GREEK, STEP_SEPARATORS
 
 GREEK_NAMES = {g: g[1:] for g in GREEK}
@@ -54,12 +55,21 @@ def _tokens(row, decimal_comma=True):
             base, sub, sup = node[1], node[2], node[3]
         if base[0] == "sym":
             out.append(["sym", base[1], sup, sub])
+        elif base[0] == "num":
+            out.append(["num", base[1], sup, sub])
         else:
             out.append([base[0], base, sup, sub])
     # unir cifras (y el separador decimal) en números
     merged = []
     for t in out:
         prev = merged[-1] if merged else None
+        if t[0] == "num":  # número ya unido por el diseño; solo sigue a «3.» (punto decimal abierto)
+            if prev is not None and prev[0] == "num" and prev[1].endswith(".") and prev[2] is None:
+                prev[1] += t[1]
+                prev[2], prev[3] = t[2], t[3]
+            else:
+                merged.append(t)
+            continue
         is_digit = t[0] == "sym" and t[1].isdigit()
         if is_digit and prev is not None and prev[0] == "num" and prev[2] is None and prev[3] is None:
             prev[1] += t[1]
@@ -115,70 +125,6 @@ def _tokens(row, decimal_comma=True):
         ):
             final[i] = ["sym", r"\times", None, None]
     return _leibniz(final)
-
-
-_D = ("d", r"\partial")
-
-
-def _pow(t):
-    """(letra, n) de una ficha letra con exponente entero opcional (n = 1 si no lo tiene), o None."""
-    if t[0] != "sym" or t[3] is not None:
-        return None
-    if t[2] is None:
-        return t[1], 1
-    try:
-        return t[1], int(_plain(t[2]))
-    except (ParseError, ValueError):
-        return None
-
-
-def _letra(t):
-    return t[0] == "sym" and t[2] is None and t[3] is None and t[1].isalpha() and len(t[1]) == 1
-
-
-def _deriv_frac(t):
-    """(f, [(v, n)]) si la fracción es una derivada de Leibniz (d/dx, d²f/dx², ∂²f/∂x∂y), si no None."""
-    _, num, den = t[1]
-    nt, dt = _tokens(num), _tokens(den)
-    a = _pow(nt[0]) if nt else None
-    if not a or a[0] not in _D or len(nt) > 2 or (len(nt) == 2 and not _letra(nt[1])):
-        return None
-    d, n = a
-    f = nt[1][1] if len(nt) == 2 else None
-    if len(dt) == 2 and dt[0][:4] == ["sym", d, None, None]:
-        v = _pow(dt[1])
-        if v and v[1] == n and len(v[0]) == 1 and v[0].isalpha():
-            return f, [v]
-    if d == r"\partial" and n == 2 and len(dt) == 4 and all(dt[k][:4] == ["sym", d, None, None] for k in (0, 2)) \
-            and _letra(dt[1]) and _letra(dt[3]):
-        return f, [(dt[1][1], 1), (dt[3][1], 1)]
-    return None
-
-
-def _leibniz(tokens, definidos=()):
-    """Derivadas de Leibniz como una sola ficha ["deriv", (f o None, [(variable, orden)]), None, None]: d/dx, dx/dt,
-    d²f/dx², ∂²f/∂x∂y y en línea dx/dt. No se aplica si «d» es una variable de la página."""
-    if "d" in definidos:
-        return tokens
-    out, i = [], 0
-    while i < len(tokens):
-        t = tokens[i]
-        w = tokens[i : i + 5]
-        d = _deriv_frac(t) if t[0] == "frac" and t[2] is None and t[3] is None else None
-        if d:
-            out.append(["deriv", d, None, None])
-        elif (
-            len(w) == 5
-            and all(_letra(x) for x in (w[0], w[1], w[3], w[4]))
-            and w[0][1] == w[3][1] == "d"
-            and w[2][:4] == ["sym", "/", None, None]
-        ):
-            out.append(["deriv", (w[1][1], [(w[4][1], 1)]), None, None])
-            i += 4
-        else:
-            out.append(t)
-        i += 1
-    return out
 
 
 _NOT_OPERAND = {"+", "-", r"\pm", r"\mp", r"\times", r"\cdot", r"\div", "/", "*", "=", r"\neq", "<", ">",
@@ -456,7 +402,7 @@ def _plain(row):
     """Texto de un subíndice (k_{B} -> "B", x_{12} -> "12")."""
     out = ""
     for node in row[1]:
-        if node[0] != "sym":
+        if node[0] not in ("sym", "num"):
             raise ParseError("subíndice complejo")
         out += GREEK_NAMES.get(node[1], node[1])
     return out
