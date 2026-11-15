@@ -50,8 +50,8 @@ impl Default for MathOptions {
         Self {
             replace: true,
             threshold: 0.95,
-            equals: false,
-            variables: false,
+            equals: true,
+            variables: true,
             check: false,
         }
     }
@@ -1968,8 +1968,16 @@ mod tests {
         assert_eq!(engine.math.overlays.len(), 2);
         // all options off: nothing to ask, the annotations go
         engine.config.write().pens_config.brush_config.math.equals = false;
+        engine.config.write().pens_config.brush_config.math.variables = false;
         assert!(engine.math_page_request(None).is_none());
         assert!(engine.math.overlays.is_empty());
+    }
+
+    #[test]
+    fn math_options_default() {
+        let o = MathOptions::default();
+        assert!(o.equals && o.variables && !o.check);
+        assert_eq!(o.threshold, 0.95);
     }
 
     #[test]
