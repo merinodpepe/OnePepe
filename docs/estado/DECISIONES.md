@@ -525,3 +525,23 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - SUPUESTO (T7b): W fijo en 10 (sin probar 30 y 90); los vectores del kNN se calculan sin contexto de renglón; el entrenamiento va por bloques de 50 000 con `partial_fit` (falló dos veces por memoria con la matriz entera); sin red convolucional (A6 = no) ni curva de aprendizaje.
 - T5b (modelo de pares): no se abre en esta ejecución; `juntado` sigue en 13,4 % (meta ≤ 4). Pendiente.
 - Tests tras T7b: 204 de Python pasan, 24 sondas con 0 erróneas, motor 26, `cargo check` de la interfaz ok. Nada probado con lápiz.
+
+## Cierre, oleadas O7 y O9 (2026-11-15): T10 y T13
+
+- T10, medida cruzada (n = 813, 108 renglones): el contexto en el orden del árbol sube corte y etiqueta de 69,7 a 70,2 % (P = 0,87, mejora): ENCENDIDO (`orden_arbol = 1`). La búsqueda de lecturas alternativas sube renglón perfecto de 38,0 a 38,9 % (un renglón; P = 0,56, empate; con el árbol, P = 0,74 frente al árbol solo): APAGADA (`mejor_lectura = 0`). El premio da igual en 2, 3 y 4: queda 3,0. Tiempo ≤ 15,4 ms. Aceptación NO cumplida.
+- Constantes del kNN de vuelta a `TAU = 0,1`, `D_MAX = 0,3`, `LAMBDA_MAX = 0,6` (hecho en la rama de T10).
+- T13: `MathOptions::default` con «=» y «Variables» encendidos (A4: las sondas dan 0 erróneas de 24); «Revisar pasos» apagado; umbral 0,95.
+- Decisión (Fable), distinta de la respuesta A1 del usuario: la promoción a los datos reales NO se ha ejecutado. Motivos: las metas no se cumplen y el usuario tiene que elegir el umbral de confianza. `promover_cierre.py` se ejecutó solo en modo informe (las sumas de los originales coinciden con `origen.sha256`). Gana la opción `--sin-confianza`.
+- Medida final (de «Cifras contra las metas» en `INFORME-CIERRE.md`):
+
+| Medida | Hoy (auditoría) | Final examen (n = 217; 31 renglones) | Final cruzada (n = 813; 108 renglones) | Examen incremental | Meta | ¿Cumplida? |
+|--------|-----------------|------|------|------|------|------|
+| Símbolos con corte y etiqueta | 44–66 % | 78,3 % [73,4–82,6] | 70,2 % [67,5–72,8] | 76,0 % | ≥ 90 % | No |
+| Renglones todos bien | 5–28 % | 54,8 % [40,3–68,6] | 38,0 % [30,7–45,9] | 45,2 % | ≥ 60 % | No |
+| Números de 2 o más cifras | 63–78 % | 85,7 % (6 de 7) | 77,3 % (17 de 22) | 85,7 % | ≥ 90 % | No (muestra pequeña) |
+| Raya de fracción, corte y papel | 21 % | 16,7 % (1 de 6) | 10,7 % (3 de 28) | 16,7 % | ≥ 90 % | No |
+| Sustituciones erróneas (sin umbral) | 9–10,5 % | 12,6 % (21 de 167) | 19,7 % (127 de 644) | 16,2 % | ≤ 2 % | No |
+| Resultados erróneos en las sondas | 8 | 0 de 24 | — | — | 0 | **Sí** |
+
+- T9 SALTADA: faltan páginas reales de apuntes (A5). T5b (modelo de pares) no abierta. T12 (diseño): último paso, recortado a lo más importante por petición del usuario.
+- Tests al cerrar: 216 de Python, 27 del motor (filtro `math`), `cargo check` de la interfaz ok, `msgfmt -c` ok. Nada probado con lápiz.

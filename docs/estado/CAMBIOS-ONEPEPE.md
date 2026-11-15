@@ -606,3 +606,24 @@ Para enseñarle tu letra al modo matemáticas sabiendo exactamente qué escribes
 6. La versión de la app se ve abajo a la derecha (por ejemplo `OnePepe 1.2.0 · 1a2b3c4`) y en «Acerca de».
 
 Si quieres que mire tu letra yo, mándame el `.entreno.json` por el chat o por Drive (**nunca por git**).
+
+## Cierre de matemáticas (1.9): pruebas con lápiz
+
+Modo matemáticas encendido; «=» y «Variables» ya vienen encendidos. Nada de esto está probado con lápiz todavía.
+
+| Nº | Escribe | Debe salir |
+|----|---------|------------|
+| 1 | `12+34=` | 46, y los símbolos se sustituyen por los limpios |
+| 2 | `x=5` y, debajo, `2x+3=` | 13 |
+| 3 | `y=2x+3` debajo de `x=5` | «= 13» al lado, en morado |
+| 4 | `f(x)=x²+1` y, debajo, `f(3)=` | 10 |
+| 5 | `x=t²` y, debajo, `dx/dt=` (en fracción y en línea) | 2t las dos veces |
+| 6 | `(x+1)+3=` | x + 4 |
+| 7 | Una fracción `1/2 + 1/3 =` con rayas largas | 5/6; ninguna raya se junta con un número |
+| 8 | `e^5=` | e⁵ ≈ 148,4 |
+| 9 | `25`, `19`, `100` deprisa | Números, sin letras dentro («2S», «1q») |
+| 10 | Un «=» con una pausa de más de 1 s entre sus dos rayas | Un solo «=» (T5/T9) |
+| 11 | Algo con mala letra a propósito | No se sustituye; el resultado sale tenue y con «?» |
+| 12 | `2x+4=10`, `2x=14` con «Revisar pasos» | Marca de error en el segundo renglón |
+
+Botón «Esto está mal…» en la ventanita de candidatas y en la del «?»: debe guardar y avisar «Guardado para entrenar».
