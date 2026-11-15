@@ -90,8 +90,26 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     tools_box.add_css_class("onepepe-optionsbar-tools");
     let separator = gtk4::Separator::new(gtk4::Orientation::Horizontal);
 
+    // folding slides the contents (Revealer) instead of cutting them
+    let duration = if crate::theme::animations_enabled() {
+        crate::theme::MOTION_NORMAL
+    } else {
+        0
+    };
+    let new_revealer = || {
+        gtk4::Revealer::builder()
+            .transition_type(gtk4::RevealerTransitionType::SlideDown)
+            .transition_duration(duration)
+            .build()
+    };
+    let tools_revealer = new_revealer();
+    tools_revealer.set_child(Some(&tools_box));
+    let scroller_revealer = new_revealer();
+    sidebar_box.remove(&scroller);
+    scroller_revealer.set_child(Some(&scroller));
+    sidebar_box.append(&scroller_revealer);
     sidebar_box.prepend(&separator);
-    sidebar_box.prepend(&tools_box);
+    sidebar_box.prepend(&tools_revealer);
     sidebar_box.prepend(&header);
 
     let rebuild_tools = clone!(
@@ -133,14 +151,14 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     // fold: only the header stays
     let apply_fold = clone!(
         #[weak]
-        scroller,
+        scroller_revealer,
         #[weak]
-        tools_box,
+        tools_revealer,
         #[weak]
         separator,
         move |folded: bool| {
-            scroller.set_visible(!folded);
-            tools_box.set_visible(!folded);
+            scroller_revealer.set_reveal_child(!folded);
+            tools_revealer.set_reveal_child(!folded);
             separator.set_visible(!folded && !chosen_tools().is_empty());
         }
     );
