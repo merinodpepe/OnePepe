@@ -77,6 +77,16 @@ pub struct MathSymbol {
     pub group: (u64, i64),
     /// The handwritten strokes, sent with corrections as examples of the user's handwriting.
     pub original: Vec<Vec<[f64; 2]>>,
+    /// How sure the helper was (1.0 for what was chosen by hand).
+    pub confidence: f64,
+}
+
+fn one() -> f64 {
+    1.0
+}
+
+fn yes() -> bool {
+    true
 }
 
 impl MathSymbol {
@@ -90,6 +100,7 @@ impl MathSymbol {
                 .take(5)
                 .map(|c| c.0.clone())
                 .collect(),
+            p: self.confidence,
         }
     }
 }
@@ -108,6 +119,8 @@ pub struct MathOverlay {
     /// Other ways to show the number (fraction, decimal, mixed): a tap goes to the next one. (text, latex)
     pub formats: Vec<(String, String)>,
     pub format: usize,
+    /// False when a symbol of the line was read with low confidence: it is drawn faint, with a " ?".
+    pub sure: bool,
 }
 
 impl MathOverlay {
@@ -217,6 +230,8 @@ struct SidecarSymbol {
     candidates: Vec<(String, f64)>,
     group: (u64, i64),
     original: Vec<Vec<[f64; 2]>>,
+    #[serde(default = "one")]
+    confidence: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -233,6 +248,8 @@ struct SidecarOverlay {
     formats: Vec<(String, String)>,
     #[serde(default)]
     format: usize,
+    #[serde(default = "yes")]
+    sure: bool,
 }
 
 fn aabb_to_array(b: Aabb) -> [f64; 4] {
@@ -266,6 +283,8 @@ struct KnownSymbol {
     r#box: [f64; 4],
     /// Its other candidates (to join functions read wrongly, «1n» → ln).
     alts: Vec<String>,
+    /// Its confidence, to mark doubtful lines.
+    p: f64,
 }
 
 #[derive(Debug, Serialize)]
@@ -293,6 +312,8 @@ struct RecognizedSymbol {
     group: i64,
     #[serde(default)]
     clean: Option<Vec<Vec<[f64; 2]>>>,
+    #[serde(default = "one")]
+    confidence: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -849,6 +870,7 @@ impl Engine {
             candidates,
             group: (id, 0),
             original: fix.original,
+            confidence: resp.confidence,
         });
         widget_flags |= self.record(Instant::now());
         widget_flags.store_modified = true;
@@ -927,6 +949,7 @@ impl Engine {
                 candidates,
                 group: (req_id, sym.group),
                 original,
+                confidence: sym.confidence,
             });
         }
         // what goes next to the lines (the result of "=", variables, steps) comes from the page request
@@ -1024,6 +1047,7 @@ impl Engine {
             // the chosen label goes first
             sym.candidates.retain(|c| c.0 != latex);
             sym.candidates.insert(0, (latex.clone(), 1.0));
+            sym.confidence = 1.0;
         }
         if widget_flags.store_modified {
             widget_flags |= self.record(Instant::now());
@@ -1058,6 +1082,7 @@ impl Engine {
                     candidates: s.candidates.clone(),
                     group: s.group,
                     original: s.original.clone(),
+                    confidence: s.confidence,
                 })
             })
             .collect::<Vec<_>>();
@@ -1085,6 +1110,7 @@ impl Engine {
                 kind: o.kind.clone(),
                 formats: o.formats.clone(),
                 format: o.format,
+                sure: o.sure,
             })
             .collect();
         let times = self
@@ -1139,6 +1165,7 @@ impl Engine {
                 candidates: s.candidates,
                 group: s.group,
                 original: s.original,
+                confidence: s.confidence,
             });
             restored += 1;
         }
@@ -1168,6 +1195,7 @@ impl Engine {
                 kind: o.kind,
                 formats: o.formats,
                 format: o.format,
+                sure: o.sure,
             })
             .collect();
         restored
@@ -1337,6 +1365,8 @@ impl Engine {
             at: Option<usize>,
             #[serde(default)]
             formats: Vec<Format>,
+            #[serde(default = "yes")]
+            sure: bool,
         }
         #[derive(Deserialize)]
         struct Format {
@@ -1410,6 +1440,7 @@ impl Engine {
                         .map(|f| (f.text, f.latex))
                         .collect(),
                     format,
+                    sure: mark.sure,
                 });
             }
         }
@@ -1770,15 +1801,20 @@ pub fn draw_math_overlays(
     use rnote_compose::color;
     for o in overlays {
         let font_size = o.height.max(6.0);
-        // results in gray, variables in a soft purple, wrong steps in red
+        // results in gray, variables in a soft purple, wrong steps in red; fainter when not sure
         let text_color = match o.kind.as_str() {
-            "variable" => color::ONEPEPE_BRAND.with_a8(170),
+            "variable" => color::ONEPEPE_BRAND.with_a8(if o.sure { 170 } else { 100 }),
             "error" => color::GNOME_REDS[3].with_a8(230),
-            _ => color::GNOME_DARKS[0].with_a8(150),
+            _ => color::GNOME_DARKS[0].with_a8(if o.sure { 150 } else { 85 }),
+        };
+        let shown = if o.sure {
+            o.shown_text().to_string()
+        } else {
+            format!("{} ?", o.shown_text())
         };
         if let Ok(layout) = piet_cx
             .text()
-            .new_text_layout(o.shown_text().to_string())
+            .new_text_layout(shown)
             .text_color(text_color)
             .font(piet::FontFamily::SANS_SERIF, font_size)
             .build()
@@ -1934,6 +1970,41 @@ mod tests {
         engine.config.write().pens_config.brush_config.math.equals = false;
         assert!(engine.math_page_request(None).is_none());
         assert!(engine.math.overlays.is_empty());
+    }
+
+    #[test]
+    fn sure_defaults_true() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let _ = answer_page(
+            &mut engine,
+            r#"[{"marks": [{"kind": "value", "text": "1", "latex": "1", "anchor": [150, 120], "height": 20}]}]"#,
+        );
+        assert!(engine.math.overlays[0].sure);
+        let _ = answer_page(
+            &mut engine,
+            r#"[{"marks": [{"kind": "value", "text": "1", "latex": "1", "anchor": [150, 120], "height": 20, "sure": false}]}]"#,
+        );
+        assert!(!engine.math.overlays[0].sure);
+    }
+
+    #[test]
+    fn confidence_survives_sidecar() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        engine.math.symbols[0].confidence = 0.42;
+        let json = engine.math_sidecar_json().unwrap();
+        engine.math.symbols.clear();
+        assert!(engine.math_load_sidecar(&json) > 0);
+        assert_eq!(engine.math.symbols[0].confidence, 0.42);
+        // an old hidden file has no confidence
+        let mut v: serde_json::Value = serde_json::from_str(&json).unwrap();
+        for s in v["symbols"].as_array_mut().unwrap() {
+            s.as_object_mut().unwrap().remove("confidence");
+        }
+        engine.math.symbols.clear();
+        assert!(engine.math_load_sidecar(&v.to_string()) > 0);
+        assert_eq!(engine.math.symbols[0].confidence, 1.0);
     }
 
     #[test]
@@ -2382,6 +2453,7 @@ mod render_tests {
                 kind: "value".into(),
                 formats: vec![],
                 format: 0,
+                sure: true,
             }];
             draw_math_overlays(&mut piet_cx, &overlays).unwrap();
             piet::RenderContext::finish(&mut piet_cx).unwrap();

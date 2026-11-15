@@ -24,7 +24,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tests"))
 
-from onepepe_math import alinear  # noqa: E402
+from onepepe_math import alinear, confianza  # noqa: E402
 from onepepe_math.classifier import SymbolClassifier  # noqa: E402
 from onepepe_math.entreno import _split_by_guides, expected_symbols, list_sets, load_set  # noqa: E402
 from onepepe_math.forced import forced_groups  # noqa: E402
@@ -187,13 +187,14 @@ class Cache:
 
 def _simbolo(r, idx=None):
     return dict(strokes=idx if idx is not None else r["strokes"], top=r["candidates"][0]["latex"],
-                alts=[c["latex"] for c in r["candidates"][1:5]], box=r["box"], clean=r["clean"] is not None)
+                alts=[c["latex"] for c in r["candidates"][1:5]], box=r["box"], clean=r["clean"] is not None,
+                c=r["confidence"], sure=r["sure"])
 
 
-def leer(l, clf, pm, sp, pausa=None):
+def leer(l, clf, pm, sp, pausa=None, **kw):
     """(símbolos leídos [{strokes, top, clean}], LaTeX leído). `pausa`: lotes por pausa (s), como la app."""
     if pausa is None:
-        r = recognize(l["strokes"], clf, personal=pm, segment_params=sp, times=l["times"], equals=False)
+        r = recognize(l["strokes"], clf, personal=pm, segment_params=sp, times=l["times"], equals=False, **kw)
         return [_simbolo(s) for s in r["symbols"]], r["latex"]
     tm, lotes = l["times"], [[0]]
     for i in range(1, len(tm)):
@@ -204,7 +205,7 @@ def leer(l, clf, pm, sp, pausa=None):
     conocidos, syms, r = [], [], None
     for b in lotes:
         r = recognize([l["strokes"][i] for i in b], clf, personal=pm, known=conocidos, segment_params=sp,
-                      times=[tm[i] for i in b], equals=False)
+                      times=[tm[i] for i in b], equals=False, **kw)
         for s in r["symbols"]:
             syms.append(_simbolo(s, [b[i] for i in s["strokes"]]))
             conocidos.append({"latex": syms[-1]["top"], "box": s["box"], "alts": syms[-1]["alts"]})
@@ -239,6 +240,10 @@ def medir(lineas, clf_de, args, sp, congelada=None):
         "raya_papel", "raya_corte", "raya_corte_etiqueta", "sust_erroneas", "sust_erroneas_visibles",
         "sust_cobertura", "latex_exacto", "red_top1", "red_top5")}
     por_expr, ms = {}, []
+    sim_pred, ren_pred = [], []  # para calibrar_umbral.py: [c, acuerdo, ok] por símbolo y [mín c, perfecto] por renglón
+    # --umbral U: umbral fijo y sin el de confianza.json (U = 0 mide todo, para calibrar)
+    u = getattr(args, "umbral", None)
+    kw = dict(threshold=u, umbral_min=0.0) if u is not None else dict(umbral_min=confianza.cargar().get("umbral", 0.0))
 
     def suma(k, ok, n=1):
         cuenta[k][0] += ok
@@ -247,7 +252,7 @@ def medir(lineas, clf_de, args, sp, congelada=None):
     for l in lineas:
         clf, pm = clf_de(l)
         t0 = time.perf_counter()
-        syms, latex = leer(l, clf, pm, sp, args.incremental)
+        syms, latex = leer(l, clf, pm, sp, args.incremental, **kw)
         ms.append(1000 * (time.perf_counter() - t0))
         suma("latex_exacto", norm(latex) == norm(l["latex"]))
         grupos = referencia(l, clf, pm, args.ref, args.sin_variantes, congelada)
@@ -275,6 +280,7 @@ def medir(lineas, clf_de, args, sp, congelada=None):
             suma("red_top1", orden[0] == r["label"])
             suma("red_top5", r["label"] in orden[:5])
         suma("renglon_perfecto", all(r["ok"] for r in refs))
+        ren_pred.append([min([s["c"] for s in syms] + [1.0]), all(r["ok"] for r in refs)])
         numeros = {}
         for r in refs:
             if r["num_id"] is not None:
@@ -283,6 +289,9 @@ def medir(lineas, clf_de, args, sp, congelada=None):
             suma("numeros_2mas", all(v))
         dueno_ref = {i: r for r in refs for i in r["idx"]}
         for s in syms:
+            r = dueno_ref.get(s["strokes"][0])
+            sim_pred.append([s["c"], s["sure"], bool(r and r["estado"] == "exacto" and set(r["idx"]) == set(s["strokes"])
+                                                     and s["top"] == r["label"])])
             suma("sust_cobertura", s["clean"])
             if s["clean"]:
                 r = dueno_ref[s["strokes"][0]]
@@ -299,7 +308,7 @@ def medir(lineas, clf_de, args, sp, congelada=None):
     res = {k: _m(*v) for k, v in cuenta.items()}
     res["ms_por_renglon"] = round(sum(ms) / len(ms), 1) if ms else None
     return {"metricas": res, "por_expresion": {k: {"k": a, "n": b} for k, (a, b) in por_expr.items()},
-            "renglones": len(lineas)}
+            "renglones": len(lineas), "simbolos_pred": sim_pred, "renglones_pred": ren_pred}
 
 
 # ---------------------------------------------------------------- examen y referencia congelada
@@ -359,6 +368,7 @@ def main():
     ap.add_argument("--cruzada", metavar="RECETA", help="modelos en $ONEPEPE_DATA/pliegues/RECETA/pliegue<k>.npz")
     ap.add_argument("--incremental", type=float, metavar="PAUSA")
     ap.add_argument("--sin-knn", action="store_true")
+    ap.add_argument("--umbral", type=float, help="umbral de sustitución fijo (0 para calibrar); sin él, confianza.json")
     ap.add_argument("--modelo")
     ap.add_argument("--ref", choices=["O", "F"], default="O")
     ap.add_argument("--sin-variantes", action="store_true")

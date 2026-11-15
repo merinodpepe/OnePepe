@@ -30,6 +30,7 @@ import json
 import os
 import sys
 
+from . import confianza
 from . import glossary as gl
 from . import glyphs
 
@@ -75,6 +76,7 @@ class Server:
                 equals=bool(req.get("equals", True)),
                 segment_params=self.segment_params,
                 times=req.get("times"),
+                umbral_min=confianza.cargar().get("umbral", 0.0),
             )
         if cmd == "correct":
             strokes = [[(float(p[0]), float(p[1])) for p in s] for s in req["strokes"] if s]
@@ -131,6 +133,7 @@ class Server:
                     variables=bool(req.get("variables", False)),
                     check=bool(req.get("check", False)),
                     glossary_units=gl.units(values),
+                    umbral_renglon=confianza.cargar().get("umbral_renglon", 0.7),
                 )
             }
         if cmd == "latex":
