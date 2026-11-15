@@ -344,13 +344,14 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None, u
     entorno = Entorno(definiciones)
     if variables:
         for i, p in enumerate(parsed):
-            if p is None or _ends_with_equals(p[2]):
+            if p is None:
                 continue
             vista = entorno.vista(i)
             d = _cache(("d", repr(p[2]), vista.clave()), lambda: definir(p[2], i, vista, glossary_units))
             if d:
                 definiciones.append(replace(d, renglon=i, _texto=None))
-    por_renglon = {d.renglon: d for d in definiciones}
+    # las cadenas que acaban en «=» definen para los de abajo, pero no cuentan como definición del renglón
+    por_renglon = {d.renglon: d for d in definiciones if not _ends_with_equals(parsed[d.renglon][2])}
     out = []
     previous = previous_d = None
     for i, p in enumerate(parsed):

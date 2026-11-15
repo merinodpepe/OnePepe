@@ -219,6 +219,11 @@ SONDAS = [
     ("sumatorio_con_i", ["i=2", sumrow()], True, r"^6$"),
     ("entorno_parcial", ["x=5", "x+y="], True, r"^y \+ 5$"),
     ("ciclo", ["x=y+1", "y=x+1", "x="], True, r"^\?$"),
+    ("letra_derecha", ["4+5=x", "x="], True, r"^9$"),
+    ("letra_derecha_expr", ["x=3", "2x=y", "y="], True, r"^6$"),
+    ("cadena_con_variable", ["x=9/2=4y", "x="], True, r"^9/2$"),
+    ("cadena_derecha", ["4+5=9=x", "x+1="], True, r"^10$"),
+    ("cadena_con_igual_final", ["x=9/2=", "x+1="], True, r"^11/2$"),
 ]
 
 # los 40 renglones de la sonda de rendimiento (s07.mix)

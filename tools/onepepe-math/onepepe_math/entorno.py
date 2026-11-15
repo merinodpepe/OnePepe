@@ -171,11 +171,49 @@ def _unit_text(tokens):
 
 def definir(tokens, i, vista, units=None):
     """La definición que hace el renglón `i` (fichas `tokens`) o None. `vista`: lo que vale encima. `units`: sin uso
-    (las constantes con unidad del glosario se resuelven al calcular)."""
+    (las constantes con unidad del glosario se resuelven al calcular).
+    `x = 5` (letra a la izquierda, manda si los dos lados son nombres); `4+5 = x` (letra sola a la derecha); cadena
+    `x = 9/2 = 4y` (extremo que es un nombre y no aparece en el resto, con la primera otra parte que se evalúa sin él;
+    shortcut: un solo extremo por renglón, el izquierdo gana, y no se despeja `4y`). Una cadena `x = 9/2 =` también define."""
     partes = _split(tokens, RELATIONS)
-    if len(partes) != 2 or partes[0][1] != "=" or not partes[1][0]:
+    if len(partes) >= 3 and not partes[-1][0]:
+        partes = partes[:-1]
+    segs = [p[0] for p in partes]
+    if len(segs) < 2 or not all(segs) or any(p[1] != "=" for p in partes[:-1]):
         return None
-    lhs, rhs = partes[0][0], partes[1][0]
+    if len(segs) == 2:
+        return _definir_lado(segs[0], segs[1], i, vista) or (
+            _definir_lado(segs[1], segs[0], i, vista) if _solo_nombre(segs[1]) else None)
+    for k in (0, -1):
+        n = _solo_nombre(segs[k])
+        otras = [s for j, s in enumerate(segs) if j != k % len(segs)]
+        if n is None or any(n in (_libres(o, vista) or ()) for o in otras):
+            continue
+        for o in otras:
+            d = _definir_lado(segs[k], o, i, vista)
+            if d:
+                return d
+    return None
+
+
+def _solo_nombre(fichas):
+    if len(fichas) == 1 and fichas[0][0] == "accent":
+        try:
+            fichas = [accent_token(fichas[0])]
+        except ParseError:
+            return None
+    return _nombre(fichas)
+
+
+def _libres(fichas, vista):
+    try:
+        return {s.name for s in _Parser(fichas, {}, vista.funciones, vista.conocidas).full().free_symbols}
+    except Exception:  # noqa: BLE001 - no se entiende: no cuenta
+        return None
+
+
+def _definir_lado(lhs, rhs, i, vista):
+    """`lhs` (nombre, o f(x)) = `rhs` (valor)."""
     if len(lhs) == 1 and lhs[0][0] == "accent":
         try:
             lhs = [accent_token(lhs[0])]
