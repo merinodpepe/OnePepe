@@ -11,6 +11,8 @@ Tipos de definición: `valor` (x = 5), `cantidad` (m = 70 kg), `expr` (y = x², 
 """
 
 import re
+import signal
+import threading
 from dataclasses import dataclass, field
 
 import sympy as sp
@@ -31,6 +33,7 @@ class Definicion:
     param: str | None = None  # solo "funcion" (un parámetro)
     expr: object = None  # sympy, sin sustituir
     cantidad: object = None  # pint
+    despejada: bool = False  # sacada de una ecuación (`2x+4=10`): conclusión, no dato
     _texto: str | None = field(default=None, compare=False, repr=False)
 
     def texto(self):
@@ -51,7 +54,9 @@ class Entorno:
         for d in self.definiciones:
             if d.renglon < i:
                 vale[d.nombre] = d
-        if not solo_encima:
+        if solo_encima:  # «revisar pasos»: lo despejado no es un dato
+            vale = {n: d for n, d in vale.items() if not d.despejada}
+        else:
             for d in self.definiciones:
                 vale.setdefault(d.nombre, d)
         return Vista(vale)
@@ -59,12 +64,16 @@ class Entorno:
 
 class Vista:
     def __init__(self, vale):
+        self._vale = vale
         ds = vale.values()
         self._clave = "|".join(sorted(d.texto() for d in ds))
         self.funciones = {d.nombre: (sp.Symbol(d.param), d.expr) for d in ds if d.tipo == "funcion"}
         self.alias = {d.nombre: d.expr for d in ds if d.tipo == "expr"}
         self.valores = {d.nombre: d.expr for d in ds if d.tipo == "valor"}
         self.cantidades = {d.nombre: d.cantidad for d in ds if d.tipo == "cantidad"}
+
+    def con(self, d):
+        return Vista({**self._vale, d.nombre: d})
 
     @property
     def conocidas(self):
@@ -194,6 +203,60 @@ def definir(tokens, i, vista, units=None):
             if d:
                 return d
     return None
+
+
+def _con_tope(f, segundos=1.0):
+    """f() con un tope de tiempo (solo en el hilo principal; en otro, sin tope); None si tarda o falla."""
+    if threading.current_thread() is not threading.main_thread():
+        segundos = 0
+    def alarma(*_):
+        raise TimeoutError
+    try:
+        antes = signal.signal(signal.SIGALRM, alarma) if segundos else None
+        if segundos:
+            signal.setitimer(signal.ITIMER_REAL, segundos)
+        try:
+            return f()
+        finally:
+            if segundos:
+                signal.setitimer(signal.ITIMER_REAL, 0)
+                signal.signal(signal.SIGALRM, antes)
+    except Exception:  # noqa: BLE001 - tarda o no se sabe: no define
+        return None
+
+
+def despejar(tokens, i, vista):
+    """Definiciones por despeje del renglón `i`: en cada igualdad de la cadena (un par de partes), si tras resolver con
+    `vista` queda una sola letra libre y tiene una única solución real y numérica, la define (tipo valor).
+    shortcut: solo igualdades «=» de una incógnita, sin unidades; el resto no define nada."""
+    partes = _split(tokens, RELATIONS)
+    if len(partes) >= 3 and not partes[-1][0]:
+        partes = partes[:-1]
+    segs = [p[0] for p in partes]
+    if len(segs) < 2 or not all(segs) or any(p[1] != "=" for p in partes[:-1]):
+        return []
+    out = []
+    for a, b in zip(segs, segs[1:]):
+        try:
+            ea, eb = (vista.resolver(_Parser(s, {}, vista.funciones, vista.conocidas).full())[0] for s in (a, b))
+        except Exception:  # noqa: BLE001
+            continue
+        f = ea - eb
+        libres = f.free_symbols
+        if len(libres) != 1 or f.atoms(AppliedUndef):
+            continue
+        n = next(iter(libres))
+        if n.name in ("e", "i") or n.name in vista.cantidades or n.name in vista.funciones or not n.is_Symbol:
+            continue
+        sol = _con_tope(lambda: sp.solveset(f, n, sp.S.Reals))
+        if not isinstance(sol, sp.FiniteSet) or len(sol) != 1:
+            continue
+        v = sol.args[0]
+        if v.is_number and v.is_real and not v.free_symbols:
+            d = Definicion(i, n.name, "valor", expr=v, despejada=True)
+            out.append(d)
+            vista = vista.con(d)
+    return out
 
 
 def _solo_nombre(fichas):
