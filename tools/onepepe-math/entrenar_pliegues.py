@@ -23,14 +23,19 @@ def main(argv=None):
     ap.add_argument("--receta", required=True)
     ap.add_argument("--peso", required=True, choices=["10", "30", "90"])
     ap.add_argument("--epocas", required=True, type=int)
+    ap.add_argument("--rasgos", type=int, default=None, choices=[1, 2], help="por defecto 2 si la receta empieza por v2")
+    ap.add_argument("--extraidos", default=os.path.join(DATA, "mathwriting-extraido", "simbolos.jsonl"))
     ap.add_argument("--personal", default=os.path.join(DATA, "math", "correcciones.jsonl"))
     args = ap.parse_args(argv)
+    rasgos = args.rasgos or (2 if args.receta.startswith("v2") else 1)
     salida = os.path.join(DATA, "pliegues", args.receta)
     os.makedirs(salida, exist_ok=True)
     for k in range(4):
         cmd = [sys.executable, os.path.join(DIR, "train_classifier.py"), DATASET, "-o",
                os.path.join(salida, f"pliegue{k}.npz"), "--personal", args.personal, "--personal-weight", args.peso,
                "--epocas-fijas", str(args.epocas), "--excluir-pliegue", str(k)]
+        if rasgos == 2:
+            cmd += ["--rasgos", "2", "--extraidos", args.extraidos]
         print(f"pliegue {k}: {' '.join(cmd[2:])}", flush=True)
         subprocess.run(cmd, check=True, cwd=DIR)
 

@@ -86,6 +86,18 @@ class TestFeatures(unittest.TestCase):
         self.assertLess(abs(corte - 10.0), 0.05 * tip)
         self.assertIsNone(F.linea(t[:1]))
 
+    def test_featurizar_v2(self):
+        import train_classifier as tc
+
+        rng = np.random.default_rng(0)
+        m = [("A", A, "a")]
+        X, y, _ = tc.featurizar(m, [2], rng, [(10.0, 0.0, 10.0)], 2, soltar=0.0)
+        self.assertEqual((X.shape, y), ((3, 556), ["A"] * 3))
+        self.assertTrue((X[:, CTX][:, 0] == 1).all())
+        X, _, _ = tc.featurizar(m, [2], rng, [(10.0, 0.0, 10.0)], 2, soltar=1.0)
+        self.assertTrue((X[:, CTX] == 0).all())
+        self.assertEqual(tc.featurizar(m, [1], rng)[0].shape, (2, 266))
+
 
 if __name__ == "__main__":
     unittest.main()
