@@ -51,9 +51,31 @@ class TestDefinir(unittest.TestCase):
     def test_no_son_definiciones(self):
         self.assertIsNone(self.d("x", "=", "x", "+", "1"))  # ecuación
         self.assertIsNone(self.d("2", "x", "=", "6"))
-        self.assertIsNone(self.d("x", "=", "5", "="))  # acaba en «=»: es una pregunta
+        self.assertIsNone(self.d("x", "+", "1", "="))  # acaba en «=»: es una pregunta
+        self.assertIsNone(self.d("2", "x", "+", "4", "=", "1", "0"))  # ecuación
         self.assertIsNone(self.d("f", "(", "f", ")", "=", "1"))
         self.assertIsNone(self.d("f", "(", "x", ")", "=", "x", vista=Vista({"f": Definicion(0, "f", "valor", expr=sp.Integer(1))})))
+
+
+class TestDerechaYCadenas(unittest.TestCase):
+    def d(self, *items, vista=None):
+        return definir(toks(*items), 0, vista or Vista({}), None)
+
+    def test_letra_a_la_derecha(self):
+        d = self.d("4", "+", "5", "=", "x")
+        self.assertEqual((d.nombre, d.tipo, d.expr), ("x", "valor", 9))
+        v = Vista({"x": Definicion(0, "x", "valor", expr=sp.Integer(3))})
+        self.assertEqual(self.d("2", "x", "=", "y", vista=v).expr, 2 * x)  # sin sustituir; la Vista lo vale 6
+        self.assertEqual(self.d("x", "=", "y").nombre, "x")  # dos nombres: manda la izquierda
+        self.assertIsNone(self.d("x", "+", "1", "=", "x"))
+
+    def test_cadenas(self):
+        d = self.d("x", "=", "9", "/", "2", "=", "4", "y")
+        self.assertEqual((d.nombre, d.expr), ("x", sp.Rational(9, 2)))
+        d = self.d("4", "+", "5", "=", "9", "=", "x")
+        self.assertEqual((d.nombre, d.expr), ("x", 9))
+        self.assertEqual(self.d("x", "=", "9", "/", "2", "=").expr, sp.Rational(9, 2))
+        self.assertIsNone(self.d("x", "=", "4", "x", "=", "8"))
 
 
 class TestResolver(unittest.TestCase):
