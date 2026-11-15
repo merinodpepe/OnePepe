@@ -61,6 +61,12 @@ pub(crate) fn animations_enabled() -> bool {
 /// Minimal shadows, never pure black.
 const SHADOW: (&str, &str) = ("rgba(20, 20, 20, 0.10)", "rgba(10, 10, 10, 0.45)");
 
+/// Big elevation for what floats, two layers (contact, diffuse), each (light, dark).
+const SHADOW_LG: [(&str, &str); 2] = [
+    ("rgba(20, 20, 20, 0.12)", "rgba(10, 10, 10, 0.50)"),
+    ("rgba(20, 20, 20, 0.10)", "rgba(10, 10, 10, 0.45)"),
+];
+
 /// libadwaita color -> token.
 const ADW_COLORS: &[(&str, &str)] = &[
     ("accent_bg_color", "brand"),
@@ -111,6 +117,10 @@ pub(crate) fn theme_css(dark: bool, high_contrast: bool) -> String {
         );
     }
     css += &format!("@define-color op_shadow {shadow};\n");
+    for (name, (light, dark_value)) in ["contact", "diffuse"].iter().zip(SHADOW_LG) {
+        let value = if dark { dark_value } else { light };
+        css += &format!("@define-color op_shadow_{name} {value};\n");
+    }
     for (adw, name) in ADW_COLORS {
         css += &format!("@define-color {adw} @op_{name};\n");
     }
@@ -310,6 +320,16 @@ mod tests {
             })
             .collect();
         assert!(loose.is_empty(), "loose colors in style.css: {loose:#?}");
+    }
+
+    #[test]
+    fn big_shadow_in_the_three_themes() {
+        for (dark, hc) in [(false, false), (true, false), (false, true)] {
+            let css = theme_css(dark, hc);
+            for name in ["contact", "diffuse"] {
+                assert!(css.contains(&format!("op_shadow_{name} rgba(")), "{name} {dark} {hc}");
+            }
+        }
     }
 
     #[test]

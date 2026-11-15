@@ -97,7 +97,7 @@
     background-position: 0px 0px, 9px 9px;
     border: 1px solid @borders;
     filter: brightness(100%);
-    border-radius: 2px;
+    border-radius: 8px;
     transition: all 160ms ease-out;
 }
 
@@ -126,7 +126,7 @@
 }
 
 .files-listview row {
-    border-radius: 6px;
+    border-radius: 8px;
     margin-top: 2px;
     margin-bottom: 2px;
 }
@@ -213,19 +213,17 @@
 }
 
 .overlay_toolbar {
-    padding: 6px;
-    border-radius: 8px;
+    padding: 8px;
+    border-radius: 12px;
     background-color: @op_bg_raised;
-    border: 1px solid @op_stroke_2;
-    box-shadow: 0px 2px 6px @op_shadow;
+    box-shadow: 0px 1px 2px @op_shadow_contact, 0px 8px 24px @op_shadow_diffuse;
 }
 
 .overlay_toolbar_scrollable {
     padding: 0px;
-    border-radius: 8px;
+    border-radius: 12px;
     background-color: @op_bg_raised;
-    border: 1px solid @op_stroke_2;
-    box-shadow: 0px 2px 6px @op_shadow;
+    box-shadow: 0px 1px 2px @op_shadow_contact, 0px 8px 24px @op_shadow_diffuse;
 }
 
 toast {
@@ -235,7 +233,7 @@ toast {
 }
 
 /* ===== OnePepe (design guide). Colors only from the tokens of src/theme.rs (@op_*), which switch with the
-   light, dark and high contrast themes. Spacing 2/4/6/8/12/16/24/32, radii 4/6/8/12, motion 100-200 ms. */
+   light, dark and high contrast themes. Spacing 2/4/6/8/12/16/24/32, radii 8/12 (circles aside), motion 100-200 ms. */
 
 /* --- header (40 px) and tabs (36 px) in the header color; the active tab joins the ribbon */
 window.onepepe headerbar.onepepe-header,
@@ -286,7 +284,7 @@ window.onepepe .onepepe-tabbar stackswitcher button {
     border: none;
     box-shadow: none;
     color: alpha(@op_on_header, 0.8);
-    border-radius: 6px 6px 0px 0px;
+    border-radius: 8px 8px 0px 0px;
     min-width: 0px;
     min-height: 0px;
     padding: 6px 12px;
@@ -308,17 +306,16 @@ window.onepepe .onepepe-tabbar stackswitcher button:checked {
 
 window.onepepe .onepepe-tabbar > button {
     color: @op_on_header;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 window.onepepe .onepepe-tabbar > button:hover {
     background-color: alpha(@op_on_header, 0.16);
 }
 
-/* --- the ribbon: full width, no frame, only a 1 px line below */
+/* --- the ribbon: full width, no frame, no line: its tone sets it apart (high contrast keeps the line) */
 window.onepepe .onepepe-ribbon {
     background-color: @op_bg_surface;
-    border-bottom: 1px solid @op_stroke_2;
 }
 
 window.onepepe .onepepe-ribbon > separator {
@@ -334,17 +331,17 @@ window.onepepe .onepepe-ribbon-body {
 }
 
 window.onepepe .onepepe-ribbon-body separator.vertical {
-    background-color: @op_stroke_2;
+    background-color: alpha(@op_stroke_2, 0.5);
     margin: 8px 4px;
     min-width: 1px;
 }
 
 window.onepepe .onepepe-ribbon-body button.flat {
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 4px 8px;
     min-height: 0px;
     color: @op_fg_2;
-    transition: background-color 100ms ease-out, color 100ms ease-out;
+    transition: background-color 100ms ease-out, color 100ms ease-out, transform 100ms ease-out, filter 100ms ease-out, outline-color 160ms ease-out;
 }
 
 window.onepepe .onepepe-ribbon-body button.flat label {
@@ -358,6 +355,8 @@ window.onepepe .onepepe-ribbon-body button.flat:hover {
 
 window.onepepe .onepepe-ribbon-body button.flat:active {
     background-color: @op_brand_tint;
+    filter: brightness(94%);
+    transform: scale(0.98);
 }
 
 window.onepepe .onepepe-ribbon-body button.flat:checked {
@@ -378,8 +377,14 @@ window.onepepe .onepepe-ribbon-body .dim-label {
 
 /* --- notebooks: active row in brand-tint with a 3 px brand bar */
 window.onepepe listview row {
-    border-radius: 4px;
+    border-radius: 8px;
     margin: 1px 6px;
+    transition: background-color 100ms ease-out, outline-color 160ms ease-out;
+}
+
+window.onepepe listview row:active {
+    background-color: @op_brand_tint;
+    filter: brightness(94%);
 }
 
 window.onepepe listview row:hover {
@@ -396,8 +401,7 @@ window.onepepe listview row:selected {
 window.onepepe .onepepe-statusbar {
     min-height: 24px;
     padding: 0px 12px;
-    background-color: @op_bg_surface;
-    border-top: 1px solid @op_stroke_2;
+    background-color: @op_bg_frame;
     color: @op_fg_3;
     font-size: 12px;
 }
@@ -449,6 +453,16 @@ window.onepepe .onepepe-optionsbar button:checked {
     color: @op_brand;
 }
 
+window.onepepe .onepepe-optionsbar button {
+    border-radius: 8px;
+    transition: background-color 100ms ease-out, transform 100ms ease-out, filter 100ms ease-out, outline-color 160ms ease-out;
+}
+
+window.onepepe .onepepe-optionsbar button:active {
+    filter: brightness(94%);
+    transform: scale(0.98);
+}
+
 window.onepepe .onepepe-optionsbar button:not(:checked):not(:hover) {
     background: none;
 }
@@ -463,6 +477,12 @@ window.onepepe .onepepe-favorites button.onepepe-pen {
     border-radius: 18px;
     min-width: 0px;
     min-height: 0px;
+    transition: transform 100ms ease-out, filter 100ms ease-out, outline-color 160ms ease-out;
+}
+
+window.onepepe .onepepe-favorites button.onepepe-pen:active {
+    filter: brightness(94%);
+    transform: scale(0.98);
 }
 
 window.onepepe .onepepe-favorites button.onepepe-pen.active {
@@ -496,7 +516,7 @@ window.onepepe .onepepe-add-page {
 /* --- settings: logo on top, flat tabs with an underline, 48 px rows, a fixed bar at the bottom */
 window.onepepe .onepepe-settings-header {
     padding: 16px 16px 0px 16px;
-    border-bottom: 1px solid @op_stroke_2;
+    background-color: @op_bg_frame;
 }
 
 window.onepepe .onepepe-settings-header image {
@@ -532,12 +552,38 @@ window.onepepe .onepepe-settings row {
 
 window.onepepe .onepepe-settings-bar {
     padding: 8px 16px;
-    background-color: @op_bg_surface;
+    background-color: @op_bg_frame;
+}
+
+/* --- keyboard focus: a brand ring (the same property libadwaita uses, so it is not doubled) */
+window.onepepe .onepepe-ribbon-body button.flat:focus-visible,
+window.onepepe .onepepe-optionsbar button:focus-visible,
+window.onepepe .onepepe-favorites button.onepepe-pen:focus-visible,
+window.onepepe listview row:focus-visible {
+    outline: 2px solid alpha(@op_brand, 0.7);
+    outline-offset: 2px;
+}
+
+/* --- high contrast: visible borders and lines on the controls */
+window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
+window.onepepe.high-contrast .overlay_toolbar,
+window.onepepe.high-contrast .overlay_toolbar_scrollable {
+    border: 1px solid @op_stroke_1;
+}
+
+window.onepepe.high-contrast .onepepe-ribbon {
+    border-bottom: 1px solid @op_stroke_2;
+}
+
+window.onepepe.high-contrast .onepepe-statusbar,
+window.onepepe.high-contrast .onepepe-settings-bar {
     border-top: 1px solid @op_stroke_2;
 }
 
-/* --- high contrast: visible borders on the controls */
-window.onepepe.high-contrast .onepepe-ribbon-body button.flat:checked,
-window.onepepe.high-contrast .overlay_toolbar {
-    border: 1px solid @op_stroke_1;
+window.onepepe.high-contrast .onepepe-settings-header {
+    border-bottom: 1px solid @op_stroke_2;
+}
+
+window.onepepe.high-contrast .onepepe-ribbon-body separator.vertical {
+    background-color: @op_stroke_2;
 }
