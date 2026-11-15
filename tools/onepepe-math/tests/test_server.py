@@ -87,12 +87,16 @@ class TestServer(unittest.TestCase):
             line(50, 7, 64, 7),
             line(50, 13, 64, 13),
         ]
-        resp = self.run_server(
-            {"id": 1, "cmd": "ping"},
-            {"id": 2, "cmd": "recognize", "strokes": strokes, "threshold": 0.9},
-            {"id": 3, "cmd": "nada"},
-            {"id": 4, "cmd": "glyph", "latex": "K", "box": [0, 0, 10, 20]},
-        )
+        from unittest import mock
+
+        # carpeta temporal: que no lea el confianza.json de la copia de trabajo
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"ONEPEPE_DATA": d}):
+            resp = self.run_server(
+                {"id": 1, "cmd": "ping"},
+                {"id": 2, "cmd": "recognize", "strokes": strokes, "threshold": 0.9},
+                {"id": 3, "cmd": "nada"},
+                {"id": 4, "cmd": "glyph", "latex": "K", "box": [0, 0, 10, 20]},
+            )
         self.assertEqual([r["id"] for r in resp], [1, 2, 3, 4])
         self.assertTrue(resp[0]["ok"])
         r = resp[1]
