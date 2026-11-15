@@ -132,7 +132,16 @@ def _pause_score(times, start, end, params):
     return max(min(score, 3.0), -3.0) if end - start > 1 or start > 0 else 0.0
 
 
-def segment(strokes, classifier, params=None, k=8, times=None):
+def linea_de(strokes, classifier, known_boxes=()):
+    """El renglón (M7.5) solo si el clasificador lo usa (modelos v2); si no, None."""
+    if not getattr(classifier, "usa_linea", False):
+        return None
+    from .features import linea
+
+    return linea(strokes, known_boxes)
+
+
+def segment(strokes, classifier, params=None, k=8, times=None, known_boxes=()):
     """Agrupa los trazos en símbolos.
 
     `times`: opcional, [(inicio, fin)] en segundos de cada trazo; las pausas cortas favorecen el mismo símbolo.
@@ -144,6 +153,7 @@ def segment(strokes, classifier, params=None, k=8, times=None):
         return []
     typical = typical_size(strokes)
     boxes = [bbox([s]) for s in strokes]
+    kw = {"linea": ln} if (ln := linea_de(strokes, classifier, known_boxes)) else {}
     best = [(-math.inf, None)] * (n + 1)
     best[0] = (0.0, None)
     cache = {}
@@ -160,7 +170,7 @@ def segment(strokes, classifier, params=None, k=8, times=None):
                 continue
             key = (start, end)
             if key not in cache:
-                cache[key] = classifier.candidates_w_junk(strokes[start:end], k)
+                cache[key] = classifier.candidates_w_junk(strokes[start:end], k, **kw)
             cands, junk = cache[key]
             score = (
                 best[start][0]

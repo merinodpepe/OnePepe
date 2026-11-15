@@ -25,7 +25,8 @@ from onepepe_math import alinear  # noqa: E402
 from onepepe_math.classifier import SymbolClassifier  # noqa: E402
 from onepepe_math.entreno import expected_symbols  # noqa: E402
 from onepepe_math.inkml import read_inkml  # noqa: E402
-from onepepe_math.segment import MAX_STROKES, bbox, typical_size  # noqa: E402
+from onepepe_math.features import linea  # noqa: E402,F401  (M7.5; vive en features.py)
+from onepepe_math.segment import MAX_STROKES  # noqa: E402
 from onepepe_math.symbols import CORE  # noqa: E402
 
 MAX_FICHAS = 25
@@ -40,26 +41,6 @@ def formula_valida(tokens, n_trazos, core):
 
 def supera_80(A):
     return bool(A) and sum(A) >= 0.8 * len(A)
-
-
-def linea(strokes):
-    """M7.5 de una fórmula: (típico, pendiente, corte) o None. T7b la mueve a features.py."""
-    tip = typical_size(strokes)
-    pts = []
-    for s in strokes:
-        b = bbox([s])
-        if b[3] - b[1] >= 0.5 * tip:
-            pts.append(((b[0] + b[2]) / 2, b[3]))
-    if len(pts) < 2:
-        return None
-    pend = 0.0
-    if len(pts) >= 4 and max(p[0] for p in pts) - min(p[0] for p in pts) > 4 * tip:
-        sl = sorted((q[1] - p[1]) / (q[0] - p[0]) for p, q in itertools.combinations(pts, 2) if q[0] != p[0])
-        if sl:
-            pend = max(-0.3, min(0.3, (sl[(len(sl) - 1) // 2] + sl[len(sl) // 2]) / 2))
-    fondos = sorted(y - pend * x for x, y in pts)
-    corte = (fondos[(len(fondos) - 1) // 2] + fondos[len(fondos) // 2]) / 2
-    return (tip, pend, corte)
 
 
 def _analizar(item):
