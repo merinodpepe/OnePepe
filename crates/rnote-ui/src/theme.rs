@@ -41,6 +41,23 @@ const HIGH_CONTRAST: &[(&str, &str, &str)] = &[
     ("stroke_2", "#9E9E9E", "#808080"),
 ];
 
+/// Motion table (ms) and curves: the only durations `style.css` may use (see `no_loose_durations`).
+#[allow(dead_code)]
+pub(crate) const MOTION_FAST: u32 = 100;
+pub(crate) const MOTION_NORMAL: u32 = 160;
+#[allow(dead_code)]
+pub(crate) const MOTION_SLOW: u32 = 240;
+/// Curves of the stylesheet (CSS can not take them from here): entry and exit.
+#[allow(dead_code)]
+pub(crate) const CURVE_IN: &str = "cubic-bezier(0.2, 0, 0, 1)";
+#[allow(dead_code)]
+pub(crate) const CURVE_OUT: &str = "cubic-bezier(0.4, 0, 1, 1)";
+
+/// The one place that asks whether to animate: the system setting `gtk-enable-animations`.
+pub(crate) fn animations_enabled() -> bool {
+    gtk4::Settings::default().is_none_or(|s| s.is_gtk_enable_animations())
+}
+
 /// Minimal shadows, never pure black.
 const SHADOW: (&str, &str) = ("rgba(20, 20, 20, 0.10)", "rgba(10, 10, 10, 0.45)");
 
@@ -293,6 +310,29 @@ mod tests {
             })
             .collect();
         assert!(loose.is_empty(), "loose colors in style.css: {loose:#?}");
+    }
+
+    #[test]
+    fn no_loose_durations() {
+        let css = include_str!("../data/style.css");
+        let mut loose = vec![];
+        for l in css.lines().filter(|l| l.contains("transition:")) {
+            for t in l.split(|c: char| c.is_whitespace() || c == ',' || c == ';') {
+                let ms = if let Some(n) = t.strip_suffix("ms") {
+                    n.parse::<f64>().ok()
+                } else {
+                    t.strip_suffix('s')
+                        .and_then(|n| n.parse::<f64>().ok())
+                        .map(|n| n * 1000.0)
+                };
+                if let Some(ms) = ms
+                    && ![100.0, 160.0, 240.0].contains(&ms)
+                {
+                    loose.push(l.trim());
+                }
+            }
+        }
+        assert!(loose.is_empty(), "loose durations in style.css: {loose:#?}");
     }
 
     #[test]

@@ -28,7 +28,7 @@
 
 .main_title.unsaved_changes .title {
     font-style: italic;
-    transition: font-style 0.2s;
+    transition: font-style 160ms;
 }
 
 .canvas_scroller {
@@ -37,7 +37,7 @@
 
 .modifiernode {
     color: @op_brand;
-    transition: color 0.15s;
+    transition: color 160ms;
 }
 
 .modifiernode:hover {
@@ -63,7 +63,7 @@
     background-position: 0px 0px, 9px 9px;
     border: 1px solid @borders;
     border-radius: 4px;
-    transition: all 0.15s ease-out;
+    transition: all 160ms ease-out;
 }
 
 .colorpad:hover {
@@ -98,7 +98,7 @@
     border: 1px solid @borders;
     filter: brightness(100%);
     border-radius: 2px;
-    transition: all 0.15s ease-out;
+    transition: all 160ms ease-out;
 }
 
 .colorsetter:hover {
@@ -122,7 +122,7 @@
 }
 
 .workspace-listbox {
-    transition: color 0.15s;
+    transition: color 160ms;
 }
 
 .files-listview row {
@@ -141,7 +141,7 @@
     min-height: 40px;
     margin: 4px 3px;
     padding: 3px;
-    transition: opacity 150ms ease-out;
+    transition: opacity 160ms ease-out;
     opacity: 0.8;
     background-color: @workspacerow_color;
     border-radius: 0 4px 4px 0;
@@ -192,7 +192,7 @@
 
 /* https://gitlab.gnome.org/GNOME/libadwaita/-/blob/main/src/stylesheet/_common.scss#L1 */
 .groupediconpickergroup_flowbox flowboxchild {
-    transition: background 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: background 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* https://gitlab.gnome.org/GNOME/libadwaita/-/blob/main/src/stylesheet/_colors.scss#L62-L66 */
@@ -292,7 +292,7 @@ window.onepepe .onepepe-tabbar stackswitcher button {
     padding: 6px 12px;
     margin: 4px 2px 0px 2px;
     font-weight: 400;
-    transition: color 150ms ease-out, background-color 150ms ease-out;
+    transition: color 160ms ease-out, background-color 160ms ease-out;
 }
 
 window.onepepe .onepepe-tabbar stackswitcher button:hover {
@@ -511,7 +511,7 @@ window.onepepe .onepepe-settings-tabs button {
     padding: 8px 8px;
     color: @op_fg_2;
     border-bottom: 2px solid transparent;
-    transition: color 150ms ease-out, border-color 150ms ease-out;
+    transition: color 160ms ease-out, border-color 160ms ease-out;
 }
 
 window.onepepe .onepepe-settings-tabs button:hover {

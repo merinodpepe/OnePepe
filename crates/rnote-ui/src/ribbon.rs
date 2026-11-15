@@ -19,7 +19,12 @@ pub(crate) fn setup(appwindow: &RnAppWindow) {
     setup_actions(appwindow);
 
     let stack = gtk4::Stack::builder()
-        .transition_type(gtk4::StackTransitionType::Crossfade)
+        .transition_type(if crate::theme::animations_enabled() {
+            gtk4::StackTransitionType::Crossfade
+        } else {
+            gtk4::StackTransitionType::None
+        })
+        .transition_duration(crate::theme::MOTION_NORMAL)
         .hhomogeneous(false)
         .vhomogeneous(true)
         .build();

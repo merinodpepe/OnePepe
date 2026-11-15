@@ -261,6 +261,13 @@ mod imp {
                 #[upgrade_or]
                 glib::ControlFlow::Break,
                 move |_widget, _frame_clock| {
+                    // the engine does not know GTK: it gets the setting as data, and asks for redraws while a result fades in
+                    canvas
+                        .engine_mut()
+                        .math_set_animate(crate::theme::animations_enabled());
+                    if canvas.engine_ref().math_animating() {
+                        canvas.queue_draw();
+                    }
                     if canvas.engine_mut().animation.process_frame() {
                         let optimize_epd = canvas.engine_ref().optimize_epd();
                         canvas.engine_mut().handle_animation_frame();
