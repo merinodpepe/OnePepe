@@ -26,11 +26,11 @@ DEFAULT_PATH = os.path.join(
     os.environ.get("ONEPEPE_DATA", os.path.expanduser("~/.local/share/onepepe")), "math", "correcciones.jsonl"
 )
 
-# Medido con tu letra (30 expresiones, división temporal): ver MATEMATICAS-INFORME.md, sección 0.5.
+# Rejilla de T7b (M7.6) sobre el examen con la red v2: ver ESTADO/SUPUESTOS de T7b; antes 0,3 y 0,6.
 K = 5
 TAU = 0.1
-D_MAX = 0.3
-LAMBDA_MAX = 0.6
+D_MAX = 0.2
+LAMBDA_MAX = 0.8
 
 
 def _unit(e):
