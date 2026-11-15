@@ -7,6 +7,16 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.10.1 (2026-11-15) — definiciones a la derecha, cadenas y despeje
+
+- **Letra a la derecha:** `4+5=x` define x = 9; con `x=3`, `2x=y` define y = 6.
+- **Cadenas de iguales:** `x=9/2=4y` define x = 9/2; `x=9/2=` también deja definida la x.
+- **Despeje:** una ecuación con una sola letra sin definir y una única solución real la define (`2x+4=10` → x = 3;
+  `x=9/2=4y` → y = 9/8). Es silencioso: el valor solo sale cuando preguntas debajo (`x=`).
+- No despeja: dos incógnitas, varias soluciones (`x^2=4`), unidades, ni una letra ya definida arriba. «Revisar
+  pasos» no usa lo despejado como dato.
+- Solo cambia el programa auxiliar: no hace falta recompilar la app. Sin cambio de formato .rnote.
+
 ## 1.10 (2026-11-15) — diseño fluido, recortado (T12)
 
 - **Tabla de movimiento** en `theme.rs` (100, 160 y 240 ms y dos curvas); todas las transiciones de `style.css` usan

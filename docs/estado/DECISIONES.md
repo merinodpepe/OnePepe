@@ -552,3 +552,11 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - SUPUESTO: el fundido de pestañas dura 160 ms (`MOTION_NORMAL`) y no los 150 del manual, para no tener duraciones fuera de la tabla. Las transiciones de `style.css` de 150 y 200 ms pasan a 160.
 - SUPUESTO: `born` no se guarda (al reabrir, el resultado sale opaco); un resultado que ya existía conserva su `born` y no se vuelve a animar; el motor recibe «animar o no» como dato (`math_set_animate`), sin llamar a GTK.
 - Tests: motor 29 (filtro `math`), tema 4, `cargo check` de la interfaz ok. Nada visto en pantalla.
+
+## 1.10.1 (2026-11-15): definiciones a la derecha, cadenas y despeje (petición del usuario tras instalar)
+
+- El usuario esperaba que `4+5=x` / `x=` diera 9 y que las cadenas (`x=9/2=4y`) valieran con variables, despejando también la `y`.
+- Reglas: letra sola a la derecha define esa letra si el otro lado no la contiene; `x=y` sigue definiendo la de la izquierda; en una cadena se pueden definir varios nombres; despeje solo con exactamente una letra sin definir y una única solución real.
+- SUPUESTO (Fable): el valor despejado es silencioso (no se enseña junto a la ecuación, para no resolver los ejercicios mientras se escriben). El usuario puede pedirlo visible.
+- SUPUESTO: «Revisar pasos» no usa lo despejado como dato (las sondas `pasos_mal` y `pasos_bien` salen igual). Tope de 1 s por despeje. Sin unidades, sistemas ni desigualdades.
+- Tests: 223 de Python, 29 sondas con 0 erróneas; página de 40 renglones 0,016 s. Los tests del despeje se escribieron a la vez que el código (no se vieron fallar antes). Probado con texto compuesto, no con lápiz.
