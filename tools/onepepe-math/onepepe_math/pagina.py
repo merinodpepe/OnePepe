@@ -19,7 +19,7 @@ from dataclasses import replace
 
 import sympy as sp
 
-from .entorno import Entorno, _value, definir
+from .entorno import Entorno, _value, definir, despejar
 from .evaluate import (
     RELATIONS,
     ParseError,
@@ -328,6 +328,14 @@ def _valor_variable(tree, tokens, d, vista, units):
     return _natural_log_names({"text": str(value), "latex": sp.latex(value), "kind": "value"})
 
 
+def _definiciones(tokens, i, vista, glossary_units):
+    """Lo que define el renglón: su definición (si hay) y lo que se despeja (si no es una función `f(x)=…`)."""
+    d = definir(tokens, i, vista, glossary_units)
+    if d and d.tipo == "funcion":
+        return [d]
+    return ([d] if d else []) + despejar(tokens, i, vista.con(d) if d else vista)
+
+
 def page(rows, equals=True, variables=False, check=False, glossary_units=None, umbral_renglon=0.7):
     """Anotaciones de cada renglón. `rows`: [{"symbols": [{"latex", "box"}]}], de arriba abajo."""
     glossary_units = glossary_units or {}
@@ -347,11 +355,10 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None, u
             if p is None:
                 continue
             vista = entorno.vista(i)
-            d = _cache(("d", repr(p[2]), vista.clave()), lambda: definir(p[2], i, vista, glossary_units))
-            if d:
-                definiciones.append(replace(d, renglon=i, _texto=None))
+            ds = _cache(("d", repr(p[2]), vista.clave()), lambda: _definiciones(p[2], i, vista, glossary_units))
+            definiciones += [replace(d, renglon=i, _texto=None) for d in ds]
     # las cadenas que acaban en «=» definen para los de abajo, pero no cuentan como definición del renglón
-    por_renglon = {d.renglon: d for d in definiciones if not _ends_with_equals(parsed[d.renglon][2])}
+    por_renglon = {d.renglon: d for d in definiciones if not d.despejada and not _ends_with_equals(parsed[d.renglon][2])}
     out = []
     previous = previous_d = None
     for i, p in enumerate(parsed):

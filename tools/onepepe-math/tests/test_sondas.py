@@ -147,5 +147,30 @@ class TestQueFunciona(unittest.TestCase):
         self.assertEqual(textos(r"\frac{\partial}{\partial x}(x^2y)="), ["2*x*y"])
 
 
+class TestDespejar(unittest.TestCase):
+    def t(self, *filas, **kw):
+        return textos(*filas, variables=True, **kw)
+
+    def test_cadena_define_varias(self):
+        self.assertEqual(self.t("x=9/2=4y", "y="), ["9/8"])
+        self.assertEqual(self.t("x=9/2=4y", "x="), ["9/2"])
+
+    def test_despeja(self):
+        self.assertEqual(self.t("2x+4=10", "x="), ["3"])
+        self.assertEqual(self.t("x=3", "2x+y=10", "y="), ["4"])
+
+    def test_no_despeja(self):
+        self.assertEqual(self.t("x^2=4", "x="), ["?"])
+        self.assertEqual(self.t("x+y=5", "x="), ["?"])
+        self.assertEqual(self.t("x=3", "2x=7", "x="), ["3"])
+
+    def test_silencioso(self):
+        self.assertEqual(compone("2x+4=10", variables=True)[0]["marks"], [])
+
+    def test_como_hoy(self):
+        self.assertEqual(self.t("4+5=x", "x="), ["9"])
+        self.assertEqual(self.t("x=5", "y=x", "y="), ["5"])
+
+
 if __name__ == "__main__":
     unittest.main()
