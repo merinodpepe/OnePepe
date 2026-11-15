@@ -149,6 +149,40 @@ def renglon(r, y=0.0):
     return {"symbols": [{"latex": l, "box": [b[0], b[1] + y, b[2], b[3] + y]} for l, b in r]}
 
 
+def _dict(syms):
+    return {"symbols": [{"latex": q.label, "box": list(q.box)} for q in syms]}
+
+
+def sumrow():
+    """`\\sum_{i=1}^{3} i=` con los límites debajo (centrado) y encima del signo (como `s12.sumrow`)."""
+    B = 40.0
+    sigma = Sym(r"\sum", (0, B - 20, 16, B + 2))
+    lo, _ = _coloca(tokeniza("i=1"), 0, B + 14, 0.5)
+    hi, _ = _coloca(tokeniza("3"), 6, B - 24, 0.5)
+    dx = (16 - max(q.box[2] for q in lo)) / 2
+    for q in lo:
+        q.box = (q.box[0] + dx, q.box[1], q.box[2] + dx, q.box[3])
+    return _dict([sigma] + lo + hi + _coloca(tokeniza("i="), 22, B, 1.0)[0])
+
+
+def num2(d1, d2, escala=1.0, dy=0.0, hueco=2.0, pre="x+"):
+    """`pre` + dos cifras + «=»: la 2.ª con alto `escala` (base alineada) y desplazada `dy` (+ = abajo), como `s04.num2`."""
+    B = 24.0
+    syms, x = _coloca(tokeniza(pre), 0, B, 1.0)
+    syms.append(Sym(d1, (x, B - H, x + 8, B)))
+    x += 8 + hueco
+    h2 = H * escala
+    syms.append(Sym(d2, (x, B - h2 + dy, x + 8 * escala, B + dy)))
+    x += 8 * escala + hueco
+    return _dict(syms + _coloca(tokeniza("="), x, B, 1.0)[0])
+
+
+def hueco_numeros():
+    """`12` y `34` separados 3 altos, y «=»."""
+    a, x = _coloca(tokeniza("12"), 0, 24.0, 1.0)
+    return _dict(a + _coloca(tokeniza("34="), x + 3 * H, 24.0, 1.0)[0])
+
+
 def compone(*renglones, paso=60.0, **kw):
     """`pagina.page` de los renglones (cada uno `paso` unidades más abajo). `kw`: equals (True), variables, check."""
     kw.setdefault("equals", True)
@@ -172,6 +206,10 @@ SONDAS = [
     ("e_a_la_5", ["e^5="], False, r"148,4"),
     ("exponente_negativo", ["e^{-x}"], False, r"^$"),
     ("prima", ["f'(x)="], False, r"^\?$"),
+    ("sumatorio", [sumrow()], False, r"^6$"),
+    ("cifra_pequena", [num2("3", "0", 0.72)], False, r"^\?$"),
+    ("cifra_exponente", [num2("3", "0", 0.6, -0.4 * H)], False, r"^x \+ 1$"),
+    ("hueco_numeros", [hueco_numeros()], False, r"^\?$"),
 ]
 
 

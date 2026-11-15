@@ -114,7 +114,71 @@ def _tokens(row, decimal_comma=True):
             and final[i + 1][0] == "num"
         ):
             final[i] = ["sym", r"\times", None, None]
-    return final
+    return _leibniz(final)
+
+
+_D = ("d", r"\partial")
+
+
+def _pow(t):
+    """(letra, n) de una ficha letra con exponente entero opcional (n = 1 si no lo tiene), o None."""
+    if t[0] != "sym" or t[3] is not None:
+        return None
+    if t[2] is None:
+        return t[1], 1
+    try:
+        return t[1], int(_plain(t[2]))
+    except (ParseError, ValueError):
+        return None
+
+
+def _letra(t):
+    return t[0] == "sym" and t[2] is None and t[3] is None and t[1].isalpha() and len(t[1]) == 1
+
+
+def _deriv_frac(t):
+    """(f, [(v, n)]) si la fracción es una derivada de Leibniz (d/dx, d²f/dx², ∂²f/∂x∂y), si no None."""
+    _, num, den = t[1]
+    nt, dt = _tokens(num), _tokens(den)
+    a = _pow(nt[0]) if nt else None
+    if not a or a[0] not in _D or len(nt) > 2 or (len(nt) == 2 and not _letra(nt[1])):
+        return None
+    d, n = a
+    f = nt[1][1] if len(nt) == 2 else None
+    if len(dt) == 2 and dt[0][:4] == ["sym", d, None, None]:
+        v = _pow(dt[1])
+        if v and v[1] == n and len(v[0]) == 1 and v[0].isalpha():
+            return f, [v]
+    if d == r"\partial" and n == 2 and len(dt) == 4 and all(dt[k][:4] == ["sym", d, None, None] for k in (0, 2)) \
+            and _letra(dt[1]) and _letra(dt[3]):
+        return f, [(dt[1][1], 1), (dt[3][1], 1)]
+    return None
+
+
+def _leibniz(tokens, definidos=()):
+    """Derivadas de Leibniz como una sola ficha ["deriv", (f o None, [(variable, orden)]), None, None]: d/dx, dx/dt,
+    d²f/dx², ∂²f/∂x∂y y en línea dx/dt. No se aplica si «d» es una variable de la página."""
+    if "d" in definidos:
+        return tokens
+    out, i = [], 0
+    while i < len(tokens):
+        t = tokens[i]
+        w = tokens[i : i + 5]
+        d = _deriv_frac(t) if t[0] == "frac" and t[2] is None and t[3] is None else None
+        if d:
+            out.append(["deriv", d, None, None])
+        elif (
+            len(w) == 5
+            and all(_letra(x) for x in (w[0], w[1], w[3], w[4]))
+            and w[0][1] == w[3][1] == "d"
+            and w[2][:4] == ["sym", "/", None, None]
+        ):
+            out.append(["deriv", (w[1][1], [(w[4][1], 1)]), None, None])
+            i += 4
+        else:
+            out.append(t)
+        i += 1
+    return out
 
 
 _NOT_OPERAND = {"+", "-", r"\pm", r"\mp", r"\times", r"\cdot", r"\div", "/", "*", "=", r"\neq", "<", ">",
@@ -189,7 +253,7 @@ class _Parser:
         return self.atom()
 
     def _starts_atom(self, tok):
-        if tok[0] in ("num", "frac", "sqrt", "root", "accent"):
+        if tok[0] in ("num", "frac", "sqrt", "root", "accent", "deriv", "prime"):
             return True
         if tok[0] != "sym":
             return False
@@ -218,21 +282,15 @@ class _Parser:
             if tok[3] is not None:
                 raise ParseError("subíndice en un número")
             return self._apply_scripts(value, tok)
+        if kind == "deriv":
+            f, vs = tok[1]
+            if f is not None:
+                raise ParseError("derivada de una función sin definir")
+            return sp.Derivative(self.unary(), *[(self._symbol(["sym", v, None, None]), n) for v, n in vs])
+        if kind == "prime":
+            raise ParseError("derivada de una función sin definir")
         if kind == "frac":
             _, num, den = tok[1]
-            # derivada d/dx
-            num_t, den_t = _tokens(num), _tokens(den)
-            if (
-                len(num_t) == 1
-                and num_t[0][0] == "sym"
-                and num_t[0][1] in ("d", r"\partial")
-                and len(den_t) == 2
-                and den_t[0][0] == "sym"
-                and den_t[0][1] in ("d", r"\partial")
-                and den_t[1][0] == "sym"
-            ):
-                var = self._symbol(den_t[1])
-                return sp.Derivative(self.unary(), var)
             value = sub_expr(num, self.glossary) / sub_expr(den, self.glossary)
             return self._apply_scripts(value, tok)
         if kind == "sqrt":
@@ -274,6 +332,8 @@ class _Parser:
             return self._limit(tok)
         if v == r"\infty":
             return sp.oo
+        if v in ("f", "g", "h", "F", "G") and v not in self.glossary and tok[3] is None and self.is_sym(self.peek(), "("):
+            raise ParseError("función sin definir")
         return self._apply_scripts(self._symbol(tok), tok)
 
     def _bare_argument(self):
@@ -298,6 +358,8 @@ class _Parser:
             return self.glossary[name]
         if name == "pi":
             return sp.pi
+        if name == "e":
+            return sp.E
         return sp.Symbol(name)
 
     def _integral(self, tok):
@@ -345,7 +407,7 @@ class _Parser:
     def full(self):
         value = self.expr()
         if self.peek() is not None:
-            raise ParseError(f"sobra {self.peek()[1]}")
+            raise ParseError("hueco entre números" if self.peek()[1] == r"\," else f"sobra {self.peek()[1]}")
         return value
 
 
@@ -520,7 +582,18 @@ def _with_units(expr, units):
         return None
     f = sp.lambdify(free, expr, modules=[{"sqrt": lambda q: q**0.5}, "math"])
     q = f(*[units[s.name] for s in free])
-    q = q.to_compact() if hasattr(q, "to_compact") else q
+    if hasattr(q, "to_base_units"):
+        from pint import DimensionalityError
+
+        q = q.to_base_units()
+        for u in ("N", "J", "W", "Pa", "C", "V", "ohm", "Hz"):
+            try:
+                q = q.to(u)
+                break
+            except DimensionalityError:
+                pass
+        if len(q.unit_items()) == 1:
+            q = q.to_compact()
     mag = sp.Float(q.magnitude, 4) if hasattr(q, "magnitude") else sp.Float(q, 4)
     unit = f" {q.units:~P}" if hasattr(q, "units") and str(q.units) != "dimensionless" else ""
     return {"latex": sp.latex(mag) + (r"\," + rf"\mathrm{{{unit.strip()}}}" if unit else ""),

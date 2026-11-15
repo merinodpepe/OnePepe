@@ -9,7 +9,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sondas_util import compone  # noqa: E402
+from sondas_util import H, compone, hueco_numeros, num2, sumrow  # noqa: E402
 
 
 def textos(*filas, **kw):
@@ -18,39 +18,30 @@ def textos(*filas, **kw):
 
 
 class TestSondasTrasT3(unittest.TestCase):
-    @unittest.expectedFailure
     def test_paren_mas(self):
         self.assertEqual(textos("(x+1)+3="), ["x + 4"])
 
-    @unittest.expectedFailure
     def test_segunda_derivada(self):
         self.assertEqual(textos(r"\frac{d^2}{dx^2}(x^3)="), ["6*x"])
 
-    @unittest.expectedFailure
     def test_dxdt_frac(self):
         self.assertEqual(textos("x=t^2", r"\frac{dx}{dt}=", variables=True), ["?"])
 
-    @unittest.expectedFailure
     def test_dydx_frac(self):
         self.assertEqual(textos("y=x^2", r"\frac{dy}{dx}=", variables=True), ["?"])
 
-    @unittest.expectedFailure
     def test_dxdt_linea(self):
         self.assertEqual(textos("x=t^2", "dx/dt=", variables=True), ["?"])
 
-    @unittest.expectedFailure
     def test_f_de_3(self):
         self.assertEqual(textos("f(x)=x^2+1", "f(3)=", variables=True), ["?"])
 
-    @unittest.expectedFailure
     def test_f_de_x(self):
         self.assertEqual(textos("x=5", "f(x)=x^2+1", "f(x)=", variables=True), ["?"])
 
-    @unittest.expectedFailure
     def test_unidades(self):
         self.assertRegex(" ".join(textos("m=70kg", "g=9,8m/s^2", "mg=", variables=True)), r"^686.*N$")
 
-    @unittest.expectedFailure
     def test_e_a_la_5(self):
         self.assertRegex(" ".join(textos("e^5=")), "148,4")
 
@@ -63,9 +54,20 @@ class TestSondasTrasT3(unittest.TestCase):
     def test_prima(self):
         self.assertEqual(textos("f'(x)="), ["?"])
 
-    @unittest.expectedFailure
     def test_prima_latex(self):
         self.assertEqual(compone("f'(x)=")[-1]["latex"], "f'(x)=")
+
+    def test_sumatorio(self):
+        self.assertEqual(textos(sumrow()), ["6"])
+
+    def test_cifra_pequena(self):
+        self.assertEqual(compone(num2("3", "0", 0.72))[-1]["latex"], "x+30=")
+
+    def test_cifra_exponente(self):
+        self.assertEqual(compone(num2("3", "0", 0.6, -0.4 * H))[-1]["latex"], "x+3^{0}=")
+
+    def test_hueco_numeros(self):
+        self.assertEqual(textos(hueco_numeros()), ["?"])
 
 
 class TestQueFunciona(unittest.TestCase):
