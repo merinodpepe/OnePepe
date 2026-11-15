@@ -20,12 +20,14 @@ Peticiones:
   {"id": 14, "cmd": "training_sets"}                 sets del modo entreno (entreno.py)
   {"id": 15, "cmd": "training_new", "set": "general-200"}   una sesión nueva (lo que la app guarda)
   {"id": 16, "cmd": "training_render", "lines": ["x^2"], "color": "#000000"}   la expresión: {"png": base64 o null}
+  {"id": 18, "cmd": "report_failure", "strokes", "times", "expected": "x+1", "read": "x + l"}   renglón mal leído
   {"id": 17, "cmd": "training_import", "session": {...}}   tu letra al almacén: {"imported", "failed", ...}
 
 Cada respuesta lleva el mismo "id". Los errores se responden con {"id", "error": "..."}; nunca se cae el programa.
 """
 
 import json
+import os
 import sys
 
 from . import glossary as gl
@@ -156,6 +158,8 @@ class Server:
             from . import entreno
 
             return entreno.import_session(req["session"], self.classifier, self.personal)
+        if cmd == "report_failure":
+            return self.report_failure(req)
         if cmd == "examples":
             return {"examples": self.personal.list_examples()}
         if cmd == "forget":
@@ -163,6 +167,23 @@ class Server:
         if cmd == "relabel":
             return {"ok": self.personal.relabel(req["example"], req["latex"])}
         return {"error": f"orden desconocida: {cmd}"}
+
+    def report_failure(self, req):
+        """Guarda un renglón mal leído en `fallos.jsonl` (lo lee `medir.py --fallos`)."""
+        import datetime
+        import uuid
+
+        expected = (req.get("expected") or "").strip()
+        if not expected:
+            return {"error": "falta lo que querías escribir"}
+        fid = uuid.uuid4().hex[:12]
+        rec = {"id": fid, "date": datetime.datetime.now().isoformat(timespec="seconds"), "expected": expected,
+               "read": req.get("read", ""), "strokes": req.get("strokes", []), "times": req.get("times")}
+        data = os.path.join(os.environ.get("ONEPEPE_DATA", os.path.expanduser("~/.local/share/onepepe")), "math")
+        os.makedirs(data, exist_ok=True)
+        with open(os.path.join(data, "fallos.jsonl"), "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        return {"ok": True, "failure": fid}  # "id" de la respuesta es el de la petición
 
     def serve(self, inp=sys.stdin, out=sys.stdout):
         for line in inp:

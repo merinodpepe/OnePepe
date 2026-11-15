@@ -1434,6 +1434,63 @@ impl Engine {
         })
     }
 
+    /// The recognized line under a symbol or under an annotation of that line (indices into the symbols).
+    fn math_failure_line(&self, pos: Vector2) -> Option<Vec<usize>> {
+        let i = self.math_symbol_index_at(pos).or_else(|| {
+            let o = &self.math.overlays[self.math_overlay_index_at(pos)?];
+            self.math
+                .symbols
+                .iter()
+                .position(|s| s.keys.iter().any(|k| o.keys.contains(k)))
+        })?;
+        self.math_symbol_lines(None).into_iter().find(|l| l.contains(&i))
+    }
+
+    /// The LaTeX read on the line at the position (to offer it for editing).
+    pub fn math_failure_read(&self, pos: Vector2) -> Option<String> {
+        let line = self.math_failure_line(pos)?;
+        Some(
+            line.iter()
+                .map(|&i| self.math.symbols[i].latex.as_str())
+                .collect::<Vec<_>>()
+                .join(" "),
+        )
+    }
+
+    /// The request that saves the line at the position as a failure: its original strokes (and times when every
+    /// stroke has them), what was read and what the user says it is.
+    pub fn math_failure_request(&mut self, pos: Vector2, expected: &str) -> Option<String> {
+        let line = self.math_failure_line(pos)?;
+        let read = self.math_failure_read(pos)?;
+        let strokes = line
+            .iter()
+            .flat_map(|&i| self.math.symbols[i].original.clone())
+            .collect::<Vec<_>>();
+        // the times are per current stroke: they only match when the strokes were not replaced by clean ones
+        let times = line
+            .iter()
+            .flat_map(|&i| {
+                let s = &self.math.symbols[i];
+                let t = s.keys.iter().map(|k| self.math.stroke_times.get(k).copied());
+                if s.keys.len() == s.original.len() {
+                    t.collect::<Vec<_>>()
+                } else {
+                    vec![None; s.original.len()]
+                }
+            })
+            .collect::<Option<Vec<[f64; 2]>>>();
+        self.math.next_id += 1;
+        serde_json::to_string(&serde_json::json!({
+            "id": self.math.next_id,
+            "cmd": "report_failure",
+            "strokes": strokes,
+            "times": times,
+            "expected": expected,
+            "read": read,
+        }))
+        .ok()
+    }
+
     /// A tap on an annotation: a number goes to its next form (fraction → decimal → mixed). Returns false when it
     /// has only one form (then the UI explains it).
     fn math_tap_overlay(&mut self, i: usize) -> bool {
@@ -1877,6 +1934,21 @@ mod tests {
         engine.config.write().pens_config.brush_config.math.equals = false;
         assert!(engine.math_page_request(None).is_none());
         assert!(engine.math.overlays.is_empty());
+    }
+
+    #[test]
+    fn failure_request_has_strokes() {
+        let mut engine = Engine::default();
+        let _ = write_one_equals(&mut engine);
+        let req = engine
+            .math_failure_request(Vector2::new(101.0, 120.0), "1 = 1")
+            .unwrap();
+        let v: serde_json::Value = serde_json::from_str(&req).unwrap();
+        assert_eq!(v["cmd"], "report_failure");
+        assert_eq!(v["strokes"].as_array().unwrap().len(), 3);
+        assert_eq!(v["read"], "1 =");
+        assert_eq!(v["expected"], "1 = 1");
+        assert!(engine.math_failure_request(Vector2::new(900.0, 900.0), "x").is_none());
     }
 
     #[test]

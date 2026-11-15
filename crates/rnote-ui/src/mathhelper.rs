@@ -655,8 +655,72 @@ fn other_symbol_box(
     vbox
 }
 
+/// The "This is wrong…" button: asks what should have been read and saves the line as a failure to train with.
+fn failure_button(
+    appwindow: &RnAppWindow,
+    canvas: &RnCanvas,
+    popover: &gtk4::Popover,
+    pos: rnote_engine::engine::math::Vector2,
+) -> gtk4::Button {
+    use adw::prelude::*;
+    let button = gtk4::Button::with_label(&gettext("This is wrong…"));
+    button.add_css_class("flat");
+    button.connect_clicked(clone!(
+        #[weak]
+        appwindow,
+        #[weak]
+        canvas,
+        #[weak]
+        popover,
+        move |_| {
+            popover.popdown();
+            let read = canvas.engine_ref().math_failure_read(pos).unwrap_or_default();
+            glib::spawn_future_local(clone!(
+                #[weak]
+                appwindow,
+                #[weak]
+                canvas,
+                async move {
+                    let entry = gtk4::Entry::builder().text(&read).activates_default(true).build();
+                    let dialog = adw::AlertDialog::new(
+                        Some(&gettext("This is wrong…")),
+                        Some(&gettext("Write in LaTeX what you wrote, to train with it")),
+                    );
+                    dialog.set_extra_child(Some(&entry));
+                    dialog.add_response("cancel", &gettext("Cancel"));
+                    dialog.add_response("save", &gettext("Save"));
+                    dialog.set_response_appearance("save", adw::ResponseAppearance::Suggested);
+                    dialog.set_default_response(Some("save"));
+                    dialog.set_close_response("cancel");
+                    if dialog.choose_future(Some(&appwindow)).await.as_str() != "save" {
+                        return;
+                    }
+                    let request = canvas.engine_mut().math_failure_request(pos, entry.text().trim());
+                    let Some(request) = request else {
+                        return;
+                    };
+                    let ok = ask(&appwindow, request)
+                        .await
+                        .and_then(|r| serde_json::from_str::<serde_json::Value>(&r).ok())
+                        .is_some_and(|v| v["ok"] == true);
+                    let message = if ok {
+                        gettext("Saved for training")
+                    } else {
+                        gettext("It could not be saved")
+                    };
+                    appwindow
+                        .overlays()
+                        .dispatch_toast_text(&message, crate::overlays::TEXT_TOAST_TIMEOUT_DEFAULT);
+                }
+            ));
+        }
+    ));
+    button
+}
+
 /// A tap on what is written next to a line: the "?" says what was read, a wrong step its explanation.
 fn explain_overlay(
+    appwindow: &RnAppWindow,
     canvas: &RnCanvas,
     pos: rnote_engine::engine::math::Vector2,
     kind: &str,
@@ -681,7 +745,10 @@ fn explain_overlay(
     label.set_wrap(true);
     label.set_max_width_chars(40);
     label.set_selectable(true);
-    popover.set_child(Some(&label));
+    let vbox = gtk4::Box::new(gtk4::Orientation::Vertical, 6);
+    vbox.append(&label);
+    vbox.append(&failure_button(appwindow, canvas, &popover, pos));
+    popover.set_child(Some(&vbox));
     popover.set_parent(canvas);
     popover.set_pointing_to(Some(&gdk::Rectangle::new(
         surface_pos.x as i32,
@@ -786,7 +853,7 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     // then use the engine too (an `if let` would keep it borrowed: that closed the app when tapping a "?")
     let overlay = canvas.engine_ref().math_overlay_at(pos);
     if let Some((kind, text, latex)) = overlay {
-        explain_overlay(canvas, pos, &kind, &text, &latex);
+        explain_overlay(appwindow, canvas, pos, &kind, &text, &latex);
         return;
     }
     let Some((symbol_id, candidates)) = canvas.engine_ref().math_symbol_at(pos) else {
@@ -903,6 +970,7 @@ pub(crate) fn show_candidates(appwindow: &RnAppWindow, canvas: &RnCanvas) {
     }
     vbox.append(&gtk4::Separator::new(gtk4::Orientation::Horizontal));
     vbox.append(&cut_box);
+    vbox.append(&failure_button(appwindow, canvas, &popover, pos));
     popover.set_child(Some(&vbox));
     popover.set_parent(canvas);
     popover.set_pointing_to(Some(&gdk::Rectangle::new(

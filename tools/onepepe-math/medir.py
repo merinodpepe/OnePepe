@@ -73,9 +73,9 @@ def cargar_fallos(datos=DATOS):
             for n, linea in enumerate(f):
                 d = json.loads(linea)
                 st = [[(float(p[0]), float(p[1])) for p in s] for s in d["strokes"]]
-                out.append(dict(set="fallos", id=str(d.get("id", n)), li=0, latex=d["latex"], strokes=st,
+                out.append(dict(set="fallos", id=str(d.get("id", n)), li=0, latex=d.get("latex") or d["expected"], strokes=st,
                                 times=[tuple(t) for t in d["times"]] if d.get("times") else None,
-                                tokens=expected_symbols(d["latex"]), kind="expr"))
+                                tokens=expected_symbols(d.get("latex") or d["expected"]), kind="expr"))
     return out
 
 
