@@ -12,6 +12,7 @@ etiqueta y sustituciones. Los datos de trabajo salen de $ONEPEPE_DATA (copia de 
 """
 
 import argparse
+import dataclasses
 import glob
 import json
 import math
@@ -376,6 +377,7 @@ def main():
     ap.add_argument("--ref", choices=["O", "F"], default="O")
     ap.add_argument("--sin-variantes", action="store_true")
     ap.add_argument("--solo-sin-frac", action="store_true")
+    ap.add_argument("--param", action="append", default=[], metavar="CLAVE=VALOR", help="parámetro del corte/reconocedor")
     ap.add_argument("--salida")
     ap.add_argument("--comparar", nargs=2, metavar=("A", "B"))
     ap.add_argument("--sondas", action="store_true")
@@ -418,7 +420,11 @@ def main():
             else:
                 def clf_de(l):
                     return clf, pm
-            out = medir(lineas, clf_de, args, SegmentParams.load(), congelada)
+            sp = SegmentParams.load()
+            for kv in args.param:
+                k, v = kv.split("=")
+                sp = dataclasses.replace(sp, **{k: float(v)})
+            out = medir(lineas, clf_de, args, sp, congelada)
     texto = json.dumps(out, ensure_ascii=False, indent=1)
     if args.salida:
         with open(args.salida, "w", encoding="utf-8") as f:

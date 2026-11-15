@@ -65,7 +65,9 @@ def unir_numeros(syms, tipico, crear):
             break
         box = (min(g.box[0] for g in grupo), min(g.box[1] for g in grupo),
                max(g.box[2] for g in grupo), max(g.box[3] for g in grupo))
-        out.append(crear(grupo[-1].label, box, ("num", texto)))
+        nuevo = crear(grupo[-1].label, box, ("num", texto))
+        nuevo.members = tuple(m for g in grupo for m in getattr(g, "members", ()))
+        out.append(nuevo)
     return out
 
 

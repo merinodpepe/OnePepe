@@ -73,6 +73,40 @@ def _middle(s, typical):
     return s.cy
 
 
+class _Hoja(tuple):
+    """Nodo del árbol con los índices (`members`) de los símbolos que lo originan: da el orden LaTeX (M10.3)."""
+
+    def __new__(cls, nodo, members):
+        t = super().__new__(cls, nodo)
+        t.members = members
+        return t
+
+
+def _miembros(*syms):
+    return tuple(m for s in syms for m in getattr(s, "members", ()))
+
+
+def _recorrer(n):
+    yield from getattr(n, "members", ())
+    if n[0] in ("sym", "num"):
+        return
+    for h in n[1] if n[0] == "row" else n[1:]:
+        if isinstance(h, tuple):
+            yield from _recorrer(h)
+
+
+def parse_with_order(syms):
+    """(árbol, orden): los índices de `syms` en el orden del LaTeX (raya, numerador, denominador; raíz, índice,
+    radicando; acento, base; base, subíndice, exponente). Los que el árbol descarta (primas) van al final."""
+    syms = list(syms)
+    for i, s in enumerate(syms):
+        s.members = (i,)
+    tree = parse(syms)
+    orden = list(_recorrer(tree))
+    resto = sorted(set(range(len(syms))) - set(orden), key=lambda i: syms[i].cx)
+    return tree, orden + resto
+
+
 def parse(syms):
     """Árbol de la expresión."""
     syms = list(syms)
@@ -142,7 +176,7 @@ def _parse_region(syms, typical):
             used = below + above
             node = Sym(label=big.label, box=(min(s.box[0] for s in used + [big]), min(s.box[1] for s in used + [big]),
                                               max(s.box[2] for s in used + [big]), max(s.box[3] for s in used + [big])))
-            base = ("sym", big.label)
+            base = _node(big)
             lo = _parse_region(below, typical) if below else None
             up = _parse_region(above, typical) if above else None
             node.node = ("subsup", base, lo, up) if lo and up else ("sub", base, lo) if lo else ("sup", base, up)
@@ -168,7 +202,7 @@ def _parse_region(syms, typical):
                 max(s.box[3] for s in below),
             )
             node = Sym(label="", box=box)
-            node.node = ("frac", num, den)
+            node.node = _Hoja(("frac", num, den), _miembros(bar))
             rest = [s for s in syms if s is not bar and s not in above and s not in below]
             return _parse_region(rest + [node], typical)
     # 2. acentos: un sombrero, una raya o una virgulilla pequeños justo encima de un símbolo (ŷ, x̄, x̃). La raya de
@@ -187,7 +221,7 @@ def _parse_region(syms, typical):
                 continue
         kind = r"\overline" if acc.label == "-" else acc.label
         node = Sym(label="", box=(min(acc.box[0], base.box[0]), acc.box[1], max(acc.box[2], base.box[2]), base.box[3]))
-        node.node = ("accent", kind, _node(base))
+        node.node = _Hoja(("accent", kind, _node(base)), _miembros(acc))
         node.accent_base = base
         rest = [s for s in syms if s is not acc and s is not base]
         return _parse_region(rest + [node], typical)
@@ -218,7 +252,8 @@ def _parse_region(syms, typical):
             ]
             node = Sym(label="", box=root.box)
             radicand = _parse_region(inside, typical)
-            node.node = ("root", _parse_region(index, typical), radicand) if index else ("sqrt", radicand)
+            nodo = ("root", _parse_region(index, typical), radicand) if index else ("sqrt", radicand)
+            node.node = _Hoja(nodo, _miembros(root))
             rest = [s for s in syms if s is not root and s not in inside and s not in index]
             return _parse_region(rest + [node], typical)
     # 4. línea base con potencias y subíndices
@@ -226,7 +261,9 @@ def _parse_region(syms, typical):
 
 
 def _node(s):
-    return getattr(s, "node", None) or ("sym", s.label)
+    n = getattr(s, "node", None) or ("sym", s.label)
+    m = getattr(s, "members", None)
+    return n if m is None or isinstance(n, _Hoja) else _Hoja(n, m)
 
 
 FUNCTIONS = ["sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "arcsin", "arccos", "arctan",
@@ -281,6 +318,7 @@ def _merge_functions(syms, typical):
                     )
                     fn = Sym("\\" + FUNCTION_ALIASES.get(name, name), box)
                     # la línea base de la palabra, sin contar las letras que bajan (la «g» de log)
+                    fn.members = _miembros(*group)
                     fn.baseline = max((s.box[3] for s in group if s.label not in _DESC), default=box[3])
                     out.append(fn)
                     i += n
