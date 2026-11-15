@@ -33,6 +33,9 @@ class SymbolClassifier:
         self.classes = [str(c) for c in data["classes"]]
         # temperatura de calibración (train_classifier.py): 1.0 si el modelo es antiguo
         self.temperature = float(data["temperature"]) if "temperature" in data else 1.0
+        # versión de los rasgos: un modelo viejo (sin la clave) usa los v1 y no mira el renglón
+        self.feature_version = int(data["feature_version"]) if "feature_version" in data else 1
+        self.usa_linea = self.feature_version >= 2
         self.mean = data["mean"]
         self.std = data["std"]
         n = int(data["n_layers"])
@@ -54,16 +57,19 @@ class SymbolClassifier:
 
             self.lm = BigramModel([str(v) for v in data["lm_vocab"]], data["lm_unigram"], data["lm_bigram"])
 
-    def embedding(self, strokes):
+    def _x(self, strokes, linea):
+        return (symbol_features(strokes, linea, version=self.feature_version) - self.mean) / self.std
+
+    def embedding(self, strokes, linea=None):
         """Representación interna (última capa oculta), para comparar formas entre símbolos."""
-        x = (symbol_features(strokes) - self.mean) / self.std
+        x = self._x(strokes, linea)
         for w, b in self.weights[:-1]:
             x = np.maximum(x @ w + b, 0.0)
         return x
 
-    def probabilities_and_embedding(self, strokes):
+    def probabilities_and_embedding(self, strokes, linea=None):
         """(probabilidades, embedding) en una sola pasada por la red."""
-        x = (symbol_features(strokes) - self.mean) / self.std
+        x = self._x(strokes, linea)
         embedding = None
         for i, (w, b) in enumerate(self.weights):
             x = x @ w + b
@@ -75,8 +81,8 @@ class SymbolClassifier:
         e = np.exp(x)
         return e / e.sum(), embedding
 
-    def probabilities(self, strokes):
-        x = (symbol_features(strokes) - self.mean) / self.std
+    def probabilities(self, strokes, linea=None):
+        x = self._x(strokes, linea)
         for i, (w, b) in enumerate(self.weights):
             x = x @ w + b
             if i < len(self.weights) - 1:
@@ -86,13 +92,13 @@ class SymbolClassifier:
         e = np.exp(x)
         return e / e.sum()
 
-    def candidates(self, strokes, k=5):
+    def candidates(self, strokes, k=5, linea=None):
         """Las k etiquetas más probables: lista de (latex, probabilidad), sin la clase "trozo"."""
-        return self.candidates_w_junk(strokes, k)[0]
+        return self.candidates_w_junk(strokes, k, linea)[0]
 
-    def candidates_w_junk(self, strokes, k=5):
+    def candidates_w_junk(self, strokes, k=5, linea=None):
         """(candidatas sin "trozo", probabilidad de que el grupo sea un trozo y no un símbolo)."""
-        p = self.probabilities(strokes)
+        p = self.probabilities(strokes, linea)
         junk = float(p[self.classes.index(JUNK)]) if JUNK in self.classes else 0.0
         # las clases que son el mismo símbolo suman su probabilidad
         merged = {}

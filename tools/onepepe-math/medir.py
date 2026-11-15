@@ -30,7 +30,7 @@ from onepepe_math.entreno import _split_by_guides, expected_symbols, list_sets, 
 from onepepe_math.forced import forced_groups  # noqa: E402
 from onepepe_math.personal import PersonalModel  # noqa: E402
 from onepepe_math.recognizer import recognize  # noqa: E402
-from onepepe_math.segment import SegmentParams, bbox, typical_size  # noqa: E402
+from onepepe_math.segment import SegmentParams, bbox, linea_de, typical_size  # noqa: E402
 from onepepe_math.symbols import same_shape  # noqa: E402
 
 DATOS = os.path.join(os.environ.get("ONEPEPE_DATA", os.path.expanduser("~/.local/share/onepepe")), "math")
@@ -169,17 +169,17 @@ class Cache:
     def __getattr__(self, n):
         return getattr(self._c, n)
 
-    def _get(self, nombre, strokes, *a):
-        k = (nombre, tuple(id(s) for s in strokes), a)
+    def _get(self, nombre, strokes, *a, **kw):
+        k = (nombre, tuple(id(s) for s in strokes), a, tuple(kw.items()))
         if k not in self._m:
-            self._m[k] = getattr(self._c, nombre)(strokes, *a)
+            self._m[k] = getattr(self._c, nombre)(strokes, *a, **kw)
         return self._m[k]
 
-    def candidates_w_junk(self, strokes, k=5):
-        return self._get("candidates_w_junk", strokes, k)
+    def candidates_w_junk(self, strokes, k=5, **kw):
+        return self._get("candidates_w_junk", strokes, k, **kw)
 
-    def probabilities(self, strokes):
-        return self._get("probabilities", strokes)
+    def probabilities(self, strokes, **kw):
+        return self._get("probabilities", strokes, **kw)
 
     def embedding(self, strokes):
         return self._get("embedding", strokes)
@@ -255,6 +255,9 @@ def medir(lineas, clf_de, args, sp, congelada=None):
         syms, latex = leer(l, clf, pm, sp, args.incremental, **kw)
         ms.append(1000 * (time.perf_counter() - t0))
         suma("latex_exacto", norm(latex) == norm(l["latex"]))
+        # los modelos v2 miran el renglón también en la medida de la red sola
+        ln = linea_de(l["strokes"], clf)
+        kw_ln = {"linea": ln} if ln else {}
         grupos = referencia(l, clf, pm, args.ref, args.sin_variantes, congelada)
         if grupos is None:
             continue
@@ -272,7 +275,7 @@ def medir(lineas, clf_de, args, sp, congelada=None):
                 suma("raya_corte_etiqueta", r["ok"])
                 suma("raya_papel", e == "exacto" and r["pred"] in ("-", r"\frac")
                      and latex.count(r"\frac") == l["tokens"].count(r"\frac"))
-            ps = clf.probabilities([l["strokes"][i] for i in r["idx"]])
+            ps = clf.probabilities([l["strokes"][i] for i in r["idx"]], **kw_ln)
             por_lab = {}
             for lab, p in zip(getattr(clf, "labels", clf.classes), ps):
                 por_lab[lab] = por_lab.get(lab, 0.0) + float(p)

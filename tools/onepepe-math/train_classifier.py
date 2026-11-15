@@ -28,11 +28,14 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from onepepe_math import alinear, synth  # noqa: E402
 from onepepe_math.classifier import DEFAULT_MODEL, JUNK, SymbolClassifier  # noqa: E402
-from onepepe_math.features import N_FEATURES, augment, symbol_features  # noqa: E402
+from onepepe_math.features import N_FEATURES, N_FEATURES_V2, augment, linea, perturbar_linea, symbol_features  # noqa: E402
 from onepepe_math.inkml import read_inkml  # noqa: E402
 from onepepe_math.symbols import CORE, normalize_label  # noqa: E402
 
-FEATURE_VERSION = 1
+TOPE_EXTRAIDOS = 400  # símbolos extraídos de fórmulas (extraer_simbolos.py) por clase
+COPIAS_EXTRAIDOS = 10
+BLOQUE = 50000  # filas por llamada a partial_fit
+SOLTAR_LINEA = 0.3  # M7.5: fracción de muestras con contexto a las que se les borra
 TOPE_PROPIO = 40  # copias propias por clase: como mucho TOPE_PROPIO · W
 BASE_POR_CLASE = 80  # muestras base de MathWriting por clase
 PESOS = (10, 30, 90)
@@ -96,18 +99,43 @@ def copias_trozo(n_simbolos, n_trozos):
     return int(min(max(round(0.15 * n_simbolos / n_trozos), 2), 30))
 
 
-def featurizar(muestras, copias, rng):
-    """(X, etiquetas, orígenes) de cada muestra [(etiqueta, trazos, origen)] y de sus `copias[i]` deformaciones."""
-    X, y, o = [], [], []
-    for (label, strokes, origen), n in zip(muestras, copias):
-        X.append(symbol_features(strokes))
+def featurizar(muestras, copias, rng, lineas=None, version=1, soltar=SOLTAR_LINEA, out=None):
+    """(X, etiquetas, orígenes) de cada muestra [(etiqueta, trazos, origen)] y de sus `copias[i]` deformaciones.
+    v2: `lineas[i]` (típico, pendiente, corte) o None; en las copias se perturba, y se borra con probabilidad `soltar`."""
+    dim = N_FEATURES_V2 if version >= 2 else N_FEATURES
+    X = np.empty((len(muestras) + int(sum(copias)), dim), dtype=np.float32) if out is None else out  # `out`: sin copias
+    y, o, r = [], [], 0
+
+    def ctx(lin):
+        return None if lin is None or (version >= 2 and rng.random() < soltar) else lin
+
+    for i, ((label, strokes, origen), n) in enumerate(zip(muestras, copias)):
+        lin = lineas[i] if lineas is not None else None
+        X[r] = symbol_features(strokes, ctx(lin), version)
         y.append(label)
         o.append(origen)
+        r += 1
         for _ in range(n):
-            X.append(symbol_features(augment(strokes, rng)))
+            X[r] = symbol_features(augment(strokes, rng), ctx(perturbar_linea(lin, rng)), version)
             y.append(label)
             o.append(origen)
-    return (np.array(X, dtype=np.float32) if X else np.zeros((0, N_FEATURES), np.float32)), y, o
+            r += 1
+    return X, y, o
+
+
+def cargar_extraidos(ruta, rng, tope=TOPE_EXTRAIDOS):
+    """Símbolos extraídos (jsonl de extraer_simbolos.py): hasta `tope` por clase -> (muestras, líneas)."""
+    por_clase = {}
+    with open(ruta, encoding="utf-8") as f:
+        for texto in f:
+            try:
+                it = json.loads(texto)
+                fila = (normalize_label(it["etiqueta"]), [[tuple(p) for p in s] for s in it["trazos"]], it["id"])
+            except (ValueError, KeyError, TypeError):
+                continue
+            por_clase.setdefault(fila[0], []).append((fila, tuple(it["linea"]) if it.get("linea") else None))
+    elegidas = [f for c in sorted(por_clase) for f in [por_clase[c][k] for k in rng.permutation(len(por_clase[c]))][:tope]]
+    return [f for f, _ in elegidas], [ln for _, ln in elegidas]
 
 
 # ---------------------------------------------------------------- red, parada y temperatura
@@ -156,7 +184,11 @@ def entrenar_red(Xtr, ytr, val_m, val_p, n_clases, args, epocas_fijas=None):
     todas = np.arange(n_clases)
     mejor, sin_mejora, mejor_ep, j_mejor = None, 0, 0, np.inf
     for ep in range(1, (epocas_fijas or args.max_epocas) + 1):
-        clf.partial_fit(Xtr, ytr, classes=todas)
+        # por bloques mezclados: MLPClassifier binariza `y` de golpe (n × clases en float64) y no cabe en 7 GB
+        orden = np.random.default_rng(args.seed + ep).permutation(len(ytr))
+        for i in range(0, len(orden), BLOQUE):
+            b = orden[i : i + BLOQUE]
+            clf.partial_fit(Xtr[b], ytr[b], classes=todas)
         nl_p, nl_m = nll(clf, *val_p), nll(clf, *val_m)
         partes = [v for v in (nl_p, nl_m) if v is not None]
         j = sum(partes) / max(len(partes), 1)  # ½ NLL propia + ½ NLL MathWriting (o la única que haya)
@@ -202,11 +234,14 @@ def main():
                     help="copias deformadas por ejemplo tuyo; auto prueba 10, 30 y 90 y se queda con el de menor J")
     ap.add_argument("--epocas-fijas", type=int, default=None, help="sin parada: justo N épocas (los pliegues)")
     ap.add_argument("--excluir-pliegue", type=int, default=None, choices=range(4))
+    ap.add_argument("--rasgos", type=int, default=1, choices=[1, 2], help="versión de los rasgos (2: M7.2-M7.5)")
+    ap.add_argument("--extraidos", default=None, help="símbolos extraídos de fórmulas (simbolos.jsonl de T7a)")
     ap.add_argument("--max-epocas", type=int, default=60)
     ap.add_argument("--paciencia", type=int, default=5)
     args = ap.parse_args()
 
     rng = np.random.default_rng(args.seed)
+    version = args.rasgos
     simbolos = cargar_simbolos(args.dataset)
     print(f"{len(simbolos)} símbolos cargados", file=sys.stderr)
     sym_tr = [s for s in simbolos if not es_validacion_mw(s[2])]
@@ -224,7 +259,7 @@ def main():
     junk_tr = junk_tr[: args.junk_max]
     print(f"{len(junk_tr)} ejemplos de 'trozo'", file=sys.stderr)
 
-    prop_tr, prop_va = [], []
+    prop_tr, prop_va, lin_origen = [], [], {}
     if args.personal and os.path.exists(args.personal):
         items = []
         with open(args.personal, encoding="utf-8") as f:
@@ -239,9 +274,21 @@ def main():
                             "examen.json")
         conj = json.load(open(ruta, encoding="utf-8")) if os.path.exists(ruta) else {}
         prop_tr, prop_va = reparto_propio(items, conj, args.excluir_pliegue)
+        if version >= 2:  # el renglón de cada expresión del entreno: todos sus trazos juntos
+            exp = {}
+            for it in items:
+                m = re.match(r"entreno:(.+)#([^#]+)$", it.get("notebook") or "")
+                if m and it.get("kind") != "junk":
+                    exp.setdefault(m.groups(), []).extend([tuple(p) for p in s] for s in it["strokes"])
+            lin_origen = {f"{s}#{i}": linea(t) for (s, i), t in exp.items()}
         print(f"{len(prop_tr)} ejemplos tuyos para entrenar y {len(prop_va)} para validar", file=sys.stderr)
 
-    clases = sorted({s[0] for s in sym_tr + sym_va + prop_tr + prop_va} | {JUNK})
+    ext, lin_ext = [], []
+    if args.extraidos and version >= 2:
+        ext, lin_ext = cargar_extraidos(args.extraidos, rng)
+        print(f"{len(ext)} símbolos extraídos de fórmulas", file=sys.stderr)
+
+    clases = sorted({s[0] for s in sym_tr + sym_va + prop_tr + prop_va + ext} | {JUNK})
     idx = {c: i for i, c in enumerate(clases)}
 
     # MathWriting: como mucho BASE_POR_CLASE muestras base por clase, cada una con `augment` copias
@@ -250,14 +297,13 @@ def main():
         por_clase.setdefault(s[0], []).append(s)
     base_m = [s for c in sorted(por_clase) for s in [por_clase[c][k] for k in rng.permutation(len(por_clase[c]))
                                                       ][:BASE_POR_CLASE]]
-    Xm, ym, _ = featurizar(base_m, [args.augment] * len(base_m), rng)
 
-    def valid(muestras):
-        X, y, _ = featurizar(muestras, [0] * len(muestras), rng)
+    def valid(muestras, lineas=None):
+        X, y, _ = featurizar(muestras, [0] * len(muestras), rng, lineas, version, soltar=0.0)
         return X, np.array([idx[e] for e in y], dtype=int)
 
     Xvm, yvm = valid(sym_va + junk_va)
-    Xvp, yvp = valid(prop_va)
+    Xvp, yvp = valid(prop_va, [lin_origen.get(s[2]) for s in prop_va] if version >= 2 else None)
 
     permitidas = [i for i, c in enumerate(clases) if c == JUNK or normalize_label(c) in CORE]
     en_permitidas = {c: k for k, c in enumerate(permitidas)}
@@ -270,16 +316,36 @@ def main():
         n_c = {}
         for s in propios:
             n_c[s[0]] = n_c.get(s[0], 0) + 1
-        Xp, yp, _ = featurizar(propios, [copias_propias(n_c[s[0]], w) for s in propios], rng)
-        n_s = len(Xm) + len(Xp)
+        lin_p = [lin_origen.get(s[2]) for s in propios] if version >= 2 else None
+        cop_m, cop_e = [args.augment] * len(base_m), [COPIAS_EXTRAIDOS] * len(ext)
+        cop_p = [copias_propias(n_c[s[0]], w) for s in propios]
+        n_s = len(base_m) + sum(cop_m) + len(propios) + sum(cop_p) + len(ext) + sum(cop_e)
         trozos = junk_tr + [s for s in prop_tr if s[0] == JUNK]
         a_t = copias_trozo(n_s, len(trozos)) if trozos else 0
-        Xj, yj, _ = featurizar(trozos, [a_t] * len(trozos), rng)
-        Xtr = np.vstack([Xm, Xp, Xj])
-        ytr = np.array([idx[e] for e in ym + yp + yj], dtype=int)
-        mean = Xtr.mean(axis=0)
-        std = Xtr.std(axis=0) + 1e-3
-        Xtr = (Xtr - mean) / std
+        lin_j = ([None] * len(junk_tr) + [lin_origen.get(s[2]) for s in prop_tr if s[0] == JUNK]) if version >= 2 else None
+        # una sola matriz, rellenada por trozos: la memoria (7 GB) no admite concatenar copias
+        dim = N_FEATURES_V2 if version >= 2 else N_FEATURES
+        Xtr = np.empty((n_s + len(trozos) * (a_t + 1), dim), dtype=np.float32)
+        etiquetas, r = [], 0
+        for muestras, cop, lin in ((base_m, cop_m, None), (propios, cop_p, lin_p), (ext, cop_e, lin_ext),
+                                   (trozos, [a_t] * len(trozos), lin_j)):
+            n = len(muestras) + sum(cop)
+            _, y_, _ = featurizar(muestras, cop, rng, lin, version, out=Xtr[r : r + n])
+            etiquetas += y_
+            r += n
+            print(f"  rasgos: {r}/{len(Xtr)}", file=sys.stderr, flush=True)
+        ytr = np.array([idx[e] for e in etiquetas], dtype=int)
+        # media y desviación por bloques (float64): sin copias temporales de la matriz
+        s1, s2 = np.zeros(dim), np.zeros(dim)
+        for i in range(0, len(Xtr), 50000):
+            blk = Xtr[i : i + 50000].astype(np.float64)
+            s1 += blk.sum(axis=0)
+            s2 += (blk * blk).sum(axis=0)
+        mean = (s1 / len(Xtr)).astype(np.float32)
+        std = (np.sqrt(np.maximum(s2 / len(Xtr) - (s1 / len(Xtr)) ** 2, 0)) + 1e-3).astype(np.float32)
+        for i in range(0, len(Xtr), 50000):
+            Xtr[i : i + 50000] -= mean
+            Xtr[i : i + 50000] /= std
         print(f"entrenando con {len(Xtr)} muestras, {len(clases)} clases (W={w}) ...", file=sys.stderr)
         coefs, inters, j, ep = entrenar_red(Xtr, ytr, ((Xvm - mean) / std, yvm), ((Xvp - mean) / std, yvp),
                                             len(clases), args, args.epocas_fijas)
@@ -303,7 +369,7 @@ def main():
 
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     arrays = {"classes": np.array(clases), "mean": mean, "std": std, "n_layers": np.array(len(coefs)),
-              "temperature": np.array(T), "feature_version": np.array(FEATURE_VERSION), "epocas": np.array(ep),
+              "temperature": np.array(T), "feature_version": np.array(version), "epocas": np.array(ep),
               "personal_weight": np.array(w)}
     # versión: cambia en cada reentrenamiento, para recalcular los embeddings de tus ejemplos
     arrays["version"] = np.array(time.strftime("%Y%m%d-%H%M%S") + f"-{len(prop_tr)}")

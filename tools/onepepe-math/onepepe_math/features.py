@@ -5,13 +5,20 @@ Un símbolo es una lista de trazos; cada trazo, una lista de puntos (x, y) con e
 Las características no dependen de la posición ni del tamaño del símbolo, pero sí de su proporción.
 """
 
+import itertools
 import math
 
 import numpy as np
 
+from .segment import bbox, typical_size
+
 N_POINTS = 32
 GRID = 10
-N_FEATURES = N_POINTS * 5 + GRID * GRID + 6
+N_FEATURES = N_POINTS * 5 + GRID * GRID + 6  # v1
+VERSION = 2
+GRID2 = 16
+N_FEATURES_V2 = N_POINTS * 5 + 128 + GRID2 * GRID2 + 6 + 6  # 556
+PASO = 0.05
 
 
 def _normalize(strokes):
@@ -77,8 +84,8 @@ def _raster(strokes, grid):
     return img.ravel()
 
 
-def symbol_features(strokes):
-    """Vector de características (numpy, float32) de un símbolo."""
+def symbol_features_v1(strokes):
+    """Vector de características v1 (numpy, float32) de un símbolo."""
     strokes = [s for s in strokes if s]
     norm, w, h = _normalize(strokes)
     seq = np.array(_resample(norm, N_POINTS), dtype=np.float32).ravel()
@@ -96,6 +103,119 @@ def symbol_features(strokes):
         dtype=np.float32,
     )
     return np.concatenate([seq, raster, extra])
+
+
+# ---------------------------------------------------------------- v2 (M7.2-M7.5)
+
+
+def _remuestreo_paso(norm):
+    """Cada trazo remuestreado a paso PASO: lista de arrays (n, 2)."""
+    out = []
+    for s in norm:
+        a = np.asarray(s, dtype=np.float64)
+        if len(a) < 2:
+            out.append(a.reshape(-1, 2))
+            continue
+        cum = np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(a, axis=0).T))])
+        t = np.linspace(0.0, cum[-1], max(1, math.ceil(cum[-1] / PASO)) + 1)
+        out.append(np.stack([np.interp(t, cum, a[:, 0]), np.interp(t, cum, a[:, 1])], axis=1))
+    return out
+
+
+def _bilineal(c, n):
+    """Índices y pesos de las dos celdas vecinas de la coordenada c, recortados a [0, n-1]."""
+    i0 = np.floor(c).astype(int)
+    f = c - i0
+    return (np.clip(i0, 0, n - 1), 1 - f), (np.clip(i0 + 1, 0, n - 1), f)
+
+
+def _direcciones(tramos):
+    """M7.3: histograma 4x4x8 de orientaciones (módulo π) ponderado por longitud, raíz de H/Σℓ."""
+    H = np.zeros((4, 4, 8))
+    seg = [t for t in tramos if len(t) > 1]
+    if not seg:
+        return H.ravel().astype(np.float32)
+    a = np.concatenate([t[:-1] for t in seg])
+    b = np.concatenate([t[1:] for t in seg])
+    d = b - a
+    ln = np.hypot(d[:, 0], d[:, 1])
+    m = (a + b) / 2
+    bk = (np.arctan2(d[:, 1], d[:, 0]) % math.pi) / (math.pi / 8)
+    k0 = np.floor(bk).astype(int)
+    orient = (((k0 % 8), 1 - (bk - k0)), (((k0 + 1) % 8), bk - k0))
+    for ix, wx in _bilineal((m[:, 0] + 1) * 2 - 0.5, 4):
+        for iy, wy in _bilineal((m[:, 1] + 1) * 2 - 0.5, 4):
+            for ik, wk in orient:
+                np.add.at(H, (iy, ix, ik), ln * wk * wx * wy)
+    return np.sqrt(H / max(ln.sum(), 1e-9)).ravel().astype(np.float32)
+
+
+def _rejilla16(tramos):
+    """M7.4: puntos del remuestreo repartidos bilinealmente en 16x16, suavizado [1 2 1]/4 y tope 1."""
+    g = np.zeros((GRID2, GRID2))
+    p = np.concatenate(tramos)
+    for ix, wx in _bilineal((p[:, 0] + 1) / 2 * (GRID2 - 1), GRID2):
+        for iy, wy in _bilineal((p[:, 1] + 1) / 2 * (GRID2 - 1), GRID2):
+            np.add.at(g, (iy, ix), wx * wy)
+    for ax in (0, 1):
+        q = np.pad(g, [(1, 1) if i == ax else (0, 0) for i in range(2)])
+        g = (np.take(q, range(0, GRID2), ax) + 2 * np.take(q, range(1, GRID2 + 1), ax)
+             + np.take(q, range(2, GRID2 + 2), ax)) / 4
+    return np.minimum(g, 1.0).ravel().astype(np.float32)
+
+
+def _contexto(box, linea):
+    """M7.5: seis valores del símbolo respecto al renglón; ceros sin contexto."""
+    if linea is None or linea[0] <= 1e-6:  # típico 0: línea degenerada, sin contexto
+        return np.zeros(6, dtype=np.float32)
+    tip, pend, corte = linea
+    x0, y0, x1, y1 = box
+    w, h = max(x1 - x0, 0.02 * tip), max(y1 - y0, 0.02 * tip)
+    base = corte + pend * (x0 + x1) / 2
+    lg = lambda v: float(np.clip(math.log(v / tip), -3, 2)) / 2  # noqa: E731
+    cl = lambda v: float(np.clip(v / tip, -3, 3)) / 3  # noqa: E731
+    return np.array([1.0, lg(w), lg(h), cl(y0 - base), cl(y1 - base), lg(max(w, h))], dtype=np.float32)
+
+
+def symbol_features(strokes, linea=None, version=VERSION):
+    """Vector de características de un símbolo: v1 (266 valores) o v2 (556). `linea`: (típico, pendiente, corte)."""
+    if version < 2:
+        return symbol_features_v1(strokes)
+    strokes = [s for s in strokes if s]
+    v1 = symbol_features_v1(strokes)
+    norm, _, _ = _normalize(strokes)
+    tramos = _remuestreo_paso(norm)
+    return np.concatenate([v1[: N_POINTS * 5], _direcciones(tramos), _rejilla16(tramos),
+                           _contexto(bbox(strokes), linea), v1[-6:]])
+
+
+def linea(strokes, known_boxes=()):
+    """M7.5: (típico, pendiente, corte) del renglón, con los trazos y las cajas de los símbolos conocidos; o None."""
+    tip = typical_size(strokes)
+    if known_boxes:
+        sizes = sorted([max(b[3] - b[1], (b[2] - b[0]) * 0.5) for b in map(lambda s: bbox([s]), strokes)]
+                       + [max(b[3] - b[1], (b[2] - b[0]) * 0.5) for b in known_boxes])
+        tip = max(sizes[len(sizes) // 2], 1e-6)
+    boxes = [bbox([s]) for s in strokes] + [tuple(b) for b in known_boxes]
+    pts = [((b[0] + b[2]) / 2, b[3]) for b in boxes if b[3] - b[1] >= 0.5 * tip]
+    if len(pts) < 2:
+        return None
+    pend = 0.0
+    if len(pts) >= 4 and max(p[0] for p in pts) - min(p[0] for p in pts) > 4 * tip:
+        sl = sorted((q[1] - p[1]) / (q[0] - p[0]) for p, q in itertools.combinations(pts, 2) if q[0] != p[0])
+        if sl:
+            pend = max(-0.3, min(0.3, (sl[(len(sl) - 1) // 2] + sl[len(sl) // 2]) / 2))
+    fondos = sorted(y - pend * x for x, y in pts)
+    corte = (fondos[(len(fondos) - 1) // 2] + fondos[len(fondos) // 2]) / 2
+    return (tip, pend, corte)
+
+
+def perturbar_linea(lin, rng):
+    """Entrenamiento: típico·exp(N(0; 0,1)) y base + N(0; 0,08·típico)."""
+    if lin is None:
+        return None
+    tip = lin[0] * math.exp(rng.normal(0, 0.1))
+    return (tip, lin[1], lin[2] + rng.normal(0, 0.08 * tip))
 
 
 def augment(strokes, rng):

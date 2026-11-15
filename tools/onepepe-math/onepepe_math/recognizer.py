@@ -10,7 +10,7 @@ from .layout import Sym, bar_role, parse, to_latex
 from .lexico import corregir_entidades
 from .symbols import same_shape
 from .reparar import fix_dotted_letters, reparar
-from .segment import SegmentParams, bbox, segment, typical_size
+from .segment import SegmentParams, bbox, linea_de, segment, typical_size
 
 
 _RAYAS = {"-": "minus", r"\frac": "frac", r"\overline": "overline"}
@@ -55,12 +55,14 @@ def recognize(
     línea, como [{"latex", "box"}], que dan contexto. Devuelve un dict con "symbols", "latex", "result".
     """
     segment_params = segment_params or SegmentParams()
-    syms = segment(strokes, classifier, params=segment_params, times=times)
+    cajas = [tuple(k["box"]) for k in known]
+    syms = segment(strokes, classifier, params=segment_params, times=times, known_boxes=cajas)
     if syms:
+        ln = linea_de(strokes, classifier, cajas)  # solo los modelos v2 miran el renglón
         if segment_params.repair > 0:
-            syms = reparar(syms, strokes, classifier, typical_size(strokes), segment_params)
+            syms = reparar(syms, strokes, classifier, typical_size(strokes), segment_params, linea=ln)
         else:
-            syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes))
+            syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes), linea=ln)
     y_red = [s["candidates"][0][0] for s in syms]  # lo que dice la red sola (M8.2)
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]

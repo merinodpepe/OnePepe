@@ -25,9 +25,10 @@ def _top(cands):
     return cands[0][0] if cands else None
 
 
-def fix_dotted_letters(syms, strokes, classifier, typical):
+def fix_dotted_letters(syms, strokes, classifier, typical, linea=None):
     """Une los puntos sueltos con su palo en la salida de `segment` (lista de {"strokes", "candidates", "junk"})."""
     syms = [dict(s) for s in syms]
+    kw = {"linea": linea} if linea else {}
     boxes = [bbox([strokes[i] for i in s["strokes"]]) for s in syms]
     used = set()
     for d, (dsym, dbox) in enumerate(zip(syms, boxes)):
@@ -53,7 +54,7 @@ def fix_dotted_letters(syms, strokes, classifier, typical):
             continue
         s = best[0]
         group = sorted(syms[s]["strokes"] + dsym["strokes"])
-        cands, junk = classifier.candidates_w_junk([strokes[i] for i in group], 8)
+        cands, junk = classifier.candidates_w_junk([strokes[i] for i in group], 8, **kw)
         p = dict(cands)
         # solo si la red ve también una i o una j en el grupo: si no, se deja como estaba
         if p.get("i", 0.0) + p.get("j", 0.0) < 0.1:
@@ -79,16 +80,17 @@ def _gaps(a, b):
     return max(0.0, max(a[0], b[0]) - min(a[2], b[2])), max(0.0, max(a[1], b[1]) - min(a[3], b[3]))
 
 
-def reparar(syms, strokes, classifier, typical, params=None):
+def reparar(syms, strokes, classifier, typical, params=None, linea=None):
     """Une trazos sobrantes con su pareja si la lectura unida es mucho más probable que las dos por separado."""
     params = params or SegmentParams()
     syms = [dict(s) for s in syms]
     memo = {}
+    kw = {"linea": linea} if linea else {}
 
     def lee(idx):
         k = tuple(idx)
         if k not in memo:
-            memo[k] = classifier.candidates_w_junk([strokes[i] for i in idx], 8)
+            memo[k] = classifier.candidates_w_junk([strokes[i] for i in idx], 8, **kw)
         return memo[k]
 
     def score(idx):
@@ -125,4 +127,4 @@ def reparar(syms, strokes, classifier, typical, params=None):
         syms[s] = {"strokes": union, "candidates": cands, "junk": junk}
         del syms[d]
     syms.sort(key=lambda s: s["strokes"][0])
-    return fix_dotted_letters(syms, strokes, classifier, typical)
+    return fix_dotted_letters(syms, strokes, classifier, typical, linea)
