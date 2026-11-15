@@ -11,7 +11,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from onepepe_math.forced import forced_groups, junk_examples  # noqa: E402
-from onepepe_math.segment import SegmentParams, segment  # noqa: E402
+from onepepe_math.segment import SegmentParams, _close, bbox, segment  # noqa: E402
 
 
 class FakeClassifier:
@@ -75,6 +75,36 @@ class TestSegment(unittest.TestCase):
         # las dos rayas sueltas del "=" y el "1" pegado al "="
         self.assertEqual(len(junk), 3)
         self.assertIsNone(forced_groups(strokes, ["1", "=", "-", "-"], FakeClassifier()))
+
+
+T = 10.0  # tamaño típico de los tests de rayas
+
+
+class TestRayasPrimero(unittest.TestCase):
+    P = SegmentParams(bars_first=1.0)
+
+    def close(self, a, b, params=None):
+        return _close(bbox([a]), bbox([b]), T, params or self.P)
+
+    def test_raya_no_traga_numerador(self):
+        raya, uno = hline(0, 0, 30), vline(15, -2.2, -12)  # el «1» acaba a 0,2·típico de la raya
+        self.assertFalse(self.close(raya, uno))
+        self.assertTrue(self.close(raya, uno, SegmentParams(bars_first=0.0)))
+
+    def test_igual_sigue_junto(self):
+        self.assertTrue(self.close(hline(0, 0, 20), hline(3, 0, 20)))
+
+    def test_dividido(self):
+        raya = hline(0, 0, 30)
+        for y in (-4, 4):
+            self.assertTrue(self.close(raya, [(15, y), (15.5, y + 0.5)]))
+
+    def test_cruce(self):
+        self.assertTrue(self.close(hline(0, 0, 30), vline(15, -8, 8)))
+
+    def test_roce_no_basta(self):
+        # un trazo de alto 10 cuyo extremo baja 0,05·h por debajo de la raya
+        self.assertFalse(self.close(hline(0, 0, 30), vline(15, -9.5, 0.5)))
 
 
 if __name__ == "__main__":

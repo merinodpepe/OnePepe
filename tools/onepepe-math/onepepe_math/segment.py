@@ -36,6 +36,15 @@ class SegmentParams:
     # (sin medir aún con tu letra: tu archivo de prueba no tiene tiempos; se ajustará con tus páginas nuevas)
     pause_same: float = 0.3
     pause_weight: float = 0.5
+    # rayas primero (M5.3): una raya larga solo se une con un plano parecido, un punto o un trazo que la cruza
+    bars_first: float = 0.0
+    bar_ratio: float = 1.5  # raya: plana y más ancha que esto (× tamaño típico)
+    bar_flat: float = 0.25  # plano: alto menor que esto × ancho
+    # margen del solape horizontal en la regla de apilados (× tamaño típico); 0 = solape estricto
+    stack_margin: float = 0.35
+    # reparación general tras el corte (reparar.py) y papel de la raya en el reconocedor (layout.bar_role)
+    repair: float = 1.0
+    bar_role: float = 1.0
 
     @classmethod
     def load(cls, path=DEFAULT_PARAMS_PATH):
@@ -60,15 +69,37 @@ def bbox(strokes):
     return (min(xs), min(ys), max(xs), max(ys))
 
 
+def _flat(b, typical, params):
+    w, h = b[2] - b[0], b[3] - b[1]
+    return h < params.bar_flat * w and w >= 0.3 * typical
+
+
+def _close_bar(bar, o, typical, params):
+    """M5.3: la raya `bar` y el trazo `o`: solo un plano parecido, un punto o un trazo que la cruza."""
+    wb, wo, ho = bar[2] - bar[0], o[2] - o[0], o[3] - o[1]
+    gap_y = max(0.0, max(bar[1], o[1]) - min(bar[3], o[3]))
+    overlap_x = min(bar[2], o[2]) - max(bar[0], o[0])
+    if _flat(o, typical, params):
+        return 0.6 <= wb / wo <= 1.67 and overlap_x > 0.5 * min(wb, wo) and gap_y < 0.6 * typical
+    if max(wo, ho) < 0.3 * typical:
+        return bar[0] <= (o[0] + o[2]) / 2 <= bar[2] and gap_y < 0.6 * typical
+    cy = (bar[1] + bar[3]) / 2
+    return bar[0] <= (o[0] + o[2]) / 2 <= bar[2] and o[1] < cy < o[3] and min(cy - o[1], o[3] - cy) > 0.15 * ho
+
+
 def _close(a, b, typical, params=None):
     """¿Están las cajas a y b lo bastante cerca para ser el mismo símbolo?"""
     params = params or SegmentParams()
+    if params.bars_first > 0:
+        for bar, o in ((a, b), (b, a)):
+            if _flat(bar, typical, params) and bar[2] - bar[0] > params.bar_ratio * typical:
+                return _close_bar(bar, o, typical, params)
     gap_x = max(0.0, max(a[0], b[0]) - min(a[2], b[2]))
     gap_y = max(0.0, max(a[1], b[1]) - min(a[3], b[3]))
     overlap_x = min(a[2], b[2]) - max(a[0], b[0])
     narrower = max(min(a[2] - a[0], b[2] - b[0]), 0.05 * typical)
     # uno encima del otro (=, i, j, :, ÷, ≤, Σ): solapan en horizontal y hay poco hueco vertical
-    if overlap_x > min(0.3 * narrower, 0.2 * typical) - 0.35 * typical and gap_y < params.stack_gap * typical:
+    if overlap_x > min(0.3 * narrower, 0.2 * typical) - params.stack_margin * typical and gap_y < params.stack_gap * typical:
         return True
     # se tocan o casi (+, x, k, π, 4)
     return gap_x < params.touch_gap * typical and gap_y < params.touch_gap * typical

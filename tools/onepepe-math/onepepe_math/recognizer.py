@@ -5,9 +5,27 @@ from . import glossary as gl
 from . import glyphs
 from .context import apply_glossary, reading_order, share_within_groups, shape_groups, viterbi
 from .evaluate import answer
-from .layout import Sym, parse, to_latex
-from .dots import fix_dotted_letters
-from .segment import bbox, segment, typical_size
+from .layout import Sym, bar_role, parse, to_latex
+from .reparar import fix_dotted_letters, reparar
+from .segment import SegmentParams, bbox, segment, typical_size
+
+
+_RAYAS = {"-": "minus", r"\frac": "frac", r"\overline": "overline"}
+_ETIQUETA = {"minus": "-", "frac": r"\frac", "overline": r"\overline"}
+
+
+def _raya_con_su_papel(cand_lists, boxes, typical):
+    """M5.5: la probabilidad de «-», «\\frac» y «\\overline» pasa a la etiqueta que le toca por su sitio."""
+    out = []
+    for i, cands in enumerate(cand_lists):
+        if cands[0][0] not in _RAYAS:
+            out.append(cands)
+            continue
+        otras = [Sym(c[0][0], b) for j, (c, b) in enumerate(zip(cand_lists, boxes)) if j != i]
+        papel = _ETIQUETA[bar_role(boxes[i], otras, typical)]
+        total = sum(p for c, p in cands if c in _RAYAS)
+        out.append([(papel, total)] + [(c, p) for c, p in cands if c not in _RAYAS])
+    return out
 
 
 def recognize(
@@ -28,9 +46,13 @@ def recognize(
     `strokes`: trazos nuevos (listas de (x, y)) en orden de escritura. `known`: símbolos ya reconocidos antes en esa
     línea, como [{"latex", "box"}], que dan contexto. Devuelve un dict con "symbols", "latex", "result".
     """
+    segment_params = segment_params or SegmentParams()
     syms = segment(strokes, classifier, params=segment_params, times=times)
     if syms:
-        syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes))
+        if segment_params.repair > 0:
+            syms = reparar(syms, strokes, classifier, typical_size(strokes), segment_params)
+        else:
+            syms = fix_dotted_letters(syms, strokes, classifier, typical_size(strokes))
     groups_strokes = [[strokes[i] for i in s["strokes"]] for s in syms]
     boxes = [bbox(g) for g in groups_strokes]
     cand_lists = [s["candidates"] for s in syms]
@@ -43,6 +65,9 @@ def recognize(
     # los que se parecen mucho entre sí comparten etiqueta
     groups = shape_groups(embeddings) if syms else []
     cand_lists = share_within_groups(cand_lists, groups)
+
+    if segment_params.bar_role > 0 and syms:
+        cand_lists = _raya_con_su_papel(cand_lists, boxes, typical_size(strokes))
 
     # contexto: todos los símbolos de la línea en orden de lectura (los ya conocidos, fijos)
     all_c = cand_lists + [[(k["latex"], 1.0)] for k in known]
