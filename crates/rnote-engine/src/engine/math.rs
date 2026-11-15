@@ -121,6 +121,20 @@ pub struct MathOverlay {
     pub format: usize,
     /// False when a symbol of the line was read with low confidence: it is drawn faint, with a " ?".
     pub sure: bool,
+    /// When it appeared, to fade it in (not saved).
+    pub born: Option<Instant>,
+}
+
+/// Duration of the fade-in of a result (ms).
+const FADE_MS: f64 = 120.0;
+
+/// Opacity of a result `ms` after it appeared (ease-out); 1 when animations are off.
+pub fn overlay_alpha(ms: f64, animate: bool) -> f64 {
+    if !animate {
+        return 1.0;
+    }
+    let t = (ms / FADE_MS).clamp(0.0, 1.0);
+    1.0 - (1.0 - t).powi(3)
 }
 
 impl MathOverlay {
@@ -157,6 +171,8 @@ pub struct MathState {
     in_flight: Vec<(u64, Vec<StrokeKey>)>,
     pub symbols: Vec<MathSymbol>,
     pub overlays: Vec<MathOverlay>,
+    /// Whether to animate (the UI sets it from the system setting).
+    pub animate: bool,
     next_id: u64,
     tap_start: Option<Vector2>,
     /// The events of a possible tap, held back until it is clear whether the pen moves (then they are a stroke).
@@ -1196,6 +1212,7 @@ impl Engine {
                 formats: o.formats,
                 format: o.format,
                 sure: o.sure,
+                born: None,
             })
             .collect();
         restored
@@ -1352,6 +1369,21 @@ impl Engine {
         .ok()
     }
 
+    /// The UI tells whether to animate (the system setting); the engine does not know GTK.
+    pub fn math_set_animate(&mut self, on: bool) {
+        self.math.animate = on;
+    }
+
+    /// Whether some result is still fading in (the UI keeps redrawing while true).
+    pub fn math_animating(&self) -> bool {
+        self.math.animate
+            && self
+                .math
+                .overlays
+                .iter()
+                .any(|o| o.born.is_some_and(|b| b.elapsed().as_secs_f64() * 1000.0 < FADE_MS))
+    }
+
     /// Applies the answer to the page request: the annotations of all lines are replaced.
     pub fn math_apply_page(&mut self, line: &str) -> WidgetFlags {
         #[derive(Deserialize)]
@@ -1415,18 +1447,16 @@ impl Engine {
                     Some(id) => keys_of(&[*id]),
                     None => keys_of(ids),
                 };
-                // the format chosen before (fraction, decimal...) is kept
-                let format = self
-                    .math
-                    .overlays
-                    .iter()
-                    .find(|o| {
-                        o.kind == mark.kind
-                            && (o.anchor - Vector2::from(mark.anchor)).length() < 1.0
-                    })
+                // the format chosen before (fraction, decimal...) and the age are kept
+                let old = self.math.overlays.iter().find(|o| {
+                    o.kind == mark.kind && (o.anchor - Vector2::from(mark.anchor)).length() < 1.0
+                });
+                let format = old
                     .map(|o| o.format)
                     .filter(|f| *f < mark.formats.len())
                     .unwrap_or(0);
+                // a result that was already there keeps its age; a new one fades in
+                let born = old.map_or(Some(Instant::now()), |o| o.born);
                 overlays.push(MathOverlay {
                     anchor: Vector2::from(mark.anchor),
                     height: mark.height,
@@ -1441,6 +1471,7 @@ impl Engine {
                         .collect(),
                     format,
                     sure: mark.sure,
+                    born,
                 });
             }
         }
@@ -1773,7 +1804,7 @@ impl Engine {
             draw_math_mode_border(&mut piet_cx, size)?;
         }
         piet_cx.transform(self.camera.transform().to_kurbo());
-        draw_math_overlays(&mut piet_cx, &overlays)?;
+        draw_math_overlays(&mut piet_cx, &overlays, self.math.animate)?;
         piet_cx.finish().map_err(|e| anyhow::anyhow!("{e:?}"))?;
         snapshot.restore();
         Ok(())
@@ -1796,16 +1827,23 @@ pub fn draw_math_mode_border(
 pub fn draw_math_overlays(
     piet_cx: &mut impl piet::RenderContext,
     overlays: &[MathOverlay],
+    animate: bool,
 ) -> anyhow::Result<()> {
     use piet::{Text, TextLayoutBuilder};
     use rnote_compose::color;
     for o in overlays {
+        let alpha = overlay_alpha(
+            o.born.map_or(FADE_MS, |b| b.elapsed().as_secs_f64() * 1000.0),
+            animate,
+        );
+        let fade = |a: u8| (a as f64 * alpha).round() as u8;
+        let dy = 4.0 * (1.0 - alpha);
         let font_size = o.height.max(6.0);
         // results in gray, variables in a soft purple, wrong steps in red; fainter when not sure
         let text_color = match o.kind.as_str() {
-            "variable" => color::ONEPEPE_BRAND.with_a8(if o.sure { 170 } else { 100 }),
-            "error" => color::GNOME_REDS[3].with_a8(230),
-            _ => color::GNOME_DARKS[0].with_a8(if o.sure { 150 } else { 85 }),
+            "variable" => color::ONEPEPE_BRAND.with_a8(fade(if o.sure { 170 } else { 100 })),
+            "error" => color::GNOME_REDS[3].with_a8(fade(230)),
+            _ => color::GNOME_DARKS[0].with_a8(fade(if o.sure { 150 } else { 85 })),
         };
         let shown = if o.sure {
             o.shown_text().to_string()
@@ -1821,7 +1859,7 @@ pub fn draw_math_overlays(
         {
             piet_cx.draw_text(
                 &layout,
-                kurbo::Point::new(o.anchor.x, o.anchor.y - font_size * 0.6),
+                kurbo::Point::new(o.anchor.x, o.anchor.y - font_size * 0.6 + dy),
             );
         }
         // the LaTeX under the results (not under the "?", the variables or the explanations)
@@ -1829,13 +1867,13 @@ pub fn draw_math_overlays(
             && let Ok(layout) = piet_cx
                 .text()
                 .new_text_layout(format!("LaTeX: {}", o.shown_latex()))
-                .text_color(color::GNOME_DARKS[0].with_a8(110))
+                .text_color(color::GNOME_DARKS[0].with_a8(fade(110)))
                 .font(piet::FontFamily::MONOSPACE, font_size * 0.35)
                 .build()
         {
             piet_cx.draw_text(
                 &layout,
-                kurbo::Point::new(o.anchor.x, o.anchor.y + font_size * 0.6),
+                kurbo::Point::new(o.anchor.x, o.anchor.y + font_size * 0.6 + dy),
             );
         }
     }
@@ -2444,6 +2482,20 @@ mod render_tests {
     use super::*;
 
     #[test]
+    fn overlay_alpha_curve() {
+        assert_eq!(overlay_alpha(0.0, true), 0.0);
+        let mid = overlay_alpha(60.0, true);
+        assert!(mid > 0.0 && mid < 1.0);
+        assert_eq!(overlay_alpha(120.0, true), 1.0);
+        assert_eq!(overlay_alpha(500.0, true), 1.0);
+    }
+
+    #[test]
+    fn no_animation_when_disabled() {
+        assert_eq!(overlay_alpha(0.0, false), 1.0);
+    }
+
+    #[test]
     fn border_and_result_are_drawn() {
         let surface = cairo::ImageSurface::create(cairo::Format::ARgb32, 300, 120).unwrap();
         {
@@ -2462,8 +2514,9 @@ mod render_tests {
                 formats: vec![],
                 format: 0,
                 sure: true,
+                born: None,
             }];
-            draw_math_overlays(&mut piet_cx, &overlays).unwrap();
+            draw_math_overlays(&mut piet_cx, &overlays, true).unwrap();
             piet::RenderContext::finish(&mut piet_cx).unwrap();
         }
         if let Ok(path) = std::env::var("ONEPEPE_RENDER_MATH") {
