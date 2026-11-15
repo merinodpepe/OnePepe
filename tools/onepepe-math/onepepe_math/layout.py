@@ -80,6 +80,49 @@ def parse(syms):
     return _parse_region(syms, typical)
 
 
+def _big_height(syms, typical):
+    alturas = sorted(s.h for s in syms if s.label not in _FLAT)
+    return max(typical, alturas[int(0.9 * (len(alturas) - 1))]) if alturas else typical
+
+
+def _frac_sides(bar, syms, typical, H):
+    """Lo que hay encima y debajo de una raya, dentro de su ancho y cerca (si hay de los dos lados, es fracción)."""
+    x0, x1 = bar.box[0] - 0.1 * bar.w, bar.box[2] + 0.1 * bar.w
+    above = [s for s in syms if s is not bar and x0 <= s.cx <= x1 and s.box[3] <= bar.cy + 0.15 * typical]
+    below = [s for s in syms if s is not bar and x0 <= s.cx <= x1 and s.box[1] >= bar.cy - 0.15 * typical]
+    # solo lo que está cerca de la raya en vertical
+    return [s for s in above if bar.cy - s.box[3] < 1.5 * H], [s for s in below if s.box[1] - bar.cy < 1.5 * H]
+
+
+def _accent_below(acc, syms, typical):
+    """Los símbolos que quedan justo debajo de un posible acento."""
+    return [
+        s
+        for s in syms
+        if s is not acc
+        and s.label not in ACCENTS
+        and s.box[0] - 0.35 * s.w <= acc.cx <= s.box[2] + 0.35 * s.w
+        and -0.15 * typical <= s.box[1] - acc.box[3] < 0.6 * typical
+        and acc.w <= 2.2 * max(s.w, 0.4 * typical)
+    ]
+
+
+def bar_role(box, others, typical):
+    """Papel de una raya (M5.5): "frac" (algo encima y debajo), "overline" (solo una letra debajo, y no mucho más
+    ancha) o "minus". `others`: los demás Sym de la región. Usa los mismos umbrales que `_parse_region`."""
+    bar = Sym("-", tuple(box))
+    if bar.w > 0.8 * typical:
+        above, below = _frac_sides(bar, others, typical, _big_height(others, typical))
+        if above and below:
+            return "frac"
+    below = _accent_below(bar, others, typical)
+    if len(below) == 1:
+        over = [s for s in others if s.box[3] <= bar.box[1] and abs(s.cx - bar.cx) < bar.w]
+        if not over and bar.w <= 1.6 * max(below[0].w, 0.4 * typical) and below[0].label not in _FLAT:
+            return "overline"
+    return "minus"
+
+
 def _parse_region(syms, typical):
     syms = sorted(syms, key=lambda s: s.box[0])
     # 0. límites de ∑, ∏ y ∫ debajo y encima del signo
@@ -104,8 +147,7 @@ def _parse_region(syms, typical):
             node.limits_done = True
             return _parse_region([s for s in syms if s is not big and s not in used] + [node], typical)
     # 1. fracciones: la raya más larga primero
-    alturas = sorted(s.h for s in syms if s.label not in _FLAT)
-    H = max(typical, alturas[int(0.9 * (len(alturas) - 1))]) if alturas else typical
+    H = _big_height(syms, typical)
     bars = sorted(
         [s for s in syms if s.label in ("-", r"\frac") and s.w > 0.8 * typical],
         key=lambda s: -s.w,
@@ -113,12 +155,7 @@ def _parse_region(syms, typical):
     for bar in bars:
         if bar not in syms:
             continue
-        x0, x1 = bar.box[0] - 0.1 * bar.w, bar.box[2] + 0.1 * bar.w
-        above = [s for s in syms if s is not bar and x0 <= s.cx <= x1 and s.box[3] <= bar.cy + 0.15 * typical]
-        below = [s for s in syms if s is not bar and x0 <= s.cx <= x1 and s.box[1] >= bar.cy - 0.15 * typical]
-        # solo lo que está cerca de la raya en vertical
-        above = [s for s in above if bar.cy - s.box[3] < 1.5 * H]
-        below = [s for s in below if s.box[1] - bar.cy < 1.5 * H]
+        above, below = _frac_sides(bar, syms, typical, H)
         if above and below:
             num = _parse_region(above, typical)
             den = _parse_region(below, typical)
@@ -137,15 +174,7 @@ def _parse_region(syms, typical):
     for acc in [s for s in syms if s.label in ACCENTS or s.label == "-"]:
         if acc not in syms:
             continue
-        below = [
-            s
-            for s in syms
-            if s is not acc
-            and s.label not in ACCENTS
-            and s.box[0] - 0.35 * s.w <= acc.cx <= s.box[2] + 0.35 * s.w
-            and -0.15 * typical <= s.box[1] - acc.box[3] < 0.6 * typical
-            and acc.w <= 2.2 * max(s.w, 0.4 * typical)
-        ]
+        below = _accent_below(acc, syms, typical)
         if len(below) != 1:
             continue
         base = below[0]
