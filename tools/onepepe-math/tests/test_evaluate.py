@@ -142,3 +142,38 @@ class TestStepSymbols(unittest.TestCase):
         for s in [";", r"\rightarrow", r"\Rightarrow", r"\Leftrightarrow"]:
             lines = place_glyph(s, (0.0, 0.0, 40.0, 20.0))
             self.assertTrue(lines, s)
+
+
+class TestT3(unittest.TestCase):
+    """Evaluación correcta: nada de resultados erróneos mostrados (T3)."""
+
+    def text(self, tree, **kw):
+        r = answer(tree, **kw)
+        return None if r is None else r["text"]
+
+    def test_euler_constant(self):
+        self.assertTrue(self.text(row(sup("e", "5"), "=")).startswith("exp(5)"))
+
+    def test_undefined_function_call_is_unknown(self):
+        import sympy as sp
+
+        self.assertIsNone(self.text(row("f", "(", "3", ")", "=")))
+        # con f definida como valor del glosario sigue siendo un producto
+        self.assertEqual(self.text(row("f", "(", "3", ")", "="), glossary={"f": sp.Integer(2)}), "6")
+
+    def test_leibniz_without_function_is_derivative(self):
+        d2 = frac(row(sup("d", "2")), row("d", sup("x", "2")))
+        self.assertEqual(self.text(row(d2, "(", sup("x", "3"), ")", "=")), "6*x")
+        # dx/dt: derivada de una función sin definir -> sin resultado
+        self.assertIsNone(self.text(row(frac(row("d", "x"), row("d", "t")), "=")))
+
+    def test_prime_and_gap_are_unknown(self):
+        self.assertIsNone(self.text(row(("prime", ("sym", "f"), 1), "(", "x", ")", "=")))
+        self.assertIsNone(self.text(row("1", "2", ("sym", r"\,"), "3", "4", "=")))
+
+    def test_force_in_newtons(self):
+        import pint
+
+        u = pint.UnitRegistry()
+        r = self.text(row("m", "g", "="), units={"m": 70 * u.kg, "g": 9.8 * u.m / u.s**2})
+        self.assertTrue(r.startswith("686") and r.endswith("N"), r)

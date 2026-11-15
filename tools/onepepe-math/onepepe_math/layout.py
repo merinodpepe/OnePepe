@@ -19,7 +19,7 @@ Nodos del árbol (tuplas):
 import re
 from dataclasses import dataclass
 
-from .symbols import ACCENTS, category
+from .symbols import ACCENTS, DIGITS, category
 
 
 @dataclass
@@ -82,7 +82,30 @@ def parse(syms):
 
 def _parse_region(syms, typical):
     syms = sorted(syms, key=lambda s: s.box[0])
+    # 0. límites de ∑, ∏ y ∫ debajo y encima del signo
+    for big in [s for s in syms if s.label in (r"\sum", r"\prod", r"\int") and not hasattr(s, "limits_done")]:
+        near = [
+            s
+            for s in syms
+            if s is not big
+            and s.h < 0.8 * big.h
+            and min(s.box[2], big.box[2] + 0.6 * typical) - max(s.box[0], big.box[0] - 0.6 * typical) > 0.5 * s.w
+        ]
+        below = [s for s in near if s.box[1] >= big.box[3] - 0.10 * big.h and s.box[1] - big.box[3] < typical]
+        above = [s for s in near if s.box[3] <= big.box[1] + 0.10 * big.h and big.box[1] - s.box[3] < typical]
+        if below or above:
+            used = below + above
+            node = Sym(label=big.label, box=(min(s.box[0] for s in used + [big]), min(s.box[1] for s in used + [big]),
+                                              max(s.box[2] for s in used + [big]), max(s.box[3] for s in used + [big])))
+            base = ("sym", big.label)
+            lo = _parse_region(below, typical) if below else None
+            up = _parse_region(above, typical) if above else None
+            node.node = ("subsup", base, lo, up) if lo and up else ("sub", base, lo) if lo else ("sup", base, up)
+            node.limits_done = True
+            return _parse_region([s for s in syms if s is not big and s not in used] + [node], typical)
     # 1. fracciones: la raya más larga primero
+    alturas = sorted(s.h for s in syms if s.label not in _FLAT)
+    H = max(typical, alturas[int(0.9 * (len(alturas) - 1))]) if alturas else typical
     bars = sorted(
         [s for s in syms if s.label in ("-", r"\frac") and s.w > 0.8 * typical],
         key=lambda s: -s.w,
@@ -94,8 +117,8 @@ def _parse_region(syms, typical):
         above = [s for s in syms if s is not bar and x0 <= s.cx <= x1 and s.box[3] <= bar.cy + 0.15 * typical]
         below = [s for s in syms if s is not bar and x0 <= s.cx <= x1 and s.box[1] >= bar.cy - 0.15 * typical]
         # solo lo que está cerca de la raya en vertical
-        above = [s for s in above if bar.cy - s.box[3] < 1.5 * typical + 0.0 * s.h]
-        below = [s for s in below if s.box[1] - bar.cy < 1.5 * typical]
+        above = [s for s in above if bar.cy - s.box[3] < 1.5 * H]
+        below = [s for s in below if s.box[1] - bar.cy < 1.5 * H]
         if above and below:
             num = _parse_region(above, typical)
             den = _parse_region(below, typical)
@@ -242,6 +265,13 @@ def is_function(label):
     return label.startswith("\\") and label[1:] in FUNCTIONS
 
 
+_BIGLIM = {r"\sum", r"\prod", r"\lim"}
+
+
+def _is_op(label):
+    return category(label) in {"binop", "relation"} or label in {r"\cdot", r"\sim", r"\equiv"}
+
+
 def _parse_row(syms, typical):
     syms = _merge_functions(syms, typical)
     items = []
@@ -250,22 +280,68 @@ def _parse_row(syms, typical):
         base = syms[i]
         node = _node(base)
         i += 1
+        if getattr(base, "limits_done", False):
+            items.append((base, node))
+            continue
         if base.label in _FLAT or category(base.label) in {"binop", "relation", "open"}:
             items.append((base, node))
             continue
         base_mid = _middle(base, typical)
         base_top, base_bot = base.box[1], base.box[3]
-        sup, sub = [], []
+        sup, sub, primes = [], [], 0
         # los símbolos siguientes más pequeños y desplazados hacia arriba (o abajo) forman el exponente (o subíndice)
         while i < len(syms):
             s = syms[i]
-            if s.label in _NEVER_SCRIPT or (s.box[0] > base.box[2] + 1.2 * typical and not (sup or sub)):
+            if s.label in _NEVER_SCRIPT and not (
+                # límites de ∑, ∏ y lim escritos a la derecha: «i=1» y «x→0» siguen en el subíndice
+                sub and base.label in _BIGLIM and s.label in ("=", r"\rightarrow") and s.cy > base_mid + 0.12 * typical
+            ):
                 break
+            if s.box[0] > base.box[2] + 1.2 * typical and not (sup or sub):
+                break
+            # prima: f', f'', ŷ', (x)'
+            if s.label == "'" and s.box[3] < base_mid and (
+                category(base.label) in {"latin", "greek"} or base.label == ")" or hasattr(base, "accent_base")
+            ):
+                primes += 1
+                i += 1
+                continue
             # una función de letras bajas tras un paréntesis («sin(x)cos(x)») sigue en la línea; solo es exponente
             # si queda entera por encima del centro (e^{sin x})
             if is_function(s.label) and not s.box[3] < base_mid:
                 break
-            smaller = s.h < 0.85 * max(base.h, typical) or s.label in _FLAT
+            # cifra tras cifra: sigue en la línea (mismo número) salvo que esté claramente subida (exponente)
+            if base.label in DIGITS and s.label in DIGITS:
+                mismo = abs(s.box[3] - base.box[3]) <= 0.2 * max(base.h, typical)
+                sube = s.box[3] < base.box[3] - 0.35 * base.h and s.h < 0.85 * max(base.h, typical)
+                if mismo or not sube:
+                    break
+                sup.append(s)
+                i += 1
+                continue
+            # un operador solo sigue en un guion ya abierto; uno nuevo solo abre un exponente negativo (e^{-x})
+            if _is_op(s.label):
+                nxt = syms[i + 1] if i + 1 < len(syms) else None
+                if sup:
+                    ok, dest = s.cy < base_mid - 0.25 * typical, sup
+                elif sub:
+                    ok, dest = s.cy > base_mid + 0.12 * typical, sub
+                else:
+                    ok, dest = (
+                        s.label in ("-", "+")
+                        and s.cy < base_top + 0.35 * base.h
+                        and nxt is not None
+                        and not _is_op(nxt.label)
+                        and nxt.h < 0.85 * max(base.h, typical)
+                        and _middle(nxt, typical) < base_mid - 0.25 * typical
+                        and nxt.box[3] < base_bot - 0.05 * typical
+                    ), sup
+                if not ok:
+                    break
+                dest.append(s)
+                i += 1
+                continue
+            smaller = s.h < 0.85 * max(base.h, typical)
             mid = _middle(s, typical)
             if is_function(base.label):
                 # tras una función, lo que sigue es su argumento (sin x, ln 2); solo es subíndice lo que queda
@@ -286,6 +362,8 @@ def _parse_row(syms, typical):
             else:
                 break
             i += 1
+        if primes:
+            node = ("prime", node, primes)
         if sup and sub:
             node = ("subsup", node, _parse_row(sub, typical), _parse_row(sup, typical))
         elif sup:
@@ -293,7 +371,15 @@ def _parse_row(syms, typical):
         elif sub:
             node = ("sub", node, _parse_row(sub, typical))
         items.append((base, node))
-    return ("row", [n for _, n in items])
+    # hueco grande entre dos cifras de la línea: no son un solo número
+    out = []
+    for k, (b, n) in enumerate(items):
+        p = items[k - 1] if k else None
+        if p and b.label in DIGITS and p[0].label in DIGITS and n[0] == p[1][0] == "sym" \
+                and b.box[0] - p[0].box[2] > 0.8 * typical:
+            out.append(("sym", r"\,"))
+        out.append(n)
+    return ("row", out)
 
 
 def to_latex(node):
@@ -323,6 +409,8 @@ def to_latex(node):
         return f"\\sqrt[{to_latex(node[1])}]{{{to_latex(node[2])}}}"
     if kind == "accent":
         return f"{node[1]}{{{to_latex(node[2])}}}"
+    if kind == "prime":
+        return f"{_group(node[1])}{chr(39) * node[2]}"
     raise ValueError(kind)
 
 

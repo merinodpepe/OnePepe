@@ -138,7 +138,7 @@ def _definition(tokens, env, units):
     if len(lhs) != 1 or lhs[0][0] != "sym" or lhs[0][2] is not None or not rhs:
         return None
     try:
-        sym = _Parser([], {})._symbol(lhs[0])
+        sym = _Parser([], {"e": sp.Symbol("e")})._symbol(lhs[0])
     except ParseError:
         return None
     if not isinstance(sym, sp.Symbol):

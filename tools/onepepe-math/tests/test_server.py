@@ -56,7 +56,7 @@ class TestServer(unittest.TestCase):
         # "1 + 1 =" escrito como: 1, (dos rayas cruzadas: no hace falta), 1, =
         strokes = [
             line(0, 0, 0, 20),
-            line(30, 0, 30, 20),
+            line(12, 0, 12, 20),
             line(50, 7, 64, 7),
             line(50, 13, 64, 13),
         ]
