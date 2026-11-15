@@ -45,6 +45,9 @@ class SegmentParams:
     # reparación general tras el corte (reparar.py) y papel de la raya en el reconocedor (layout.bar_role)
     repair: float = 1.0
     bar_role: float = 1.0
+    # cifras mal leídas dentro de un número (lexico.corregir_entidades): 1 = activa; desconfianza de partida theta
+    entidades: float = 1.0
+    theta: float = 2.5
 
     @classmethod
     def load(cls, path=DEFAULT_PARAMS_PATH):

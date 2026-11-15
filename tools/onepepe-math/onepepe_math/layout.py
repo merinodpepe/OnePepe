@@ -6,6 +6,7 @@ Salida: un árbol sencillo y su LaTeX. Las tolerancias son amplias porque la let
 
 Nodos del árbol (tuplas):
     ("sym", latex)                      símbolo
+    ("num", "12.5")                     número de varias cifras (la coma decimal se guarda como punto)
     ("row", [nodos])                    secuencia en la misma línea
     ("sup", base, exponente)            potencia
     ("sub", base, subíndice)
@@ -19,6 +20,7 @@ Nodos del árbol (tuplas):
 import re
 from dataclasses import dataclass
 
+from .lexico import unir_numeros
 from .symbols import ACCENTS, DIGITS, category
 
 
@@ -301,8 +303,14 @@ def _is_op(label):
     return category(label) in {"binop", "relation"} or label in {r"\cdot", r"\sim", r"\equiv"}
 
 
+def _crear_num(label, box, node):
+    s = Sym(label, box)
+    s.node = node
+    return s
+
+
 def _parse_row(syms, typical):
-    syms = _merge_functions(syms, typical)
+    syms = unir_numeros(_merge_functions(syms, typical), typical, _crear_num)
     items = []
     i = 0
     while i < len(syms):
@@ -404,8 +412,7 @@ def _parse_row(syms, typical):
     out = []
     for k, (b, n) in enumerate(items):
         p = items[k - 1] if k else None
-        if p and b.label in DIGITS and p[0].label in DIGITS and n[0] == p[1][0] == "sym" \
-                and b.box[0] - p[0].box[2] > 0.8 * typical:
+        if p and n[0] == p[1][0] == "num" and b.box[0] - p[0].box[2] > 0.8 * typical:
             out.append(("sym", r"\,"))
         out.append(n)
     return ("row", out)
@@ -424,6 +431,8 @@ def to_latex(node):
                 out += " "
             out += t
         return out
+    if kind == "num":
+        return node[1].replace(".", ",")
     if kind == "sup":
         return f"{_group(node[1])}^{{{to_latex(node[2])}}}"
     if kind == "sub":
@@ -445,4 +454,4 @@ def to_latex(node):
 
 def _group(node):
     t = to_latex(node)
-    return t if node[0] in ("sym", "accent") else "{" + t + "}"
+    return t if node[0] in ("sym", "accent") or (node[0] == "num" and len(t) == 1) else "{" + t + "}"

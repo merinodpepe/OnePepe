@@ -6,6 +6,7 @@ from . import glyphs
 from .context import apply_glossary, reading_order, share_within_groups, shape_groups, viterbi
 from .evaluate import answer
 from .layout import Sym, bar_role, parse, to_latex
+from .lexico import corregir_entidades
 from .reparar import fix_dotted_letters, reparar
 from .segment import SegmentParams, bbox, segment, typical_size
 
@@ -78,6 +79,9 @@ def recognize(
         ranked = viterbi([all_c[i] for i in order], lm)
         for pos, i in enumerate(order):
             all_c[i] = ranked[pos]
+    if segment_params.entidades > 0 and all_c:
+        all_c = corregir_entidades(all_c, all_b, sorted(b[3] - b[1] for b in all_b)[len(all_b) // 2],
+                                   range(len(syms), len(all_c)), segment_params.theta)
     cand_lists = all_c[: len(syms)]
 
     out_symbols = []
