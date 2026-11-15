@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Modo entreno: el set de 200, dibujar las expresiones e importar lo escrito (con un clasificador falso)."""
 
+import glob
+import json
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 import numpy as np
@@ -11,6 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from onepepe_math import entreno  # noqa: E402
 from onepepe_math.symbols import CORE  # noqa: E402
+from test_alinear import Plantilla, trazos  # noqa: E402
 
 try:
     import matplotlib  # noqa: F401
@@ -63,65 +68,94 @@ class TestSet(unittest.TestCase):
         self.assertIn("general-200", [s["name"] for s in entreno.list_sets()])
 
 
-class FakeClassifier:
-    """Cualquier trazo suelto es cualquiera de los símbolos (lo que cuenta aquí es el reparto, no la red)."""
-
-    def __init__(self, labels):
-        self.classes = sorted(set(labels))
-
-    def probabilities(self, strokes):
-        p = np.full(len(self.classes), 1.0 / len(self.classes))
-        return p if len(strokes) == 1 else p * 0.01
-
-
 class FakeStore:
-    def __init__(self):
+    def __init__(self, path):
+        self.path = path
         self.items = []
 
     def add_correction(self, latex, strokes, notebook=None, kind="symbol", **_):
         self.items.append((latex, len(strokes), kind, notebook))
 
 
-def dash(x, y):
-    return [[x, y], [x + 5, y + 8]]
+def sesion(latex, simbolos, id_="g001", set_="general-200"):
+    """Una sesión con una expresión escrita con los trazos de `trazos(simbolos)` (ver test_alinear)."""
+    return {"set": set_, "items": [{"id": id_, "kind": "expr", "lines": [latex]}],
+            "answers": {id_: {"strokes": trazos(simbolos), "size": [300, 100]}}}
+
+
+IGUAL = [("2", 1), ("x", 1), ("+", 1), ("1", 1), ("=", 2), ("7", 1)]
 
 
 class TestImport(unittest.TestCase):
-    def session(self):
-        return {
-            "set": "prueba",
-            "items": [
-                {"id": "a", "kind": "expr", "lines": ["2x+1=7"]},
-                {"id": "b", "kind": "steps", "lines": ["x=1", "y=2"]},
-                {"id": "c", "kind": "expr", "lines": ["x+1"]},
-                {"id": "d", "kind": "expr", "lines": ["9"]},
-            ],
-            "answers": {
-                # seis trazos, un símbolo cada uno
-                "a": {"strokes": [dash(10 * i, 10) for i in range(6)], "size": [300, 100]},
-                # dos renglones guía: cada trazo va al renglón de su altura
-                "b": {"strokes": [dash(0, 10), dash(10, 10), dash(20, 10), dash(0, 60), dash(10, 60), dash(20, 60)],
-                      "size": [300, 100]},
-                # un trazo para tres símbolos: no encaja
-                "c": {"strokes": [dash(0, 10)], "size": [300, 100]},
-                "d": {"strokes": [dash(0, 10)], "size": [300, 100], "skipped": True},
-            },
-        }
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.dir)
+        self.store = FakeStore(os.path.join(self.dir, "correcciones.jsonl"))
 
-    def test_import(self):
-        labels = list("2x+1=7y9")
-        store = FakeStore()
-        out = entreno.import_session(self.session(), FakeClassifier(labels), store)
-        self.assertEqual(sorted(out["imported"]), ["a", "b"])
-        self.assertEqual(out["failed"], ["c"])
-        self.assertEqual(out["symbols"], 12)
-        self.assertEqual(sorted(x[0] for x in store.items if x[2] == "symbol")[:3], ["+", "1", "1"])
-        self.assertTrue(all(x[3] == "entreno:prueba" for x in store.items))
-        # lo ya importado no se repite
-        s = self.session()
-        for k in ("a", "b"):
-            s["answers"][k]["imported"] = True
-        self.assertEqual(entreno.import_session(s, FakeClassifier(labels), FakeStore())["imported"], [])
+    def test_import_usa_orden(self):
+        out = entreno.import_session(sesion("2x+1=7", IGUAL), Plantilla(IGUAL), self.store, examen=set())
+        self.assertEqual(out["imported"], ["g001"])
+        self.assertEqual([x[1] for x in self.store.items if x[0] == "="], [2])
+
+    def test_import_salta_examen(self):
+        out = entreno.import_session(sesion("2x+1=7", IGUAL), Plantilla(IGUAL), self.store, examen={"g001"})
+        self.assertEqual(self.store.items, [])
+        self.assertEqual((out["imported"], out["examen"]), (["g001"], ["g001"]))
+
+    def test_import_revision(self):
+        sim = [("x", 1), ("+", 1), ("1", 1)]
+        out = entreno.import_session(sesion("x+1", sim), Plantilla(sim, clases=["x"]), self.store, examen=set())
+        self.assertEqual([x[0] for x in self.store.items if x[2] == "symbol"], ["x"])
+        self.assertEqual(out["revision"], 2)
+        with open(os.path.join(self.dir, "revision.jsonl"), encoding="utf-8") as f:
+            self.assertEqual([json.loads(l)["latex"] for l in f], ["+", "1"])
+
+    def test_notebook_lleva_id(self):
+        entreno.import_session(sesion("2x+1=7", IGUAL), Plantilla(IGUAL), self.store, examen=set())
+        self.assertTrue(self.store.items)
+        self.assertTrue(all(x[3] == "entreno:general-200#g001" for x in self.store.items))
+
+    def test_forzar_ignora_la_marca(self):
+        s = sesion("2x+1=7", IGUAL)
+        s["answers"]["g001"]["imported"] = True
+        clf = Plantilla(IGUAL)
+        self.assertEqual(entreno.import_session(s, clf, self.store, examen=set())["imported"], [])
+        self.assertEqual(entreno.import_session(s, clf, self.store, examen=set(), forzar=True)["imported"], ["g001"])
+
+
+class ClasificadorEmbedding(Plantilla):
+    version = "t"
+
+    def embedding(self, strokes):
+        return np.ones(4)
+
+
+class TestReimportar(unittest.TestCase):
+    def test_reimportar_copia(self):
+        import reimportar_entrenos
+        from onepepe_math.personal import PersonalModel
+
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d)
+        ruta = os.path.join(d, "correcciones.jsonl")
+        clf = ClasificadorEmbedding(IGUAL)
+        pm = PersonalModel(clf, ruta, background=False)
+        pm.add_correction("x", trazos([("x", 1)]), notebook="entreno:general-200#g009")
+        pm.add_correction("y", trazos([("y", 1)]), notebook="mi_pagina.rnote")
+        ses = os.path.join(d, "ses")
+        os.mkdir(ses)
+        with open(os.path.join(ses, "a.entreno.json"), "w", encoding="utf-8") as f:
+            json.dump(sesion("2x+1=7", IGUAL), f)
+        # ensayo: nada cambia
+        t = reimportar_entrenos.reimportar(ses, clf, ruta)
+        self.assertEqual(t["entran"], 6)
+        self.assertEqual(len(PersonalModel(clf, ruta, background=False).examples), 2)
+        t = reimportar_entrenos.reimportar(ses, clf, ruta, aplicar=True)
+        self.assertEqual(len(glob.glob(os.path.join(d, "correcciones.*.bak"))), 1)
+        notas = [e["notebook"] for e in PersonalModel(clf, ruta, background=False).examples.values()]
+        self.assertIn("mi_pagina.rnote", notas)
+        self.assertNotIn("entreno:general-200#g009", notas)
+        self.assertEqual(notas.count("entreno:general-200#g001"), t["entran"] + t["trozos"])
 
 
 class TestServer(unittest.TestCase):
