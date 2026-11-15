@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.8.0" date="2026-11-15">
+      <description>
+        <p>Math: classifier v2 (order-independent direction features, 16x16 grid, line context, more generic training data), calibrated confidence and uncertain results shown dimmed with a question mark.</p>
+      </description>
+    </release>
     <release version="1.7.0" date="2026-11-15">
       <description>
         <p>Math: better stroke segmentation (no fixed symbol penalty, general repair, fraction-bar role) and number lexicon (multi-digit numbers, decimal comma, digit/letter correction inside numbers).</p>

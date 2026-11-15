@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-11-15. **Versión 1.7.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
+Actualizado: 2026-11-15. **Versión 1.8.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/PLAN-PENDIENTE.md) (plan de mejora).
 
 **Auditoría del 2026-11-15** (solo lectura: no cambia código ni versión; medida sobre la 1.3.5 del equipo y revisada contra la 1.4): [`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md) explica por qué falla el modo matemáticas, con medidas hechas con tu letra de los entrenos, y [`PLAN-CIERRE.md`](../planes/PLAN-CIERRE.md) dice qué hacer, en orden, para terminarlo. Medido fuera de la app; nada probado con el lápiz.
@@ -22,14 +22,17 @@ Reparto: Fable orquesta, Sonnet programa, Haiku prueba y documenta. Regla para t
 | T2 entrenamiento sin fugas | hecha, fusionada, subida (1.6.0); aceptación **en empate** | `fix/entrenamiento-sin-fugas` | Examen (217 símbolos, 22 expresiones), antes → nuevo: corte y etiqueta 69,1 → 68,7 % (P = 0,44: empate); sustituciones erróneas 15,5 → 9,8 % (23 → 9); MathWriting reservado top-1 43,4 → 46,0 %. T = 1,321, W = 10, 2 épocas. Modelos: `cierre-trabajo/base/` y `cierre-trabajo/nuevo/simbolos.npz`. **Sin ejecutar:** `entrenar_pliegues.py`, `medir.py --cruzada`, `reentrenar.py` entero |
 | T5 corte | hecha, fusionada (1.7.0); aceptación no cumplida | `feat/corte-rayas` | Juntado 16,0 → 12,4 %; raya 25,0 % (meta 85). «Rayas primero» apagado |
 | T6 léxico | hecha, fusionada (1.7.0); aceptación no cumplida | `feat/lexico` | Números de 2+ cifras 54,5 → 59,1 % (meta 90) |
-| T7a extracción, T8 confianza | en marcha (2026-11-15, 20:00) | `feat/extraer-simbolos`, `feat/confianza` | Extracción en `cierre-trabajo/mathwriting-extraido/` |
-| T7b, T10, T13, T12; T9 saltada (sin páginas reales) | sin empezar | — | Orden: §5 del manual |
+| T7a extracción | hecha, fusionada (1.8.0) | `feat/extraer-simbolos` | 212 541 símbolos en `cierre-trabajo/mathwriting-extraido/` |
+| T8 confianza | hecha, fusionada (1.8.0); aceptación no cumplida | `feat/confianza` | Umbral calibrado 0,999: la sustitución casi no actúa. Decide el usuario |
+| T7b clasificador v2 | hecha, fusionada (1.8.0); aceptación no cumplida | `feat/clasificador-v2` | Corte y etiqueta 66,4 → 69,7 % (cruzada), 71,9 → 77,9 % (examen). Modelo v2 instalado en la copia de trabajo |
+| T10 N mejores | en marcha (2026-11-15, 21:00) | `feat/n-mejores` | — |
+| T13 cierre, T12 diseño; T9 saltada (sin páginas reales) | sin empezar | — | T13 incluye `promover_cierre.py` e `INFORME-CIERRE.md` |
 
 Para retomar:
 
 1. `git status --short` (solo `?? docs/archivo/`) y `git log --oneline -8`.
 2. Pliegues y medida cruzada: hechos (tabla de abajo).
-3. Seguir con T8 (confianza) y T7a (extracción); después T7b, T10, T13 y, al final, T12.
+3. Seguir con T10; después T13 (cierre) y, al final, T12 (diseño, lote seguro).
 
 **Decidido (Fable, 2026-11-15, con permiso del usuario): la parada se queda como está, sin mínimo de épocas ni suavizado.** El registro por épocas (`registros/t2-nuevo.txt`, W = 10) dice que no corta antes de tiempo: la pérdida de MathWriting baja de 0,705 (época 2) a 0,676 (época 5) y vuelve a subir (0,724 en la 7), mientras la de tu letra sube de 1,354 a 1,481. Obligar a más épocas ganaría 0,03 en letra general y perdería 0,10 en la tuya. El 46 % en MathWriting reservado no es falta de épocas (el modelo «antes» daba 43,4 % en la misma prueba): es el techo de los rasgos y de los datos genéricos actuales, que es lo que arregla T7 (clasificador v2).
 
@@ -124,6 +127,7 @@ Leyenda de cómo se probó cada cosa:
 | 1.5 | **Banco de medida** (T0 del cierre): alineado ordenado, examen congelado, `medir.py`, sondas como tests | `feat/banco-de-medida` | — | sí (33, Python) + ejecutado con tus datos (copia de trabajo) | no aplica |
 | 1.6 | **Cierre O2**: evaluación correcta, entorno, captura de fallos, reimportar entrenos, entrenamiento sin fugas (T1–T4, T11) | varias (`fix/evaluacion-correcta`, `feat/entorno`, `feat/captura-fallos`, `fix/reimportar-entrenos`, `fix/entrenamiento-sin-fugas`) | sí (motor y `cargo check` de la interfaz) | sí (163 Python, 24 motor) + ejecutado con tus datos en copia de trabajo | pendiente |
 | 1.7 | **Cierre O3**: corte sin penalización fija, reparación general y papel de la raya (T5); léxico de números (T6) | `feat/corte-rayas`, `feat/lexico` | — | sí (180 Python) + medida cruzada con tus datos | pendiente |
+| 1.8 | **Cierre O4–O6**: confianza calibrada y resultado dudoso (T8), extracción de símbolos (T7a), clasificador v2 (T7b) | `feat/confianza`, `feat/extraer-simbolos`, `feat/clasificador-v2` | sí (motor y `cargo check`) | sí (204 Python, 26 motor) + medida cruzada con tus datos | pendiente |
 
 Ya existían en Rnote y lo comprobé en el código (sin cambios): resaltador que no tapa la tinta, ejes 2D/3D, negrita,
 cursiva, subrayado, tachado y color de texto, reasignación de botones del lápiz, extremo borrador, borrar con
@@ -171,6 +175,8 @@ el modo variables y el «=» funcionan. Falta probar el resto (`CAMBIOS-ONEPEPE.
 - Comprobar las fracciones en vertical con tu letra.
 
 ## Qué necesito de ti
+
+**Del cierre (2026-11-15), para otro día:** cuando termines de escribir los entrenos que faltan (hay 115 de 400), hay que reentrenar y volver a medir para ver cuánto mejora. El documento `docs/planes/REENTRENAR.md` (se escribe al final del cierre) trae los pasos y el texto exacto para pegarle a Claude.
 
 **De la auditoría (2026-11-15):**
 

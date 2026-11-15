@@ -511,3 +511,17 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - T6, aceptación NO cumplida: números 59,1 % (meta ≥ 90). El límite es el corte y la lectura de las cifras, no la corrección léxica. Sondas `dx/dt`, `dy/dx` y `d²y/dx²` en verde (24 sondas, 0 erróneas).
 - SUPUESTO (T6): dos cifras que se solapan son el mismo número (sin límite inferior de hueco); la coma decimal puede bajar hasta 0,4 del alto de la cifra; un solo dígito también es nodo `num`; `to_latex` escribe el decimal con coma; `SegmentParams` gana `entidades` (0 = apagado) y `theta`.
 - Tests tras T6: 180 de Python pasan; motor 24; nada probado con lápiz.
+
+## Cierre, oleadas O4–O6 (2026-11-15): T7a, T8 y T7b
+
+- T7a: 212 541 símbolos extraídos de 22 549 fórmulas válidas (30 000 vistas) de MathWriting `train/`, más 20 383 de `valid/`; de las 152 clases, 90 llegan a 400, 34 tienen 100–399 y 28 menos de 100; con 0: `<`, `>`, `\lim`, `\varepsilon` (sin investigar). SUPUESTO (Fable): no se hace la segunda ronda de extracción.
+- T8, aceptación NO cumplida: ningún umbral da cota de Wilson ≤ 2 % (cruzada: τ = 0,95 → 22 errores de 231, cobertura 30 %; τ = 0,99 → 8 de 83, 11 %; τ = 0,999 → 1 de 10, 1 %). Queda τ* = 0,999 (repliegue) y τ_r = 0,7 (por defecto). Con ese umbral la sustitución por símbolos limpios casi no actúa. Causa: la confianza no detecta los símbolos mal cortados (juntado 12–13 %).
+- PENDIENTE DEL USUARIO (T8): al instalar, elegir entre el umbral calibrado 0,999 (casi sin sustitución) o el 0,95 de la app (sustituye el 30 %, falla alrededor de 1 de cada 10). `confianza.json` decide: sin ese archivo vale el umbral de la app.
+- SUPUESTO (T8): `-`, `\frac` y `\overline` cuentan como la misma forma para la regla de acuerdo; la medida cruzada va sin kNN, así que la regla 3 (el kNN no contradice) no entra en la calibración; `medir.py` gana `--umbral U` (0 mide todo). Para recalibrar: `medir.py --cruzada v2 --conjunto entreno --umbral 0 --salida X.json` y `calibrar_umbral.py X.json`.
+- T7b, v1 → v2, medida cruzada (n = 813): red sola top-1 64,7 → 65,9 %, top-5 91,4 → 92,6 %; corte y etiqueta 66,4 → 69,7 %; renglón perfecto 35,2 → 38,0 %; números de 2+ cifras 59,1 → 72,7 %; raya con corte exacto 25,0 → 39,3 %; juntado 12,4 → 13,4 %; 5,3 → 13,6 ms por renglón. P = 0,98 (mejora).
+- T7b, v1 → v2, examen (n = 217): top-1 72,4 → 72,8 %; corte y etiqueta 71,9 → 77,9 %; renglón perfecto 45,2 → 51,6 %; juntado 8,3 → 6,9 %. P = 0,97 (mejora). MathWriting reservado top-1 46,0 → 52,2 %.
+- T7b, aceptación NO cumplida: top-1 65,9 / 72,8 % (meta ≥ 80) y top-5 92,6 % (meta ≥ 95). Tiempo cumplido (< 30 ms). El modelo v2 queda instalado en la copia de trabajo (W = 10, 2 épocas, T = 1,306; 45 254 símbolos extraídos usados, tope 400 por clase).
+- Decisión (Fable): las constantes del kNN vuelven a `TAU = 0,1`, `D_MAX = 0,3`, `LAMBDA_MAX = 0,6`. T7b las había cambiado con una rejilla medida sobre el examen, que el manual prohíbe; se revierte en la rama de T10.
+- SUPUESTO (T7b): W fijo en 10 (sin probar 30 y 90); los vectores del kNN se calculan sin contexto de renglón; el entrenamiento va por bloques de 50 000 con `partial_fit` (falló dos veces por memoria con la matriz entera); sin red convolucional (A6 = no) ni curva de aprendizaje.
+- T5b (modelo de pares): no se abre en esta ejecución; `juntado` sigue en 13,4 % (meta ≤ 4). Pendiente.
+- Tests tras T7b: 204 de Python pasan, 24 sondas con 0 erróneas, motor 26, `cargo check` de la interfaz ok. Nada probado con lápiz.
