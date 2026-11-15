@@ -25,14 +25,25 @@ Reparto: Fable orquesta, Sonnet programa, Haiku prueba y documenta. Regla para t
 Para retomar:
 
 1. `git status --short` (solo `?? docs/archivo/`) y `git log --oneline -8`.
-2. Si no existe `~/.local/share/onepepe/cierre-trabajo/pliegues/v1/`, entrenar los pliegues (`entrenar_pliegues.py --receta v1`) y estrenar `medir.py --cruzada v1`.
+2. Pliegues y medida cruzada: hechos (tabla de abajo).
 3. Seguir con O3 (T5, corte: rayas primero), §5 y §7 del manual.
 
 **Decidido (Fable, 2026-11-15, con permiso del usuario): la parada se queda como está, sin mínimo de épocas ni suavizado.** El registro por épocas (`registros/t2-nuevo.txt`, W = 10) dice que no corta antes de tiempo: la pérdida de MathWriting baja de 0,705 (época 2) a 0,676 (época 5) y vuelve a subir (0,724 en la 7), mientras la de tu letra sube de 1,354 a 1,481. Obligar a más épocas ganaría 0,03 en letra general y perdería 0,10 en la tuya. El 46 % en MathWriting reservado no es falta de épocas (el modelo «antes» daba 43,4 % en la misma prueba): es el techo de los rasgos y de los datos genéricos actuales, que es lo que arregla T7 (clasificador v2).
 
 Rust en este equipo: `~/.local/share/onepepe/cierre-trabajo/rust.sh engine|ui|po` (SDK de Flatpak; el sistema no compila nativo).
 
-Decisiones de los agentes pendientes de apuntar en `DECISIONES.md` al cerrar O2: hueco entre cifras `> 0,8` alturas da «?»; `e` es la constante salvo que la página la defina; `f=3` y luego `f(2)` da «?»; un ciclo de definiciones da «?»; «Revisar pasos» no compara dos definiciones seguidas de nombres distintos; `report_failure` responde con el id en `failure`; `docs/archivo/` fuera de git.
+**Medida cruzada estrenada (2026-11-15, 19:40), línea base para T5–T10.** Pliegues: `entrenar_pliegues.py --receta v1 --peso 10 --epocas 2` (en `cierre-trabajo/pliegues/v1/`). Se mide con `medir.py --sesiones … --cruzada v1 --conjunto entreno`. El modelo de T2 está instalado en la copia de trabajo (`cierre-trabajo/math/simbolos.npz`; el anterior, `simbolos.antes-t2.npz`). Resultados en `cierre-trabajo/medidas/t2-cruzada.json` y `t2-examen.json`:
+
+| Medida | Cruzada (813 símbolos, 112 renglones, 28 rayas) | Examen (217, 31, 6) | Meta |
+|--------|------|------|------|
+| Corte exacto / juntado / partido | 81,2 / 16,0 / 1,6 | 85,3 / 10,1 / 2,8 | juntado ≤ 4 |
+| Corte y etiqueta | 62,4 | 68,7 | ≥ 90 |
+| Renglón perfecto | 28,7 | 41,9 | ≥ 60 |
+| Números de 2 o más cifras | 54,5 (n = 22) | 85,7 (n = 7) | ≥ 90 |
+| Raya: corte / papel | 32,1 / 10,7 | 0,0 / 0,0 | ≥ 85 / ≥ 90 |
+| Sustituciones erróneas / cobertura | 11,0 / 30,8 | 9,8 / 43,2 | ≤ 2 / ≥ 60 |
+| Red sola top-1 / top-5 | 64,7 / 91,4 | 72,4 / 91,7 | ≥ 80 / ≥ 95 |
+| ms por renglón | 4,7 | 5,7 | < 30 |
 
 Leyenda de cómo se probó cada cosa:
 - **compilado**: el motor compila de verdad; la interfaz GTK solo con `cargo check` (comprobación de tipos, sin
