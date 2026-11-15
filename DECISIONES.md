@@ -457,5 +457,7 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
   y es el último paso**, después del cierre.
 - **Punto de guardado local:** la rama local `onepepe` del equipo lleva el commit `146e1526` («Punto de guardado
   antes de migrar») con archivos personales (`mis_expresiones_1.rnote`, `instalacion.log`). No se ha subido ni se
-  subirá. Los documentos se subieron por una línea limpia creada desde `origin/onepepe`. Qué hacer con ese commit
-  es la decisión A8 del manual.
+  subirá. Los documentos se subieron por una línea limpia creada desde `origin/onepepe`. Decisión A8 (el usuario
+  dijo que sí): el commit queda en la rama local `guardado/antes-de-migrar`, que no se sube, y la rama local
+  `onepepe` se alineó con el remoto. Sus archivos siguen en la carpeta, sin seguimiento de git, con copia en
+  `~/.local/share/onepepe/guardado-146e1526/`. Para deshacerlo: `git checkout -B onepepe guardado/antes-de-migrar`.

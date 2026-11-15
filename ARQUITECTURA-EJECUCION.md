@@ -22,7 +22,7 @@ Ejecuta ARQUITECTURA-EJECUCION.md como orquestador. El bloque A ya está respond
 |-----|-------|
 | Rama y versión | En el remoto, `onepepe` = `main`, **versión 1.4.0** (el punto multiplica y la coma es el decimal). Ninguna tarea T0–T13 hecha |
 | Código leído | La auditoría y este manual se escribieron leyendo la 1.3.5 que había en el equipo. La 1.4 solo cambia, en matemáticas, `evaluate._tokens`, `layout._NEVER_SCRIPT` y `pagina._mark` (resultados con coma). Revisado contra la 1.4: los números de línea citados son los de la 1.4 y las 8 sondas con resultado erróneo siguen igual |
-| Rama local del equipo | La rama local `onepepe` lleva el commit `146e1526` «Punto de guardado antes de migrar», que añade archivos personales (`mis_expresiones_1.rnote`, `instalacion.log` y otros). **No está subido y no debe subirse** (§3.4, punto 8; decisión A8) |
+| Rama local del equipo | Alineada con el remoto el 2026-11-15 (decisión A8). El commit `146e1526` «Punto de guardado antes de migrar», con archivos personales, está en la rama local `guardado/antes-de-migrar`, que **no se sube ni se fusiona nunca**. Sus 12 archivos siguen en la carpeta, sin seguimiento (`.git/info/exclude`), con copia en `~/.local/share/onepepe/guardado-146e1526/` |
 | Documentos | `AUDITORIA-MATEMATICAS.md`, `PLAN-CIERRE.md`, este manual y las notas de `ESTADO.md`, `DECISIONES.md` y `CLAUDE.md`: con commit en `feat/auditoria-plan-cierre`, fusionados en `onepepe` y subidos el 2026-11-15 |
 | Tests | Python: 88 pasan en la 1.4 (15 archivos en `tools/onepepe-math/tests/`) |
 | Entorno Python | `~/.local/share/onepepe/venv`: numpy 2.5.4, scikit-learn 1.9.1, sympy 1.14.0, scipy 1.18.1. **Sin PyTorch** |
@@ -63,7 +63,7 @@ usa las respuestas y no pregunta nada más hasta §9.
 | A0 | Sí. **Además se permite `push`**: lo hace el integrador al cerrar cada oleada (§3.4, punto 5) |
 | A1 a A6 | El valor por defecto de la tabla |
 | A7 | **El diseño (T12) queda en espera y es el último paso**: oleada O10, después del cierre T13. Alcance: lote seguro |
-| A8 | Pendiente: se pregunta al usuario en la misma sesión en que se escribió este manual. Sin respuesta vale «no» |
+| A8 | **Sí. Hecho el 2026-11-15:** el commit está en `guardado/antes-de-migrar` y la rama local `onepepe` es la del remoto |
 
 ## 2. Agentes y contrato
 
@@ -166,12 +166,10 @@ leer archivo por archivo o releer trozos contiguos en bucle.
 6. Red: solo lo aprobado en A3 y A6. Ningún dato del usuario sale del equipo.
 7. Trabajo en paralelo: cada programador en su `git worktree` (Agent con `isolation: "worktree"`). Las tareas con
    Rust van siempre en el árbol principal y nunca dos a la vez (comparten `target/`).
-8. **Punto de guardado local.** El commit `146e1526` no se sube nunca: ningún `push` sale de una rama que lo
-   contenga (`git merge-base --is-ancestor 146e1526 <rama>` debe fallar). Si al arrancar la rama local `onepepe`
-   todavía lo contiene (A8 = no, o sin respuesta), el cierre no usa esa rama: se crea el árbol
-   `git worktree add ../One_Pepe-cierre -b cierre/onepepe origin/onepepe`; ahí `cierre/onepepe` hace de `onepepe`
-   (las ramas salen de ella y se fusionan en ella) y se sube con `git push origin cierre/onepepe:onepepe`. En ese
-   caso, «árbol principal» en este manual significa `../One_Pepe-cierre`.
+8. **Punto de guardado local.** El commit `146e1526` y la rama `guardado/antes-de-migrar` no se suben ni se
+   fusionan nunca. Antes de cada `push`: `git merge-base --is-ancestor 146e1526 onepepe` debe fallar. Los archivos
+   personales que quedan en la carpeta sin seguimiento (`mis_expresiones_1.rnote`, `instalacion.log` y otros) no
+   se añaden a git.
 
 ## 4. Protocolo de fallo
 
