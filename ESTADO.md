@@ -3,6 +3,10 @@
 Actualizado: 2026-11-01. **Versión 1.4.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](PLAN-PENDIENTE.md) (plan de mejora).
 
+**Auditoría del 2026-11-15** (solo lectura: no cambia código ni versión; medida sobre la 1.3.5 del equipo y revisada contra la 1.4): [`AUDITORIA-MATEMATICAS.md`](AUDITORIA-MATEMATICAS.md) explica por qué falla el modo matemáticas, con medidas hechas con tu letra de los entrenos, y [`PLAN-CIERRE.md`](PLAN-CIERRE.md) dice qué hacer, en orden, para terminarlo. Medido fuera de la app; nada probado con el lápiz.
+
+**Manual de ejecución (2026-11-15):** [`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md) convierte el plan en instrucciones para agentes (oleadas, especificación de cada tarea, matemática resuelta, contrato y protocolo de fallo). Ninguna tarea T0–T13 está hecha todavía; la versión sigue siendo la 1.4.0. El bloque A ya está respondido (§1 de ese documento): se permite `push` y el diseño fluido (T12) queda para el último paso. Para arrancar: sesión nueva con Opus 5.5 y la orden que hay al principio del manual.
+
 Leyenda de cómo se probó cada cosa:
 - **compilado**: el motor compila de verdad; la interfaz GTK solo con `cargo check` (comprobación de tipos, sin
   enlazar ni ejecutar), porque la nube no tiene GTK 4.22 / libadwaita 1.9 ni pantalla.
@@ -123,6 +127,16 @@ el modo variables y el «=» funcionan. Falta probar el resto (`CAMBIOS-ONEPEPE.
 - Comprobar las fracciones en vertical con tu letra.
 
 ## Qué necesito de ti
+
+**De la auditoría (2026-11-15):**
+
+1. Abrir Matemáticas y comprobar que «=» y «Variables» están encendidos (vienen apagados).
+2. Decir qué es el dataset nuevo.
+3. Aprobar: a) reimportar los entrenos; b) las metas de «terminado»; c) descargar CROHME o no; d) encender «=» y «Variables» por defecto.
+4. Terminar los dos sets de 200 (hay 115 de 400 escritas).
+5. Una o dos páginas reales de apuntes de matemáticas con el modo activado, para medir pausas reales.
+
+Detalle y orden de trabajo en [`PLAN-CIERRE.md`](PLAN-CIERRE.md).
 
 **De la 1.3:**
 
