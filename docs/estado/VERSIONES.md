@@ -7,6 +7,15 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.10 (2026-11-15) — diseño fluido, recortado (T12)
+
+- **Tabla de movimiento** en `theme.rs` (100, 160 y 240 ms y dos curvas); todas las transiciones de `style.css` usan
+  esos valores y un test impide duraciones sueltas.
+- **Cinta:** el cambio de pestaña funde en 160 ms.
+- **Resultados de matemáticas:** aparecen con fundido y un deslizamiento de 4 px en 120 ms.
+- Con «reducir animaciones» del sistema no se anima nada. Sin cambio de formato .rnote.
+- Fuera: borde del modo matemáticas, fundido de la sustitución y el resto de propuestas.
+
 ## 1.9 (2026-11-15) — cierre: T10 y T13
 
 - **«=» y «Variables» encendidos por defecto** (A4): las sondas dan 0 resultados erróneos de 24. «Revisar pasos» sigue

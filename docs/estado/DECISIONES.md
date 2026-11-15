@@ -545,3 +545,10 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 
 - T9 SALTADA: faltan páginas reales de apuntes (A5). T5b (modelo de pares) no abierta. T12 (diseño): último paso, recortado a lo más importante por petición del usuario.
 - Tests al cerrar: 216 de Python, 27 del motor (filtro `math`), `cargo check` de la interfaz ok, `msgfmt -c` ok. Nada probado con lápiz.
+
+## Cierre, oleada O10 (2026-11-15): T12 diseño fluido, recortada
+
+- Alcance recortado por petición del usuario («solo lo más importante, pocos tokens en diseño»): propuestas 1 (tabla de movimiento y test), 9 (fundido de pestañas) y 4 (entrada suave de resultados), más el interruptor de «reducir animaciones». Fuera: 12 (borde del modo matemáticas) y 2 (fundido de la sustitución), que estaban en el lote seguro.
+- SUPUESTO: el fundido de pestañas dura 160 ms (`MOTION_NORMAL`) y no los 150 del manual, para no tener duraciones fuera de la tabla. Las transiciones de `style.css` de 150 y 200 ms pasan a 160.
+- SUPUESTO: `born` no se guarda (al reabrir, el resultado sale opaco); un resultado que ya existía conserva su `born` y no se vuelve a animar; el motor recibe «animar o no» como dato (`math_set_animate`), sin llamar a GTK.
+- Tests: motor 29 (filtro `math`), tema 4, `cargo check` de la interfaz ok. Nada visto en pantalla.

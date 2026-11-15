@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.10.0" date="2026-11-15">
+      <description>
+        <p>Design: motion tokens (100/160/240 ms), ribbon tab crossfade and math results that fade in; all respect the system "reduce animations" setting.</p>
+      </description>
+    </release>
     <release version="1.9.0" date="2026-11-15">
       <description>
         <p>Math: "=" and "Variables" enabled by default; pair context read in formula-tree order.</p>

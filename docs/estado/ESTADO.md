@@ -1,6 +1,6 @@
 # Estado del proyecto OnePepe
 
-Actualizado: 2026-11-15. **Versión 1.9.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
+Actualizado: 2026-11-15. **Versión 1.10.0** (qué trae cada versión: [`VERSIONES.md`](VERSIONES.md)). Rama de integración: `onepepe`; **`main` = OnePepe**; el Rnote original está en `rnote-original`.
 Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/PLAN-PENDIENTE.md) (plan de mejora).
 
 **Auditoría del 2026-11-15** (solo lectura: no cambia código ni versión; medida sobre la 1.3.5 del equipo y revisada contra la 1.4): [`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md) explica por qué falla el modo matemáticas, con medidas hechas con tu letra de los entrenos, y [`PLAN-CIERRE.md`](../planes/PLAN-CIERRE.md) dice qué hacer, en orden, para terminarlo. Medido fuera de la app; nada probado con el lápiz.
@@ -27,7 +27,7 @@ Reparto: Fable orquesta, Sonnet programa, Haiku prueba y documenta. Regla para t
 | T7b clasificador v2 | hecha, fusionada (1.8.0); aceptación no cumplida | `feat/clasificador-v2` | Corte y etiqueta 66,4 → 69,7 % (cruzada), 71,9 → 77,9 % (examen). Modelo v2 instalado en la copia de trabajo |
 | T10 N mejores | hecha, fusionada (1.9.0); aceptación no cumplida | `feat/n-mejores` | Orden del árbol encendido; búsqueda de lecturas apagada |
 | T13 cierre | código y documentos hechos (1.9.0); **promoción a tus datos reales sin aplicar** | `feat/cierre` | Informe: `INFORME-CIERRE.md`. Orden para instalar, en su apartado «Lo que queda para ti» |
-| T12 diseño | en marcha (2026-11-15), recortado | `feat/diseno-fluido` | — |
+| T12 diseño | hecha, recortada (1.10.0) | `feat/diseno-fluido` | Tabla de movimiento, fundido de pestañas y entrada suave de resultados. Compila y pasa tests (motor 29, tema 4); nada visto en pantalla |
 | T9 renglón vivo; T5b modelo de pares | sin hacer | — | T9: faltan páginas reales. T5b: lo siguiente para bajar los símbolos juntados |
 
 El cierre está hecho hasta T13. Lo que queda es del usuario: [`INFORME-CIERRE.md`](INFORME-CIERRE.md), apartado «Lo que queda para ti». Para reentrenar otro día: [`REENTRENAR.md`](../planes/REENTRENAR.md).

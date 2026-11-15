@@ -3,7 +3,7 @@
 ## En cinco líneas
 
 - Hechas y fusionadas 11 de las 14 tareas del plan (T0–T8, T10, T11 y el código de T13). T9 saltada (faltan páginas
-  reales); T12 (diseño) es el último paso.
+  reales); T12 (diseño) hecha en versión recortada.
 - Los resultados que se enseñaban mal ya no salen: las sondas pasan de 8 resultados erróneos a 0 (de 24).
 - El reconocimiento mejora pero **no llega a las metas**: símbolos con corte y etiqueta, de 44–66 % a 78,3 % en el
   examen (meta 90 %).
@@ -29,7 +29,7 @@
 | T13 Cierre | código hecho; promoción sin aplicar | `feat/cierre` | 1.9.0 | Metas medidas, no cumplidas |
 | T9 Renglón vivo | saltada | — | — | Faltan páginas reales de apuntes |
 | T5b Modelo de pares | no abierta | — | — | Es lo siguiente si se sigue |
-| T12 Diseño fluido | último paso | `feat/diseno-fluido` | — | Ver `ESTADO.md` |
+| T12 Diseño fluido | hecha, recortada: tabla de movimiento, fundido de pestañas, entrada suave de resultados | `feat/diseno-fluido` | 1.10.0 | Compila y pasa tests (motor 29, tema 4); nada visto en pantalla. Fuera: borde del modo matemáticas y fundido de la sustitución |
 
 ## Cifras contra las metas
 
