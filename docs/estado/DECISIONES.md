@@ -219,7 +219,7 @@ Formato: qué elegí y por qué.
 
 ## Diseño según tu guía (29/10/2026)
 
-Detalle, capturas y contrastes en [`DISENO.md`](DISENO.md).
+Detalle, capturas y contrastes en [`DISENO.md`](../diseno/DISENO.md).
 
 - **Una sola tabla de colores** (`theme.rs`). De ella sale el CSS de claro, oscuro y alto contraste, y los colores
   de libadwaita.
@@ -436,11 +436,11 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - Lo que más pesa es la etiqueta con letra no vista (53,8–59,1 % top-1) y el corte de la raya de fracción (52,6 %).
 - Se descubrió que `forced_groups` ignora el orden (28 % de renglones con grupos distintos). Por eso se propone reimportar los entrenos con el alineado ordenado.
 - Se decide medir siempre con un examen congelado por expresión antes de aceptar cambios.
-- Detalle en [`AUDITORIA-MATEMATICAS.md`](AUDITORIA-MATEMATICAS.md) y [`PLAN-CIERRE.md`](PLAN-CIERRE.md).
+- Detalle en [`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md) y [`PLAN-CIERRE.md`](../planes/PLAN-CIERRE.md).
 
 ## Manual de ejecución del cierre (2026-11-15)
 
-- [`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md): cómo ejecutar T0–T13 con agentes (Opus orquesta, Sonnet
+- [`ARQUITECTURA-EJECUCION.md`](../planes/ARQUITECTURA-EJECUCION.md): cómo ejecutar T0–T13 con agentes (Opus orquesta, Sonnet
   programa, Haiku integra y documenta). El usuario solo interviene en el bloque A (decisiones) y en el bloque B
   (pruebas con lápiz, interfaz y `push`).
 - El examen congelado sale pequeño con lo escrito hoy (22 expresiones, 217 símbolos, 6 rayas de fracción). Por eso

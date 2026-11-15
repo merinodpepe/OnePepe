@@ -1,6 +1,6 @@
 # Plan de cierre de OnePepe: matemáticas (2026-11-15)
 
-El porqué de cada tarea: [`AUDITORIA-MATEMATICAS.md`](AUDITORIA-MATEMATICAS.md).
+El porqué de cada tarea: [`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md).
 
 Este documento dice qué hacer, en orden, para terminar el modo matemáticas. Las medidas y sus causas están en la
 auditoría. Cómo ejecutarlo con agentes: [`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md).

@@ -1,7 +1,7 @@
 # Auditoría del modo matemáticas (2026-11-15)
 
 Esta auditoría explica por qué el modo matemáticas falla y con qué datos. Lo que hay que hacer, en orden, está en
-[`PLAN-CIERRE.md`](PLAN-CIERRE.md).
+[`PLAN-CIERRE.md`](../planes/PLAN-CIERRE.md).
 
 > **Nota (2026-11-15).** Medido y escrito sobre la versión 1.3.5 que había en el equipo. El remoto ya iba por la
 > 1.4 (el punto multiplica y la coma es el decimal), que en matemáticas solo cambia `evaluate._tokens`,

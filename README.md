@@ -109,18 +109,18 @@ Todo se guarda en `~/.local/share/onepepe/`; tus correcciones nunca salen de tu 
 
 | Documento | Para qué |
 |---|---|
-| [ESTADO.md](./ESTADO.md) | Qué está hecho, cómo se ha probado y qué falta |
-| [CAMBIOS-ONEPEPE.md](./CAMBIOS-ONEPEPE.md) | Cada función de OnePepe y cómo probarla con el lápiz |
-| [MATEMATICAS-INFORME.md](./MATEMATICAS-INFORME.md) | Cómo funciona el reconocimiento de matemáticas y sus resultados |
-| [DECISIONES.md](./DECISIONES.md) | Por qué se hizo cada cosa así |
-| [AUDITORIA.md](./AUDITORIA.md) | Qué traía ya la base y qué se añadió |
-| [PLAN-PENDIENTE.md](./PLAN-PENDIENTE.md) | El plan de mejora: lo que falta por hacer |
+| [ESTADO.md](./docs/estado/ESTADO.md) | Qué está hecho, cómo se ha probado y qué falta |
+| [CAMBIOS-ONEPEPE.md](./docs/estado/CAMBIOS-ONEPEPE.md) | Cada función de OnePepe y cómo probarla con el lápiz |
+| [MATEMATICAS-INFORME.md](./docs/auditorias/MATEMATICAS-INFORME.md) | Cómo funciona el reconocimiento de matemáticas y sus resultados |
+| [DECISIONES.md](./docs/estado/DECISIONES.md) | Por qué se hizo cada cosa así |
+| [AUDITORIA.md](./docs/auditorias/AUDITORIA.md) | Qué traía ya la base y qué se añadió |
+| [PLAN-PENDIENTE.md](./docs/planes/PLAN-PENDIENTE.md) | El plan de mejora: lo que falta por hacer |
 
 ## Problemas conocidos
 
 - **Usa Wayland.** En X11 la entrada del lápiz y de la pantalla táctil no es fiable.
 - **Si los botones del lápiz no responden**, comprueba que `libinput` y `libwacom` están instalados (`./setup-deps.sh --check`).
-  Para ver qué evento envía cada botón usa `evtest` (instrucciones en [CAMBIOS-ONEPEPE.md](./CAMBIOS-ONEPEPE.md)).
+  Para ver qué evento envía cada botón usa `evtest` (instrucciones en [CAMBIOS-ONEPEPE.md](./docs/estado/CAMBIOS-ONEPEPE.md)).
 - **Algunos lápices** (no las Wacom) tienen un botón que se presenta como "goma"; la aplicación no puede distinguirlo
   del extremo borrador. Elige qué hace en Ajustes → "Tool for the eraser action".
 - **Con Flatpak**, guarda tus cuadernos en Documentos, Imágenes o Escritorio: son las carpetas que la aplicación puede ver.

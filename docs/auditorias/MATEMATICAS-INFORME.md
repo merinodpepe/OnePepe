@@ -1,7 +1,7 @@
 # Reconocimiento y resolución de matemáticas — informe (Fase 3, primer entregable)
 
 Fecha: 2026-10-26 (actualizado el mismo día con el cambio de plan). Estado: **investigación y prototipo de datos**.
-Nada de esto está aún en la app. Herramientas y lista de expresiones: [`tools/onepepe-math/`](tools/onepepe-math/README.md).
+Nada de esto está aún en la app. Herramientas y lista de expresiones: [`tools/onepepe-math/`](../../tools/onepepe-math/README.md).
 El cambio de plan (parte A) estaba en `PLAN-PENDIENTE.md`; ya está hecho y ese archivo ahora solo recoge lo pendiente
 (la versión original está en su historial de git).
 

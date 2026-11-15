@@ -117,8 +117,8 @@ cargo test -p rnote-compose
 
 ## Matemáticas — primer entregable (informe y extractor)
 
-- **Qué hay:** [`MATEMATICAS-INFORME.md`](MATEMATICAS-INFORME.md) (arquitectura, librerías, datos, qué necesito de ti) y
-  [`tools/onepepe-math/`](tools/onepepe-math/README.md): extractor de trazos de `.rnote`, lista de 30 expresiones para
+- **Qué hay:** [`MATEMATICAS-INFORME.md`](../auditorias/MATEMATICAS-INFORME.md) (arquitectura, librerías, datos, qué necesito de ti) y
+  [`tools/onepepe-math/`](../../tools/onepepe-math/README.md): extractor de trazos de `.rnote`, lista de 30 expresiones para
   que las escribas y script para descargar el dataset MathWriting fuera del repositorio. **Aún no hay nada de
   matemáticas dentro de la app.**
 - **Rama:** `feat/matematicas-prototipo` (fusionada en `onepepe`).
@@ -473,7 +473,7 @@ Rnote sin cambios). Lo que se ve en tu equipo con GTK 4.22 **sigue sin probar**,
 
 ## Diseño nuevo según tu guía (29/10/2026)
 
-Capturas y detalles: [`DISENO.md`](DISENO.md). Cómo probarlo:
+Capturas y detalles: [`DISENO.md`](../diseno/DISENO.md). Cómo probarlo:
 
 1. **Temas:** Ajustes → Apariencia → Sistema / Claro / Oscuro. Cambia toda la ventana a la vez.
    - En oscuro, la página también se ve oscura; se apaga en Vista → «Lienzo oscuro».

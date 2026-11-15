@@ -1,8 +1,8 @@
 # onepepe-math (Fase 3)
 
 Programa auxiliar de matemáticas de OnePepe (lo arranca la app en el modo matemáticas) y herramientas para reunir datos
-de tu letra. Diseño, estado y medidas en [`MATEMATICAS-INFORME.md`](../../MATEMATICAS-INFORME.md); cómo probarlo en
-[`CAMBIOS-ONEPEPE.md`](../../CAMBIOS-ONEPEPE.md).
+de tu letra. Diseño, estado y medidas en [`MATEMATICAS-INFORME.md`](../../docs/auditorias/MATEMATICAS-INFORME.md); cómo probarlo en
+[`CAMBIOS-ONEPEPE.md`](../../docs/estado/CAMBIOS-ONEPEPE.md).
 
 | Archivo | Para qué sirve |
 |---|---|
