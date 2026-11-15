@@ -25,19 +25,69 @@ class TestSondasTrasT3(unittest.TestCase):
         self.assertEqual(textos(r"\frac{d^2}{dx^2}(x^3)="), ["6*x"])
 
     def test_dxdt_frac(self):
-        self.assertEqual(textos("x=t^2", r"\frac{dx}{dt}=", variables=True), ["?"])
+        self.assertEqual(textos("x=t^2", r"\frac{dx}{dt}=", variables=True), ["2*t"])
 
     def test_dydx_frac(self):
-        self.assertEqual(textos("y=x^2", r"\frac{dy}{dx}=", variables=True), ["?"])
+        self.assertEqual(textos("y=x^2", r"\frac{dy}{dx}=", variables=True), ["2*x"])
 
     def test_dxdt_linea(self):
-        self.assertEqual(textos("x=t^2", "dx/dt=", variables=True), ["?"])
+        self.assertEqual(textos("x=t^2", "dx/dt=", variables=True), ["2*t"])
 
     def test_f_de_3(self):
-        self.assertEqual(textos("f(x)=x^2+1", "f(3)=", variables=True), ["?"])
+        self.assertEqual(textos("f(x)=x^2+1", "f(3)=", variables=True), ["10"])
 
     def test_f_de_x(self):
-        self.assertEqual(textos("x=5", "f(x)=x^2+1", "f(x)=", variables=True), ["?"])
+        self.assertEqual(textos("x=5", "f(x)=x^2+1", "f(x)=", variables=True), ["26"])
+
+    def test_f_sin_x(self):
+        self.assertEqual(textos("f(x)=x^2+1", "f(x)=", variables=True), ["x**2 + 1"])
+
+    def test_prima_con_definicion(self):
+        self.assertEqual(textos("f(x)=x^2", "f'(x)=", variables=True), ["2*x"])
+
+    def test_integral_con_x(self):
+        self.assertEqual(textos("x=5", r"\int 2xdx=", variables=True), ["x**2 + C"])
+
+    def test_integral_definida_con_x(self):
+        self.assertEqual(textos("x=5", r"\int_0^1 x^2dx=", variables=True), ["1/3"])
+
+    def test_derivada_con_x(self):
+        self.assertEqual(textos("x=5", r"\frac{d}{dx}(x^2)=", variables=True), ["2*x"])
+
+    def test_sumatorio_con_i(self):
+        self.assertEqual(textos("i=2", sumrow(), variables=True), ["6"])
+
+    def test_definicion_ensena(self):
+        r = compone("x=5", "y=2x+3", variables=True)
+        self.assertEqual([(m["kind"], m["text"]) for m in r[1]["marks"]], [("variable", "= 13")])
+        self.assertEqual(r[0]["marks"], [])
+
+    def test_entorno_parcial(self):
+        self.assertEqual(textos("x=5", "x+y=", variables=True), ["y + 5"])
+
+    def test_pasos_mal(self):
+        r = compone("2x+4=10", "2x=14", "x=7", "x=3", variables=True, check=True)
+        self.assertEqual([any(m["kind"] == "error" for m in x["marks"]) for x in r], [False, True, False, True])
+
+    def test_pasos_bien(self):
+        r = compone("a=2", "b=3", "a+b=5", variables=True, check=True)
+        self.assertFalse(any(m["kind"] == "error" for x in r for m in x["marks"]))
+
+    def test_ciclo(self):
+        self.assertEqual(textos("x=y+1", "y=x+1", "x=", variables=True), ["?"])
+
+    def test_rendimiento(self):
+        import statistics
+        import time
+
+        from sondas_util import MIX
+
+        ts = []
+        for _ in range(5):
+            t = time.perf_counter()
+            compone(*MIX, variables=True, check=True)
+            ts.append(time.perf_counter() - t)
+        self.assertLess(statistics.mean(ts), 0.2)
 
     def test_unidades(self):
         self.assertRegex(" ".join(textos("m=70kg", "g=9,8m/s^2", "mg=", variables=True)), r"^686.*N$")

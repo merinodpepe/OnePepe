@@ -15,19 +15,19 @@ Nada de esto cambia la tinta: son anotaciones que la app dibuja encima.
 
 import random
 import re
+from dataclasses import replace
 
 import sympy as sp
 
-from . import glossary as gl
+from .entorno import Entorno, _value, definir
 from .evaluate import (
-    MUL_OPS,
     RELATIONS,
     ParseError,
     _natural_log_names,
+    _parse,
     _Parser,
     _split,
     _tokens,
-    accent_token,
     answer,
 )
 from .layout import Sym, parse, to_latex
@@ -59,16 +59,13 @@ def _ends_with_equals(tokens):
     return bool(tokens) and tokens[-1][0] == "sym" and tokens[-1][1] == "=" and tokens[-1][2] is None
 
 
-def _expr(tokens, env):
-    """Expresión de SymPy de unas fichas, tal como se escribió (sin simplificar: hace falta para explicar errores)."""
+def _expr(tokens, vista):
+    """Expresión de SymPy de unas fichas, tal como se escribió (sin simplificar: hace falta para explicar errores),
+    con lo que vale en `vista`."""
     if not tokens:
         raise ParseError("vacío")
     with sp.evaluate(False):
-        return _Parser(tokens, env).full()
-
-
-def _value(expr):
-    return sp.simplify(expr.doit())
+        return _parse(tokens, {}, vista)[0]
 
 
 # ---------- formas de un número (fase 6) ----------
@@ -100,85 +97,18 @@ def number_formats(value):
     return out
 
 
-# ---------- variables (fase 3) ----------
+# ---------- caché por renglón ----------
+
+_CACHE = {}
 
 
-def _unit_text(tokens):
-    """Texto de unas fichas que podrían ser una unidad (kg, m/s^2, µm)."""
-    out = ""
-    for t in tokens:
-        if t[0] != "sym" or t[3] is not None:
-            raise ParseError("no es una unidad")
-        v = t[1]
-        if v == r"\mu":
-            v = "µ"
-        elif v == r"\Omega":
-            v = "Ω"
-        elif v in MUL_OPS:
-            v = "*"
-        elif v not in ("/",) and not v.isalpha():
-            raise ParseError("no es una unidad")
-        out += v
-        if t[2] is not None:
-            out += "**" + to_latex(t[2])
-    return out
-
-
-def _definition(tokens, env, units):
-    """Si el renglón es `letra = valor` (o `m = 70 kg`), (nombre, valor) con valor sympy o cantidad de pint."""
-    parts = _split(tokens, RELATIONS)
-    if len(parts) != 2 or parts[0][1] != "=":
-        return None
-    lhs, rhs = parts[0][0], parts[1][0]
-    if len(lhs) == 1 and lhs[0][0] == "accent":
-        try:
-            lhs = [accent_token(lhs[0])]
-        except ParseError:
-            return None
-    if len(lhs) != 1 or lhs[0][0] != "sym" or lhs[0][2] is not None or not rhs:
-        return None
-    try:
-        sym = _Parser([], {"e": sp.Symbol("e")})._symbol(lhs[0])
-    except ParseError:
-        return None
-    if not isinstance(sym, sp.Symbol):
-        return None
-    name = sym.name
-    # número con unidad: lo que sigue a la primera ficha numérica es la unidad
-    if len(rhs) >= 2 and rhs[0][0] == "num" and rhs[0][2] is None:
-        try:
-            unit = _unit_text(rhs[1:])
-            q = gl.registry().Quantity(float(rhs[0][1]), unit)
-            if not q.dimensionless:
-                return name, q
-        except Exception:  # noqa: BLE001 - no era una unidad
-            pass
-    try:
-        value = _value(_expr(rhs, {**env, name: sp.Symbol(name)}))
-    except Exception:  # noqa: BLE001
-        return None
-    if value.free_symbols or not value.is_number:
-        return None
-    return name, value
-
-
-def _env_for(index, definitions):
-    """Variables que valen en el renglón `index`: la última definición de cada una por encima; si no hay ninguna
-    encima, la primera de la página."""
-    env = {}
-    for _, name, value in definitions:
-        env.setdefault(name, value)
-    for i, name, value in definitions:
-        if i < index:
-            env[name] = value
-    return env
-
-
-def _split_env(env):
-    """(valores sympy, cantidades con unidad)."""
-    plain = {k: v for k, v in env.items() if not hasattr(v, "magnitude")}
-    quantities = {k: v for k, v in env.items() if hasattr(v, "magnitude")}
-    return plain, quantities
+def _cache(clave, calcula):
+    """Lo que se calcula de un renglón depende solo de sus fichas, las opciones y lo que vale; no de dónde está."""
+    if clave not in _CACHE:
+        if len(_CACHE) >= 512:
+            _CACHE.clear()
+        _CACHE[clave] = calcula()
+    return _CACHE[clave]
 
 
 # ---------- revisión de pasos (fase 4) ----------
@@ -326,13 +256,13 @@ def explain_equations(e1, e2):
     return "No tiene las mismas soluciones que el paso anterior."
 
 
-def _statement(tokens, env):
+def _statement(tokens, vista):
     """("eq", (lhs, rhs)) o ("expr", e) o None."""
     parts = _split(tokens, RELATIONS)
     if len(parts) == 1:
-        return ("expr", _expr(tokens, env))
+        return ("expr", _expr(tokens, vista))
     if len(parts) == 2 and parts[0][1] == "=":
-        return ("eq", (_expr(parts[0][0], env), _expr(parts[1][0], env)))
+        return ("eq", (_expr(parts[0][0], vista), _expr(parts[1][0], vista)))
     return None
 
 
@@ -369,6 +299,35 @@ def _after(box, typical):
     return (box[2] + 0.3 * max(typical, 8.0), (box[1] + box[3]) / 2)
 
 
+def _resultado(tree, units, vista):
+    result = answer(tree, units=units or None, vista=vista)
+    if result is None and units:
+        result = answer(tree, vista=vista)
+    return result
+
+
+def _valor_variable(tree, tokens, d, vista, units):
+    """{"text", "latex"} del valor de un renglón sin «=» que usa variables (o de una definición `y = 2x + 3`), si
+    todo lo que usa tiene valor."""
+    if d is None:
+        if len(_split(tokens, RELATIONS | {","} | STEP_SEPARATORS)) != 1:
+            return None
+        expr = _Parser(tokens, {}, vista.funciones, vista.conocidas).full()
+    elif vista.cantidades:
+        return None
+    else:
+        expr = d.expr
+    resuelta, cambiado = vista.resolver(expr)
+    libres = {s.name for s in resuelta.free_symbols}
+    if not cambiado or not (not libres or libres <= set(vista.cantidades)):
+        return None
+    if vista.cantidades:
+        return answer(("row", tree[1] + [("sym", "=")]), units=units, vista=vista)
+    value = _value(resuelta)
+    value = value if value.is_Rational else sp.Float(value, 4)
+    return _natural_log_names({"text": str(value), "latex": sp.latex(value), "kind": "value"})
+
+
 def page(rows, equals=True, variables=False, check=False, glossary_units=None):
     """Anotaciones de cada renglón. `rows`: [{"symbols": [{"latex", "box"}]}], de arriba abajo."""
     glossary_units = glossary_units or {}
@@ -380,40 +339,39 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None):
             continue
         tree = parse(syms)
         parsed.append((syms, tree, _tokens(tree)))
-    # variables definidas en la página
-    definitions = []
+    # definiciones de la página
+    definiciones = []
+    entorno = Entorno(definiciones)
     if variables:
-        env = {}
         for i, p in enumerate(parsed):
             if p is None or _ends_with_equals(p[2]):
                 continue
-            d = _definition(p[2], _split_env(env)[0], glossary_units)
+            vista = entorno.vista(i)
+            d = _cache(("d", repr(p[2]), vista.clave()), lambda: definir(p[2], i, vista, glossary_units))
             if d:
-                env[d[0]] = d[1]
-                definitions.append((i, d[0], d[1]))
+                definiciones.append(replace(d, renglon=i, _texto=None))
+    por_renglon = {d.renglon: d for d in definiciones}
     out = []
-    previous = None
+    previous = previous_d = None
     for i, p in enumerate(parsed):
         if p is None:
             out.append({"latex": "", "marks": []})
-            previous = None
+            previous = previous_d = None
             continue
         syms, tree, tokens = p
         typical = _typical(syms)
         box = _bounds(syms)
         marks = []
-        env = _env_for(i, definitions) if variables else {}
-        plain, quantities = _split_env(env)
-        units = {**glossary_units, **quantities}
-        is_definition = any(j == i for j, _, _ in definitions)
+        vista = entorno.vista(i)
+        units = {**glossary_units, **vista.cantidades}
+        clave = (repr(tokens), repr(sorted((k, str(v)) for k, v in units.items())), vista.clave())
+        d = por_renglon.get(i)
         # 1. el «=» final
         if equals and _ends_with_equals(tokens):
             eq = max((s for s in syms if s.label == "="), key=lambda s: s.box[2])
             anchor = _after(eq.box, typical)
             height = max(eq.w, eq.h, 0.8 * typical) * 1.2
-            result = answer(tree, glossary=plain, units=units or None)
-            if result is None and units:
-                result = answer(tree, glossary=plain)
+            result = _cache(("=",) + clave, lambda: _resultado(tree, units, vista))
             if result is None:
                 marks.append(_mark("unknown", "?", to_latex(tree), anchor, height, at=syms.index(eq)))
             else:
@@ -425,87 +383,81 @@ def page(rows, equals=True, variables=False, check=False, glossary_units=None):
                         formats = []
                 marks.append(_mark(result["kind"], result["text"], result["latex"], anchor, height, formats=formats,
                                    at=syms.index(eq)))
-        # 2. variables: una expresión que las usa muestra su valor
-        elif variables and env and not is_definition and len(tokens) >= 2:
-            parts = _split(tokens, RELATIONS | {","} | STEP_SEPARATORS)
-            if len(parts) == 1:
+        # 2. variables: una expresión que las usa (o una definición `y = 2x + 3`) muestra su valor
+        elif variables and len(tokens) >= 2 and (d is None or d.tipo == "expr"):
+
+            def calcula():
                 try:
-                    expr = _Parser(tokens, plain).full()
-                    free = {s.name for s in expr.free_symbols}
-                    used = {s.name for s in _Parser(tokens, {}).full().free_symbols} & set(env)
-                    if used and (not free or free <= set(quantities)):
-                        result = None
-                        if quantities:
-                            result = answer(("row", tree[1] + [("sym", "=")]), glossary=plain, units=units)
-                        else:
-                            value = _value(expr)
-                            result = _natural_log_names(
-                                {"text": str(value if value.is_Rational else sp.Float(value, 4)),
-                                 "latex": sp.latex(value if value.is_Rational else sp.Float(value, 4)),
-                                 "kind": "value"})
-                        if result:
-                            text = "= " + result["text"]
-                            formats = number_formats(sp.sympify(result["text"])) if not quantities else []
-                            for f in formats:
-                                f["text"] = "= " + f["text"]
-                            marks.append(_mark("variable", text, "= " + result["latex"], _after(box, typical),
-                                               0.9 * typical, formats=formats))
+                    return _valor_variable(tree, tokens, d, vista, units)
                 except Exception:  # noqa: BLE001 - un renglón que no se entiende no anota nada
-                    pass
-        # 3. revisión de pasos
+                    return None
+
+            result = _cache(("v",) + clave, calcula)
+            if result:
+                formats = number_formats(sp.sympify(result["text"])) if not vista.cantidades else []
+                for f in formats:
+                    f["text"] = "= " + f["text"]
+                marks.append(_mark("variable", "= " + result["text"], "= " + result["latex"], _after(box, typical),
+                                   0.9 * typical, formats=formats))
+        # 3. revisión de pasos: solo valen como datos las definiciones anteriores a este renglón y al de encima
         if check:
-            marks += _check_row(tokens, syms, typical, box, previous, plain)
+            # dos definiciones seguidas de nombres distintos (x = 5, y = 2x + 3) no son pasos de un desarrollo
+            otro = d is not None and previous_d is not None and d.nombre != previous_d.nombre
+            marks += _check_row(tokens, typical, box, None if otro else previous, entorno.vista(i - 1, solo_encima=True))
         out.append({"latex": to_latex(tree), "marks": marks})
         previous = (tokens, syms)
+        previous_d = d
     return out
 
 
-def _check_row(tokens, syms, typical, box, previous, env):
+def _check_row(tokens, typical, box, previous, vista):
     """Pasos dentro del renglón (separados por → ⇒ ;, o una cadena A = B = C) y con el renglón de encima."""
-    marks = []
+    why = _cache(("c", repr(tokens), repr(previous[0]) if previous else None, vista.clave()),
+                 lambda: _check_why(tokens, previous, vista))
+    if not why:
+        return []
+    # debajo del renglón, empezando por la izquierda: así no se cruza con el resultado del «=» ni con el valor
+    # de las variables, que van a la derecha
+    return [_mark("error", "✗ " + why, why, (box[0], box[3] + 0.55 * typical), 0.55 * typical)]
+
+
+def _check_why(tokens, previous, vista):
+    """La explicación del primer paso que no cuadra, o "" si todo cuadra (o no se entiende)."""
     if _ends_with_equals(tokens):
         tokens = tokens[:-1]
-
-    def bad(why, where):
-        # debajo del renglón, empezando por la izquierda: así no se cruza con el resultado del «=» ni con el valor
-        # de las variables, que van a la derecha
-        return _mark("error", "✗ " + why, why, (where[0], where[3] + 0.55 * typical), 0.55 * typical)
-
     # «= …» sigue la expresión del renglón de encima
     continues = bool(tokens) and tokens[0][0] == "sym" and tokens[0][1] == "="
     body = tokens[1:] if continues else tokens
     try:
         steps = [t for t, _ in _split(body, STEP_SEPARATORS) if t]
-        stmts = [_statement(t, env) for t in steps]
+        stmts = [_statement(t, vista) for t in steps]
         for a, b in zip(stmts, stmts[1:]):
             why = check_steps(a, b)
             if why:
-                return [bad(why, box)]
+                return why
         # cadena «A = B = C»: cada parte igual a la anterior
         parts = [t for t, _ in _split(body, {"="})]
         if len(parts) >= 3 and all(parts):
-            exprs = [_expr(t, env) for t in parts]
+            exprs = [_expr(t, vista) for t in parts]
             for a, b in zip(exprs, exprs[1:]):
                 if not same_expr(a, b):
-                    return [bad(explain_expressions(a, b), box)]
+                    return explain_expressions(a, b)
         # con el renglón de encima
         if previous is not None:
             prev_tokens = previous[0][:-1] if _ends_with_equals(previous[0]) else previous[0]
             prev_steps = [t for t, _ in _split(prev_tokens, STEP_SEPARATORS) if t]
             if not prev_steps:
-                return marks
+                return ""
             if continues:
-                a = _expr(_split(prev_steps[-1], {"="})[-1][0], env)
-                b = _expr(_split(body, {"="})[0][0], env)
+                a = _expr(_split(prev_steps[-1], {"="})[-1][0], vista)
+                b = _expr(_split(body, {"="})[0][0], vista)
                 if not same_expr(a, b):
-                    return [bad(explain_expressions(a, b), box)]
+                    return explain_expressions(a, b)
             elif stmts:
-                why = check_steps(_statement(prev_steps[-1], env), stmts[0])
-                if why:
-                    return [bad(why, box)]
+                return check_steps(_statement(prev_steps[-1], vista), stmts[0]) or ""
     except Exception:  # noqa: BLE001 - lo que no se entiende no se marca
-        return marks
-    return marks
+        return ""
+    return ""
 
 
 # ---------- LaTeX de varios renglones (fase 5) ----------

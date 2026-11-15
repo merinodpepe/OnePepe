@@ -125,7 +125,7 @@ def _coloca(toks, x, base, sc, gap=2.0):
             x, last = nw, b
         elif t in (r"\int", r"\sum"):
             w = 8 * sc if t == r"\int" else 16 * sc
-            b = (x, base - 1.4 * H * sc, x + w, base + 0.4 * H * sc) if t == r"\int" else (
+            b = (x, base - 19.5 * sc, x + w, base + 6.5 * sc) if t == r"\int" else (
                 x, base - H * sc, x + w, base + 0.1 * H * sc)
             last = Sym(t, b)
             out.append(last)
@@ -197,11 +197,11 @@ def resumen(resultado):
 SONDAS = [
     ("paren_mas", ["(x+1)+3="], False, r"^x\s*\+\s*4$"),
     ("segunda_derivada", [r"\frac{d^2}{dx^2}(x^3)="], False, r"^(6\s*\*?\s*x|\?)$"),
-    ("dxdt_frac", ["x=t^2", r"\frac{dx}{dt}="], True, r"^\?$"),
-    ("dydx_frac", ["y=x^2", r"\frac{dy}{dx}="], True, r"^\?$"),
-    ("dxdt_linea", ["x=t^2", "dx/dt="], True, r"^\?$"),
-    ("f_de_3", ["f(x)=x^2+1", "f(3)="], True, r"^\?$"),
-    ("f_de_x", ["x=5", "f(x)=x^2+1", "f(x)="], True, r"^\?$"),
+    ("dxdt_frac", ["x=t^2", r"\frac{dx}{dt}="], True, r"^2\*t$"),
+    ("dydx_frac", ["y=x^2", r"\frac{dy}{dx}="], True, r"^2\*x$"),
+    ("dxdt_linea", ["x=t^2", "dx/dt="], True, r"^2\*t$"),
+    ("f_de_3", ["f(x)=x^2+1", "f(3)="], True, r"^10$"),
+    ("f_de_x", ["x=5", "f(x)=x^2+1", "f(x)="], True, r"^26$"),
     ("unidades", ["m=70kg", "g=9,8m/s^2", "mg="], True, r"^686.*N$"),
     ("e_a_la_5", ["e^5="], False, r"148,4"),
     ("exponente_negativo", ["e^{-x}"], False, r"^$"),
@@ -210,7 +210,21 @@ SONDAS = [
     ("cifra_pequena", [num2("3", "0", 0.72)], False, r"^\?$"),
     ("cifra_exponente", [num2("3", "0", 0.6, -0.4 * H)], False, r"^x \+ 1$"),
     ("hueco_numeros", [hueco_numeros()], False, r"^\?$"),
+    ("f_sin_x", ["f(x)=x^2+1", "f(x)="], True, r"^x\*\*2 \+ 1$"),
+    ("prima_con_definicion", ["f(x)=x^2", "f'(x)="], True, r"^2\*x$"),
+    ("integral_con_x", ["x=5", r"\int 2xdx="], True, r"^x\*\*2 \+ C$"),
+    ("integral_definida_con_x", ["x=5", r"\int_0^1 x^2dx="], True, r"^1/3$"),
+    ("derivada_con_x", ["x=5", r"\frac{d}{dx}(x^2)="], True, r"^2\*x$"),
+    ("sumatorio_con_i", ["i=2", sumrow()], True, r"^6$"),
+    ("entorno_parcial", ["x=5", "x+y="], True, r"^y \+ 5$"),
+    ("ciclo", ["x=y+1", "y=x+1", "x="], True, r"^\?$"),
 ]
+
+# los 40 renglones de la sonda de rendimiento (s07.mix)
+MIX = ["x=5", "y=2x+3", "y=", "y+1=", "2x+3=", "x^2=", r"\sqrt{x+4}=", r"\frac{x}{2}=", "sinx=", "a=2", "b=3", "c=a+b",
+       "c^2=", r"\frac{d}{dx}(x^2)=", "12+34=", "3,5+1,5=", "1000/8=", "m=70kg", "g=9,8", "mg=", "2x+4=10", "2x=6",
+       "x=3", "(x+1)(x-1)=", r"\frac{x}{2}+\frac{x}{3}=", "x^2+2x+1=", "2(x+1)=", "e^x=", r"\pi r^2=", "r=2", "k=3",
+       "k+x=", "x_1=2", "x_2=3", "x_1+x_2=", r"\frac{d}{dx}(x^3)=", "x+y=", "f(x)=x^2+1", "f(x)=", "2x+3=13"]
 
 
 def erroneas(sondas=SONDAS):
