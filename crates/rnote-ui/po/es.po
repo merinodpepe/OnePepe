@@ -4229,3 +4229,15 @@ msgstr "OnePepe se cerró por un fallo la última vez. El informe está en {path
 
 msgid "To see it drawn, install matplotlib once: cd tools/onepepe-math && ./instalar.sh"
 msgstr "Para verla dibujada, instala matplotlib una vez: cd tools/onepepe-math && ./instalar.sh"
+
+msgid "This is wrong…"
+msgstr "Esto está mal…"
+
+msgid "Write in LaTeX what you wrote, to train with it"
+msgstr "Escribe en LaTeX lo que escribiste, para entrenar con ello"
+
+msgid "Saved for training"
+msgstr "Guardado para entrenar"
+
+msgid "It could not be saved"
+msgstr "No se pudo guardar"

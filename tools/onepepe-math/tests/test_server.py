@@ -52,6 +52,33 @@ class TestServer(unittest.TestCase):
         server.serve(io.StringIO("\n".join(json.dumps(r) for r in requests) + "\n"), out)
         return [json.loads(x) for x in out.getvalue().splitlines()]
 
+    def test_report_failure_guarda(self):
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"ONEPEPE_DATA": d}):
+            st = [line(0, 0, 0, 20), line(10, 0, 10, 20)]
+            r = self.run_server({"id": 1, "cmd": "report_failure", "strokes": st, "times": None,
+                                 "expected": "x+1", "read": "x + l"})[0]
+            self.assertTrue(r["ok"])
+            with open(os.path.join(d, "math", "fallos.jsonl"), encoding="utf-8") as f:
+                rec = [json.loads(x) for x in f]
+            self.assertEqual(len(rec), 1)
+            self.assertEqual((rec[0]["id"], rec[0]["expected"], rec[0]["read"]), (r["failure"], "x+1", "x + l"))
+            self.assertEqual(len(rec[0]["strokes"]), 2)
+            # medir.py lo lee como un renglón
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            import medir
+
+            self.assertEqual(len(medir.cargar_fallos(os.path.join(d, "math"))), 1)
+
+    def test_report_failure_vacio(self):
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"ONEPEPE_DATA": d}):
+            r = self.run_server({"id": 1, "cmd": "report_failure", "strokes": [], "expected": " "})[0]
+            self.assertIn("error", r)
+            self.assertFalse(os.path.exists(os.path.join(d, "math", "fallos.jsonl")))
+
     def test_protocol(self):
         # "1 + 1 =" escrito como: 1, (dos rayas cruzadas: no hace falta), 1, =
         strokes = [
