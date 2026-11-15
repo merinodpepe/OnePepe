@@ -19,6 +19,7 @@ Reglas que no se rompen nunca (detalle en `CONTEXTO-IA.md`, sección 3):
 - **Leer una vez, no en bucle.** Antes de cambiar nada: lista todos los archivos que necesitas, léelos todos de una
   vez en paralelo, haz todas las ediciones y ejecuta los tests. Prohibido leer archivo por archivo o releer trozos
   contiguos en bucle. Si eres un subagente y los tests fallan, no iteres: escala al orquestador
-  ([`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md) §4).
+  ([`ARQUITECTURA-EJECUCION.md`](docs/planes/ARQUITECTURA-EJECUCION.md) §4).
 
-Para ejecutar el cierre de matemáticas (tareas T0–T13): [`ARQUITECTURA-EJECUCION.md`](ARQUITECTURA-EJECUCION.md).
+Para ejecutar el cierre de matemáticas (tareas T0–T13): [`ARQUITECTURA-EJECUCION.md`](docs/planes/ARQUITECTURA-EJECUCION.md).
+Índice de toda la documentación: [`docs/README.md`](docs/README.md).

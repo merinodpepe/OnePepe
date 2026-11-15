@@ -14,9 +14,9 @@ todavía.**
 
 | | Antes | Después |
 |---|---|---|
-| Claro | ![antes claro](misc/onepepe/diseno/antes-claro.png) | ![después claro](misc/onepepe/diseno/despues-claro.png) |
-| Oscuro | ![antes oscuro](misc/onepepe/diseno/antes-oscuro.png) | ![después oscuro](misc/onepepe/diseno/despues-oscuro.png) |
-| Alto contraste | ![antes alto contraste](misc/onepepe/diseno/antes-contraste.png) | ![después alto contraste](misc/onepepe/diseno/despues-contraste.png) |
+| Claro | ![antes claro](../../misc/onepepe/diseno/antes-claro.png) | ![después claro](../../misc/onepepe/diseno/despues-claro.png) |
+| Oscuro | ![antes oscuro](../../misc/onepepe/diseno/antes-oscuro.png) | ![después oscuro](../../misc/onepepe/diseno/despues-oscuro.png) |
+| Alto contraste | ![antes alto contraste](../../misc/onepepe/diseno/antes-contraste.png) | ![después alto contraste](../../misc/onepepe/diseno/despues-contraste.png) |
 
 **Antes, en oscuro,** solo cambiaba la barra de herramientas: la cinta, el lienzo y la cabecera seguían claros.
 **Ahora** cambia todo a la vez.
@@ -25,9 +25,9 @@ Los cuadrados rosas de algunas capturas son trazos. La GTK 4.14 de la nube no sa
 versión, no de OnePepe.
 
 Más capturas:
-- [Fondo y renglones](misc/onepepe/diseno/renglones.png): rayado de 7 mm con línea de margen.
-- [Regla infinita](misc/onepepe/diseno/regla-infinita.png).
-- [Ajustes → Apariencia](misc/onepepe/diseno/ajustes-apariencia.png).
+- [Fondo y renglones](../../misc/onepepe/diseno/renglones.png): rayado de 7 mm con línea de margen.
+- [Regla infinita](../../misc/onepepe/diseno/regla-infinita.png).
+- [Ajustes → Apariencia](../../misc/onepepe/diseno/ajustes-apariencia.png).
 
 ## Cómo está montado el tema
 

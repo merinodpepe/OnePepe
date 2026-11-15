@@ -1,7 +1,7 @@
 # Arquitectura de ejecución del cierre (2026-11-15)
 
 Manual para ejecutar de una vez las tareas T0–T13 de [`PLAN-CIERRE.md`](PLAN-CIERRE.md). El plan dice QUÉ; la
-auditoría ([`AUDITORIA-MATEMATICAS.md`](AUDITORIA-MATEMATICAS.md)) dice POR QUÉ; este documento dice CÓMO. No repite
+auditoría ([`AUDITORIA-MATEMATICAS.md`](../auditorias/AUDITORIA-MATEMATICAS.md)) dice POR QUÉ; este documento dice CÓMO. No repite
 el plan: usa sus ids, ramas, metas y criterios de aceptación.
 
 Cómo se lee:

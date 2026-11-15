@@ -1,7 +1,7 @@
 # Plan de mejora de OnePepe (pendiente)
 
-Actualizado: 2026-10-30. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](ESTADO.md) y
-[`CAMBIOS-ONEPEPE.md`](CAMBIOS-ONEPEPE.md); el plan original completo queda en el historial de git de este archivo.
+Actualizado: 2026-10-30. Solo lo que falta por hacer. Lo ya hecho está en [`ESTADO.md`](../estado/ESTADO.md) y
+[`CAMBIOS-ONEPEPE.md`](../estado/CAMBIOS-ONEPEPE.md); el plan original completo queda en el historial de git de este archivo.
 
 ## 1. Pruebas en tu equipo (lo primero)
 
