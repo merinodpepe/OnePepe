@@ -7,6 +7,33 @@ Lo que falta por hacer, en orden de prioridad: [`PLAN-PENDIENTE.md`](../planes/P
 
 **Manual de ejecución (2026-11-15):** [`ARQUITECTURA-EJECUCION.md`](../planes/ARQUITECTURA-EJECUCION.md) convierte el plan en instrucciones para agentes (oleadas, especificación de cada tarea, matemática resuelta, contrato y protocolo de fallo). Cierre en marcha: T0 (banco de medida) hecha y fusionada, versión 1.5.0; ejecutado con tus datos en una copia de trabajo, nada probado con lápiz. El bloque A ya está respondido (§1 de ese documento): se permite `push` y el diseño fluido (T12) queda para el último paso. Todo lo de planificar está decidido. Para arrancar: sesión nueva con Opus 5.5 y la orden que hay al principio del manual.
 
+### Cierre en curso: punto de retoma (2026-11-15, 16:10)
+
+Reparto: Fable orquesta, Sonnet programa, Haiku prueba y documenta. Regla para todos: leer todo, editar todo, probar todo.
+
+| Tarea | Estado | Rama | Dónde está |
+|-------|--------|------|------------|
+| O0 preparación | hecha | — | Copia de trabajo en `~/.local/share/onepepe/cierre-trabajo/` (sumas de los originales en `origen.sha256`) |
+| T0 banco de medida | hecha, **subida** (1.5.0) | `feat/banco-de-medida` | `onepepe` = `main` = `e5a4f814` en GitHub |
+| T11 captura de fallos | hecha, fusionada en `onepepe` local, **sin subir** | `feat/captura-fallos` | py 123 ok, motor 24 ok, `cargo check` ok, `msgfmt` ok. Interfaz sin abrir |
+| T3 evaluación correcta | hecha, fusionada local, **sin subir** | `fix/evaluacion-correcta` | sondas erróneas 8 → 0 |
+| T4 entorno | hecha, fusionada local, **sin subir** | `feat/entorno` | 152 tests ok, 23 sondas, 0 erróneas; página de 40 renglones 0,12 s (0,17–0,20 s con carga: el test `< 0,2 s` puede fallar por carga) |
+| T1 reimportar entrenos | código con commit (`f7b84baf`), **sin fusionar** | `fix/reimportar-entrenos` | Ejecutado sobre la copia de trabajo (`math/correcciones.jsonl` nuevo, `.bak` al lado, `revision.jsonl`). Informe en `cierre-trabajo/registros/t1-reimportar.txt` |
+| T2 entrenamiento sin fugas | código con commit (`c6964428`), **sin fusionar, entrenando** | `fix/entrenamiento-sin-fugas` | Modelo «antes» en `cierre-trabajo/base/`; el nuevo (`--personal-weight auto`) se entrenaba a las 16:10 hacia `cierre-trabajo/nuevo/simbolos.npz`. Registros: `registros/t2-antes.txt`, `t2-nuevo.txt`. Faltan: medir examen, `--comparar`, pliegues (`entrenar_pliegues.py --receta v1`) |
+| T5–T10, T12, T13 | sin empezar | — | Orden: §5 del manual (O3 = T5) |
+
+Para retomar:
+
+1. `git status --short` (solo debe salir `?? docs/archivo/`) y `git log --oneline -8`.
+2. T2: si `cierre-trabajo/nuevo/simbolos.npz` existe y no hay ningún `train_classifier.py` en marcha (`pgrep -af train_classifier`), terminar la aceptación de §7 T2 en la rama `fix/entrenamiento-sin-fugas` (medir el examen con `--modelo`, `--comparar` contra el «antes», entrenar los pliegues). Si no existe, relanzar el entrenamiento.
+3. Fusionar `fix/reimportar-entrenos` y `fix/entrenamiento-sin-fugas` en `onepepe` (`--no-ff`); puede haber conflicto pequeño en `medir.py` (T11 lo tocó: acepta `expected` como LaTeX). Tests: deben pasar todos.
+4. Cerrar la oleada O2: versión 1.6.0 (`meson.build`, `app.metainfo.xml.in.in`, `VERSIONES.md`, `CLAUDE.md`), notas en `DECISIONES.md`, `push` de las ramas y `git push origin onepepe:main` tras las comprobaciones de §3.4 del manual.
+5. Seguir con O3 (T5).
+
+Rust en este equipo: `~/.local/share/onepepe/cierre-trabajo/rust.sh engine|ui|po` (SDK de Flatpak; el sistema no compila nativo).
+
+Decisiones de los agentes pendientes de apuntar en `DECISIONES.md` al cerrar O2: hueco entre cifras `> 0,8` alturas da «?»; `e` es la constante salvo que la página la defina; `f=3` y luego `f(2)` da «?»; un ciclo de definiciones da «?»; «Revisar pasos» no compara dos definiciones seguidas de nombres distintos; `report_failure` responde con el id en `failure`; `docs/archivo/` fuera de git.
+
 Leyenda de cómo se probó cada cosa:
 - **compilado**: el motor compila de verdad; la interfaz GTK solo con `cargo check` (comprobación de tipos, sin
   enlazar ni ejecutar), porque la nube no tiene GTK 4.22 / libadwaita 1.9 ni pantalla.
