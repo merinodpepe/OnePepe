@@ -34,6 +34,7 @@ from onepepe_math.symbols import CORE, normalize_label  # noqa: E402
 
 TOPE_EXTRAIDOS = 400  # símbolos extraídos de fórmulas (extraer_simbolos.py) por clase
 COPIAS_EXTRAIDOS = 10
+BLOQUE = 50000  # filas por llamada a partial_fit
 SOLTAR_LINEA = 0.3  # M7.5: fracción de muestras con contexto a las que se les borra
 TOPE_PROPIO = 40  # copias propias por clase: como mucho TOPE_PROPIO · W
 BASE_POR_CLASE = 80  # muestras base de MathWriting por clase
@@ -98,11 +99,11 @@ def copias_trozo(n_simbolos, n_trozos):
     return int(min(max(round(0.15 * n_simbolos / n_trozos), 2), 30))
 
 
-def featurizar(muestras, copias, rng, lineas=None, version=1, soltar=SOLTAR_LINEA):
+def featurizar(muestras, copias, rng, lineas=None, version=1, soltar=SOLTAR_LINEA, out=None):
     """(X, etiquetas, orígenes) de cada muestra [(etiqueta, trazos, origen)] y de sus `copias[i]` deformaciones.
     v2: `lineas[i]` (típico, pendiente, corte) o None; en las copias se perturba, y se borra con probabilidad `soltar`."""
     dim = N_FEATURES_V2 if version >= 2 else N_FEATURES
-    X = np.empty((len(muestras) + int(sum(copias)), dim), dtype=np.float32)
+    X = np.empty((len(muestras) + int(sum(copias)), dim), dtype=np.float32) if out is None else out  # `out`: sin copias
     y, o, r = [], [], 0
 
     def ctx(lin):
@@ -183,7 +184,11 @@ def entrenar_red(Xtr, ytr, val_m, val_p, n_clases, args, epocas_fijas=None):
     todas = np.arange(n_clases)
     mejor, sin_mejora, mejor_ep, j_mejor = None, 0, 0, np.inf
     for ep in range(1, (epocas_fijas or args.max_epocas) + 1):
-        clf.partial_fit(Xtr, ytr, classes=todas)
+        # por bloques mezclados: MLPClassifier binariza `y` de golpe (n × clases en float64) y no cabe en 7 GB
+        orden = np.random.default_rng(args.seed + ep).permutation(len(ytr))
+        for i in range(0, len(orden), BLOQUE):
+            b = orden[i : i + BLOQUE]
+            clf.partial_fit(Xtr[b], ytr[b], classes=todas)
         nl_p, nl_m = nll(clf, *val_p), nll(clf, *val_m)
         partes = [v for v in (nl_p, nl_m) if v is not None]
         j = sum(partes) / max(len(partes), 1)  # ½ NLL propia + ½ NLL MathWriting (o la única que haya)
@@ -292,8 +297,6 @@ def main():
         por_clase.setdefault(s[0], []).append(s)
     base_m = [s for c in sorted(por_clase) for s in [por_clase[c][k] for k in rng.permutation(len(por_clase[c]))
                                                       ][:BASE_POR_CLASE]]
-    Xm, ym, _ = featurizar(base_m, [args.augment] * len(base_m), rng, version=version)
-    Xe, ye, _ = featurizar(ext, [COPIAS_EXTRAIDOS] * len(ext), rng, lin_ext, version)
 
     def valid(muestras, lineas=None):
         X, y, _ = featurizar(muestras, [0] * len(muestras), rng, lineas, version, soltar=0.0)
@@ -314,21 +317,35 @@ def main():
         for s in propios:
             n_c[s[0]] = n_c.get(s[0], 0) + 1
         lin_p = [lin_origen.get(s[2]) for s in propios] if version >= 2 else None
-        Xp, yp, _ = featurizar(propios, [copias_propias(n_c[s[0]], w) for s in propios], rng, lin_p, version)
-        n_s = len(Xm) + len(Xp) + len(Xe)
+        cop_m, cop_e = [args.augment] * len(base_m), [COPIAS_EXTRAIDOS] * len(ext)
+        cop_p = [copias_propias(n_c[s[0]], w) for s in propios]
+        n_s = len(base_m) + sum(cop_m) + len(propios) + sum(cop_p) + len(ext) + sum(cop_e)
         trozos = junk_tr + [s for s in prop_tr if s[0] == JUNK]
         a_t = copias_trozo(n_s, len(trozos)) if trozos else 0
         lin_j = ([None] * len(junk_tr) + [lin_origen.get(s[2]) for s in prop_tr if s[0] == JUNK]) if version >= 2 else None
-        Xj, yj, _ = featurizar(trozos, [a_t] * len(trozos), rng, lin_j, version)
-        Xtr = np.concatenate([Xm, Xp, Xe, Xj])
-        ytr = np.array([idx[e] for e in ym + yp + ye + yj], dtype=int)
-        del Xp, Xj
-        if len(Xtr) > 0 and w == pesos[-1]:
-            del Xm, Xe  # la memoria manda: solo se liberan en la última vuelta de W
-        mean = Xtr.mean(axis=0)
-        std = Xtr.std(axis=0) + 1e-3
-        Xtr -= mean  # en el sitio: la matriz es grande
-        Xtr /= std
+        # una sola matriz, rellenada por trozos: la memoria (7 GB) no admite concatenar copias
+        dim = N_FEATURES_V2 if version >= 2 else N_FEATURES
+        Xtr = np.empty((n_s + len(trozos) * (a_t + 1), dim), dtype=np.float32)
+        etiquetas, r = [], 0
+        for muestras, cop, lin in ((base_m, cop_m, None), (propios, cop_p, lin_p), (ext, cop_e, lin_ext),
+                                   (trozos, [a_t] * len(trozos), lin_j)):
+            n = len(muestras) + sum(cop)
+            _, y_, _ = featurizar(muestras, cop, rng, lin, version, out=Xtr[r : r + n])
+            etiquetas += y_
+            r += n
+            print(f"  rasgos: {r}/{len(Xtr)}", file=sys.stderr, flush=True)
+        ytr = np.array([idx[e] for e in etiquetas], dtype=int)
+        # media y desviación por bloques (float64): sin copias temporales de la matriz
+        s1, s2 = np.zeros(dim), np.zeros(dim)
+        for i in range(0, len(Xtr), 50000):
+            blk = Xtr[i : i + 50000].astype(np.float64)
+            s1 += blk.sum(axis=0)
+            s2 += (blk * blk).sum(axis=0)
+        mean = (s1 / len(Xtr)).astype(np.float32)
+        std = (np.sqrt(np.maximum(s2 / len(Xtr) - (s1 / len(Xtr)) ** 2, 0)) + 1e-3).astype(np.float32)
+        for i in range(0, len(Xtr), 50000):
+            Xtr[i : i + 50000] -= mean
+            Xtr[i : i + 50000] /= std
         print(f"entrenando con {len(Xtr)} muestras, {len(clases)} clases (W={w}) ...", file=sys.stderr)
         coefs, inters, j, ep = entrenar_red(Xtr, ytr, ((Xvm - mean) / std, yvm), ((Xvp - mean) / std, yvp),
                                             len(clases), args, args.epocas_fijas)

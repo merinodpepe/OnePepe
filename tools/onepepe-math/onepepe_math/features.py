@@ -166,7 +166,7 @@ def _rejilla16(tramos):
 
 def _contexto(box, linea):
     """M7.5: seis valores del símbolo respecto al renglón; ceros sin contexto."""
-    if linea is None:
+    if linea is None or linea[0] <= 1e-6:  # típico 0: línea degenerada, sin contexto
         return np.zeros(6, dtype=np.float32)
     tip, pend, corte = linea
     x0, y0, x1, y1 = box
