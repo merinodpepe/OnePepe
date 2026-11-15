@@ -7,6 +7,13 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.10.2 (2026-11-15) — el despeje se ve en morado
+
+- Una ecuación que despeja enseña al lado «x = 3», en morado, como las definiciones que enseñan su valor
+  (`x=9/2=4y` enseña «y = 9/8»; la x ya está a la vista).
+- Con «Revisar pasos», un renglón marcado como error no enseña el despeje.
+- Solo cambia el programa auxiliar: no hace falta recompilar la app.
+
 ## 1.10.1 (2026-11-15) — definiciones a la derecha, cadenas y despeje
 
 - **Letra a la derecha:** `4+5=x` define x = 9; con `x=3`, `2x=y` define y = 6.

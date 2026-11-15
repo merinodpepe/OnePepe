@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.10.2" date="2026-11-15">
+      <description>
+        <p>Math: the value solved from an equation is shown next to it.</p>
+      </description>
+    </release>
     <release version="1.10.1" date="2026-11-15">
       <description>
         <p>Math: definitions with the letter on the right ("4+5=x"), chains of equalities, and solving for the single unknown of an equation.</p>

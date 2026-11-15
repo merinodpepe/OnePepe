@@ -560,3 +560,10 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - SUPUESTO (Fable): el valor despejado es silencioso (no se enseña junto a la ecuación, para no resolver los ejercicios mientras se escriben). El usuario puede pedirlo visible.
 - SUPUESTO: «Revisar pasos» no usa lo despejado como dato (las sondas `pasos_mal` y `pasos_bien` salen igual). Tope de 1 s por despeje. Sin unidades, sistemas ni desigualdades.
 - Tests: 223 de Python, 29 sondas con 0 erróneas; página de 40 renglones 0,016 s. Los tests del despeje se escribieron a la vez que el código (no se vieron fallar antes). Probado con texto compuesto, no con lápiz.
+
+## 1.10.2 (2026-11-15): el despeje, visible en morado
+
+- El usuario eligió verlo: sustituye al SUPUESTO «silencioso» de la 1.10.1. Marca `variable` con el texto `x = 3`; varios nombres en un renglón, unidos por «; ». No cambia el esquema de `page` ni Rust.
+- Con «Revisar pasos», un renglón con marca de error no enseña el despeje.
+- Sin comprobar con lápiz: si el renglón acaba en «=», la marca del despeje y la del resultado comparten sitio y pueden solaparse.
+- Tests: 224 de Python (los dos nuevos se vieron fallar antes), 29 sondas con 0 erróneas.
