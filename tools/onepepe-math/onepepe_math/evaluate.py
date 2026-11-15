@@ -199,10 +199,27 @@ def _operand_start(t):
 
 
 class _Parser:
-    def __init__(self, tokens, glossary):
+    def __init__(self, tokens, glossary, funciones=(), conocidas=()):
         self.t = tokens
         self.i = 0
         self.glossary = glossary or {}
+        self.funciones = funciones  # nombres de funciones definidas en la página: f(x) es una llamada
+        self.conocidas = conocidas  # nombres con valor o alias en la página: se puede derivar df/dx
+
+    def hijo(self, tokens):
+        return _Parser(tokens, self.glossary, self.funciones, self.conocidas)
+
+    def sub(self, row):
+        return self.hijo(_tokens(row)).full()
+
+    def _llamada(self, nombre, tok):
+        """f(a) con f función de la página: la llamada sin sustituir (la sustituye `Vista.resolver`)."""
+        self.take()
+        arg = self.expr()
+        end = self.take()
+        if end is None or end[1] != ")":
+            raise ParseError("paréntesis sin cerrar")
+        return self._apply_scripts(sp.Function(nombre)(arg), end)
 
     def peek(self, k=0):
         j = self.i + k
@@ -269,7 +286,7 @@ class _Parser:
     def _apply_scripts(self, value, tok):
         sup = tok[2]
         if sup is not None:
-            value = value ** sub_expr(sup, self.glossary)
+            value = value ** self.sub(sup)
         return value
 
     def atom(self):
@@ -284,22 +301,29 @@ class _Parser:
             return self._apply_scripts(value, tok)
         if kind == "deriv":
             f, vs = tok[1]
-            if f is not None:
+            if f is None:
+                operando = self.unary()
+            elif f in self.conocidas:
+                operando = self._symbol(["sym", f, None, None])
+            else:
                 raise ParseError("derivada de una función sin definir")
-            return sp.Derivative(self.unary(), *[(self._symbol(["sym", v, None, None]), n) for v, n in vs])
+            return sp.Derivative(operando, *[(self._symbol(["sym", v, None, None]), n) for v, n in vs])
         if kind == "prime":
+            _, base, n = tok[1]
+            if base[0] == "sym" and base[1] in self.funciones and self.is_sym(self.peek(), "("):
+                return self._llamada(f"{base[1]}__d{n}", tok)
             raise ParseError("derivada de una función sin definir")
         if kind == "frac":
             _, num, den = tok[1]
-            value = sub_expr(num, self.glossary) / sub_expr(den, self.glossary)
+            value = self.sub(num) / self.sub(den)
             return self._apply_scripts(value, tok)
         if kind == "sqrt":
-            return self._apply_scripts(sp.sqrt(sub_expr(tok[1][1], self.glossary)), tok)
+            return self._apply_scripts(sp.sqrt(self.sub(tok[1][1])), tok)
         if kind == "accent":
             return self._apply_scripts(self._symbol(accent_token(tok)), tok)
         if kind == "root":
-            index = sub_expr(tok[1][1], self.glossary)
-            radicand = sub_expr(tok[1][2], self.glossary)
+            index = self.sub(tok[1][1])
+            radicand = self.sub(tok[1][2])
             # ∛-8 = -2 (la raíz real), como en clase
             if index.is_integer and index.is_odd:
                 value = sp.real_root(radicand, index)
@@ -320,7 +344,7 @@ class _Parser:
             arg = self.atom() if self.is_sym(self.peek(), "(") else self._bare_argument()
             if v == r"\log" and tok[3] is not None:
                 # log₂(8): la base va de subíndice
-                value = sp.log(arg, sub_expr(tok[3], self.glossary))
+                value = sp.log(arg, self.sub(tok[3]))
             else:
                 value = FUNCS[v](arg)
             return self._apply_scripts(value, tok)
@@ -332,6 +356,8 @@ class _Parser:
             return self._limit(tok)
         if v == r"\infty":
             return sp.oo
+        if v in self.funciones and tok[2] is None and tok[3] is None and self.is_sym(self.peek(), "("):
+            return self._llamada(v, tok)
         if v in ("f", "g", "h", "F", "G") and v not in self.glossary and tok[3] is None and self.is_sym(self.peek(), "("):
             raise ParseError("función sin definir")
         return self._apply_scripts(self._symbol(tok), tok)
@@ -358,13 +384,13 @@ class _Parser:
             return self.glossary[name]
         if name == "pi":
             return sp.pi
-        if name == "e":
+        if name == "e" and "e" not in self.conocidas:
             return sp.E
         return sp.Symbol(name)
 
     def _integral(self, tok):
-        lower = sub_expr(tok[3], self.glossary) if tok[3] is not None else None
-        upper = sub_expr(tok[2], self.glossary) if tok[2] is not None else None
+        lower = self.sub(tok[3]) if tok[3] is not None else None
+        upper = self.sub(tok[2]) if tok[2] is not None else None
         # el integrando llega hasta "d" seguido de una variable
         start = self.i
         j = start
@@ -372,7 +398,7 @@ class _Parser:
             j += 1
         if j >= len(self.t) - 1:
             raise ParseError("integral sin diferencial")
-        integrand = _Parser(self.t[start:j], self.glossary).full()
+        integrand = self.hijo(self.t[start:j]).full()
         var = self._symbol(self.t[j + 1])
         self.i = j + 2
         if lower is None and upper is None:
@@ -388,8 +414,8 @@ class _Parser:
         if len(sub_t) < 3 or not self.is_sym(sub_t[1], "="):
             raise ParseError("sumatorio sin índice")
         var = self._symbol(sub_t[0])
-        lower = _Parser(sub_t[2:], self.glossary).full()
-        upper = sub_expr(tok[2], self.glossary)
+        lower = self.hijo(sub_t[2:]).full()
+        upper = self.sub(tok[2])
         body = self.term()
         cls = sp.Sum if kind == r"\sum" else sp.Product
         return cls(body, (var, lower, upper))
@@ -401,7 +427,7 @@ class _Parser:
         if len(sub_t) < 3 or not self.is_sym(sub_t[1], r"\rightarrow"):
             raise ParseError("límite mal escrito")
         var = self._symbol(sub_t[0])
-        to = _Parser(sub_t[2:], self.glossary).full()
+        to = self.hijo(sub_t[2:]).full()
         return sp.Limit(self.term(), var, to)
 
     def full(self):
@@ -472,14 +498,21 @@ def _natural_log_names(result):
     return result
 
 
-def answer(tree, glossary=None, units=None):
+def _parse(tokens, glossary, vista):
+    """(expresión con lo que vale en el renglón, ¿cambió algo?). `vista`: ver `entorno.Vista`."""
+    if vista is None:
+        return _Parser(tokens, glossary).full(), False
+    return vista.resolver(_Parser(tokens, glossary, vista.funciones, vista.conocidas).full())
+
+
+def answer(tree, glossary=None, units=None, vista=None):
     """Resultado del "=" de una fila. Devuelve dict {"latex", "text", "kind"} o None.
 
     `glossary`: {nombre: valor sympy} (p. ej. constantes); `units`: {nombre: cantidad de pint} para calcular con
     unidades y comprobar dimensiones.
     """
     try:
-        return _natural_log_names(_answer(tree, glossary or {}, units or {}))
+        return _natural_log_names(_answer(tree, glossary or {}, units or {}, vista))
     except (ParseError, ValueError, TypeError, ZeroDivisionError, NotImplementedError, AttributeError):
         return None
     except Exception as e:  # SymPy puede lanzar errores variados con entradas raras
@@ -488,7 +521,7 @@ def answer(tree, glossary=None, units=None):
         raise
 
 
-def _answer(tree, glossary, units):
+def _answer(tree, glossary, units, vista):
     tokens = _tokens(tree)
     if not tokens or not (tokens[-1][0] == "sym" and tokens[-1][1] == "=" and tokens[-1][2] is None):
         return None
@@ -503,22 +536,22 @@ def _answer(tree, glossary, units):
         eq_parts = _split(statements[-2], RELATIONS)
         if len(eq_parts) != 2 or eq_parts[0][1] != "=":
             return None
-        lhs = _Parser(eq_parts[0][0], glossary).full()
-        rhs = _Parser(eq_parts[1][0], glossary).full()
+        lhs = _parse(eq_parts[0][0], glossary, vista)[0]
+        rhs = _parse(eq_parts[1][0], glossary, vista)[0]
         return _solve(sp.Eq(lhs, rhs), var)
     parts = _split(last, RELATIONS)
     if len(parts) == 2 and parts[0][1] == "=":
         # "ecuación =": se despeja la única incógnita
-        lhs = _Parser(parts[0][0], glossary).full()
-        rhs = _Parser(parts[1][0], glossary).full()
+        lhs = _parse(parts[0][0], glossary, vista)[0]
+        rhs = _parse(parts[1][0], glossary, vista)[0]
         free = (lhs - rhs).free_symbols
         if len(free) != 1:
             return None
         return _solve(sp.Eq(lhs, rhs), free.pop())
     if len(parts) != 1:
         return None
-    expr = _Parser(last, glossary).full()
-    if units:
+    expr, cambiado = _parse(last, glossary, vista)
+    if units and any(s.name in units for s in expr.free_symbols):
         return _with_units(expr, units)
     has_calculus = expr.has(sp.Derivative, sp.Integral, sp.Sum, sp.Product, sp.Limit)
     value = expr.doit() if has_calculus else expr
@@ -537,7 +570,8 @@ def _answer(tree, glossary, units):
         return {"latex": sp.latex(sp.simplify(value)), "text": str(sp.simplify(value)), "kind": "calculus"}
     # SymPy ya agrupa términos al construir la expresión (2a+3a -> 5a), así que se compara con lo escrito
     simple = sp.simplify(expr)
-    if len(visible_tokens(sp.latex(simple))) < len(_written_symbols(last)):
+    # si las definiciones de la página cambiaron algo, se muestra siempre; si no, solo si es más corto
+    if cambiado or len(visible_tokens(sp.latex(simple))) < len(_written_symbols(last)):
         return {"latex": sp.latex(simple), "text": str(simple), "kind": "simplified"}
     return None
 
