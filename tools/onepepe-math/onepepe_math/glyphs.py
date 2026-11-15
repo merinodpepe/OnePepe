@@ -130,6 +130,10 @@ _FLAT = {"-", "=", r"\sim", r"\approx", r"\equiv", r"\rightarrow", r"\leftarrow"
          r"\overline", r"\hat", r"\tilde", r"\rightleftharpoons"}
 
 
+# símbolos altos que, aunque el glifo sea ancho, se escriben altos y estrechos: manda el alto
+_TALL = {r"\int", r"\sum", r"\prod"}
+
+
 def place_glyph(latex, target_box):
     """Polilíneas del símbolo limpio colocadas en `target_box` = (x0, y0, x1, y1) del símbolo escrito a mano.
 
@@ -147,7 +151,7 @@ def place_glyph(latex, target_box):
         scale = tw / gw
         # que no crezca en altura más de lo razonable
         scale = min(scale, 1.5 * max(th, 0.3 * tw) / gh)
-    elif gw < 0.2 * gh:
+    elif latex in _TALL or gw < 0.2 * gh:
         # símbolos muy estrechos (1, l, |, paréntesis): por la altura
         scale = th / gh
     else:
