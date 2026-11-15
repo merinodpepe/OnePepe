@@ -7,6 +7,21 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.9 (2026-11-15) — cierre: T10 y T13
+
+- **«=» y «Variables» encendidos por defecto** (A4): las sondas dan 0 resultados erróneos de 24. «Revisar pasos» sigue
+  apagado.
+- **Contexto de pares en el orden del árbol** (T10): corte y etiqueta de 69,7 a 70,2 % (P = 0,87). Encendido
+  (`orden_arbol = 1`).
+- **Búsqueda de lecturas alternativas** (T10): incluida pero apagada (`mejor_lectura = 0`). Renglón perfecto de 38,0
+  a 38,9 % (un renglón, empate). Aceptación no cumplida.
+- **`promover_cierre.py`** (T13): instala el modelo y el almacén nuevos con copia previa. No se ha ejecutado sobre tus
+  datos reales; las órdenes están en el informe.
+- **Informe del cierre** ([`INFORME-CIERRE.md`](INFORME-CIERRE.md)) y guía para reentrenar
+  ([`REENTRENAR.md`](../planes/REENTRENAR.md)).
+- Constantes del kNN otra vez `TAU = 0,1`, `D_MAX = 0,3`, `LAMBDA_MAX = 0,6`.
+- Sin cambio de formato .rnote.
+
 ## 1.8 (2026-11-15) — cierre de las oleadas O4–O6
 
 - **Confianza calibrada** (T8): regla de sustitución con acuerdo entre la red y el kNN, y umbral calibrado

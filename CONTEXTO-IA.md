@@ -840,12 +840,19 @@ programa nunca se cae.
 | `symbols.py` | vocabulario, alias, categorías, `same_shape` |
 | `latex_tokens.py`, `inkml.py`, `synth.py` | utilidades y fórmulas sintéticas para medir |
 | `recognizer.py` | une todo (orden abajo) |
-| `dots.py` | i/j: une el punto cortado aparte con su palo (medido: i 141 → 147 de 358) |
+| `reparar.py` | antes `dots.py`: une los trazos sueltos tras el corte (i/j: el punto con su palo; medido: i 141 → 147 de 358) |
+| `alinear.py` | alineado ordenado y reparto examen/validación/pliegues |
+| `entorno.py` | definiciones de la página: valores, alias, funciones, variables ligadas |
+| `lexico.py` | números, corrección de letras dentro de un número, derivadas de Leibniz |
+| `haz.py` | N mejores lecturas y gramática (apagado) |
+| `confianza.py` | cota de Wilson y `confianza.json` |
 | `nombres.py` | diccionario de símbolos (nombre es/en, LaTeX, carácter, grupo, atajo), `resolve`, `search` |
 | `pagina.py` | orden `page`: «=», «?», variables, revisión de pasos (errores típicos), formas de fracción; `latex_rows` |
 | `grafica.py` | orden `plot`: y = f(x) con numpy, cortes en asíntotas, ejes y números con glifos Hershey |
 | `entreno.py` | modo entreno: sets (`entrenos/*.json`), sesión nueva, dibujar con matplotlib, importar con el corte forzado (renglones guía de `line_height`); `expected_symbols` (también lo usa `importar_mi_letra.py`) |
-| `server.py` | el servidor del protocolo |
+| `server.py` | el servidor del protocolo; orden nueva `report_failure` (escribe `fallos.jsonl`) |
+
+Scripts del cierre en `tools/onepepe-math/`: `medir.py`, `reimportar_entrenos.py`, `entrenar_pliegues.py`, `elegir_corte.py`, `calibrar_umbral.py`, `extraer_simbolos.py`, `promover_cierre.py`.
 
 **`classifier.py`:**
 - La red tiene una versión: `npz["version"]` o el sha1 del archivo.

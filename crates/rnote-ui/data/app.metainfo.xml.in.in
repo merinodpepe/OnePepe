@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.9.0" date="2026-11-15">
+      <description>
+        <p>Math: "=" and "Variables" enabled by default; pair context read in formula-tree order.</p>
+      </description>
+    </release>
     <release version="1.8.0" date="2026-11-15">
       <description>
         <p>Math: classifier v2 (order-independent direction features, 16x16 grid, line context, more generic training data), calibrated confidence and uncertain results shown dimmed with a question mark.</p>
