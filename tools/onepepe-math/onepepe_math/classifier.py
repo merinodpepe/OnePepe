@@ -31,6 +31,8 @@ class SymbolClassifier:
             with open(path, "rb") as f:
                 self.version = hashlib.sha1(f.read()).hexdigest()[:12]
         self.classes = [str(c) for c in data["classes"]]
+        # temperatura de calibración (train_classifier.py): 1.0 si el modelo es antiguo
+        self.temperature = float(data["temperature"]) if "temperature" in data else 1.0
         self.mean = data["mean"]
         self.std = data["std"]
         n = int(data["n_layers"])
@@ -68,7 +70,7 @@ class SymbolClassifier:
             if i < len(self.weights) - 1:
                 x = np.maximum(x, 0.0)
                 embedding = x
-        x = np.where(self.mask, x, -np.inf)
+        x = np.where(self.mask, x / self.temperature, -np.inf)
         x = x - x.max()
         e = np.exp(x)
         return e / e.sum(), embedding
@@ -79,7 +81,7 @@ class SymbolClassifier:
             x = x @ w + b
             if i < len(self.weights) - 1:
                 x = np.maximum(x, 0.0)
-        x = np.where(self.mask, x, -np.inf)
+        x = np.where(self.mask, x / self.temperature, -np.inf)
         x = x - x.max()
         e = np.exp(x)
         return e / e.sum()
