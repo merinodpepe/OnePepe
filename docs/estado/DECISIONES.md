@@ -567,3 +567,10 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - Con «Revisar pasos», un renglón con marca de error no enseña el despeje.
 - Sin comprobar con lápiz: si el renglón acaba en «=», la marca del despeje y la del resultado comparten sitio y pueden solaparse.
 - Tests: 224 de Python (los dos nuevos se vieron fallar antes), 29 sondas con 0 erróneas.
+
+## 1.10.3 (2026-11-15): tamaño del símbolo limpio y set «refuerzo»
+
+- Fallo visto por el usuario con el lápiz: la ∫ limpia salía más pequeña que la escrita. Causa: `glyphs.place_glyph` escalaba ∫, ∑ y ∏ por el ancho de la caja. Ahora van por el alto (como 1, l, | y paréntesis). Medido: alto del símbolo limpio 50 / 40 / 36 % → 100 %. Sin comprobar con lápiz: una ∑ escrita muy estrecha saldrá más ancha que el trazo.
+- Set «refuerzo»: 80 expresiones y no 200 (decisión de Fable: al usuario le quedan 285 de los otros dos). 61 `expr`, 12 `steps`, 7 `symbols`; 15 al examen. Las 27 clases con pocos ejemplos ajenos aparecen al menos 2 veces. Algunas expresiones valen para escribir pero no tienen sentido matemático estricto.
+- PENDIENTE: `examen.json` se congeló antes de existir este set; al reentrenar hay que añadir sus 15 ids (apuntado en `REENTRENAR.md`).
+- Tests: 227 de Python, 29 sondas con 0 erróneas.

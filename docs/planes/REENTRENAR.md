@@ -6,7 +6,9 @@ qué hacer ese día.
 
 ## 1. Lo que haces tú antes
 
-1. Escribe los entrenos que falten: Matemáticas → Abrir entreno (los dos sets, «General» y «Tus asignaturas»).
+1. Escribe los entrenos que falten. Empieza por el set corto **«refuerzo»** (80 expresiones; Matemáticas → Nuevo
+   entreno → refuerzo): está hecho con lo que más falla hoy (fracciones, números, símbolos de dos rayas). Después,
+   los dos sets de 200 («General» y «Tus asignaturas»; Matemáticas → Abrir entreno).
 2. No hace falta pulsar «Usar para entrenar» ni «Reentrenar»: el paso 2 lo reimporta todo desde los archivos
    `*.entreno.json` de `~/Documentos/OnePepe entrenos`.
 3. Cierra OnePepe antes de empezar el paso 2.
@@ -25,7 +27,9 @@ Haz esto, en la copia de trabajo (~/.local/share/onepepe/cierre-trabajo), sin to
 2. Cuenta cuántas expresiones hay escritas ahora en ~/Documentos/OnePepe entrenos y cuántas son del examen.
 3. Guarda las medidas de hoy como «antes»: las de docs/estado/INFORME-CIERRE.md (archivos final-*.json en
    cierre-trabajo/medidas/).
-4. Sigue los pasos de la sección 3 de REENTRENAR.md. Antes de ejecutar cada orden, comprueba en el código que hace lo
+4. El set «refuerzo» se añadió después de congelar el examen: comprueba que sus 15 ids de examen están en
+   examen.json (si no, añádelos con la regla de M0.4 sin tocar los que ya hay) y que no entran en el entrenamiento.
+   Después sigue los pasos de la sección 3 de REENTRENAR.md. Antes de ejecutar cada orden, comprueba en el código que hace lo
    que dice el documento (sobre todo cómo entran en la medida las expresiones del examen escritas después del cierre).
 5. Compara antes y después con medir.py --comparar, en el examen y en la medida cruzada. Las expresiones nuevas del
    examen no existían en el «antes»: dame la comparación sobre las 22 expresiones antiguas y, aparte, las cifras del

@@ -7,6 +7,16 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.10.3 (2026-11-15) — la integral no encoge y set de entreno «Refuerzo»
+
+- **∫, ∑ y ∏ limpios con el alto de lo escrito:** antes se escalaban por el ancho y salían al 36–50 % del alto.
+- **Set de entreno nuevo, «refuerzo»** (80 expresiones, `entrenos/refuerzo.json`), dirigido a lo que la medida dice
+  que falla: fracciones con rayas largas (21), números de varias cifras junto a letras parecidas (14), símbolos de
+  dos rayas (13), símbolos con pocos ejemplos de otras manos (16) y las funciones nuevas (16). 15 van al examen.
+  Aparece al elegir set en «Nuevo entreno».
+- Apuntado como pendiente: mejorar la vista previa para móvil y tablet.
+- Solo cambia el programa auxiliar: no hace falta recompilar la app.
+
 ## 1.10.2 (2026-11-15) — el despeje se ve en morado
 
 - Una ecuación que despeja enseña al lado «x = 3», en morado, como las definiciones que enseñan su valor
