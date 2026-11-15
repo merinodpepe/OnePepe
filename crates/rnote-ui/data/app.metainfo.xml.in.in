@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.6.0" date="2026-11-15">
+      <description>
+        <p>Math: correct evaluation (functions, derivatives, bound variables, units), page environment, failure capture button, leak-free training.</p>
+      </description>
+    </release>
     <release version="1.5.0" date="2026-11-15">
       <description>
         <p>Math: internal measurement bench for the math mode (developer tool; the app itself does not change).</p>

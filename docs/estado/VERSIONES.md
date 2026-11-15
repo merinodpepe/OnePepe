@@ -7,6 +7,19 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.6 (2026-11-15) — cierre de la oleada O2
+
+- **Evaluación correcta** (T3): las 8 sondas con resultado erróneo pasan a 0. `(x+1)+3=` da `x + 4`; segunda
+  derivada; sumatorio con límites; `e` es la constante salvo que la página la defina; unidades en N.
+- **Entorno** (T4): funciones `f(x)`, alias, derivadas con variables, variables ligadas, definiciones que enseñan su
+  valor, caché. 23 sondas, 0 erróneas; página de 40 renglones en 0,12 s.
+- **Captura de fallos** (T11): botón «Esto está mal…» en la página; registra el fallo en `fallos.jsonl`.
+- **Reimportar entrenos** (T1): `reimportar_entrenos.py`, con alineado ordenado y control de calidad. Los símbolos
+  con renglón en revisión no se sacan.
+- **Entrenamiento sin fugas** (T2): el reparto se hace antes de deformar los trazos, la parada es real y la
+  temperatura está controlada.
+- Sin cambio de formato `.rnote`.
+
 ## 1.5 (2026-11-15) — banco de medida
 
 - Banco de medida (T0 del cierre): `medir.py`, `onepepe_math/alinear.py` (alineado ordenado con variantes de orden),

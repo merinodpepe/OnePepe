@@ -474,3 +474,28 @@ molesta, ya le hago referencia en mi md». Opciones elegidas: «main = OnePepe»
 - SUPUESTO: `docs/archivo/` (dos `*-viejo.md` del punto de guardado local) se queda fuera de git; el enlace de `docs/README.md` a esa carpeta no funciona en GitHub. Pendiente de que el usuario decida.
 - Entorno: Rust se comprueba dentro del SDK de Flatpak con `~/.local/share/onepepe/cierre-trabajo/rust.sh engine|ui|po` (el sistema no compila nativo: glib 2.80). Base: 23 tests del motor con filtro `math`, `cargo check -p rnote` ok, `msgfmt -c` ok.
 - Reparto de agentes en esta ejecución (petición del usuario del 2026-11-15): Fable 5.2 orquesta, Sonnet programa, Haiku prueba y documenta.
+
+## Cierre, oleada O2 (2026-11-15): T1, T2, T3, T4 y T11
+
+- **T1 reimportar entrenos:** entran 917 símbolos (1472 trozos), 6 a revisión, 3 expresiones fallidas, 22 del examen
+  saltadas. SUPUESTO: `revision.jsonl` se escribe junto al almacén y se borra al reimportar; un renglón con símbolos
+  en revisión cuenta como importado y sus trozos no se sacan.
+- **T2 entrenamiento sin fugas:** corte y etiqueta 69,1 → 68,7 %; sustituciones erróneas 15,5 → 9,8 % (23 → 9);
+  MathWriting reservado top-1 43,4 → 46,0 %. T = 1,321, W = 10, 2 épocas. Aceptación «en empate» (P = 0,44):
+  fusionado porque no empeora (regla §4.5 del manual) y bajan las sustituciones erróneas.
+  SUPUESTO: `partial_fit` no sube `n_iter_`, pero sí hace una pasada por llamada (test adaptado).
+  SUPUESTO: `--personal-weight` por defecto 30; `auto` prueba 10, 30 y 90.
+- **Parada del entrenamiento:** se queda como está, sin mínimo de épocas ni suavizado (decidido con permiso del
+  usuario). La pérdida de MathWriting baja hasta la época 5 y luego sube; la de tu letra sube desde la época 2.
+  Obligar a más épocas ganaría 0,03 en letra general y perdería 0,10 en la tuya. El 46 % en MathWriting no es falta
+  de épocas: es el techo de los rasgos y de los datos genéricos, que arregla T7.
+- **T3 evaluación correcta:** sondas erróneas 8 → 0. SUPUESTO: un hueco mayor de 0,8 alturas entre cifras da «?»;
+  `e` es la constante salvo que la página la defina; la ficha de la prima es
+  `["prime", ("prime", base, n), None, None]`.
+- **T4 entorno:** 23 sondas, 0 erróneas; página de 40 renglones 0,12 s (0,17–0,20 s con carga). SUPUESTO: un ciclo
+  de definiciones da «?»; `f=3` y luego `f(2)` da «?»; «Revisar pasos» no compara dos definiciones seguidas de
+  nombres distintos; las unidades solo se aplican si la expresión tiene algún símbolo con unidad.
+- **T11 captura de fallos:** SUPUESTO: `report_failure` responde con el id del fallo en `failure`; `times` va `null`
+  si el símbolo ya se sustituyó por trazos limpios; `medir.py --fallos` acepta `expected` como LaTeX. La pantalla de
+  ejemplos queda fuera (pendiente del usuario).
+- **Pendiente al cerrar O2:** modelos de pliegue y medida cruzada (en marcha, rama `fix/medida-cruzada`).
