@@ -48,6 +48,10 @@ class SegmentParams:
     # cifras mal leídas dentro de un número (lexico.corregir_entidades): 1 = activa; desconfianza de partida theta
     entidades: float = 1.0
     theta: float = 2.5
+    # las N mejores lecturas con gramática (haz.py, M10): 1 = activa; premio de G; orden del árbol en el contexto
+    mejor_lectura: float = 0.0  # T10: empate (P 0,74) en la cruzada: apagada
+    premio: float = 3.0
+    orden_arbol: float = 1.0
 
     @classmethod
     def load(cls, path=DEFAULT_PARAMS_PATH):

@@ -54,8 +54,16 @@ class BigramModel:
         return math.log(self.bigram[i, j])
 
 
-def reading_order(symbols, boxes):
-    """Índices de los símbolos de izquierda a derecha (por el centro de su caja)."""
+def reading_order(symbols, boxes, arbol=False):
+    """Índices de los símbolos en orden de lectura. Con `arbol`, el del LaTeX (M10.3: raya, numerador, denominador...)
+    según `layout.parse_with_order` con las primeras candidatas; si falla, de izquierda a derecha (centro de la caja)."""
+    if arbol and symbols:
+        try:
+            from .layout import Sym, parse_with_order
+
+            return parse_with_order([Sym(c[0][0], tuple(b)) for c, b in zip(symbols, boxes)])[1]
+        except Exception:  # noqa: BLE001 -- shortcut: cualquier fallo del diseño vuelve al orden de siempre
+            pass
     return sorted(range(len(symbols)), key=lambda i: (boxes[i][0] + boxes[i][2]) / 2)
 
 

@@ -7,6 +7,7 @@ from .personal import D_MAX
 from .context import apply_glossary, reading_order, share_within_groups, shape_groups, viterbi
 from .evaluate import answer
 from .layout import Sym, bar_role, parse, to_latex
+from .haz import mejor_lectura
 from .lexico import corregir_entidades
 from .symbols import same_shape
 from .reparar import fix_dotted_letters, reparar
@@ -88,7 +89,7 @@ def recognize(
     # contexto: todos los símbolos de la línea en orden de lectura (los ya conocidos, fijos)
     all_c = cand_lists + [[(k["latex"], 1.0)] for k in known]
     all_b = boxes + [tuple(k["box"]) for k in known]
-    order = reading_order(all_c, all_b)
+    order = reading_order(all_c, all_b, segment_params.orden_arbol > 0)
     lm = getattr(classifier, "lm", None)
     if lm is not None and all_c:
         ranked = viterbi([all_c[i] for i in order], lm)
@@ -97,6 +98,9 @@ def recognize(
     if segment_params.entidades > 0 and all_c:
         all_c = corregir_entidades(all_c, all_b, sorted(b[3] - b[1] for b in all_b)[len(all_b) // 2],
                                    range(len(syms), len(all_c)), segment_params.theta)
+    if segment_params.mejor_lectura > 0 and all_c:  # M10: la lectura entera mejor; la elegida pasa a ser la primera
+        sel = mejor_lectura(all_c, all_b, range(len(syms), len(all_c)), segment_params.premio)
+        all_c = [c if s == 0 else [c[s]] + c[:s] + c[s + 1 :] for c, s in zip(all_c, sel)]
     cand_lists = all_c[: len(syms)]
 
     umbral = max(threshold, umbral_min)
