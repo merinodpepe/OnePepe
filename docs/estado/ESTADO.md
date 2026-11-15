@@ -165,6 +165,7 @@ el modo variables y el «=» funcionan. Falta probar el resto (`CAMBIOS-ONEPEPE.
 **Esfuerzo alto o necesita que decidas:**
 - Nombre interno OnePepe (identificador, migrar ajustes, instalar junto a Rnote).
 - Tinta a texto, tablas de texto, búsqueda global, corte en símbolos con varias hipótesis.
+- Vista previa para móvil y tablet: mejorarla (falta que digas cuál y qué falla; ver `PLAN-PENDIENTE.md`).
 
 **Depende de ti:**
 - Escribir el entreno (Matemáticas → Nuevo entreno → Tus asignaturas) y pulsar «Usar para entrenar» y «Reentrenar».

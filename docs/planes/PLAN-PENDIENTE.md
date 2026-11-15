@@ -290,6 +290,9 @@ Tus notas, tal cual las pediste, con lo que ya sé de cada una. **Nada de esto e
    (`layout.py`, y hay tests). Lo que falta es **comprobarlo con tu letra**: que la raya sea claramente más larga que
    los números, y que no se lea como «−» suelto. Queda: medirlo con tus ejercicios (punto 3) o con el set de entreno,
    que tiene muchas fracciones.
+9. **Vista previa para móvil y tablet: hay que mejorarla** (apuntado por el usuario el 2026-11-15). Sin detalle todavía:
+   falta que diga qué vista previa es (la de la página en la app, la de exportar, o cómo se ve en una pantalla pequeña)
+   y qué le falla. Esfuerzo: sin valorar.
 
 ## No hacer
 
