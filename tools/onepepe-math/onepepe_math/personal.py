@@ -26,11 +26,11 @@ DEFAULT_PATH = os.path.join(
     os.environ.get("ONEPEPE_DATA", os.path.expanduser("~/.local/share/onepepe")), "math", "correcciones.jsonl"
 )
 
-# Rejilla de T7b (M7.6) sobre el examen con la red v2: ver ESTADO/SUPUESTOS de T7b; antes 0,3 y 0,6.
+# Valores de M7.6 (la rejilla de T7b se midió sobre el examen: descartada).
 K = 5
 TAU = 0.1
-D_MAX = 0.2
-LAMBDA_MAX = 0.8
+D_MAX = 0.3
+LAMBDA_MAX = 0.6
 
 
 def _unit(e):
