@@ -29,14 +29,14 @@ class TestSet(unittest.TestCase):
     def sets(self):
         return [entreno.load_set(s["name"]) for s in entreno.list_sets()]
 
-    def test_two_hundred_with_unique_ids(self):
+    def test_sizes_with_unique_ids(self):
         names = [d["name"] for d in self.sets()]
-        self.assertIn("general-200", names)
-        self.assertIn("asignaturas-200", names)
+        for n in ("general-200", "asignaturas-200", "refuerzo"):
+            self.assertIn(n, names)
         all_ids = []
         for data in self.sets():
             items = data["items"]
-            self.assertEqual(len(items), 200, data["name"])
+            self.assertEqual(len(items), 80 if data["name"] == "refuerzo" else 200, data["name"])
             all_ids += [it["id"] for it in items]
             self.assertEqual({it["kind"] for it in items}, {"expr", "steps", "symbols"})
             self.assertTrue(all(len(it["lines"]) >= 2 for it in items if it["kind"] == "steps"))
@@ -63,6 +63,22 @@ class TestSet(unittest.TestCase):
         for data in self.sets():
             for it in data["items"]:
                 self.assertIsNotNone(entreno.render(tuple(it["lines"])), it["lines"])
+
+    def test_refuerzo_no_repite_y_cubre_clases_escasas(self):
+        import collections
+
+        sets = {d["name"]: d["items"] for d in self.sets()}
+        old = {tuple(it["lines"]) for n, items in sets.items() if n != "refuerzo" for it in items}
+        self.assertEqual([it["id"] for it in sets["refuerzo"] if tuple(it["lines"]) in old], [])
+        self.assertTrue(all(it["id"].startswith("r") for it in sets["refuerzo"]))
+        c = collections.Counter(s for it in sets["refuerzo"] for latex in it["lines"]
+                                for s in entreno.expected_symbols(latex))
+        escasas = ["<", ">", r"\div", r"\mp", "%", r"\Rightarrow", r"\Leftrightarrow", r"\cap", r"\cup", r"\top",
+                   r"\mathbb{E}", r"\mathbb{P}", r"\mathbb{R}", r"\rightleftharpoons", r"\neq", r"\propto", r"\sim",
+                   r"\circ", r"\leftarrow", r"\kappa", r"\Lambda", r"\Pi", r"\Psi", r"\Sigma", r"\Theta", ";",
+                   r"\epsilon"]  # \varepsilon se guarda como \epsilon
+        self.assertEqual({s: c[s] for s in escasas if c[s] < 2}, {})
+        self.assertGreaterEqual(sum(r"\lim" in latex for it in sets["refuerzo"] for latex in it["lines"]), 2)
 
     def test_listed(self):
         self.assertIn("general-200", [s["name"] for s in entreno.list_sets()])

@@ -1,0 +1,618 @@
+{
+ "name": "refuerzo",
+ "title": "Refuerzo: 80 expresiones",
+ "description": "Fracciones, números de varias cifras, símbolos de dos rayas, símbolos poco vistos y funciones nuevas. Escribe como en clase, con tu tamaño de letra normal.",
+ "items": [
+  {
+   "id": "r001",
+   "kind": "expr",
+   "lines": [
+    "f(3)="
+   ]
+  },
+  {
+   "id": "r002",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x+2}{x-2}"
+   ]
+  },
+  {
+   "id": "r003",
+   "kind": "expr",
+   "lines": [
+    "7\\equiv 1\\Leftrightarrow 6\\equiv 0"
+   ]
+  },
+  {
+   "id": "r004",
+   "kind": "steps",
+   "lines": [
+    "59q+12=71",
+    "59q=59",
+    "q=1"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r005",
+   "kind": "steps",
+   "lines": [
+    "f(x)=e^{-x}",
+    "f(0)="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r006",
+   "kind": "expr",
+   "lines": [
+    "p=15\\%\\quad a\\mp b\\quad x\\leftarrow x+\\varepsilon"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "r007",
+   "kind": "expr",
+   "lines": [
+    "126+98+205="
+   ]
+  },
+  {
+   "id": "r008",
+   "kind": "symbols",
+   "lines": [
+    ">\\quad >\\quad >\\quad >\\quad >\\quad >"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "r009",
+   "kind": "expr",
+   "lines": [
+    "\\frac{p-q}{p+q}"
+   ]
+  },
+  {
+   "id": "r010",
+   "kind": "expr",
+   "lines": [
+    "\\lim_{x\\to 0}\\frac{\\sin x}{x}=1"
+   ],
+   "hint": "Cálculo"
+  },
+  {
+   "id": "r011",
+   "kind": "expr",
+   "lines": [
+    "1,5z=3"
+   ]
+  },
+  {
+   "id": "r012",
+   "kind": "expr",
+   "lines": [
+    "\\Lambda=\\kappa\\Theta\\quad \\kappa=\\frac{k_1}{k_2}"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "r013",
+   "kind": "steps",
+   "lines": [
+    "13y+15t=240",
+    "13y=240-15t"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r014",
+   "kind": "expr",
+   "lines": [
+    "a;b;c\\quad T=37^\\circ\\quad A\\Rightarrow B"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "r015",
+   "kind": "expr",
+   "lines": [
+    "x=9/2=4y"
+   ]
+  },
+  {
+   "id": "r016",
+   "kind": "symbols",
+   "lines": [
+    "<\\quad <\\quad <\\quad <\\quad <\\quad <"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "r017",
+   "kind": "steps",
+   "lines": [
+    "x=\\frac{6}{4}",
+    "x=\\frac{3}{2}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r018",
+   "kind": "expr",
+   "lines": [
+    "e^{-2x}"
+   ]
+  },
+  {
+   "id": "r019",
+   "kind": "expr",
+   "lines": [
+    "-\\frac{5}{8}+\\frac{3}{8}="
+   ]
+  },
+  {
+   "id": "r020",
+   "kind": "expr",
+   "lines": [
+    "\\frac{25}{100}=25\\%"
+   ]
+  },
+  {
+   "id": "r021",
+   "kind": "expr",
+   "lines": [
+    "19a-16s"
+   ]
+  },
+  {
+   "id": "r022",
+   "kind": "expr",
+   "lines": [
+    "25x+10b=106"
+   ]
+  },
+  {
+   "id": "r023",
+   "kind": "expr",
+   "lines": [
+    "\\frac{4}{9}\\cdot\\frac{3}{2}\\cdot\\frac{5}{6}"
+   ]
+  },
+  {
+   "id": "r024",
+   "kind": "steps",
+   "lines": [
+    "25x+10b=106",
+    "25x=106-10b"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r025",
+   "kind": "expr",
+   "lines": [
+    "\\lim_{n\\to\\infty}\\mathbb{E}[X_n]=\\mu"
+   ],
+   "hint": "Cálculo"
+  },
+  {
+   "id": "r026",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a+b+c}{d+e}"
+   ]
+  },
+  {
+   "id": "r027",
+   "kind": "expr",
+   "lines": [
+    "a\\leq b\\leq c"
+   ]
+  },
+  {
+   "id": "r028",
+   "kind": "expr",
+   "lines": [
+    "12\\div 4=3"
+   ]
+  },
+  {
+   "id": "r029",
+   "kind": "expr",
+   "lines": [
+    "1,5z+59q=106"
+   ]
+  },
+  {
+   "id": "r030",
+   "kind": "steps",
+   "lines": [
+    "-\\frac{x+2}{3}=\\frac{1}{3}",
+    "x+2=-1",
+    "x=-3"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r031",
+   "kind": "expr",
+   "lines": [
+    "6!=720"
+   ]
+  },
+  {
+   "id": "r032",
+   "kind": "expr",
+   "lines": [
+    "106-59="
+   ]
+  },
+  {
+   "id": "r033",
+   "kind": "expr",
+   "lines": [
+    "4+5=x"
+   ]
+  },
+  {
+   "id": "r034",
+   "kind": "steps",
+   "lines": [
+    "f(x)=3x+1",
+    "f(3)="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r035",
+   "kind": "expr",
+   "lines": [
+    "dx/dt=v"
+   ]
+  },
+  {
+   "id": "r036",
+   "kind": "expr",
+   "lines": [
+    "x=1\\pm 2\\quad y=1\\mp 2"
+   ]
+  },
+  {
+   "id": "r037",
+   "kind": "steps",
+   "lines": [
+    "a=4",
+    "b=a+3",
+    "a\\cdot b="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r038",
+   "kind": "steps",
+   "lines": [
+    "x=9",
+    "2x+1="
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r039",
+   "kind": "expr",
+   "lines": [
+    "X\\sim N(\\mu,\\sigma^2)\\quad Y\\sim X"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "r040",
+   "kind": "steps",
+   "lines": [
+    "1,5z+59q=106",
+    "1,5z=106-59q"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r041",
+   "kind": "expr",
+   "lines": [
+    "m=70kg"
+   ]
+  },
+  {
+   "id": "r042",
+   "kind": "expr",
+   "lines": [
+    "0,25b+1,75=2"
+   ]
+  },
+  {
+   "id": "r043",
+   "kind": "steps",
+   "lines": [
+    "\\frac{1}{2}+\\frac{1}{3}",
+    "=\\frac{3}{6}+\\frac{2}{6}",
+    "=\\frac{5}{6}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r044",
+   "kind": "expr",
+   "lines": [
+    "\\sum_{i=1}^{n}x_i"
+   ]
+  },
+  {
+   "id": "r045",
+   "kind": "expr",
+   "lines": [
+    "\\Pi=\\frac{n}{N}\\quad \\Psi\\leftarrow\\Pi\\Theta\\quad \\Psi=\\Lambda\\Sigma"
+   ],
+   "hint": "Genética de poblaciones"
+  },
+  {
+   "id": "r046",
+   "kind": "expr",
+   "lines": [
+    "\\frac{2x+3y}{4x-5y}=\\frac{1}{2}"
+   ]
+  },
+  {
+   "id": "r047",
+   "kind": "expr",
+   "lines": [
+    "f'(x)=3x^2"
+   ]
+  },
+  {
+   "id": "r048",
+   "kind": "expr",
+   "lines": [
+    "\\mathbb{P}(A\\cup B)\\leq\\mathbb{P}(A\\cap B)+\\mathbb{P}(B)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "r049",
+   "kind": "expr",
+   "lines": [
+    "25\\cdot 4=100"
+   ]
+  },
+  {
+   "id": "r050",
+   "kind": "expr",
+   "lines": [
+    "x^2=4\\Leftrightarrow x=\\pm 2"
+   ],
+   "hint": "Cálculo"
+  },
+  {
+   "id": "r051",
+   "kind": "expr",
+   "lines": [
+    "x=2\\Rightarrow x^2=4\\neq 5"
+   ],
+   "hint": "Cálculo"
+  },
+  {
+   "id": "r052",
+   "kind": "expr",
+   "lines": [
+    "\\Sigma=\\frac{1}{n}X^\\top X\\quad \\Sigma=\\Lambda^\\top\\Lambda"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "r053",
+   "kind": "symbols",
+   "lines": [
+    "\\pm\\quad \\pm\\quad \\pm\\quad \\pm\\quad \\pm\\quad \\pm"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "r054",
+   "kind": "expr",
+   "lines": [
+    "E+S\\rightleftharpoons ES\\quad A\\rightleftharpoons B"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "r055",
+   "kind": "symbols",
+   "lines": [
+    "\\div\\quad \\div\\quad \\div\\quad \\div\\quad \\div\\quad \\div"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "r056",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{x}+\\frac{1}{y}=\\frac{x+y}{xy}"
+   ]
+  },
+  {
+   "id": "r057",
+   "kind": "expr",
+   "lines": [
+    "\\int_a^b f(x)dx"
+   ]
+  },
+  {
+   "id": "r058",
+   "kind": "symbols",
+   "lines": [
+    "\\equiv\\quad \\equiv\\quad \\equiv\\quad \\equiv\\quad \\equiv\\quad \\equiv"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "r059",
+   "kind": "expr",
+   "lines": [
+    "\\mathbb{E}[X]=\\mu\\quad \\varepsilon>0"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "r060",
+   "kind": "expr",
+   "lines": [
+    "-\\frac{3}{4}"
+   ]
+  },
+  {
+   "id": "r061",
+   "kind": "expr",
+   "lines": [
+    "\\frac{d^2y}{dx^2}=-y"
+   ]
+  },
+  {
+   "id": "r062",
+   "kind": "symbols",
+   "lines": [
+    "=\\quad =\\quad =\\quad =\\quad =\\quad ="
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  },
+  {
+   "id": "r063",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x^2+1}{x^2-1}"
+   ]
+  },
+  {
+   "id": "r064",
+   "kind": "expr",
+   "lines": [
+    "100,5-37,25="
+   ]
+  },
+  {
+   "id": "r065",
+   "kind": "expr",
+   "lines": [
+    "y=\\frac{x_1+x_2+x_3}{3}"
+   ]
+  },
+  {
+   "id": "r066",
+   "kind": "expr",
+   "lines": [
+    "f:\\mathbb{R}\\to\\mathbb{R}"
+   ],
+   "hint": "Cálculo"
+  },
+  {
+   "id": "r067",
+   "kind": "expr",
+   "lines": [
+    "F\\propto\\frac{1}{r^2}\\quad y\\propto x"
+   ],
+   "hint": "Biofísica"
+  },
+  {
+   "id": "r068",
+   "kind": "expr",
+   "lines": [
+    "1-\\frac{2}{5}"
+   ]
+  },
+  {
+   "id": "r069",
+   "kind": "expr",
+   "lines": [
+    "x=-\\frac{b}{2a}"
+   ]
+  },
+  {
+   "id": "r070",
+   "kind": "expr",
+   "lines": [
+    "2,25z-10b"
+   ]
+  },
+  {
+   "id": "r071",
+   "kind": "expr",
+   "lines": [
+    "f(x)=3x-2"
+   ]
+  },
+  {
+   "id": "r072",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a}{b}\\cdot\\frac{c}{d}=\\frac{ac}{bd}"
+   ]
+  },
+  {
+   "id": "r073",
+   "kind": "expr",
+   "lines": [
+    "\\pi\\approx 3,14"
+   ]
+  },
+  {
+   "id": "r074",
+   "kind": "expr",
+   "lines": [
+    "\\alpha=\\frac{\\pi}{3}=60^\\circ"
+   ]
+  },
+  {
+   "id": "r075",
+   "kind": "expr",
+   "lines": [
+    "\\frac{dx}{dt}=-kx"
+   ]
+  },
+  {
+   "id": "r076",
+   "kind": "expr",
+   "lines": [
+    "\\frac{n(n+1)}{2}"
+   ]
+  },
+  {
+   "id": "r077",
+   "kind": "expr",
+   "lines": [
+    "\\frac{12}{5}-\\frac{7}{10}"
+   ]
+  },
+  {
+   "id": "r078",
+   "kind": "expr",
+   "lines": [
+    "\\mathbb{P}(A\\cap B)\\neq\\mathbb{P}(A\\cup B)"
+   ],
+   "hint": "Aprendizaje estadístico"
+  },
+  {
+   "id": "r079",
+   "kind": "steps",
+   "lines": [
+    "\\frac{3x-9}{6}",
+    "=\\frac{x-3}{2}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "r080",
+   "kind": "symbols",
+   "lines": [
+    "\\mp\\quad \\mp\\quad \\mp\\quad \\mp\\quad \\mp\\quad \\mp"
+   ],
+   "hint": "El mismo símbolo seis veces, separados"
+  }
+ ]
+}
