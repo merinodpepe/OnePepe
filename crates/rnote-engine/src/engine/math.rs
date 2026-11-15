@@ -1792,7 +1792,7 @@ impl Engine {
             .filter(|o| o.keys.is_empty() || self.math_keys_alive(&o.keys))
             .cloned()
             .collect::<Vec<_>>();
-        if !self.math.mode && overlays.is_empty() {
+        if !self.math.mode && overlays.is_empty() && self.math.symbols.is_empty() {
             return Ok(());
         }
         let size = self.camera.size();
@@ -1805,6 +1805,17 @@ impl Engine {
         }
         piet_cx.transform(self.camera.transform().to_kurbo());
         draw_math_overlays(&mut piet_cx, &overlays, self.math.animate)?;
+        let threshold = self.math_options().threshold;
+        let doubts = self
+            .math
+            .symbols
+            .iter()
+            // 1.0 is what was chosen by hand (or an old file without the field)
+            .filter(|s| needs_doubt_mark(s.confidence, threshold, s.confidence >= 1.0))
+            .filter(|s| self.math_keys_alive(&s.keys))
+            .map(|s| s.bounds)
+            .collect::<Vec<_>>();
+        draw_doubt_marks(&mut piet_cx, &doubts)?;
         piet_cx.finish().map_err(|e| anyhow::anyhow!("{e:?}"))?;
         snapshot.restore();
         Ok(())
@@ -1823,13 +1834,53 @@ pub fn draw_math_mode_border(
     Ok(())
 }
 
+/// Margin (px) of the pill around the text, and its corner radius.
+const PILL_MARGIN: f64 = 4.0;
+const PILL_RADIUS: f64 = 6.0;
+
+/// The pill behind a result: the box of the text grown by the margin.
+pub fn pill_rect(text: kurbo::Rect) -> kurbo::RoundedRect {
+    kurbo::RoundedRect::from_rect(text.inflate(PILL_MARGIN, PILL_MARGIN), PILL_RADIUS)
+}
+
+/// Alpha (0-255) of the pill: very faint (about 0.12), fainter when not sure, and it fades with the text.
+/// shortcut: the engine does not know the dark theme, so the same alpha is used on dark canvases.
+pub fn pill_alpha8(sure: bool, fade_alpha: f64) -> u8 {
+    ((if sure { 30.0 } else { 18.0 }) * fade_alpha).round() as u8
+}
+
+/// A dotted underline under the symbols read with low confidence, to tell which ones to check.
+pub fn needs_doubt_mark(confidence: f64, threshold: f64, corrected: bool) -> bool {
+    !corrected && confidence < threshold
+}
+
+/// Dotted lines under the boxes of the doubtful symbols, in document coordinates (screen only, never exported).
+pub fn draw_doubt_marks(
+    piet_cx: &mut impl piet::RenderContext,
+    boxes: &[Aabb],
+) -> anyhow::Result<()> {
+    let style = piet::StrokeStyle::new()
+        .line_cap(piet::LineCap::Round)
+        .dash_pattern(&[0.1, 4.0]);
+    for b in boxes {
+        let y = b.maxs.y + 3.0;
+        piet_cx.stroke_styled(
+            kurbo::Line::new((b.mins.x, y), (b.maxs.x, y)),
+            &rnote_compose::color::ONEPEPE_BRAND.with_a8(200),
+            2.0,
+            &style,
+        );
+    }
+    Ok(())
+}
+
 /// The results of "=", in gray, in document coordinates.
 pub fn draw_math_overlays(
     piet_cx: &mut impl piet::RenderContext,
     overlays: &[MathOverlay],
     animate: bool,
 ) -> anyhow::Result<()> {
-    use piet::{Text, TextLayoutBuilder};
+    use piet::{Text, TextLayout, TextLayoutBuilder};
     use rnote_compose::color;
     for o in overlays {
         let alpha = overlay_alpha(
@@ -1857,10 +1908,19 @@ pub fn draw_math_overlays(
             .font(piet::FontFamily::SANS_SERIF, font_size)
             .build()
         {
-            piet_cx.draw_text(
-                &layout,
-                kurbo::Point::new(o.anchor.x, o.anchor.y - font_size * 0.6 + dy),
+            let pos = kurbo::Point::new(o.anchor.x, o.anchor.y - font_size * 0.6 + dy);
+            // the pill: the mark's own color, very faint, so it is not mistaken for handwriting
+            let pill_color = match o.kind.as_str() {
+                "variable" => color::ONEPEPE_BRAND,
+                "error" => color::GNOME_REDS[3],
+                _ => color::GNOME_DARKS[0],
+            };
+            let size = layout.size();
+            piet_cx.fill(
+                pill_rect(kurbo::Rect::from_origin_size(pos, size)),
+                &pill_color.with_a8(pill_alpha8(o.sure, alpha)),
             );
+            piet_cx.draw_text(&layout, pos);
         }
         // the LaTeX under the results (not under the "?", the variables or the explanations)
         if !matches!(o.kind.as_str(), "unknown" | "variable" | "error")
@@ -2488,6 +2548,30 @@ mod render_tests {
         assert!(mid > 0.0 && mid < 1.0);
         assert_eq!(overlay_alpha(120.0, true), 1.0);
         assert_eq!(overlay_alpha(500.0, true), 1.0);
+    }
+
+    #[test]
+    fn pill_is_the_text_box_plus_margin() {
+        let r = pill_rect(kurbo::Rect::new(10.0, 20.0, 50.0, 40.0));
+        let r = r.rect();
+        assert_eq!((r.x0, r.y0, r.x1, r.y1), (6.0, 16.0, 54.0, 44.0));
+    }
+
+    #[test]
+    fn pill_alpha_follows_overlay_alpha() {
+        assert_eq!(pill_alpha8(true, overlay_alpha(0.0, true)), 0);
+        assert_eq!(pill_alpha8(true, overlay_alpha(500.0, true)), 30);
+        let mid = pill_alpha8(true, overlay_alpha(60.0, true));
+        assert!(mid > 0 && mid < 30);
+        assert!(pill_alpha8(false, 1.0) < pill_alpha8(true, 1.0));
+    }
+
+    #[test]
+    fn doubt_mark_rule() {
+        assert!(needs_doubt_mark(0.5, 0.95, false));
+        assert!(!needs_doubt_mark(0.99, 0.95, false));
+        assert!(!needs_doubt_mark(0.5, 0.95, true));
+        assert!(!needs_doubt_mark(1.0, 0.95, false));
     }
 
     #[test]
