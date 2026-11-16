@@ -184,6 +184,12 @@ class TestIntegralesYDerivadas(unittest.TestCase):
         self.assertEqual(textos(r"\int dx x="), ["x**2/2 + C"])
         self.assertEqual(textos(r"\int_0^1 dx x^2="), ["1/3"])
 
+    def test_integral_grande_escrita_a_mano(self):
+        """∫ alta y ancha (con colas) y el integrando a media altura: la x no es un límite inferior (1.11.2)."""
+        fila = [(r"\int", [85, 28, 235, 268]), ("x", [197, 148, 225, 185]), ("2", [233, 138, 243, 152]),
+                ("d", [237, 148, 258, 184]), ("x", [262, 148, 283, 184]), ("=", [303, 152, 326, 168])]
+        self.assertEqual(textos(fila, variables=True), ["x**3/3 + C"])
+
     def test_integral_doble(self):
         self.assertEqual(textos(r"\int\int x y dx dy="), ["x**2*y**2/4 + C"])
         self.assertEqual(textos(r"\int_0^1\int_0^2 x y dx dy="), ["1"])

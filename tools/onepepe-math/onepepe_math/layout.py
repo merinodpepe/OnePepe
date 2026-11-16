@@ -430,9 +430,16 @@ def _parse_row(syms, typical):
                     break
                 i += 1
                 continue
-            if smaller and mid < base_mid - 0.25 * typical and s.box[3] < base_bot - 0.05 * typical:
+            # el signo ∫ es muy alto: sus límites están en su tercio de arriba o de abajo; lo que queda a media altura
+            # (el integrando, ∫ x² dx) sigue en la línea aunque su centro esté algo más bajo que el del signo
+            if base.label == r"\int":
+                sup_ok = s.box[3] <= base_top + 0.45 * base.h
+                sub_ok = s.box[1] >= base_bot - 0.45 * base.h
+            else:
+                sup_ok = sub_ok = True
+            if smaller and sup_ok and mid < base_mid - 0.25 * typical and s.box[3] < base_bot - 0.05 * typical:
                 sup.append(s)
-            elif smaller and mid > base_mid + 0.12 * typical and s.box[1] > base_top + 0.05 * typical:
+            elif smaller and sub_ok and mid > base_mid + 0.12 * typical and s.box[1] > base_top + 0.05 * typical:
                 sub.append(s)
             else:
                 break
