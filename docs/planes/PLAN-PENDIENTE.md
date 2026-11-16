@@ -301,6 +301,12 @@ Tus notas, tal cual las pediste, con lo que ya sé de cada una. **Nada de esto e
     nada en este caso y sale «?». Esfuerzo: sin valorar.
 12. **Funciones de varios parámetros (f(x,y))** (apuntado por el usuario el 2026-11-15). Hoy no define nada en este
     caso y sale «?». Esfuerzo: sin valorar.
+13. **Variables con nombre de varias letras (Nm, Fd…)** (apuntado por el usuario el 2026-11-16). Hoy `Nm=5` y
+    `Nm+1=` dan «?» porque se lee como N·m; solo funcionan letras sueltas o con subíndice (`N_m=5`, `N_m+1=` → 6).
+    Hay que decidir cuándo «Nm» es un nombre y cuándo un producto o unidades. Está en `entorno.py` (`definir`) y
+    `evaluate.py` (`_symbol`). Esfuerzo: sin valorar.
+14. **Integrales y derivadas que aún no se calculan** (2026-11-16): `F(3)` con `F(x)=∫f(x)dx`, `y'` sin función,
+    `∫ₐᵇ` con límites en letras. Esfuerzo: sin valorar.
 
 ## No hacer
 
