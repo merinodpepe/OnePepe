@@ -328,7 +328,7 @@ pub(crate) fn open_training(appwindow: &RnAppWindow) {
 }
 
 /// Height of each guide line of the box, in pixels: like a line of a page, so you write at your usual size.
-const LINE_HEIGHT: f64 = 130.0;
+const LINE_HEIGHT: f64 = 180.0;
 
 /// The widgets of the training window that change from one expression to the next. The window keeps them (in its
 /// close handler) while it is open; everything else only has weak references, so nothing is kept after closing.
@@ -353,7 +353,7 @@ fn open_window(appwindow: &RnAppWindow, state: State) {
     let window = adw::Window::builder()
         .title(gettext("Training"))
         .default_width(1100)
-        .default_height(760)
+        .default_height(900)
         .transient_for(appwindow)
         .build();
     let header = adw::HeaderBar::new();

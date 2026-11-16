@@ -36,7 +36,7 @@ class TestSet(unittest.TestCase):
         all_ids = []
         for data in self.sets():
             items = data["items"]
-            self.assertEqual(len(items), 80 if data["name"] == "refuerzo" else 200, data["name"])
+            self.assertEqual(len(items), {"refuerzo": 80, "dificiles": 90}.get(data["name"], 200), data["name"])
             all_ids += [it["id"] for it in items]
             self.assertEqual({it["kind"] for it in items}, {"expr", "steps", "symbols"})
             self.assertTrue(all(len(it["lines"]) >= 2 for it in items if it["kind"] == "steps"))
