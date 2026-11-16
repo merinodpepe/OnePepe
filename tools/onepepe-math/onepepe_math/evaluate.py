@@ -251,6 +251,9 @@ class _Parser:
                 operando = self.unary()
             elif f in self.conocidas:
                 operando = self._symbol(["sym", f, None, None])
+            elif f in self.funciones and len(vs) == 1:
+                # df/dx con f definida: la llamada f(x), que `Vista.resolver` sustituye por su cuerpo
+                operando = sp.Function(f)(self._symbol(["sym", vs[0][0], None, None]))
             else:
                 raise ParseError("derivada de una función sin definir")
             return sp.Derivative(operando, *[(self._symbol(["sym", v, None, None]), n) for v, n in vs])
@@ -334,24 +337,54 @@ class _Parser:
             return sp.E
         return sp.Symbol(name)
 
-    def _integral(self, tok):
+    def _limites(self, tok):
         lower = self.sub(tok[3]) if tok[3] is not None else None
         upper = self.sub(tok[2]) if tok[2] is not None else None
-        # el integrando llega hasta "d" seguido de una variable
-        start = self.i
-        j = start
-        while j < len(self.t) - 1 and not (self.is_sym(self.t[j], "d") and self.t[j + 1][0] == "sym"):
-            j += 1
-        if j >= len(self.t) - 1:
-            raise ParseError("integral sin diferencial")
-        integrand = self.hijo(self.t[start:j]).full()
-        var = self._symbol(self.t[j + 1])
-        self.i = j + 2
-        if lower is None and upper is None:
-            return sp.Integral(integrand, var)
-        if lower is None or upper is None:
+        if (lower is None) != (upper is None):
             raise ParseError("falta un límite de integración")
-        return sp.Integral(integrand, (var, lower, upper))
+        return lower, upper
+
+    def _diferencial(self):
+        """«d» seguida de una variable: la variable (y avanza), o None."""
+        if self.is_sym(self.peek(), "d") and self.peek(1) is not None and self.peek(1)[0] == "sym":
+            var = self._symbol(self.peek(1))
+            self.i += 2
+            return var
+        return None
+
+    def _integral(self, tok):
+        # ∫∫ f dx dy: varias integrales seguidas; la primera diferencial es la de la más interna
+        ints = [tok]
+        while self.is_sym(self.peek(), r"\int"):
+            ints.append(self.take())
+        lims = [self._limites(t) for t in ints]
+        start = self.i
+        vars_ = []
+        if self.is_sym(self.peek(), "d") and self.peek(1) is not None and self.peek(1)[0] == "sym":
+            # diferencial delante: ∫ dx x
+            for _ in ints:
+                var = self._diferencial()
+                if var is None:
+                    raise ParseError("integral sin diferencial")
+                vars_.append(var)
+            integrand = self.term()
+        else:
+            # el integrando llega hasta "d" seguido de una variable
+            j = start
+            while j < len(self.t) - 1 and not (self.is_sym(self.t[j], "d") and self.t[j + 1][0] == "sym"):
+                j += 1
+            if j >= len(self.t) - 1:
+                raise ParseError("integral sin diferencial")
+            integrand = self.hijo(self.t[start:j]).full()
+            self.i = j
+            for _ in ints:
+                var = self._diferencial()
+                if var is None:
+                    raise ParseError("integral sin diferencial")
+                vars_.append(var)
+        # de la más interna (primera diferencial) a la más externa
+        limites = [(v, lo, up) if lo is not None else (v,) for v, (lo, up) in zip(vars_, reversed(lims))]
+        return sp.Integral(integrand, *limites)
 
     def _sum(self, tok, kind):
         if tok[3] is None or tok[2] is None:

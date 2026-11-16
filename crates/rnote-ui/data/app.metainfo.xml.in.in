@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.11.1" date="2026-11-16">
+      <description>
+        <p>Math: integrals with the differential first (∫ dx x), double integrals and df/dx of a function defined on the page.</p>
+      </description>
+    </release>
     <release version="1.11.0" date="2026-11-15">
       <description>
         <p>Design: rounder corners, fewer hairlines, soft two-layer shadows, pressed and focus states, animated options bar; math results in a soft pill and a dotted underline under low-confidence symbols.</p>
