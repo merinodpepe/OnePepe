@@ -179,6 +179,24 @@ class TestDespejar(unittest.TestCase):
         self.assertEqual(self.t("4+5=x", "x="), ["9"])
         self.assertEqual(self.t("x=5", "y=x", "y="), ["5"])
 
+class TestIntegralesYDerivadas(unittest.TestCase):
+    def test_diferencial_delante(self):
+        self.assertEqual(textos(r"\int dx x="), ["x**2/2 + C"])
+        self.assertEqual(textos(r"\int_0^1 dx x^2="), ["1/3"])
+
+    def test_integral_doble(self):
+        self.assertEqual(textos(r"\int\int x y dx dy="), ["x**2*y**2/4 + C"])
+        self.assertEqual(textos(r"\int_0^1\int_0^2 x y dx dy="), ["1"])
+
+    def test_integral_de_funcion_definida(self):
+        self.assertEqual(textos("f(x)=x^2", r"\int f(x) dx=", variables=True), ["x**3/3 + C"])
+        self.assertEqual(textos("f(x)=x^2", r"\int dx f(x)=", variables=True), ["x**3/3 + C"])
+        self.assertEqual(textos("f(x)=x^2", r"\int_0^1 f(x) dx=", variables=True), ["1/3"])
+
+    def test_dfdx_de_funcion_definida(self):
+        self.assertEqual(textos("f(x)=x^2", r"\frac{df}{dx}=", variables=True), ["2*x"])
+        self.assertEqual(textos("f(x)=x^3", r"\frac{d}{dx}f(x)=", variables=True), ["3*x**2"])
+
 
 if __name__ == "__main__":
     unittest.main()

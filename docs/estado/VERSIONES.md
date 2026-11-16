@@ -7,6 +7,18 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.11.1 (2026-11-16) — integrales y derivadas más flexibles
+
+- **Diferencial delante:** `∫ dx x =` y `∫₀¹ dx x² =` se entienden igual que `∫ x dx =`.
+- **Integrales dobles:** `∫∫ xy dx dy =` y con límites `∫₀¹∫₀² xy dx dy =` (la primera diferencial es la de la ∫ de
+  dentro).
+- **`df/dx` con `f` definida en la página:** `f(x)=x²` y debajo `df/dx =` da `2x`.
+- Ya funcionaba y queda comprobado: `∫ f(x) dx`, `f'(x)`, `f(3)`, `d/dx(…)`, integrales definidas e indefinidas
+  (necesitan «Variables» encendido para usar funciones definidas).
+- Sigue sin calcularse: `f(x,y)` con dos parámetros, `F(3)` con `F(x)=∫f`, `y'` sin función, `∫ₐᵇ` con límites
+  simbólicos.
+- Solo cambia el programa auxiliar: no hace falta recompilar la app. Sin cambio de formato .rnote.
+
 ## 1.11 (2026-11-15) — diseño «suave»
 
 Ocho ideas elegidas por el usuario. Hay que recompilar la app para verlas.
