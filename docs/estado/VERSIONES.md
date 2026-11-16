@@ -7,6 +7,12 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.11.2 (2026-11-16) — la ∫ grande ya no se come el integrando
+
+- Con una ∫ escrita grande y ancha, la `x` de `∫ x² dx =` se tomaba por el límite inferior y salía «?». Ahora solo
+  son límites los símbolos pequeños del 45 % de arriba o de abajo del signo.
+- Solo cambia el programa auxiliar: no hace falta recompilar la app. Sin cambio de formato .rnote.
+
 ## 1.11.1 (2026-11-16) — integrales y derivadas más flexibles
 
 - **Diferencial delante:** `∫ dx x =` y `∫₀¹ dx x² =` se entienden igual que `∫ x dx =`.

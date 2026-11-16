@@ -71,6 +71,11 @@
 
   <!-- The changelog should not be translated -->
   <releases>
+    <release version="1.11.2" date="2026-11-16">
+      <description>
+        <p>Math: a tall handwritten integral sign no longer takes the integrand as its lower limit (∫ x² dx).</p>
+      </description>
+    </release>
     <release version="1.11.1" date="2026-11-16">
       <description>
         <p>Math: integrals with the differential first (∫ dx x), double integrals and df/dx of a function defined on the page.</p>
