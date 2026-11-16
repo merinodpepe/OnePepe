@@ -142,7 +142,7 @@ class TestReparto(unittest.TestCase):
         sets = self.sets()
         r = alinear.reparto(sets)
         for s in sets:
-            self.assertEqual(len(r["examen"][s]), 15 if s == "refuerzo" else 40)
+            self.assertEqual(len(r["examen"][s]), {"refuerzo": 15, "dificiles": 18}.get(s, 40))
             self.assertFalse(set(r["examen"][s]) & set(r["validacion"][s]))
         mas = dict(sets, nuevo=[(f"n{i}", "expr") for i in range(30)])
         r2 = alinear.reparto(mas)

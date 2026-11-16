@@ -1,0 +1,732 @@
+{
+ "name": "dificiles",
+ "title": "Puntos débiles: 90 expresiones",
+ "description": "Fracciones y rayas, símbolos que se confunden (a/9, o/0, μ/N…) y cifras o letras que se pegan. Escribe como en clase, con tu tamaño de letra normal.",
+ "items": [
+  {
+   "id": "d001",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{2}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d002",
+   "kind": "expr",
+   "lines": [
+    "\\frac{3}{4}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d003",
+   "kind": "expr",
+   "lines": [
+    "\\frac{2}{5}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d004",
+   "kind": "expr",
+   "lines": [
+    "\\frac{7}{3}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d005",
+   "kind": "expr",
+   "lines": [
+    "\\frac{10}{12}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d006",
+   "kind": "expr",
+   "lines": [
+    "\\frac{11}{21}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d007",
+   "kind": "expr",
+   "lines": [
+    "\\frac{12}{25}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d008",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a}{b}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d009",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x}{y}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d010",
+   "kind": "expr",
+   "lines": [
+    "\\frac{2x}{3}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d011",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x^2}{2}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d012",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{x}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d013",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a+b}{c}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d014",
+   "kind": "expr",
+   "lines": [
+    "\\frac{\\Delta y}{\\Delta x}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d015",
+   "kind": "expr",
+   "lines": [
+    "\\frac{n!}{k!}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d016",
+   "kind": "expr",
+   "lines": [
+    "\\frac{x^2+2x+1}{x+1}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d017",
+   "kind": "expr",
+   "lines": [
+    "\\frac{\\mu}{\\sigma}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d018",
+   "kind": "expr",
+   "lines": [
+    "\\frac{\\frac{a}{b}}{c}"
+   ],
+   "hint": "Raya larga y recta; número arriba y abajo bien separados de la raya"
+  },
+  {
+   "id": "d019",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{2}+\\frac{1}{3}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d020",
+   "kind": "expr",
+   "lines": [
+    "\\frac{2}{3}-\\frac{1}{6}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d021",
+   "kind": "expr",
+   "lines": [
+    "\\frac{3}{5}\\cdot\\frac{10}{9}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d022",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{4}=0,25"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d023",
+   "kind": "expr",
+   "lines": [
+    "x=\\frac{-b}{2a}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d024",
+   "kind": "expr",
+   "lines": [
+    "y=\\frac{x}{2}+1"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d025",
+   "kind": "expr",
+   "lines": [
+    "p=\\frac{k}{n}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d026",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a}{b}=\\frac{c}{d}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d027",
+   "kind": "expr",
+   "lines": [
+    "2\\cdot\\frac{1}{3}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d028",
+   "kind": "expr",
+   "lines": [
+    "\\frac{a}{b}-c"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d029",
+   "kind": "expr",
+   "lines": [
+    "\\frac{1}{2}x+\\frac{1}{4}"
+   ],
+   "hint": "Fracciones junto a otros símbolos: deja un hueco antes y después de la raya"
+  },
+  {
+   "id": "d030",
+   "kind": "symbols",
+   "lines": [
+    "\\frac{1}{2}\\quad \\frac{1}{2}\\quad \\frac{3}{4}\\quad \\frac{3}{4}\\quad \\frac{x}{y}\\quad \\frac{x}{y}"
+   ],
+   "hint": "Seis fracciones separadas; la raya es larga y recta"
+  },
+  {
+   "id": "d031",
+   "kind": "symbols",
+   "lines": [
+    "\\frac{1}{3}\\quad \\frac{2}{3}\\quad \\frac{1}{5}\\quad \\frac{4}{5}\\quad \\frac{a}{b}\\quad \\frac{c}{d}"
+   ],
+   "hint": "Seis fracciones separadas; la raya es larga y recta"
+  },
+  {
+   "id": "d032",
+   "kind": "steps",
+   "lines": [
+    "\\frac{x}{2}=3",
+    "x=6"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "d033",
+   "kind": "steps",
+   "lines": [
+    "\\frac{2}{3}x=4",
+    "x=\\frac{12}{3}",
+    "x=4"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "d034",
+   "kind": "steps",
+   "lines": [
+    "\\frac{a}{b}=\\frac{c}{d}",
+    "ad=bc"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "d035",
+   "kind": "steps",
+   "lines": [
+    "x=\\frac{10}{4}",
+    "x=\\frac{5}{2}"
+   ],
+   "hint": "Un paso en cada renglón"
+  },
+  {
+   "id": "d036",
+   "kind": "symbols",
+   "lines": [
+    "-\\quad -\\quad -\\quad -\\quad -\\quad -"
+   ],
+   "hint": "Rayita corta: el signo menos"
+  },
+  {
+   "id": "d037",
+   "kind": "symbols",
+   "lines": [
+    "\\cdot\\quad \\cdot\\quad \\cdot\\quad \\cdot\\quad \\cdot\\quad \\cdot"
+   ],
+   "hint": "Un punto a media altura (multiplicar)"
+  },
+  {
+   "id": "d038",
+   "kind": "expr",
+   "lines": [
+    "a-b\\quad a\\cdot b\\quad \\frac{a}{b}"
+   ],
+   "hint": "Tres rayas distintas: corta, punto y raya larga"
+  },
+  {
+   "id": "d039",
+   "kind": "expr",
+   "lines": [
+    "3-2\\quad 3\\cdot 2\\quad \\frac{3}{2}"
+   ],
+   "hint": "Tres rayas distintas: corta, punto y raya larga"
+  },
+  {
+   "id": "d040",
+   "kind": "expr",
+   "lines": [
+    "x-y\\quad \\frac{x}{y}\\quad x\\cdot y"
+   ],
+   "hint": "Tres rayas distintas: corta, punto y raya larga"
+  },
+  {
+   "id": "d041",
+   "kind": "expr",
+   "lines": [
+    "2-\\frac{1}{3}"
+   ],
+   "hint": "El menos corto y luego la raya larga de la fracción"
+  },
+  {
+   "id": "d042",
+   "kind": "symbols",
+   "lines": [
+    "a\\quad 9\\quad a\\quad 9\\quad a\\quad 9"
+   ],
+   "hint": "Alterna a y 9: que se vean bien distintos"
+  },
+  {
+   "id": "d043",
+   "kind": "expr",
+   "lines": [
+    "a=9\\quad 9a=a9"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d044",
+   "kind": "symbols",
+   "lines": [
+    "\\mu\\quad N\\quad \\mu\\quad N\\quad \\mu\\quad N"
+   ],
+   "hint": "Alterna \\mu y N: que se vean bien distintos"
+  },
+  {
+   "id": "d045",
+   "kind": "expr",
+   "lines": [
+    "N\\sim N(\\mu,\\sigma^2)"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d046",
+   "kind": "symbols",
+   "lines": [
+    "o\\quad 0\\quad o\\quad 0\\quad o\\quad 0"
+   ],
+   "hint": "Alterna o y 0: que se vean bien distintos"
+  },
+  {
+   "id": "d047",
+   "kind": "expr",
+   "lines": [
+    "10o=100"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d048",
+   "kind": "symbols",
+   "lines": [
+    "l\\quad 1\\quad l\\quad 1\\quad l\\quad 1"
+   ],
+   "hint": "Alterna l y 1: que se vean bien distintos"
+  },
+  {
+   "id": "d049",
+   "kind": "expr",
+   "lines": [
+    "l=1\\quad 11l"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d050",
+   "kind": "symbols",
+   "lines": [
+    "m\\quad M\\quad m\\quad M\\quad m\\quad M"
+   ],
+   "hint": "Alterna m y M: que se vean bien distintos"
+  },
+  {
+   "id": "d051",
+   "kind": "expr",
+   "lines": [
+    "m=M\\quad 2m+M"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d052",
+   "kind": "symbols",
+   "lines": [
+    "\\varphi\\quad Q\\quad \\varphi\\quad Q\\quad \\varphi\\quad Q"
+   ],
+   "hint": "Alterna \\varphi y Q: que se vean bien distintos"
+  },
+  {
+   "id": "d053",
+   "kind": "expr",
+   "lines": [
+    "Q=\\varphi"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d054",
+   "kind": "symbols",
+   "lines": [
+    "\\omega\\quad w\\quad \\omega\\quad w\\quad \\omega\\quad w"
+   ],
+   "hint": "Alterna \\omega y w: que se vean bien distintos"
+  },
+  {
+   "id": "d055",
+   "kind": "expr",
+   "lines": [
+    "w=\\omega t"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d056",
+   "kind": "symbols",
+   "lines": [
+    "\\leq\\quad 5\\quad \\leq\\quad 5\\quad \\leq\\quad 5"
+   ],
+   "hint": "Alterna \\leq y 5: que se vean bien distintos"
+  },
+  {
+   "id": "d057",
+   "kind": "expr",
+   "lines": [
+    "x\\leq 5"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d058",
+   "kind": "symbols",
+   "lines": [
+    "\\times\\quad x\\quad \\times\\quad x\\quad \\times\\quad x"
+   ],
+   "hint": "Alterna \\times y x: que se vean bien distintos"
+  },
+  {
+   "id": "d059",
+   "kind": "expr",
+   "lines": [
+    "2\\times x=2x"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d060",
+   "kind": "symbols",
+   "lines": [
+    "\\hat{x}\\quad 1\\quad \\hat{x}\\quad 1\\quad \\hat{x}\\quad 1"
+   ],
+   "hint": "Alterna \\hat{x} y 1: que se vean bien distintos"
+  },
+  {
+   "id": "d061",
+   "kind": "expr",
+   "lines": [
+    "\\hat{x}=1"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d062",
+   "kind": "symbols",
+   "lines": [
+    "\\beta\\quad \\rho\\quad \\beta\\quad \\rho\\quad \\beta\\quad \\rho"
+   ],
+   "hint": "Alterna \\beta y \\rho: que se vean bien distintos"
+  },
+  {
+   "id": "d063",
+   "kind": "expr",
+   "lines": [
+    "\\beta=\\rho"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d064",
+   "kind": "symbols",
+   "lines": [
+    "5\\quad s\\quad 5\\quad s\\quad 5\\quad s"
+   ],
+   "hint": "Alterna 5 y s: que se vean bien distintos"
+  },
+  {
+   "id": "d065",
+   "kind": "expr",
+   "lines": [
+    "5s=25"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d066",
+   "kind": "symbols",
+   "lines": [
+    "g\\quad 9\\quad g\\quad 9\\quad g\\quad 9"
+   ],
+   "hint": "Alterna g y 9: que se vean bien distintos"
+  },
+  {
+   "id": "d067",
+   "kind": "symbols",
+   "lines": [
+    "\\Delta\\quad D\\quad \\Delta\\quad D\\quad \\Delta\\quad D"
+   ],
+   "hint": "Alterna \\Delta y D: que se vean bien distintos"
+  },
+  {
+   "id": "d068",
+   "kind": "expr",
+   "lines": [
+    "\\Delta x=D"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d069",
+   "kind": "symbols",
+   "lines": [
+    "\\Sigma\\quad 2\\quad \\Sigma\\quad 2\\quad \\Sigma\\quad 2"
+   ],
+   "hint": "Alterna \\Sigma y 2: que se vean bien distintos"
+  },
+  {
+   "id": "d070",
+   "kind": "expr",
+   "lines": [
+    "\\Sigma x=2"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d071",
+   "kind": "symbols",
+   "lines": [
+    "P\\quad p\\quad P\\quad p\\quad P\\quad p"
+   ],
+   "hint": "Alterna P y p: que se vean bien distintos"
+  },
+  {
+   "id": "d072",
+   "kind": "expr",
+   "lines": [
+    "P(A)=p"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d073",
+   "kind": "symbols",
+   "lines": [
+    "9\\quad q\\quad 9\\quad q\\quad 9\\quad q"
+   ],
+   "hint": "Alterna 9 y q: que se vean bien distintos"
+  },
+  {
+   "id": "d074",
+   "kind": "expr",
+   "lines": [
+    "9q=q9"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d075",
+   "kind": "symbols",
+   "lines": [
+    ",\\quad 1\\quad ,\\quad 1\\quad ,\\quad 1"
+   ],
+   "hint": "Alterna , y 1: que se vean bien distintos"
+  },
+  {
+   "id": "d076",
+   "kind": "expr",
+   "lines": [
+    "1,1+1,5"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d077",
+   "kind": "symbols",
+   "lines": [
+    "j\\quad i\\quad j\\quad i\\quad j\\quad i"
+   ],
+   "hint": "Alterna j y i: que se vean bien distintos"
+  },
+  {
+   "id": "d078",
+   "kind": "expr",
+   "lines": [
+    "i+j=ij"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d079",
+   "kind": "symbols",
+   "lines": [
+    "8\\quad \\gamma\\quad 8\\quad \\gamma\\quad 8\\quad \\gamma"
+   ],
+   "hint": "Alterna 8 y \\gamma: que se vean bien distintos"
+  },
+  {
+   "id": "d080",
+   "kind": "expr",
+   "lines": [
+    "8\\gamma=\\gamma8"
+   ],
+   "hint": "Escríbelo como en clase"
+  },
+  {
+   "id": "d081",
+   "kind": "expr",
+   "lines": [
+    "a=b=c=d"
+   ],
+   "hint": "Las dos rayas del igual, juntas pero sin tocar el resto"
+  },
+  {
+   "id": "d082",
+   "kind": "expr",
+   "lines": [
+    "21\\quad 12\\quad 112\\quad 211"
+   ],
+   "hint": "Cifras de un mismo número pegadas; números separados por un hueco"
+  },
+  {
+   "id": "d083",
+   "kind": "expr",
+   "lines": [
+    "121+212=333"
+   ],
+   "hint": "Cifras de un mismo número pegadas; hueco antes y después de cada signo"
+  },
+  {
+   "id": "d084",
+   "kind": "expr",
+   "lines": [
+    "xy\\quad xx\\quad x^2y"
+   ],
+   "hint": "Cada x bien separada de la siguiente"
+  },
+  {
+   "id": "d085",
+   "kind": "expr",
+   "lines": [
+    "\\pi\\quad 2\\pi\\quad \\pi r^2"
+   ],
+   "hint": "La π en un solo gesto continuo o con el techo pegado"
+  },
+  {
+   "id": "d086",
+   "kind": "expr",
+   "lines": [
+    "A\\Rightarrow B\\quad B\\Rightarrow C"
+   ],
+   "hint": "La flecha doble de una pieza, bien separada"
+  },
+  {
+   "id": "d087",
+   "kind": "expr",
+   "lines": [
+    "\\overline{x}\\quad \\overline{y}\\quad \\overline{z}"
+   ],
+   "hint": "La raya de encima sobre toda la letra"
+  },
+  {
+   "id": "d088",
+   "kind": "expr",
+   "lines": [
+    "dx\\quad dy\\quad dt\\quad dz"
+   ],
+   "hint": "La d y la letra, separadas de la siguiente pareja"
+  },
+  {
+   "id": "d089",
+   "kind": "expr",
+   "lines": [
+    "55\\quad 5+5\\quad 505"
+   ],
+   "hint": "Cifras de un mismo número pegadas; números separados por un hueco"
+  },
+  {
+   "id": "d090",
+   "kind": "expr",
+   "lines": [
+    "n\\quad nn\\quad 3n+n"
+   ],
+   "hint": "Cada n bien separada de la siguiente"
+  }
+ ]
+}

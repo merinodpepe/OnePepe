@@ -7,6 +7,17 @@ Cómo se numera: `mayor.menor.arreglo`. Sube la **menor** con cada tanda de func
 solo se corrigen fallos. El número está en `meson.build` (`version:`) y en
 `crates/rnote-ui/data/app.metainfo.xml.in.in` (`<releases>`); al cambiarlo, se añade aquí su apartado.
 
+## 1.12.0 (2026-11-16) — entreno «Puntos débiles» y renglones más altos
+
+- Set nuevo `dificiles` («Puntos débiles», 90 expresiones), hecho con las confusiones medidas del modelo v3: fracciones y
+  raya larga frente a menos y punto, pares que se confunden (a/9, o/0, l/1, μ/N, ×/x, Σ/2…) y cifras o letras que se
+  pegan o se parten (=, 2, 1, π, i).
+- Modo entreno: cada renglón guía pasa de 130 a 180 px y la ventana nace más alta (900 px), para que lo de arriba no
+  se quede pequeño (numeradores, fracciones).
+- **Hay que recompilar la app** para el cambio de tamaño; el set nuevo ya lo ve el programa auxiliar sin recompilar.
+  Sin cambio de formato .rnote. Falta escribirlo con el lápiz y añadir sus ids de examen/validación a `examen.json`
+  antes de reentrenar.
+
 ## 1.11.2 (2026-11-16) — la ∫ grande ya no se come el integrando
 
 - Con una ∫ escrita grande y ancha, la `x` de `∫ x² dx =` se tomaba por el límite inferior y salía «?». Ahora solo
