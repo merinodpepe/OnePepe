@@ -307,6 +307,11 @@ Tus notas, tal cual las pediste, con lo que ya sé de cada una. **Nada de esto e
     `evaluate.py` (`_symbol`). Esfuerzo: sin valorar.
 14. **Integrales y derivadas que aún no se calculan** (2026-11-16): `F(3)` con `F(x)=∫f(x)dx`, `y'` sin función,
     `∫ₐᵇ` con límites en letras. Esfuerzo: sin valorar.
+15. **Modo entreno: sombrear en rojo tenue la zona donde no se debe escribir** (apuntado por el usuario el
+    2026-11-16). Cada renglón tiene una banda de 130 px desde arriba (`LINE_HEIGHT` en
+    `crates/rnote-ui/src/entreno.rs`) y lo que cae fuera no cuenta; el usuario escribió muchos ejemplos debajo de la
+    banda sin darse cuenta. Idea: en `set_draw_func`, pintar un rectángulo rojo semitransparente desde
+    `band * n` hasta el final del recuadro. Cambia Rust: hay que recompilar la app. Esfuerzo: pequeño.
 
 ## No hacer
 
